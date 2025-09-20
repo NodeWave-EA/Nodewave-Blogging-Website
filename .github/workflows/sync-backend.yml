@@ -21,11 +21,10 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.GH_PAT }}
         with:
           source-directory: 'backend'
-          # 👇 Use org name instead of personal username
-          destination-github-username: 'NodeWave-EA'
+          destination-github-username: 'NodeWave-EA'   # org name
           destination-repository-name: 'Nodewave-Blog-CMS'
           target-branch: main
           commit-message: 'Update backend from monorepo'
-          force: true
+          create-target-branch-if-needed: true
           user-email: 'github-actions[bot]@users.noreply.github.com'
           user-name: 'github-actions[bot]'
