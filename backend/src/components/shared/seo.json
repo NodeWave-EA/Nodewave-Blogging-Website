@@ -1,0 +1,70 @@
+{
+  "collectionName": "components_shared_seos",
+  "info": {
+    "displayName": "SEO",
+    "description": "SEO metadata component"
+  },
+  "options": {},
+  "attributes": {
+    "meta_title": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "meta_description": {
+      "type": "text",
+      "maxLength": 160
+    },
+    "meta_keywords": {
+      "type": "string"
+    },
+    "canonical_url": {
+      "type": "string"
+    },
+    "og_title": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "og_description": {
+      "type": "text",
+      "maxLength": 160
+    },
+    "og_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "og_type": {
+      "type": "enumeration",
+      "enum": ["website", "article", "profile"],
+      "default": "article"
+    },
+    "twitter_card": {
+      "type": "enumeration",
+      "enum": ["summary", "summary_large_image", "app", "player"],
+      "default": "summary_large_image"
+    },
+    "twitter_title": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "twitter_description": {
+      "type": "text",
+      "maxLength": 160
+    },
+    "twitter_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "robots": {
+      "type": "enumeration",
+      "enum": ["index,follow", "noindex,follow", "index,nofollow", "noindex,nofollow"],
+      "default": "index,follow"
+    },
+    "structured_data": {
+      "type": "json"
+    }
+  }
+}

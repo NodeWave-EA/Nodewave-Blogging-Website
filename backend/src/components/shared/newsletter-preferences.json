@@ -1,0 +1,40 @@
+{
+  "collectionName": "components_shared_newsletter_preferences",
+  "info": {
+    "displayName": "Newsletter Preferences",
+    "description": "User preferences for newsletter subscriptions"
+  },
+  "options": {},
+  "attributes": {
+    "frequency": {
+      "type": "enumeration",
+      "enum": ["daily", "weekly", "monthly", "never"],
+      "default": "weekly"
+    },
+    "topics": {
+      "type": "json",
+      "default": []
+    },
+    "digest_format": {
+      "type": "enumeration",
+      "enum": ["html", "text", "markdown"],
+      "default": "html"
+    },
+    "include_featured": {
+      "type": "boolean",
+      "default": true
+    },
+    "include_new_posts": {
+      "type": "boolean",
+      "default": true
+    },
+    "include_trending": {
+      "type": "boolean",
+      "default": false
+    },
+    "language": {
+      "type": "string",
+      "default": "en"
+    }
+  }
+}

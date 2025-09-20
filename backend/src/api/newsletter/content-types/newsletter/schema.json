@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "newsletters",
+  "info": {
+    "singularName": "newsletter",
+    "pluralName": "newsletters",
+    "displayName": "Newsletter",
+    "description": "Newsletter subscriptions and campaigns"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "subscribed": {
+      "type": "boolean",
+      "default": true
+    },
+    "subscription_date": {
+      "type": "datetime",
+      "default": "2024-01-01T00:00:00.000Z"
+    },
+    "unsubscription_date": {
+      "type": "datetime"
+    },
+    "source": {
+      "type": "enumeration",
+      "enum": ["website", "social", "referral", "api", "import"],
+      "default": "website"
+    },
+    "preferences": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.newsletter-preferences"
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::category.category"
+    },
+    "confirmed": {
+      "type": "boolean",
+      "default": false
+    },
+    "confirmation_token": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    }
+  }
+}

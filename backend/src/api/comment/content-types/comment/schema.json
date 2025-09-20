@@ -1,0 +1,80 @@
+{
+  "kind": "collectionType",
+  "collectionName": "comments",
+  "info": {
+    "singularName": "comment",
+    "pluralName": "comments",
+    "displayName": "Comment",
+    "description": "User comments on blog posts"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "author_name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "author_email": {
+      "type": "email",
+      "required": true
+    },
+    "author_website": {
+      "type": "string"
+    },
+    "blog_post": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::blog-post.blog-post"
+    },
+    "parent_comment": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::comment.comment",
+      "inversedBy": "replies"
+    },
+    "replies": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::comment.comment",
+      "mappedBy": "parent_comment"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "approved": {
+      "type": "boolean",
+      "default": false
+    },
+    "spam": {
+      "type": "boolean",
+      "default": false
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "like_count": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "reported": {
+      "type": "boolean",
+      "default": false
+    },
+    "report_reason": {
+      "type": "enumeration",
+      "enum": ["spam", "inappropriate", "offensive", "other"]
+    }
+  }
+}

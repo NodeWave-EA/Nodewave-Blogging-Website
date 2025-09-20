@@ -1,0 +1,42 @@
+{
+  "collectionName": "components_shared_social_links",
+  "info": {
+    "displayName": "Social Link",
+    "description": "Social media links component"
+  },
+  "options": {},
+  "attributes": {
+    "platform": {
+      "type": "enumeration",
+      "enum": [
+        "twitter",
+        "facebook",
+        "instagram",
+        "linkedin",
+        "github",
+        "youtube",
+        "tiktok",
+        "pinterest",
+        "discord",
+        "telegram",
+        "whatsapp",
+        "website",
+        "other"
+      ],
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "username": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    }
+  }
+}

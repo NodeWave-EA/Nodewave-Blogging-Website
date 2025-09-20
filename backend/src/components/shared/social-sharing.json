@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_shared_social_sharings",
+  "info": {
+    "displayName": "Social Sharing",
+    "description": "Social sharing configuration for posts"
+  },
+  "options": {},
+  "attributes": {
+    "enable_sharing": {
+      "type": "boolean",
+      "default": true
+    },
+    "platforms": {
+      "type": "json",
+      "default": ["twitter", "facebook", "linkedin", "pinterest", "whatsapp", "telegram", "reddit"]
+    },
+    "custom_message": {
+      "type": "text",
+      "maxLength": 280
+    },
+    "hashtags": {
+      "type": "string"
+    },
+    "via_username": {
+      "type": "string"
+    }
+  }
+}
