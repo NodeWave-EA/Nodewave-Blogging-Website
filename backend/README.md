@@ -8,8 +8,6 @@ Start your Strapi application with autoReload enabled. [Learn more](https://docs
 
 ```
 npm run develop
-# or
-yarn develop
 ```
 
 ### `start`
