@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
 import NProgress from 'nprogress'
+import { createRouter, createWebHistory } from 'vue-router'
 
 // Lazy load components for better performance
 const Home = () => import('@/views/Home.vue')
@@ -51,7 +51,7 @@ const routes = [
     },
   },
   {
-    path: '/category/:slug',
+    path: '/categories/:slug',
     name: 'Category',
     component: Category,
     meta: {
@@ -68,7 +68,7 @@ const routes = [
     },
   },
   {
-    path: '/author/:slug',
+    path: '/authors/:slug',
     name: 'Author',
     component: Author,
     meta: {
@@ -85,7 +85,7 @@ const routes = [
     },
   },
   {
-    path: '/tag/:slug',
+    path: '/tags/:slug',
     name: 'Tag',
     component: Tag,
     meta: {

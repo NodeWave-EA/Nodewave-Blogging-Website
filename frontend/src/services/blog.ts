@@ -1,19 +1,19 @@
-import { apiService } from './api'
 import type {
-  BlogPost,
-  Author,
-  Category,
-  Tag,
-  Comment,
-  BlogSetting,
-  Newsletter,
-  Page,
   ApiResponse,
+  Author,
   BlogFilters,
-  ContactForm,
+  BlogPost,
+  BlogSetting,
+  Category,
+  Comment,
   CommentForm,
+  ContactForm,
+  Newsletter,
   NewsletterForm,
+  Page,
+  Tag,
 } from '@/types'
+import { apiService } from './api'
 
 // Blog Posts API
 export const blogPostsApi = {
@@ -148,11 +148,6 @@ export const blogPostsApi = {
 
     const queryString = apiService.buildStrapiQuery(params)
     return apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-  },
-
-  // Increment view count
-  incrementViewCount: async (id: number): Promise<{ data: BlogPost }> => {
-    return apiService.put<{ data: BlogPost }>(`/blog-posts/${id}/view`)
   },
 
   // Like/Unlike post
@@ -310,24 +305,9 @@ export const authorsApi = {
   },
 
   getBySlug: async (slug: string): Promise<{ data: Author }> => {
-    const params = {
-      'filters[slug][$eq]': slug,
-      populate: '*',
-      publicationState: 'live',
-    }
-
-    const queryString = apiService.buildStrapiQuery(params)
-    const response = await apiService.get<ApiResponse<Author[]>>(`/authors?${queryString}`)
-
-    if (!response.data || response.data.length === 0) {
-      throw new Error('Author not found')
-    }
-
-    return { data: response.data[0] }
+    return apiService.get<{ data: Author }>(`/authors/slug/${slug}`)
   },
 }
-
-// Comments API
 export const commentsApi = {
   getByPostId: async (postId: number): Promise<ApiResponse<Comment[]>> => {
     const params = {

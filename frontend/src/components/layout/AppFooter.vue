@@ -44,7 +44,7 @@
           </h3>
           <ul class="space-y-3">
             <li v-for="category in topCategories" :key="category.slug">
-              <RouterLink :to="`/category/${category.slug}`"
+              <RouterLink :to="`/categories/${category.slug}`"
                 class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors duration-200">
                 {{ category.name }}
               </RouterLink>
@@ -80,7 +80,7 @@
               class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
               Terms of Service
             </RouterLink>
-            <a href="/api/rss"
+            <a :href="rssUrl"
               class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
               target="_blank" rel="noopener noreferrer">
               RSS Feed
@@ -131,6 +131,11 @@
   // Top categories (limit to 5)
   const topCategories = computed(() => {
     return categories.value.slice(0, 5)
+  })
+
+  // RSS feed URL
+  const rssUrl = computed(() => {
+    return `${import.meta.env.VITE_API_URL}/rss`
   })
 
   // Get social media icon component
