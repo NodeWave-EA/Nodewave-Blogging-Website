@@ -1,0 +1,31 @@
+name: Sync Backend to CMS Repo
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'   # only trigger if backend changes
+
+jobs:
+  sync-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Monorepo
+        uses: actions/checkout@v4
+
+      - name: Push backend folder to nodewave-blog-cms repo
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.GH_PAT }}
+        with:
+          source-directory: 'backend'
+          # 👇 Use org name instead of personal username
+          destination-github-username: 'NodeWave-EA'
+          destination-repository-name: 'Nodewave-Blog-CMS'
+          target-branch: main
+          commit-message: 'Update backend from monorepo'
+          force: true
+          user-email: 'github-actions[bot]@users.noreply.github.com'
+          user-name: 'github-actions[bot]'
