@@ -35,15 +35,24 @@ export default [
     name: 'strapi::cors',
     config: {
       headers: '*',
-      origin:
-        process.env.NODE_ENV === 'production'
-          ? [process.env.FRONTEND_URL, process.env.STRAPI_ADMIN_CLIENT_URL].filter(Boolean)
-          : [
-              'http://localhost:3000',
-              'http://localhost:5173',
-              'http://localhost:4173',
-              'http://127.0.0.1:3000',
-            ],
+      origin: [
+        // Development origins
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:4173',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:4173',
+
+        // Production origins
+        'https://nodewave-blogs.vercel.app',
+
+        // Environment variables (can be set in deployment)
+        process.env.FRONTEND_URL,
+        process.env.STRAPI_ADMIN_CLIENT_URL,
+
+        // Add your custom domains here
+      ].filter(Boolean), // Remove any undefined/null values
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
       credentials: true,
       maxAge: 86400,
