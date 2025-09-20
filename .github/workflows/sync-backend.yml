@@ -18,7 +18,7 @@ jobs:
       - name: Push backend folder to nodewave-blog-cms repo
         uses: cpina/github-action-push-to-another-repository@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.GH_PAT }}
+          API_TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
         with:
           source-directory: 'backend'
           destination-github-username: 'NodeWave-EA'   # org name
