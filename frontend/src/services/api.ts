@@ -97,5 +97,3 @@ export const apiService = {
 		return query.toString()
 	},
 }
-
-export default api
