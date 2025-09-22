@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2025-09-20T15:48:17.796Z"
+    "x-generation-date": "2025-09-24T05:22:25.048Z"
   },
   "servers": [
     {
@@ -14836,10 +14836,6 @@
                 "type": "string",
                 "format": "date-time"
               },
-              "unsubscription_date": {
-                "type": "string",
-                "format": "date-time"
-              },
               "source": {
                 "type": "string",
                 "enum": [
@@ -14871,12 +14867,6 @@
                 "type": "boolean"
               },
               "confirmation_token": {
-                "type": "string"
-              },
-              "ip_address": {
-                "type": "string"
-              },
-              "user_agent": {
                 "type": "string"
               },
               "locale": {
@@ -14958,10 +14948,6 @@
             "type": "boolean"
           },
           "subscription_date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "unsubscription_date": {
             "type": "string",
             "format": "date-time"
           },
@@ -16857,12 +16843,6 @@
           "confirmation_token": {
             "type": "string"
           },
-          "ip_address": {
-            "type": "string"
-          },
-          "user_agent": {
-            "type": "string"
-          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -16925,10 +16905,6 @@
                   "type": "string",
                   "format": "date-time"
                 },
-                "unsubscription_date": {
-                  "type": "string",
-                  "format": "date-time"
-                },
                 "source": {
                   "type": "string",
                   "enum": [
@@ -16960,12 +16936,6 @@
                   "type": "boolean"
                 },
                 "confirmation_token": {
-                  "type": "string"
-                },
-                "ip_address": {
-                  "type": "string"
-                },
-                "user_agent": {
                   "type": "string"
                 },
                 "createdAt": {
@@ -17050,7 +17020,6 @@
               "never"
             ]
           },
-          "topics": {},
           "digest_format": {
             "type": "string",
             "enum": [

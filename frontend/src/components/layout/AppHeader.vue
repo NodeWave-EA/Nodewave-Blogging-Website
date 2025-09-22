@@ -1,59 +1,34 @@
 <template>
   <!-- Header spacer to prevent content jump -->
   <div :class="[
-    'transition-all duration-700',
-    {
-      'h-14 lg:h-16': isScrolled,
-      'h-16 lg:h-20': !isScrolled,
-    },
+    'transition-all duration-500',
+    isScrolled ? 'h-14 lg:h-16' : 'h-16 lg:h-20',
   ]"></div>
 
   <header ref="headerRef" :class="[
-    'fixed left-2 right-2 lg:left-6 lg:right-6 z-50 transition-all duration-700 ease-out',
-    'border border-black/10 dark:border-white/10 bg-transparent backdrop-blur-2xl',
-    {
-      'top-3 lg:top-6 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 ring-1 ring-black/5 dark:ring-white/5':
-        isScrolled,
-      'top-0 rounded-none shadow-sm backdrop-blur-xl':
-        !isScrolled,
-    },
+    'fixed left-2 right-2 lg:left-6 lg:right-6 z-50 transition-all duration-500 border border-border/20 backdrop-blur-md',
+    isScrolled
+      ? 'top-3 lg:top-6 rounded-2xl shadow-lg ring-1 ring-border/10'
+      : 'top-0 rounded-none shadow-sm',
   ]">
     <nav :class="[
-      'max-w-7xl mx-auto transition-all duration-700',
-      {
-        'px-6 lg:px-8': isScrolled,
-        'px-4 lg:px-6': !isScrolled,
-      },
+      'max-w-7xl mx-auto flex flex-col',
+      isScrolled ? 'px-6 lg:px-8' : 'px-4 lg:px-6',
     ]">
       <div :class="[
-        'flex justify-between items-center transition-all duration-700',
-        {
-          'h-14 lg:h-16 py-2': isScrolled,
-          'h-16 lg:h-20 py-3': !isScrolled,
-        },
+        'flex justify-between items-center w-full',
+        isScrolled ? 'h-14 lg:h-16 py-2' : 'h-16 lg:h-20 py-3',
       ]">
         <!-- Logo (Theme-aware, improved accessibility & style) -->
         <div class="flex-shrink-0 z-10">
           <RouterLink to="/" class="flex items-center gap-3 group relative" aria-label="Home">
-            <div
-              class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -m-2 pointer-events-none">
-            </div>
             <img v-if="currentLogo" :src="currentLogo" :alt="companyName + ' logo'" :class="[
               'w-auto transition-all duration-300 group-hover:scale-105 relative z-10 drop-shadow-sm',
-              {
-                'h-7 lg:h-8': isScrolled,
-                'h-8 lg:h-10': !isScrolled,
-              },
-            ]" :style="actualTheme === 'dark'
-                  ? 'filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25)) brightness(0.95)'
-                  : 'filter: drop-shadow(0 2px 8px rgba(0,0,0,0.10))'
-                " loading="lazy" decoding="async" />
-            <span v-else class="logo-text" :class="[
-              'font-bold font-heading bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent transition-all duration-300 group-hover:from-blue-500 group-hover:via-purple-500 group-hover:to-blue-500 relative z-10',
-              {
-                'text-lg lg:text-xl': isScrolled,
-                'text-xl lg:text-2xl': !isScrolled,
-              },
+              isScrolled ? 'h-7 lg:h-8' : 'h-8 lg:h-10',
+            ]" loading="lazy" decoding="async" />
+            <span v-else :class="[
+              'font-bold font-mono bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent transition-all duration-300 relative z-10',
+              isScrolled ? 'text-lg lg:text-xl' : 'text-xl lg:text-2xl',
             ]">
               {{ companyName }}
             </span>
@@ -61,13 +36,15 @@
         </div>
 
         <!-- Desktop Navigation -->
-        <AppNavigation type="desktop" />
+        <div class="hidden lg:flex flex-1 justify-center">
+          <AppNavigation type="desktop" />
+        </div>
 
         <!-- Right side: Search, Theme Toggle, Mobile Menu -->
         <div class="flex items-center gap-1 lg:gap-2">
           <!-- Search Button -->
           <button @click="openSearch"
-            class="p-3 rounded-xl bg-transparent text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 group"
+            class="p-3 rounded-xl bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
             aria-label="Search">
             <MagnifyingGlassIcon class="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
           </button>
@@ -79,7 +56,7 @@
 
           <!-- Mobile menu button -->
           <button @click="toggleMobileMenu"
-            class="lg:hidden p-3 rounded-xl bg-transparent text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 group"
+            class="lg:hidden p-3 rounded-xl bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
             aria-label="Menu">
             <Bars3Icon v-if="!mobileMenuOpen" class="w-6 h-6 transition-transform duration-200 group-hover:scale-110" />
             <XMarkIcon v-else class="w-6 h-6 transition-transform duration-200 group-hover:rotate-90" />
@@ -171,37 +148,3 @@
     window.removeEventListener('scroll', handleScroll)
   })
 </script>
-
-<style scoped>
-
-  /* Logo text gradient animation on hover */
-  .logo-text:hover {
-    background-size: 200% 200%;
-    animation: gradient-shift 2s ease-in-out infinite;
-  }
-
-  @keyframes gradient-shift {
-
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-
-    .logo-text,
-    header,
-    nav,
-    div,
-    button {
-      transition: none !important;
-      animation: none !important;
-    }
-  }
-</style>

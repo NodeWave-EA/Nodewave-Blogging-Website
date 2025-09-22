@@ -8,16 +8,21 @@
   "attributes": {
     "frequency": {
       "type": "enumeration",
-      "enum": ["daily", "weekly", "monthly", "never"],
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "never"
+      ],
       "default": "weekly"
-    },
-    "topics": {
-      "type": "json",
-      "default": []
     },
     "digest_format": {
       "type": "enumeration",
-      "enum": ["html", "text", "markdown"],
+      "enum": [
+        "html",
+        "text",
+        "markdown"
+      ],
       "default": "html"
     },
     "include_featured": {

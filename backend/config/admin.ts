@@ -28,6 +28,10 @@ export default ({ env }: { env: EnvFunction }) => ({
     nps: env.bool('FLAG_NPS', true),
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),
   },
+  // Enable admin registration
+  registration: {
+    enabled: env.bool('ADMIN_REGISTRATION_ENABLED', true),
+  },
   autoOpen: false,
   watchIgnoreFiles: [
     '**/node_modules/**',

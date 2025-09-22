@@ -2,26 +2,26 @@
   <div class="relative theme-toggle">
     <!-- Simple Toggle Button -->
     <button v-if="variant === 'simple'" @click="toggleTheme"
-      class="group relative p-2.5 rounded-xl bg-transparent hover:bg-black/5 dark:hover:bg-white/5 border border-black/10 dark:border-white/10 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 hover:scale-105 hover:shadow-lg"
+      class="group relative p-2.5 rounded-xl bg-transparent hover:bg-muted/50 border border-border/20 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background hover:scale-105 hover:shadow-md"
       :title="themeButtonTitle" :aria-label="themeButtonTitle">
       <!-- Light Mode Icon (Sun) -->
       <SunIcon v-if="theme === 'dark' || (theme === 'system' && prefersDarkScheme)"
-        class="w-5 h-5 text-amber-500 transition-all duration-300 group-hover:text-amber-400 group-hover:rotate-12 group-hover:scale-110" />
+        class="w-5 h-5 text-amber-500 transition-all duration-300 hover:text-amber-400 group-hover:rotate-12 group-hover:scale-110" />
       <!-- Dark Mode Icon (Moon) -->
       <MoonIcon v-else-if="theme === 'light' || (theme === 'system' && !prefersDarkScheme)"
-        class="w-5 h-5 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-gray-500 dark:group-hover:text-gray-200 group-hover:-rotate-12 group-hover:scale-110" />
+        class="w-5 h-5 text-muted-foreground transition-all duration-300 hover:text-foreground group-hover:-rotate-12 group-hover:scale-110" />
       <!-- System Mode Icon (Computer) -->
       <ComputerDesktopIcon v-else
-        class="w-5 h-5 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-gray-500 dark:group-hover:text-gray-200 group-hover:scale-110" />
+        class="w-5 h-5 text-muted-foreground transition-all duration-300 hover:text-foreground group-hover:scale-110" />
 
       <!-- Animated background circle -->
       <div
-        class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </button>
 
     <!-- Dropdown Toggle Button -->
     <button v-else @click="isDropdownOpen = !isDropdownOpen"
-      class="group relative p-2.5 rounded-xl bg-white/80 dark:bg-zinc-900/80 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700/50 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+      class="group relative p-2.5 rounded-xl bg-card/80 hover:bg-card border border-border/50 backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background"
       :title="`Current theme: ${getThemeDisplayName(theme)}`"
       :aria-label="`Current theme: ${getThemeDisplayName(theme)}. Click to see options.`" aria-haspopup="true"
       :aria-expanded="isDropdownOpen">
@@ -30,17 +30,17 @@
         <SunIcon v-if="theme === 'light'"
           class="w-5 h-5 text-amber-500 transition-all duration-300 group-hover:rotate-12" />
         <MoonIcon v-else-if="theme === 'dark'"
-          class="w-5 h-5 text-slate-600 dark:text-slate-300 transition-all duration-300 group-hover:-rotate-12" />
-        <ComputerDesktopIcon v-else class="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          class="w-5 h-5 text-muted-foreground transition-all duration-300 group-hover:-rotate-12" />
+        <ComputerDesktopIcon v-else class="w-5 h-5 text-muted-foreground" />
 
         <!-- Dropdown Arrow -->
-        <ChevronDownIcon class="w-3 h-3 text-zinc-500 dark:text-zinc-400 transition-all duration-300"
+        <ChevronDownIcon class="w-3 h-3 text-muted-foreground transition-all duration-300"
           :class="{ 'rotate-180': isDropdownOpen }" />
       </div>
 
       <!-- Animated background circle -->
       <div
-        class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </button>
 
     <!-- Dropdown Menu -->
@@ -49,12 +49,12 @@
       leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 scale-100 translate-y-0"
       leave-to-class="opacity-0 scale-95 translate-y-1">
       <div v-if="isDropdownOpen && variant === 'dropdown'"
-        class="absolute right-0 top-full mt-2 w-64 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-2xl shadow-xl border border-zinc-200/50 dark:border-zinc-700/50 py-2 z-50 overflow-hidden"
+        class="absolute right-0 top-full mt-2 w-64 bg-card/95 backdrop-blur-xl rounded-2xl shadow-lg border border-border/50 py-2 z-50 overflow-hidden"
         @click.stop>
         <!-- Header -->
-        <div class="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-          <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Theme Preference</h3>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+        <div class="px-4 py-3 border-b border-border/20">
+          <h3 class="text-sm font-semibold font-mono text-foreground">Theme Preference</h3>
+          <p class="text-xs text-muted-foreground mt-1">
             Choose how the interface looks
           </p>
         </div>

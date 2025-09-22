@@ -84,4 +84,28 @@ export default () => ({
       },
     },
   },
+
+  email: {
+    enabled: true,
+    config: {
+      provider: 'nodemailer',
+      providerOptions: {
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USERNAME,
+          pass: process.env.SMTP_PASSWORD,
+        },
+        tls: {
+          rejectUnauthorized: process.env.SMTP_REJECT_UNAUTHORIZED !== 'false',
+        },
+      },
+      settings: {
+        defaultFrom: process.env.EMAIL_DEFAULT_FROM || 'noreply@nodewave.blog',
+        defaultReplyTo: process.env.EMAIL_DEFAULT_REPLY_TO || 'support@nodewave.blog',
+        testAddress: process.env.EMAIL_TEST_ADDRESS,
+      },
+    },
+  },
 })

@@ -1,6 +1,6 @@
-import type { AxiosInstance, AxiosRequestConfig } from 'axios'
-import axios from 'axios'
-import NProgress from 'nprogress'
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import NProgress from 'nprogress';
 
 // Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api'
@@ -11,7 +11,8 @@ if (!API_TOKEN) {
 	// Fail fast during development so the developer notices missing token
 	// eslint-disable-next-line no-console
 	console.error('[api] VITE_API_TOKEN is not set. Requests to Strapi will fail without a valid API token.')
-	throw new Error('VITE_API_TOKEN is required to access the Strapi API')
+	console.error('[api] Please add VITE_API_TOKEN to your .env file.')
+	throw new Error('VITE_API_TOKEN is required to access the Strapi API. Check your .env file.')
 }
 
 // Create axios instance

@@ -28,12 +28,15 @@
       "type": "datetime",
       "default": "2024-01-01T00:00:00.000Z"
     },
-    "unsubscription_date": {
-      "type": "datetime"
-    },
     "source": {
       "type": "enumeration",
-      "enum": ["website", "social", "referral", "api", "import"],
+      "enum": [
+        "website",
+        "social",
+        "referral",
+        "api",
+        "import"
+      ],
       "default": "website"
     },
     "preferences": {
@@ -51,12 +54,6 @@
       "default": false
     },
     "confirmation_token": {
-      "type": "string"
-    },
-    "ip_address": {
-      "type": "string"
-    },
-    "user_agent": {
       "type": "string"
     }
   }

@@ -278,7 +278,7 @@ export interface SortParams {
   order?: 'asc' | 'desc'
 }
 
-export interface QueryParams extends BlogFilters, PaginationParams, SortParams {}
+export interface QueryParams extends BlogFilters, PaginationParams, SortParams { }
 
 // Component Prop Types
 export interface BlogCardProps {
@@ -368,26 +368,35 @@ export interface SiteConfig {
   }
 }
 
-// Newsletter Types
-// Newsletter Types
+// Newsletter Types (aligned with Strapi content-type)
 export interface Newsletter {
   id: number
   email: string
-  status: 'active' | 'pending' | 'unsubscribed'
-  subscribed_at: string
-  unsubscribed_at?: string
-  tags?: string[]
+  name?: string | null
+  subscribed: boolean
+  subscription_date?: string | null
+  unsubscription_date?: string | null
+  source?: 'website' | 'social' | 'referral' | 'api' | 'import'
+  preferences?: {
+    // minimal typing for preferences component if needed
+    categories?: number[]
+    frequency?: 'daily' | 'weekly' | 'monthly'
+  } | null
+  confirmed?: boolean
+  confirmation_token?: string | null
+  ip_address?: string | null
+  user_agent?: string | null
   createdAt: string
   updatedAt: string
+  publishedAt?: string | null
 }
 
 export interface NewsletterSubscription {
   id: number
   email: string
-  status: 'active' | 'pending' | 'unsubscribed'
-  subscribedAt: string
+  subscribed: boolean
+  subscribedAt?: string
   unsubscribedAt?: string
-  tags?: string[]
 }
 
 // Blog Settings Interface
@@ -436,6 +445,11 @@ export interface NewsletterForm {
   preferences?: {
     categories?: number[]
     frequency?: 'daily' | 'weekly' | 'monthly'
+    digest_format?: 'html' | 'text' | 'markdown'
+    include_featured?: boolean
+    include_new_posts?: boolean
+    include_trending?: boolean
+    language?: string
   }
 }
 

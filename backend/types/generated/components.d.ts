@@ -15,7 +15,6 @@ export interface SharedNewsletterPreferences extends Struct.ComponentSchema {
     include_new_posts: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>
     include_trending: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
     language: Schema.Attribute.String & Schema.Attribute.DefaultTo<'en'>
-    topics: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>
   }
 }
 

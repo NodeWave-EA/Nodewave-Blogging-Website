@@ -895,7 +895,6 @@ export interface ApiNewsletterNewsletter extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
     email: Schema.Attribute.Email & Schema.Attribute.Required & Schema.Attribute.Unique
-    ip_address: Schema.Attribute.String
     locale: Schema.Attribute.String & Schema.Attribute.Private
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::newsletter.newsletter'> &
       Schema.Attribute.Private
@@ -910,10 +909,8 @@ export interface ApiNewsletterNewsletter extends Struct.CollectionTypeSchema {
     subscribed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>
     subscription_date: Schema.Attribute.DateTime &
       Schema.Attribute.DefaultTo<'2024-01-01T00:00:00.000Z'>
-    unsubscription_date: Schema.Attribute.DateTime
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
-    user_agent: Schema.Attribute.String
   }
 }
 

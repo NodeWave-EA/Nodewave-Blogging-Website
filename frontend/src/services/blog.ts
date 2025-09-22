@@ -7,13 +7,12 @@ import type {
   Category,
   Comment,
   CommentForm,
-  ContactForm,
   Newsletter,
   NewsletterForm,
   Page,
   Tag,
-} from '@/types'
-import { apiService } from './api'
+} from '@/types';
+import { apiService } from './api';
 
 // Blog Posts API
 export const blogPostsApi = {
@@ -380,8 +379,32 @@ export const blogSettingsApi = {
 
 // Newsletter API
 export const newsletterApi = {
-  subscribe: async (data: NewsletterForm): Promise<{ data: Newsletter }> => {
-    return apiService.post<{ data: Newsletter }>('/newsletters', { data })
+  subscribe: async (data: NewsletterForm & { name?: string; source?: 'website' | 'social' | 'referral' | 'api' | 'import' }): Promise<{ data: Newsletter }> => {
+    return apiService.post<{ data: Newsletter }>('/newsletters', {
+      data: {
+        email: data.email,
+        name: (data as any).name ?? undefined,
+        preferences: data.preferences
+          ? {
+            frequency: data.preferences.frequency ?? 'weekly',
+            digest_format: data.preferences.digest_format ?? 'html',
+            include_featured: data.preferences.include_featured ?? true,
+            include_new_posts: data.preferences.include_new_posts ?? true,
+            include_trending: data.preferences.include_trending ?? false,
+            language: data.preferences.language ?? 'en',
+            // topics removed
+          }
+          : undefined,
+        // categories manyToMany expects an array of IDs
+        categories:
+          Array.isArray(data.preferences?.categories) && data.preferences.categories.length > 0
+            ? data.preferences.categories
+            : undefined,
+        subscribed: true,
+        subscription_date: new Date().toISOString(),
+        source: (data as any).source ?? 'website',
+      },
+    })
   },
 
   unsubscribe: async (email: string): Promise<{ message: string }> => {
@@ -389,12 +412,8 @@ export const newsletterApi = {
   },
 }
 
-// Contact API
-export const contactApi = {
-  send: async (data: ContactForm): Promise<{ message: string }> => {
-    return apiService.post<{ message: string }>('/contact', data)
-  },
-}
+// Contact API moved to dedicated contact.ts file
+// Use: import { contactService } from './contact'
 
 // Search API
 export const searchApi = {

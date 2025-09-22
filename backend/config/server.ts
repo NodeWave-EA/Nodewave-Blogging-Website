@@ -11,6 +11,20 @@ export default ({ env }: { env: EnvFunction }) => ({
   app: {
     keys: env.array('APP_KEYS'),
   },
+  middlewares: [
+    'strapi::errors',
+    'strapi::security',
+    'strapi::cors',
+    'strapi::poweredBy',
+    'strapi::logger',
+    'strapi::query',
+    'strapi::body',
+    'strapi::session',
+    'strapi::favicon',
+    'strapi::public',
+    // Custom middleware to control admin registration
+    'global::admin-registration-control',
+  ],
   webhooks: {
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
   },

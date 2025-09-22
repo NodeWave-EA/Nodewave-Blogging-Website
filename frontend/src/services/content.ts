@@ -1,14 +1,14 @@
-import { apiService } from './api'
 import type {
+  ApiResponse,
   Author,
-  Category,
-  Tag,
+  BlogPost,
   BlogSetting,
+  Category,
   Newsletter,
   Page,
-  ApiResponse,
-  BlogPost,
-} from '../types'
+  Tag,
+} from '../types';
+import { apiService } from './api';
 
 export interface ContentMetrics {
   totalPosts: number
@@ -69,14 +69,23 @@ export const contentService = {
     }
   },
 
-  // Newsletter subscription
+  // Newsletter subscription (Strapi schema expects: email, subscribed, optional name, etc.)
   subscribeToNewsletter: async (data: {
     email: string
-    subscribed_at: string
-    status: string
+    name?: string
+    subscribed?: boolean
+    subscription_date?: string
+    source?: 'website' | 'social' | 'referral' | 'api' | 'import'
   }): Promise<ApiResponse<Newsletter>> => {
     return apiService.post<ApiResponse<Newsletter>>('/newsletters', {
-      data,
+      data: {
+        email: data.email,
+        name: data.name ?? null,
+        subscribed: data.subscribed ?? true,
+        subscription_date: data.subscription_date ?? new Date().toISOString(),
+        source: data.source ?? 'website',
+        confirmed: false,
+      },
     })
   },
 
@@ -241,9 +250,10 @@ export const newsletterService = {
     })
   },
 
-  async unsubscribe(email: string): Promise<void> {
-    // This would require a custom endpoint or finding by email first
-    return apiService.put('/newsletters/unsubscribe', { email })
+  async unsubscribe(): Promise<void> {
+    // Requires a custom endpoint in Strapi; left as a placeholder to avoid 404s
+    // Implement a route like POST /newsletters/unsubscribe in the backend to support this.
+    throw new Error('Unsubscribe endpoint not implemented in backend')
   },
 }
 
@@ -265,13 +275,5 @@ export const pageService = {
   },
 }
 
-export const contactService = {
-  async submitContactForm(data: {
-    name: string
-    email: string
-    subject?: string
-    message: string
-  }): Promise<void> {
-    return apiService.post('/contact', { data })
-  },
-}
+// Contact service moved to dedicated contact.ts file
+// Use: import { contactService } from './contact'
