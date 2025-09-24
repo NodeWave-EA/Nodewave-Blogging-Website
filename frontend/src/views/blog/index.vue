@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-transparent">
+  <div class="min-h-screen">
     <!-- Page Header -->
     <PageHeader title="Our Blog" description="Discover insights, stories, and updates from our team" />
 
@@ -9,7 +9,14 @@
       @search="handleSearch" @filter-change="handleFilterChange" />
 
     <!-- Blog Posts Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <!-- Section Title -->
+      <div class="text-center mb-16" data-aos="fade-up">
+        <h2 class="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white bg-clip-text text-transparent mb-4">
+          Latest Articles
+        </h2>
+      </div>
+
       <!-- Loading State -->
       <div v-if="loading && posts.length === 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <BlogPostSkeleton v-for="n in 6" :key="n" />
@@ -17,7 +24,7 @@
 
       <!-- Posts Grid -->
       <div v-else-if="posts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <BlogCard v-for="(post, index) in posts" :key="post.id" :post="post" :data-aos="'fade-up'"
+        <BlogCard v-for="(post, index) in posts" :key="post.id" :post="post" data-aos="fade-up"
           :data-aos-delay="index * 50" />
       </div>
 
@@ -26,13 +33,12 @@
         icon="document" />
 
       <!-- Load More Button -->
-      <div v-if="hasMorePages && posts.length > 0" class="text-center mt-12">
+      <div v-if="hasMorePages && posts.length > 0" class="text-center mt-16">
         <button @click="loadMore" :disabled="loading"
-          class="group relative inline-flex items-center px-8 py-3 text-base font-medium font-mono rounded-full bg-primary text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg backdrop-blur-sm">
-          <LoadingSpinner v-if="loading" class="w-4 h-4 mr-2" />
-          {{ loading ? 'Loading...' : 'Load More Posts' }}
-          <div class="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300">
-          </div>
+          class="group relative inline-flex items-center px-8 py-4 text-lg font-semibold rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-xl hover:shadow-2xl backdrop-blur-sm transform hover:scale-105">
+          <LoadingSpinner v-if="loading" class="w-5 h-5 mr-3" />
+          {{ loading ? 'Loading...' : 'Load More Articles' }}
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
         </button>
       </div>
     </div>
