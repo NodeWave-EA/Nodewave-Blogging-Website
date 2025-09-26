@@ -134,4 +134,5 @@ build
 seed.js
 seed-simple.js
 test/
+docs/
 ############################

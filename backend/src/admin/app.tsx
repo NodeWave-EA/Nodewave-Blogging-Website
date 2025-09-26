@@ -17,6 +17,10 @@ export default {
           src: '/admin/login-customization.js',
           defer: true,
         },
+        {
+          src: '/admin/register-customization.js',
+          defer: true,
+        },
       ],
     },
     // Replace the Strapi logo in the main navigation
