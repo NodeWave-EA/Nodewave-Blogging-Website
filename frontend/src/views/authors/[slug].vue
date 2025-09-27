@@ -26,8 +26,6 @@
     <div v-else-if="author" class="py-8">
       <!-- Author Header -->
       <div class="container mx-auto px-4 max-w-4xl">
-        <PageHeader :tag="author?.name || 'Author'" :title="author?.name || 'Author'"
-          :description="author?.bio || undefined" size="regular" />
         <div class="flex flex-col md:flex-row items-center gap-8">
           <!-- Author Avatar -->
           <div class="flex-shrink-0">

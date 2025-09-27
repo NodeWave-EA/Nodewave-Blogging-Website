@@ -2,14 +2,7 @@
   <div class="min-h-screen bg-transparent">
     <!-- Loading State -->
     <div v-if="loading" class="py-16">
-      <div class="container mx-auto px-4">
-        <div class="animate-pulse">
-          <div class="h-8 rounded-lg mb-8 max-w-md bg-transparent"></div>
-          <div class="flex flex-wrap gap-3">
-            <div v-for="i in 20" :key="i" class="h-10 rounded-full w-24 bg-transparent"></div>
-          </div>
-        </div>
-      </div>
+      <TagSkeleton :count="20" />
     </div>
 
     <!-- Error State -->
@@ -29,24 +22,11 @@
     <!-- Tags Content -->
     <div v-else class="py-8">
       <!-- Header -->
-      <header class="bg-transparent backdrop-blur-xl py-16 mb-12">
-        <div class="container mx-auto px-4 max-w-4xl text-center">
-          <!-- Breadcrumb -->
-          <nav class="flex items-center justify-center space-x-2 text-sm text-black dark:text-white mb-8">
-            <router-link to="/" class="hover:underline">Home</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <router-link to="/blog" class="hover:underline">Blog</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <span class="text-black dark:text-white">Tags</span>
-          </nav>
-
-          <PageHeader tag="Tags" title="Explore by Tags"
-            description="Discover content through our comprehensive tag system. Find exactly what interests you."
-            size="regular" />
-        </div>
-      </header>
-
-
+      <div class="container mx-auto px-4 max-w-4xl text-center">
+        <PageHeader tag="Tags" title="Explore by Tags"
+          description="Discover content through our comprehensive tag system. Find exactly what interests you."
+          size="regular" />
+      </div>
 
       <!-- Tags Cloud -->
       <div class="container mx-auto px-4 max-w-6xl">
@@ -67,22 +47,12 @@
               Popular Tags
             </h2>
             <div class="flex flex-wrap justify-center gap-4">
-              <router-link v-for="tag in popularTags" :key="tag.id" :to="`/tags/${tag.slug}`"
-                class="inline-flex items-center px-4 py-2 rounded-full border border-black dark:border-white text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 font-semibold text-sm transition-all"
-                :style="{ fontSize: getTagSize(tag.post_count) }">
-                <span class="font-semibold">#{{ tag.name }}</span>
-                <span class="ml-2 text-sm opacity-75">({{ tag.post_count }})</span>
-              </router-link>
+              <TagPill v-for="tag in popularTags" :key="tag.id" :tag="tag" :showCount="true" />
             </div>
           </div>
 
           <!-- All Tags -->
           <div>
-
-            <h2 class="text-2xl font-bold text-black dark:text-white mb-8 text-center">
-              All Tags
-            </h2>
-
             <!-- Sort Options -->
             <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8">
               <div class="text-sm text-black dark:text-white">
@@ -91,23 +61,13 @@
 
               <div class="flex items-center gap-4">
                 <label class="text-sm text-black dark:text-white">Sort by:</label>
-                <select v-model="sortBy"
-                  class="px-3 py-2 text-sm border border-black dark:border-white rounded-lg bg-transparent text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <option value="popular">Most Popular</option>
-                  <option value="name">Name A-Z</option>
-                  <option value="recent">Recently Used</option>
-                </select>
+                <SortOptions v-model="sortBy" :options="sortOptions" />
               </div>
             </div>
 
             <!-- Tags Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <router-link v-for="tag in sortedTags" :key="tag.id" :to="`/tags/${tag.slug}`"
-                class="inline-flex flex-col items-center px-4 py-2 rounded-full border border-black dark:border-white text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 font-semibold text-sm transition-all">
-                <span class="font-semibold">#{{ tag.name }}</span>
-                <span class="mt-2 text-sm opacity-75">{{ tag.post_count || 0 }}
-                  {{ (tag.post_count || 0) === 1 ? 'post' : 'posts' }}</span>
-              </router-link>
+              <TagPill v-for="tag in sortedTags" :key="tag.id" :tag="tag" :showCount="true" />
             </div>
           </div>
         </div>
@@ -117,17 +77,20 @@
 </template>
 
 <script setup lang="ts">
+  import SortOptions from '@/components/blog/SortOptions.vue';
+  import TagPill from '@/components/tag/TagPill.vue';
+  import TagSkeleton from '@/components/tag/TagSkeleton.vue';
   import PageHeader from '@/components/ui/PageHeader.vue';
+  import { tagsApi } from '@/services';
+  import type { Tag } from '@/types';
+  import { dbg } from '@/utils/debug';
+  import { updateSEO } from '@/utils/seo';
   import {
     ArrowLeftIcon,
-    ChevronRightIcon,
     ExclamationTriangleIcon,
     TagIcon,
   } from '@heroicons/vue/24/outline';
   import { computed, onMounted, ref } from 'vue';
-  import { tagsApi } from '../../services/blog';
-  import type { Tag } from '../../types';
-  import { updateSEO } from '../../utils/seo';
 
   // Reactive data
   const tags = ref<Tag[]>([])
@@ -135,36 +98,55 @@
   const error = ref<string | null>(null)
   const sortBy = ref('popular')
 
+  const sortOptions = [
+    { label: 'Most Popular', value: 'popular' },
+    { label: 'Trending', value: 'trending' },
+    { label: 'Name A-Z', value: 'name' },
+    { label: 'Recently Used', value: 'recent' },
+  ]
+
   // Computed properties
 
   const sortedTags = computed(() => {
     const sorted = [...tags.value]
 
-    switch (sortBy.value) {
-      case 'name':
-        return sorted.sort((a, b) => a.name.localeCompare(b.name))
-      case 'recent':
-        return sorted.sort(
-          (a, b) =>
+    // Build comparator based on chosen sort method
+    const comparator = (a: Tag, b: Tag) => {
+      switch (sortBy.value) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'recent':
+          return (
             new Date(b.updatedAt || b.createdAt).getTime() -
-            new Date(a.updatedAt || a.createdAt).getTime(),
-        )
-      case 'popular':
-      default:
-        return sorted.sort((a, b) => (b.post_count || 0) - (a.post_count || 0))
+            new Date(a.updatedAt || a.createdAt).getTime()
+          )
+        case 'trending':
+          // When explicitly sorting by trending, within each group we prefer highest post count
+          return (b.post_count || 0) - (a.post_count || 0)
+        case 'popular':
+        default:
+          return (b.post_count || 0) - (a.post_count || 0)
+      }
     }
+
+    // Ensure trending tags always come first, then apply chosen comparator
+    return sorted.sort((a, b) => {
+      const trendingDiff = Number(Boolean(b.trending)) - Number(Boolean(a.trending))
+      if (trendingDiff !== 0) return trendingDiff
+      return comparator(a, b)
+    })
   })
 
   const popularTags = computed(() => {
     return tags.value
       .filter((tag) => (tag.post_count || 0) > 0)
-      .sort((a, b) => (b.post_count || 0) - (a.post_count || 0))
+      .sort((a, b) =>
+        (Number(Boolean(b.trending)) - Number(Boolean(a.trending))) ||
+        ((b.post_count || 0) - (a.post_count || 0)),
+      )
       .slice(0, 10)
   })
 
-  const totalPosts = computed(() => {
-    return tags.value.reduce((sum, tag) => sum + (tag.post_count || 0), 0)
-  })
 
 
   // Methods
@@ -174,6 +156,8 @@
       error.value = null
 
       const response = await tagsApi.getAll()
+      dbg('[Tags]', 'Fetch tags response:', response)
+
       tags.value = response.data || []
 
       // Update SEO
@@ -191,14 +175,8 @@
     }
   }
 
-  const getTagSize = (postCount: number | undefined): string => {
-    const count = postCount || 0
-    if (count > 50) return '2rem'
-    if (count > 20) return '1.5rem'
-    if (count > 10) return '1.25rem'
-    if (count > 5) return '1.125rem'
-    return '1rem'
-  }
+  // Populate tag.post_count by asking the posts API for the total matching posts for each tag.
+  // This is a best-effort fallback when the tag object doesn't contain a reliable post_count.
 
   // Lifecycle
   onMounted(() => {

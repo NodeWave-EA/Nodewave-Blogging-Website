@@ -36,6 +36,7 @@ moduleLoaded('tags.ts')
 export const tagsApi = {
 	getAll: async (): Promise<ApiResponse<Tag[]>> => {
 		const params = {
+			populate: '*',
 			'sort[0]': 'name:asc',
 			publicationState: 'live',
 		}
@@ -47,6 +48,7 @@ export const tagsApi = {
 	getBySlug: async (slug: string): Promise<{ data: Tag }> => {
 		const params = {
 			'filters[slug][$eq]': slug,
+			populate: '*',
 			publicationState: 'live',
 		}
 
@@ -65,6 +67,7 @@ export const tagsApi = {
 			'filters[id][$ne]': tagId,
 			'pagination[pageSize]': limit,
 			'sort[0]': 'name:asc',
+			populate: '*',
 			publicationState: 'live',
 		}
 
