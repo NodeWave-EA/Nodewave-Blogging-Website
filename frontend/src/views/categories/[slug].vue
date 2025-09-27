@@ -101,6 +101,14 @@
               <label class="text-sm text-black dark:text-white">Sort by:</label>
               <SortOptions v-model="sortBy" :options="sortOptions" />
             </div>
+            <div v-if="usingFeaturedFallback" class="w-full mt-2 text-sm text-slate-600 dark:text-slate-400">
+              No featured posts found for this category — showing latest posts instead.
+            </div>
+          </div>
+
+          <!-- Fallback Message -->
+          <div v-if="usingFeaturedFallback" class="text-sm text-yellow-600 dark:text-yellow-400 text-center mb-4">
+            Showing featured posts (fallback: newest posts).
           </div>
 
           <!-- Posts Grid -->
@@ -173,7 +181,8 @@
   const error = ref<string | null>(null)
   const hasMore = ref(false)
   const currentPage = ref(1)
-  const sortBy = ref('newest')
+  const sortBy = ref<'newest' | 'oldest' | 'popular' | 'title' | 'featured'>('title')
+  const usingFeaturedFallback = ref(false)
 
   const sortOptions = [
     { label: 'Featured', value: 'featured' },
@@ -185,17 +194,13 @@
 
   // Computed properties
   const sortedPosts = computed(() => {
-    const sorted = [...posts.value]
+    // If the server returned already-filtered featured posts, just return them.
+    if (sortBy.value === 'featured' && !usingFeaturedFallback.value) {
+      return posts.value.filter((p) => !!p.featured)
+    }
 
+    const sorted = [...posts.value]
     switch (sortBy.value) {
-      case 'featured':
-        return sorted.sort((a, b) => {
-          const aFeat = a.featured ? 1 : 0
-          const bFeat = b.featured ? 1 : 0
-          if (bFeat - aFeat !== 0) return bFeat - aFeat
-          // Within same featured status, newest first
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-        })
       case 'oldest':
         return sorted.sort(
           (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
@@ -228,11 +233,25 @@
         return
       }
 
-      // Fetch posts for this category
-      const postsResponse = await blogPostsApi.getByCategory(category.value.id, {
+      usingFeaturedFallback.value = false
+      let postsResponse = await blogPostsApi.getByCategory(category.value.id, {
         page: 1,
         pageSize: 12,
+        featured: sortBy.value === 'featured',
+        sortBy: 'publishedAt',
+        sortOrder: 'desc',
       })
+
+      if (sortBy.value === 'featured' && (!postsResponse.data || postsResponse.data.length === 0)) {
+        usingFeaturedFallback.value = true
+        // fallback to newest posts
+        postsResponse = await blogPostsApi.getByCategory(category.value.id, {
+          page: 1,
+          pageSize: 12,
+          sortBy: 'publishedAt',
+          sortOrder: 'desc',
+        })
+      }
 
       posts.value = postsResponse.data || []
       hasMore.value = (postsResponse.meta?.pagination?.pageCount || 1) > 1
@@ -275,10 +294,23 @@
       loadingMore.value = true
       currentPage.value += 1
 
-      const response = await blogPostsApi.getByCategory(category.value.id, {
+      let response = await blogPostsApi.getByCategory(category.value.id, {
         page: currentPage.value,
         pageSize: 12,
+        featured: sortBy.value === 'featured' && !usingFeaturedFallback.value,
+        sortBy: 'publishedAt',
+        sortOrder: 'desc',
       })
+
+      // If we were already in fallback mode, don't request featured anymore; we just append newest
+      if (usingFeaturedFallback.value) {
+        response = await blogPostsApi.getByCategory(category.value.id, {
+          page: currentPage.value,
+          pageSize: 12,
+          sortBy: 'publishedAt',
+          sortOrder: 'desc',
+        })
+      }
 
       if (response.data && response.data.length > 0) {
         posts.value.push(...response.data)
@@ -317,6 +349,17 @@
       }
     },
     { immediate: true },
+  )
+
+  // When sort option changes, re-fetch posts so server-side featured filtering works
+  watch(
+    () => sortBy.value,
+    () => {
+      usingFeaturedFallback.value = false
+      if (category.value && category.value.slug) {
+        fetchCategoryAndPosts(category.value.slug)
+      }
+    },
   )
 
   // Lifecycle

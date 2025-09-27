@@ -41,7 +41,7 @@
 		options?: SortOption[]
 		placeholder?: string
 	}>(), {
-		modelValue: 'newest',
+		modelValue: 'title',
 		options: undefined,
 		placeholder: 'Sort by',
 	})
@@ -61,11 +61,11 @@
 	const root = ref<Element | null>(null)
 
 	const defaultOptions: SortOption[] = [
+		{ label: 'Alphabetical', value: 'title' },
 		{ label: 'Featured', value: 'featured' },
 		{ label: 'Newest First', value: 'newest' },
 		{ label: 'Oldest First', value: 'oldest' },
 		{ label: 'Most Popular', value: 'popular' },
-		{ label: 'Alphabetical', value: 'title' },
 	]
 
 	const optionsToUse = computed(() => props.options && props.options.length ? props.options : defaultOptions)

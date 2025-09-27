@@ -112,11 +112,19 @@
               <label class="text-sm text-black dark:text-white">Sort by:</label>
               <SortOptions v-model="sortBy" :options="sortOptions" />
             </div>
+            <div v-if="usingFeaturedFallback" class="w-full mt-2 text-sm text-slate-600 dark:text-slate-400">
+              No featured posts found for this tag — showing latest posts instead.
+            </div>
           </div>
 
           <!-- Posts Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <BlogCard v-for="post in sortedPosts" :key="post.id" :post="post" :highlighted-tag="tag.name" />
+          </div>
+
+          <!-- UI: fallback message when featured had no results -->
+          <div v-if="usingFeaturedFallback" class="text-center text-sm text-gray-500 mt-4">
+            Showing results without the featured posts fallback.
           </div>
 
           <!-- Load More -->
@@ -199,13 +207,14 @@
   const error = ref<string | null>(null)
   const hasMore = ref(false)
   const currentPage = ref(1)
-  const sortBy = ref('newest')
+  const sortBy = ref<'newest' | 'oldest' | 'popular' | 'title' | 'featured'>('title')
+  const usingFeaturedFallback = ref(false)
 
   const sortOptions = [
+    { label: 'Title A-Z', value: 'title' },
     { label: 'Featured', value: 'featured' },
     { label: 'Newest First', value: 'newest' },
     { label: 'Oldest First', value: 'oldest' },
-    { label: 'Title A-Z', value: 'title' },
     { label: 'Most Popular', value: 'popular' },
   ]
 
@@ -213,14 +222,11 @@
   const sortedPosts = computed(() => {
     const sorted = [...posts.value]
 
+    if (sortBy.value === 'featured' && !usingFeaturedFallback.value) {
+      return sorted.filter((p) => !!p.featured)
+    }
+
     switch (sortBy.value) {
-      case 'featured':
-        return sorted.sort((a, b) => {
-          const aFeat = a.featured ? 1 : 0
-          const bFeat = b.featured ? 1 : 0
-          if (bFeat - aFeat !== 0) return bFeat - aFeat
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-        })
       case 'oldest':
         return sorted.sort(
           (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
@@ -254,10 +260,24 @@
       }
 
       // Fetch posts for this tag
-      const postsResponse = await blogPostsApi.getByTag(tag.value.id, {
+      usingFeaturedFallback.value = false
+      let postsResponse = await blogPostsApi.getByTag(tag.value.id, {
         page: 1,
         pageSize: 12,
+        featured: sortBy.value === 'featured' && !usingFeaturedFallback.value,
+        sortBy: 'publishedAt',
+        sortOrder: 'desc',
       })
+
+      if (sortBy.value === 'featured' && (!postsResponse.data || postsResponse.data.length === 0)) {
+        usingFeaturedFallback.value = true
+        postsResponse = await blogPostsApi.getByTag(tag.value.id, {
+          page: 1,
+          pageSize: 12,
+          sortBy: 'publishedAt',
+          sortOrder: 'desc',
+        })
+      }
 
       posts.value = postsResponse.data || []
       hasMore.value = (postsResponse.meta?.pagination?.pageCount || 1) > 1
@@ -308,10 +328,22 @@
       loadingMore.value = true
       currentPage.value += 1
 
-      const response = await blogPostsApi.getByTag(tag.value.id, {
+      let response = await blogPostsApi.getByTag(tag.value.id, {
         page: currentPage.value,
         pageSize: 12,
+        featured: sortBy.value === 'featured' && !usingFeaturedFallback.value,
+        sortBy: 'publishedAt',
+        sortOrder: 'desc',
       })
+
+      if (usingFeaturedFallback.value) {
+        response = await blogPostsApi.getByTag(tag.value.id, {
+          page: currentPage.value,
+          pageSize: 12,
+          sortBy: 'publishedAt',
+          sortOrder: 'desc',
+        })
+      }
 
       if (response.data && response.data.length > 0) {
         posts.value.push(...response.data)
@@ -353,6 +385,17 @@
       }
     },
     { immediate: true },
+  )
+
+  // When sort option changes, re-fetch posts to honor server-side featured filtering
+  watch(
+    () => sortBy.value,
+    () => {
+      usingFeaturedFallback.value = false
+      if (tag.value && tag.value.slug) {
+        fetchTagAndPosts(tag.value.slug)
+      }
+    },
   )
 
   // Lifecycle

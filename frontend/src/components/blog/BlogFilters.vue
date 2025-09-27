@@ -135,7 +135,7 @@
   const props = withDefaults(defineProps<Props>(), {
     search: '',
     category: '',
-    sort: 'newest',
+    sort: 'title',
     categories: () => [],
     showResultsSummary: false,
     resultsCount: 0,

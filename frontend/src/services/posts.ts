@@ -231,10 +231,10 @@ export const blogPostsApi = {
 
 	getByCategory: async (
 		categoryId: number,
-		options: { page?: number; pageSize?: number } = {},
+		options: { page?: number; pageSize?: number; featured?: boolean; sortBy?: string; sortOrder?: string } = {},
 	): Promise<ApiResponse<BlogPost[]>> => {
 		dbg('posts.ts', 'getByCategory', { categoryId, options })
-		const params = {
+		const params: Record<string, unknown> = {
 			'filters[categories][id][$eq]': categoryId,
 			'pagination[page]': options.page || 1,
 			'pagination[pageSize]': options.pageSize || 12,
@@ -242,8 +242,17 @@ export const blogPostsApi = {
 			'populate[categories]': '*',
 			'populate[tags]': '*',
 			'populate[featured_image]': '*',
-			'sort[0]': 'publishedAt:desc',
 			publicationState: 'live',
+		}
+
+		if (options.sortBy) {
+			params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
+		} else {
+			params['sort[0]'] = 'publishedAt:desc'
+		}
+
+		if (options.featured !== undefined) {
+			params['filters[featured][$eq]'] = options.featured
 		}
 
 		const queryString = buildStrapiQuery(params)
@@ -254,10 +263,10 @@ export const blogPostsApi = {
 
 	getByAuthor: async (
 		authorId: number,
-		options: { page?: number; pageSize?: number } = {},
+		options: { page?: number; pageSize?: number; featured?: boolean; sortBy?: string; sortOrder?: string } = {},
 	): Promise<ApiResponse<BlogPost[]>> => {
 		dbg('posts.ts', 'getByAuthor', { authorId, options })
-		const params = {
+		const params: Record<string, unknown> = {
 			'filters[author][id][$eq]': authorId,
 			'pagination[page]': options.page || 1,
 			'pagination[pageSize]': options.pageSize || 12,
@@ -265,8 +274,17 @@ export const blogPostsApi = {
 			'populate[categories]': '*',
 			'populate[tags]': '*',
 			'populate[featured_image]': '*',
-			'sort[0]': 'publishedAt:desc',
 			publicationState: 'live',
+		}
+
+		if (options.sortBy) {
+			params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
+		} else {
+			params['sort[0]'] = 'publishedAt:desc'
+		}
+
+		if (options.featured !== undefined) {
+			params['filters[featured][$eq]'] = options.featured
 		}
 
 		const queryString = buildStrapiQuery(params)
@@ -277,10 +295,10 @@ export const blogPostsApi = {
 
 	getByTag: async (
 		tagId: number,
-		options: { page?: number; pageSize?: number } = {},
+		options: { page?: number; pageSize?: number; featured?: boolean; sortBy?: string; sortOrder?: string } = {},
 	): Promise<ApiResponse<BlogPost[]>> => {
 		dbg('posts.ts', 'getByTag', { tagId, options })
-		const params = {
+		const params: Record<string, unknown> = {
 			'filters[tags][id][$eq]': tagId,
 			'pagination[page]': options.page || 1,
 			'pagination[pageSize]': options.pageSize || 12,
@@ -288,8 +306,17 @@ export const blogPostsApi = {
 			'populate[categories]': '*',
 			'populate[tags]': '*',
 			'populate[featured_image]': '*',
-			'sort[0]': 'publishedAt:desc',
 			publicationState: 'live',
+		}
+
+		if (options.sortBy) {
+			params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
+		} else {
+			params['sort[0]'] = 'publishedAt:desc'
+		}
+
+		if (options.featured !== undefined) {
+			params['filters[featured][$eq]'] = options.featured
 		}
 
 		const queryString = buildStrapiQuery(params)

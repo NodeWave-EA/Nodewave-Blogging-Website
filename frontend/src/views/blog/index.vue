@@ -8,6 +8,10 @@
     <BlogFilters v-model:search="searchQuery" v-model:category="selectedCategory" v-model:sort="sortBy"
       :categories="categories" :show-results-summary="true" :results-count="posts.length" :total-count="totalPosts"
       @search="handleSearch" @filter-change="handleFilterChange" />
+    <div v-if="usingFeaturedFallback"
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm text-slate-600 dark:text-slate-400">
+      No featured posts found — showing latest posts instead.
+    </div>
 
     <!-- Blog Posts Grid -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -70,7 +74,8 @@
   // Reactive data
   const searchQuery = ref('')
   const selectedCategory = ref('')
-  const sortBy = ref<'newest' | 'oldest' | 'popular' | 'title'>('newest')
+  const sortBy = ref<'newest' | 'oldest' | 'popular' | 'title' | 'featured'>('title')
+  const usingFeaturedFallback = ref(false)
   const categories = ref<Category[]>([])
   const posts = ref<BlogPost[]>([])
   const loading = ref(false)
@@ -87,12 +92,37 @@
     try {
       loading.value = true
 
-      const response = await blogPostsApi.getAll(append ? currentPage.value + 1 : 1, pageSize, {
+      // Build filters for the API
+      const filters: any = {
         search: searchQuery.value || undefined,
-        category: selectedCategory.value || undefined,
-        sortBy: getSortField(sortBy.value),
-        sortOrder: getSortOrder(sortBy.value),
-      })
+        categories: selectedCategory.value ? [selectedCategory.value] : undefined,
+      }
+
+      if (sortBy.value === 'featured') {
+        // If we're already using a featured fallback, don't request featured posts anymore;
+        // otherwise request featured posts only and fallback to newest if none exist.
+        if (!usingFeaturedFallback.value) {
+          filters.featured = true
+        }
+        filters.sortBy = 'publishedAt'
+        filters.sortOrder = 'desc'
+      } else {
+        filters.sortBy = getSortField(sortBy.value)
+        filters.sortOrder = getSortOrder(sortBy.value)
+      }
+
+      let response = await blogPostsApi.getAll(append ? currentPage.value + 1 : 1, pageSize, filters)
+
+      // If user requested featured and API returned zero (no featured posts),
+      // fall back to newest posts and mark the fallback so UI can indicate it if desired.
+      if (!append && sortBy.value === 'featured' && (!response.data || response.data.length === 0)) {
+        usingFeaturedFallback.value = true
+        const fallbackFilters = { ...filters }
+        delete fallbackFilters.featured
+        fallbackFilters.sortBy = 'publishedAt'
+        fallbackFilters.sortOrder = 'desc'
+        response = await blogPostsApi.getAll(1, pageSize, fallbackFilters)
+      }
 
       dbg('blog/index.vue', 'Fetched posts:', response)
 
@@ -146,11 +176,13 @@
   }
 
   const handleSearch = debounce(async () => {
+    usingFeaturedFallback.value = false
     await fetchPosts()
     updateURL()
   }, 300)
 
   const handleFilterChange = async () => {
+    usingFeaturedFallback.value = false
     await fetchPosts()
     updateURL()
   }
@@ -160,7 +192,7 @@
 
     if (searchQuery.value) query.search = searchQuery.value
     if (selectedCategory.value) query.category = selectedCategory.value
-    if (sortBy.value !== 'newest') query.sort = sortBy.value
+    if (sortBy.value !== 'title') query.sort = sortBy.value
 
     router.replace({
       path: route.path,
@@ -180,6 +212,7 @@
 
   // Watchers
   watch([sortBy], () => {
+    usingFeaturedFallback.value = false
     fetchPosts()
   })
 
@@ -188,7 +221,7 @@
     // Set initial values from URL params
     searchQuery.value = (route.query.search as string) || ''
     selectedCategory.value = (route.query.category as string) || ''
-    sortBy.value = (route.query.sort as 'newest' | 'oldest' | 'popular' | 'title') || 'newest'
+    sortBy.value = (route.query.sort as 'newest' | 'oldest' | 'popular' | 'title' | 'featured') || 'title'
 
     // Fetch data
     await Promise.all([fetchPosts(), fetchCategories()])
