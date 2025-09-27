@@ -1,15 +1,8 @@
 <template>
   <div class="min-h-screen bg-transparent">
     <!-- Loading State -->
-    <div v-if="loading" class="py-16">
-      <div class="container mx-auto px-4">
-        <div class="animate-pulse">
-          <div class="h-8 rounded-lg mb-8 max-w-md bg-transparent"></div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div v-for="i in 6" :key="i" class="rounded-xl h-96 bg-transparent"></div>
-          </div>
-        </div>
-      </div>
+    <div v-if="loading">
+      <CategoryDetailSkeleton />
     </div>
 
     <!-- Error State -->
@@ -46,20 +39,14 @@
           <div class="text-center">
             <!-- Category Icon -->
             <div class="mb-6 flex justify-center">
-              <div v-if="category.icon" class="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl"
-                :class="getCategoryColor(category.name)">
-                {{ category.icon }}
-              </div>
-              <div v-else class="w-20 h-20 rounded-2xl flex items-center justify-center"
-                :class="getCategoryColor(category.name)">
-                <TagIcon class="w-10 h-10" />
+              <div :class="getCategoryColor(category.name)">
+                <CategoryIcon :icon="category.icon" :color="category.color" size="w-10 h-10" />
               </div>
             </div>
 
-            <h1 class="text-4xl md:text-5xl font-bold text-black dark:text-white mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-black dark:text-white mb-2">
               {{ category.name }}
             </h1>
-
             <p v-if="category.description" class="text-xl text-black dark:text-white mb-8 max-w-2xl mx-auto">
               {{ category.description }}
             </p>
@@ -170,11 +157,12 @@
     ChevronRightIcon,
     DocumentTextIcon,
     ExclamationTriangleIcon,
-    TagIcon,
   } from '@heroicons/vue/24/outline';
   import { computed, onMounted, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import BlogCard from '../../components/blog/BlogCard.vue';
+  import CategoryDetailSkeleton from '../../components/category/CategoryDetailSkeleton.vue';
+  import CategoryIcon from '../../components/category/CategoryIcon.vue';
   import { blogPostsApi, categoriesApi } from '../../services/blog';
   import type { BlogPost, Category } from '../../types';
   import { updateSEO } from '../../utils/seo';
