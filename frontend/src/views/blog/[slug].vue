@@ -279,14 +279,28 @@
         // Update metrics store and then call the standard collection update endpoint
         if (!post.value) return
         metricsStore.updateFromPost(post.value)
-        try {
-          const updated = await incrementView(post.value.id, post.value.view_count || 0)
-          if (updated) {
-            post.value = updated
-            metricsStore.updateFromPost(updated)
+
+        // Persist liked state from localStorage into the store
+        const likedSet = loadLikedSet()
+        const isLiked = likedSet.has(post.value.id)
+        liked.value = isLiked
+        metricsStore.setLikedFor(post.value.id, isLiked)
+
+        // Only increment view if this browser hasn't viewed this post before
+        const viewedSet = loadViewedSet()
+        if (!viewedSet.has(post.value.id)) {
+          try {
+            const updated = await incrementView(post.value.id, post.value.view_count || 0)
+            if (updated) {
+              post.value = updated
+              metricsStore.updateFromPost(updated)
+            }
+            // mark as viewed locally (permanent) so subsequent refreshes won't increment
+            viewedSet.add(post.value.id)
+            saveViewedSet(viewedSet)
+          } catch (err) {
+            console.error('Failed to increment view count via collection update:', err)
           }
-        } catch (err) {
-          console.error('Failed to increment view count via collection update:', err)
         }
       }
 
@@ -382,7 +396,14 @@
       if (updated) {
         post.value = updated
         metricsStore.updateFromPost(updated)
-        // If server doesn't track per-user liked state, persist our optimistic flag in store
+        // Persist liked flag locally so it survives across sessions for this browser
+        const likedSet2 = loadLikedSet()
+        if (liked.value) {
+          likedSet2.add(post.value.id)
+        } else {
+          likedSet2.delete(post.value.id)
+        }
+        saveLikedSet(likedSet2)
         metricsStore.setLikedFor(post.value.id, liked.value)
       }
     } catch (err) {
@@ -427,6 +448,47 @@
       loading.value = false
     }
   })
+
+  const VIEWED_KEY = 'nw_viewed_posts'
+  const LIKED_KEY = 'nw_liked_posts'
+
+  const loadViewedSet = (): Set<number> => {
+    try {
+      const raw = localStorage.getItem(VIEWED_KEY)
+      if (!raw) return new Set()
+      const arr = JSON.parse(raw) as number[]
+      return new Set(arr)
+    } catch (e) {
+      return new Set()
+    }
+  }
+
+  const saveViewedSet = (s: Set<number>) => {
+    try {
+      localStorage.setItem(VIEWED_KEY, JSON.stringify(Array.from(s)))
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  const loadLikedSet = (): Set<number> => {
+    try {
+      const raw = localStorage.getItem(LIKED_KEY)
+      if (!raw) return new Set()
+      const arr = JSON.parse(raw) as number[]
+      return new Set(arr)
+    } catch (e) {
+      return new Set()
+    }
+  }
+
+  const saveLikedSet = (s: Set<number>) => {
+    try {
+      localStorage.setItem(LIKED_KEY, JSON.stringify(Array.from(s)))
+    } catch (e) {
+      // ignore
+    }
+  }
 </script>
 
 <style scoped>

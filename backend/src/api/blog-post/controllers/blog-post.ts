@@ -4,6 +4,10 @@
 
 import { factories } from '@strapi/strapi'
 
+// Simple in-memory rate limit caches (module-scoped)
+const viewRateLimit = new Map<string, number>() // key: `${ip}:${id}` -> timestamp
+const likeRateLimit = new Map<string, number>()
+
 export default factories.createCoreController('api::blog-post.blog-post', ({ strapi }) => ({
   // Override the default find method to include populate
   async find(ctx) {
@@ -218,10 +222,59 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
     const exists = await strapi.entityService.findOne('api::blog-post.blog-post', id as string, { fields: ['id'] })
     if (!exists) return ctx.notFound()
 
-    // Perform the sanitized update on the entity
-    const updated = await strapi.entityService.update('api::blog-post.blog-post', id as string, { data: sanitized })
+    // Determine client IP for basic rate limiting (best-effort)
+    const ip = (ctx.request && (ctx.request.ip || ctx.request.headers?.['x-forwarded-for'])) || ctx.ip || 'unknown'
 
-    // If update failed, return notFound (defensive)
+    // Build per-field allowed-update object after enforcing rate limits
+    const toUpdate: Record<string, unknown> = {}
+
+    // 24-hour window for view increments per IP+post
+    if (sanitized.view_count !== undefined) {
+      const key = `${ip}:${id}`
+      const last = viewRateLimit.get(key) || 0
+      const now = Date.now()
+      const WINDOW_MS = 24 * 60 * 60 * 1000
+      if (now - last >= WINDOW_MS) {
+        toUpdate.view_count = sanitized.view_count
+        viewRateLimit.set(key, now)
+      } else {
+        // Skip view update due to 24h rate limit
+        // Continue without throwing error — callers expect an idempotent behavior
+      }
+    }
+
+    // Small debounce window for like toggles to avoid rapid spamming (5 seconds)
+    if (sanitized.like_count !== undefined) {
+      const key = `${ip}:${id}`
+      const last = likeRateLimit.get(key) || 0
+      const now = Date.now()
+      const LIKE_WINDOW_MS = 5 * 1000
+      if (now - last >= LIKE_WINDOW_MS) {
+        toUpdate.like_count = sanitized.like_count
+        likeRateLimit.set(key, now)
+      } else {
+        // Reject rapid like toggles
+        ctx.status = 429
+        return ctx.send({ error: 'Like toggled too quickly. Please wait a few seconds.' })
+      }
+    }
+
+    // If no fields survive rate-limit checks, return the full entity so UI can stay in sync
+    if (Object.keys(toUpdate).length === 0) {
+      const fullNoUpdate = await strapi.entityService.findOne('api::blog-post.blog-post', id as string, {
+        populate: {
+          seo: true,
+          featured_image: true,
+          author: { populate: { avatar: true } },
+          categories: true,
+          tags: true,
+        },
+      })
+      return { data: fullNoUpdate }
+    }
+
+    const updated = await strapi.entityService.update('api::blog-post.blog-post', id as string, { data: toUpdate })
+
     if (!updated) return ctx.notFound()
 
     const full = await strapi.entityService.findOne('api::blog-post.blog-post', id as string, {
