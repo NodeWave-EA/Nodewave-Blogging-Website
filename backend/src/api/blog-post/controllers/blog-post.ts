@@ -48,13 +48,6 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
       return ctx.notFound()
     }
 
-    // Increment view count
-    await strapi.entityService.update('api::blog-post.blog-post', id as string, {
-      data: {
-        view_count: ((entity.view_count as number) ?? 0) + 1,
-      },
-    })
-
     return { data: entity }
   },
 
@@ -86,13 +79,6 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
     }
 
     const post = entity[0]
-
-    // Increment view count
-    await strapi.entityService.update('api::blog-post.blog-post', post.id, {
-      data: {
-        view_count: ((post.view_count as number) ?? 0) + 1,
-      },
-    })
 
     return { data: post }
   },
@@ -203,5 +189,51 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
     })
 
     return { data: entity }
+  },
+
+  // Public update endpoint for simple updates from the frontend (PUT /api/blog-posts/:id)
+  async update(ctx) {
+    const { id } = ctx.params
+    const payload = ctx.request.body?.data ?? ctx.request.body
+
+    if (!payload || typeof payload !== 'object') {
+      return ctx.badRequest('Invalid payload')
+    }
+
+    // Only allow whitelisted metric fields to be updated via this public endpoint
+    const allowedFields: Record<string, boolean> = {
+      view_count: true,
+      like_count: true,
+    }
+
+    const sanitized: Record<string, unknown> = {}
+    Object.keys(payload).forEach((k) => {
+      if (allowedFields[k]) sanitized[k] = payload[k]
+    })
+
+    if (Object.keys(sanitized).length === 0) {
+      return ctx.badRequest('No updatable fields provided')
+    }
+
+    const exists = await strapi.entityService.findOne('api::blog-post.blog-post', id as string, { fields: ['id'] })
+    if (!exists) return ctx.notFound()
+
+    // Perform the sanitized update on the entity
+    const updated = await strapi.entityService.update('api::blog-post.blog-post', id as string, { data: sanitized })
+
+    // If update failed, return notFound (defensive)
+    if (!updated) return ctx.notFound()
+
+    const full = await strapi.entityService.findOne('api::blog-post.blog-post', id as string, {
+      populate: {
+        seo: true,
+        featured_image: true,
+        author: { populate: { avatar: true } },
+        categories: true,
+        tags: true,
+      },
+    })
+
+    return { data: full }
   },
 }))

@@ -28,7 +28,7 @@
       <div v-if="post.featured" class="absolute top-3 left-3 z-20">
         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full
                    text-white bg-gradient-to-r from-amber-500 to-yellow-500 shadow-lg">
-          <StarIcon class="w-4 h-4" />
+          <HStarIcon class="w-4 h-4" />
           Featured
         </span>
       </div>
@@ -37,7 +37,7 @@
       <div class="absolute top-3 right-3 z-20">
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium
                    bg-white/80 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200 shadow-lg backdrop-blur-sm">
-          <ClockIcon class="w-4 h-4" />
+          <HClockIcon class="w-4 h-4" />
           {{ post.reading_time || calculateReadingTime(post.content) || 5 }} min
         </span>
       </div>
@@ -111,13 +111,14 @@
 
         <!-- Views & Likes -->
         <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-          <span v-if="(post.view_count ?? 0) > 0" class="flex items-center gap-1">
-            <EyeIcon class="w-4 h-4" />
-            {{ formatNumber(post.view_count ?? 0) }}
+          <span v-if="(displayedViewCount ?? 0) > 0" class="flex items-center gap-1">
+            <HEyeIcon class="w-4 h-4" />
+            {{ formatNumber(displayedViewCount ?? 0) }}
           </span>
-          <span v-if="(post.like_count ?? 0) > 0" class="flex items-center gap-1">
-            <HeartIcon class="w-4 h-4" />
-            {{ formatNumber(post.like_count ?? 0) }}
+          <span v-if="(displayedLikeCount ?? 0) > 0" class="flex items-center gap-1">
+            <component :is="metricsStore.getMetrics(post.id)?.liked ? HHeartSolid : HHeartIcon" class="w-4 h-4"
+              :class="{ 'text-red-600': metricsStore.getMetrics(post.id)?.liked }" />
+            {{ formatNumber(displayedLikeCount ?? 0) }}
           </span>
         </div>
       </div>
@@ -126,22 +127,30 @@
 </template>
 
 <script setup lang="ts">
+  import { usePostMetricsStore } from '@/stores/postMetrics';
   import type { BlogPost } from '@/types';
   import { generateExcerpt } from '@/utils/contentRenderer';
   import { calculateReadingTime, formatDate, formatNumber, getPostDateISO } from '@/utils/format';
   import { getStrapiImageAltText, getStrapiImageUrl } from '@/utils/strapi';
   import {
-    ClockIcon,
-    EyeIcon,
-    HeartIcon,
-    StarIcon,
+    ClockIcon as HClockIcon,
+    EyeIcon as HEyeIcon,
+    HeartIcon as HHeartIcon,
+    StarIcon as HStarIcon,
   } from '@heroicons/vue/24/outline';
+  import { HeartIcon as HHeartSolid } from '@heroicons/vue/24/solid';
+  import { computed } from 'vue';
 
   interface Props {
     post: BlogPost
   }
 
-  defineProps<Props>()
+  const props = defineProps<Props>()
+  const post = props.post
+
+  const metricsStore = usePostMetricsStore()
+  const displayedViewCount = computed(() => metricsStore.getMetrics(post.id)?.view_count ?? post.view_count ?? 0)
+  const displayedLikeCount = computed(() => metricsStore.getMetrics(post.id)?.like_count ?? post.like_count ?? 0)
 
   // Category color mapping for visual distinction (returns Tailwind classes only)
 

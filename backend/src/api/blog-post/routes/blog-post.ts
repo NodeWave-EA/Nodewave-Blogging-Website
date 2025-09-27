@@ -12,5 +12,10 @@ export default factories.createCoreRouter('api::blog-post.blog-post', {
     findOne: {
       middlewares: ['api::blog-post.populate-defaults'],
     },
+    // Allow public (unauthenticated) PUT requests to the collection update route
+    // but the controller's `update` delegates to `updatePublic` and sanitizes fields.
+    update: {
+      auth: false,
+    },
   },
 })

@@ -133,6 +133,7 @@
 
 
 <script lang="ts" setup>
+	import { usePostMetricsStore } from '@/stores/postMetrics';
 	import type { BlogPost } from '@/types';
 	import { formatDate, getPostDateISO } from '@/utils/format';
 	import { getStrapiImageAltText, getStrapiImageUrl } from '@/utils/strapi';
@@ -171,6 +172,9 @@
 		const url = getStrapiImageUrl(a)
 		return url
 	})
+
+	const metricsStore = usePostMetricsStore()
+
 
 	const cardRootClass = computed(() => {
 		if (variant === 'hero' || variant === 'fullwidth') {

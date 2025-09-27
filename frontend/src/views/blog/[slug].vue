@@ -189,6 +189,14 @@
             <ArrowLeftIcon class="w-5 h-5 mr-2" />
             Back to Blog
           </router-link>
+
+          <div class="flex items-center gap-4">
+            <button @click="handleToggleLike" :disabled="liking"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 transition-colors">
+              <component :is="liked ? HeartSolid : HeartOutline" class="w-5 h-5" :class="{ 'text-red-600': liked }" />
+              <span>{{ displayedLikeCount }}</span>
+            </button>
+          </div>
         </div>
       </div>
     </article>
@@ -196,6 +204,8 @@
 </template>
 
 <script setup lang="ts">
+  import { incrementView, toggleLikePost } from '@/services/postMetrics';
+  import { usePostMetricsStore } from '@/stores/postMetrics';
   import { fetchRelatedPosts } from '@/utils/relatedPosts';
   import {
     ArrowLeftIcon,
@@ -205,7 +215,9 @@
     ClockIcon,
     ExclamationTriangleIcon,
     EyeIcon,
+    HeartIcon as HeartOutline,
   } from '@heroicons/vue/24/outline';
+  import { HeartIcon as HeartSolid } from '@heroicons/vue/24/solid';
   import { computed, onMounted, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import BlogCard from '../../components/blog/BlogCard.vue';
@@ -221,8 +233,16 @@
   // Reactive data
   const post = ref<BlogPost | null>(null)
   const relatedPosts = ref<BlogPost[]>([])
+  const metricsStore = usePostMetricsStore()
   const loading = ref(true)
   const error = ref<string | null>(null)
+  const liking = ref(false)
+  const liked = ref(false)
+
+  const displayedLikeCount = computed(() => {
+    if (!post.value) return 0
+    return metricsStore.getMetrics(post.value.id)?.like_count ?? post.value.like_count ?? 0
+  })
 
   // Computed properties
   const processedContent = computed(() => {
@@ -256,19 +276,32 @@
       if (post.value) {
         await fetchRelatedPostsFor()
 
-        // Update SEO
-        updateSEO({
-          title: post.value.title,
-          description: post.value.excerpt || `Read ${post.value.title} on our blog`,
-          type: 'article',
-          url: window.location.href,
-          image: getStrapiImageUrl(post.value.featured_image) || undefined,
-          publishedTime: post.value.publishedAt,
-          modifiedTime: post.value.updatedAt,
-          author: post.value.author?.name,
-          tags: post.value.tags?.map((tag) => tag.name),
-        })
+        // Update metrics store and then call the standard collection update endpoint
+        if (!post.value) return
+        metricsStore.updateFromPost(post.value)
+        try {
+          const updated = await incrementView(post.value.id, post.value.view_count || 0)
+          if (updated) {
+            post.value = updated
+            metricsStore.updateFromPost(updated)
+          }
+        } catch (err) {
+          console.error('Failed to increment view count via collection update:', err)
+        }
       }
+
+      // Update SEO
+      updateSEO({
+        title: post.value.title,
+        description: post.value.excerpt || `Read ${post.value.title} on our blog`,
+        type: 'article',
+        url: window.location.href,
+        image: getStrapiImageUrl(post.value.featured_image) || undefined,
+        publishedTime: post.value.publishedAt,
+        modifiedTime: post.value.updatedAt,
+        author: post.value.author?.name,
+        tags: post.value.tags?.map((tag) => tag.name),
+      })
     } catch (err) {
       console.error('Failed to fetch post:', err)
       error.value = 'Blog post not found or could not be loaded.'
@@ -319,8 +352,58 @@
     }
   }
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+
+  // Toggle like handler for the post detail page
+  const handleToggleLike = async () => {
+    if (!post.value) return
+    liking.value = true
+
+    // Determine current state from the metrics store (prefers local optimistic state)
+    const currentMetrics = metricsStore.getMetrics(post.value.id) || {}
+    const currentlyLiked = currentMetrics.liked ?? liked.value ?? false
+    const currentCount = currentMetrics.like_count ?? post.value.like_count ?? 0
+
+    // Optimistic UI update
+    if (currentlyLiked) {
+      liked.value = false
+      metricsStore.decrementLikeLocal(post.value.id)
+      metricsStore.setLikedFor(post.value.id, false)
+      post.value.like_count = Math.max(0, currentCount - 1)
+    } else {
+      liked.value = true
+      metricsStore.incrementLikeLocal(post.value.id)
+      metricsStore.setLikedFor(post.value.id, true)
+      post.value.like_count = currentCount + 1
+    }
+
+    try {
+      // Send the toggle request with the prior state (so backend can apply +/-)
+      const updated = await toggleLikePost(post.value.id, currentlyLiked, currentCount)
+      if (updated) {
+        post.value = updated
+        metricsStore.updateFromPost(updated)
+        // If server doesn't track per-user liked state, persist our optimistic flag in store
+        metricsStore.setLikedFor(post.value.id, liked.value)
+      }
+    } catch (err) {
+      // Revert optimistic update on failure
+      console.error('Failed to toggle like:', err)
+      if (currentlyLiked) {
+        // revert to liked
+        metricsStore.incrementLikeLocal(post.value.id)
+        metricsStore.setLikedFor(post.value.id, true)
+        liked.value = true
+        post.value.like_count = currentCount
+      } else {
+        // revert to unliked
+        metricsStore.decrementLikeLocal(post.value.id)
+        metricsStore.setLikedFor(post.value.id, false)
+        liked.value = false
+        post.value.like_count = currentCount
+      }
+    } finally {
+      liking.value = false
+    }
   }
 
   // Watch for route changes to handle dynamic slug changes
