@@ -3,11 +3,8 @@
     <!-- Loading State -->
     <div v-if="loading" class="py-16">
       <div class="container mx-auto px-4">
-        <div class="animate-pulse">
-          <div class="h-8 rounded-lg mb-8 max-w-md bg-transparent"></div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div v-for="i in 6" :key="i" class="rounded-xl h-96 bg-transparent"></div>
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <CategorySkeleton v-for="i in 6" :key="i" />
         </div>
       </div>
     </div>
@@ -124,8 +121,9 @@
 </template>
 
 <script setup lang="ts">
-  import { categoriesApi } from '@/services';
+  import { blogPostsApi, categoriesApi } from '@/services';
   import type { Category } from '@/types';
+  import { dbg } from '@/utils/debug';
   import { updateSEO } from '@/utils/seo';
   import {
     ArrowLeftIcon,
@@ -136,6 +134,7 @@
     FolderIcon,
   } from '@heroicons/vue/24/outline';
   import { computed, onMounted, ref } from 'vue';
+  import CategorySkeleton from '../../components/category/CategorySkeleton.vue';
 
   // Reactive data
   const categories = ref<Category[]>([])
@@ -225,7 +224,25 @@
       error.value = null
 
       const response = await categoriesApi.getAll()
+      dbg('Categories.vue', 'fetchCategories response', { length: response })
       categories.value = response.data || []
+
+      // Fallback: if post_count is missing or zero for any category, fetch a lightweight count
+      const missing = categories.value.filter((c) => !c.post_count || c.post_count === 0)
+      if (missing.length > 0) {
+        await Promise.all(
+          missing.map(async (cat) => {
+            try {
+              const r = await blogPostsApi.getByCategory(cat.id, { page: 1, pageSize: 1 })
+              const total = r.meta?.pagination?.total ?? (r.data?.length || 0)
+              cat.post_count = total
+            } catch (e) {
+              // ignore per-category failures
+              console.warn('Failed to fetch fallback count for category', cat.id, e)
+            }
+          }),
+        )
+      }
 
       // Update SEO
       updateSEO({
