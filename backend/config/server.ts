@@ -1,3 +1,7 @@
+import { moduleLoaded } from '../utils/debug'
+
+moduleLoaded('config/server.ts')
+
 interface EnvFunction {
   (key: string, defaultValue?: string | number | boolean): string
   int(key: string, defaultValue?: number): number

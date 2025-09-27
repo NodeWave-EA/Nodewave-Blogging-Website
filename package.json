@@ -20,16 +20,8 @@
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,vue,md,yml,webmanifest,html,mts}'"
   },
   "devDependencies": {
-    "@types/koa": "^3.0.0",
-    "@types/node": "^24.5.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2"
-  },
-  "dependencies": {
-    "@strapi/plugin-documentation": "^5.23.5",
-    "@strapi/plugin-graphql": "^5.23.5",
-    "@strapi/plugin-seo": "^2.0.8",
-    "pg": "^8.16.3"
   }
 }
