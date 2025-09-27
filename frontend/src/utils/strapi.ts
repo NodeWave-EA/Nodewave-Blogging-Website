@@ -2,131 +2,137 @@
  * Utility functions for handling Strapi images and data structures
  */
 
-import type { StrapiImage } from '@/types'
+import { usePlaceholderStore } from '@/stores/placeholder'
+import type { Category, StrapiImage } from '@/types'
+import { dbg, moduleLoaded } from './debug'
+
+const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337'
+const _placeholderPath = import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
+const placeholderImageUrl = `${strapiBaseUrl.replace(/\/$/, '')}${_placeholderPath.startsWith('/') ? '' : '/'}${_placeholderPath}`
+const PLACEHOLDER_LOCALSTORAGE_KEY = 'nw_placeholder_image_url'
+
+moduleLoaded('strapi.ts')
 
 /**
  * Extracts the URL from a Strapi image structure
- * @param image - Strapi image structure: { data: StrapiImage | null } | null
+ * @param image - Strapi image structure: { data: StrapiImage | null } | StrapiImage | null
  * @returns string | null - The image URL or null if not available
  */
 export function getStrapiImageUrl(
-  image: { data: StrapiImage | null } | null | undefined,
+  image?:
+    | StrapiImage
+    | { data?: StrapiImage | StrapiImage[] | null }
+    | StrapiImage[]
+    | null,
 ): string | null {
-  return image?.data?.url || null
+  dbg('strapi.ts [getStrapiImageUrl]', 'getStrapiImageUrl', { image })
+
+  const normalized: StrapiImage | null = normalizeImageShape(image)
+
+  if (normalized && normalized.url) {
+    if (normalized.url.startsWith('/')) {
+      dbg('strapi.ts [getStrapiImageUrl]', 'relative URL detected, prepending base URL', { strapiBaseUrl, imageUrl: normalized.url })
+      return `${strapiBaseUrl.replace(/\/$/, '')}${normalized.url}`
+    }
+    return normalized.url
+  }
+
+  // No image found — attempt to read placeholder from Pinia store, then localStorage, then fallback constant
+  try {
+    const store = usePlaceholderStore()
+    const url = store.getPlaceholderSync() || store.url
+    if (url) return url
+  } catch (err) {
+    dbg('strapi.ts [getStrapiImageUrl]', 'pinia placeholder access failed', { err })
+  }
+
+  try {
+    const saved = localStorage.getItem(PLACEHOLDER_LOCALSTORAGE_KEY)
+    if (saved) return saved
+  } catch (err) {
+    dbg('strapi.ts [getStrapiImageUrl]', 'localStorage read failed', { err })
+  }
+
+  return placeholderImageUrl
+}
+
+/**
+ * Extracts the caption from a Strapi image structure
+ * @param image - Strapi image structure: { data: StrapiImage | null } | StrapiImage | null
+ * @returns string | null - The image caption or null if not available
+ */
+export function getStrapiImageCaption(
+  image?: StrapiImage | { data?: StrapiImage | null } | null,
+) {
+  const img = normalizeImageShape(image)
+  dbg('strapi.ts [getStrapiImageCaption]', 'getStrapiImageCaption', { img })
+  if (!img) return null
+  return img.caption || null
 }
 
 /**
  * Extracts the alternative text from a Strapi image structure
- * @param image - Strapi image structure: { data: StrapiImage | null } | null
- * @returns string | null - The alternative text or null if not available
+ * @param image - Strapi image structure: { data: StrapiImage | null } | StrapiImage | null
+ * @returns string | null - The image alternative text or null if not available
  */
-export function getStrapiImageAlt(
-  image: { data: StrapiImage | null } | null | undefined,
-): string | null {
-  return image?.data?.alternativeText || null
+export function getStrapiImageAltText(image?: StrapiImage | { data?: StrapiImage | null } | null) {
+  const img = normalizeImageShape(image)
+  dbg('strapi.ts [getStrapiImageAltText]', 'getStrapiImageAltText', { img })
+  if (!img) return null
+  return img.alternativeText || null
+}
+
+// Backwards-compatible alias
+export const getStrapiImageAlt = getStrapiImageAltText
+
+/**
+ * Extracts the width from a Strapi image structure
+ * @param image - Strapi image structure: { data: StrapiImage | null } | StrapiImage | null
+ * @returns number | null - The image width or null if not available
+ */
+export function getStrapiImageWidth(image?: StrapiImage | { data?: StrapiImage | null } | null) {
+  const img = normalizeImageShape(image)
+  dbg('strapi.ts [getStrapiImageWidth]', 'getStrapiImageWidth', { img })
+  if (!img) return null
+  return img.width || null
 }
 
 /**
- * Gets both URL and alt text from a Strapi image structure
- * @param image - Strapi image structure: { data: StrapiImage | null } | null
- * @returns object with url and alt properties
+ * Extracts the height from a Strapi image structure
+ * @param image - Strapi image structure: { data: StrapiImage | null } | StrapiImage | null
+ * @returns number | null - The image height or null if not available
  */
-export function getStrapiImageData(image: { data: StrapiImage | null } | null | undefined): {
-  url: string | null
-  alt: string | null
-} {
-  return {
-    url: getStrapiImageUrl(image),
-    alt: getStrapiImageAlt(image),
-  }
+export function getStrapiImageHeight(image?: StrapiImage | { data?: StrapiImage | null } | null) {
+  const img = normalizeImageShape(image)
+  dbg('strapi.ts [getStrapiImageHeight]', 'getStrapiImageHeight', { img })
+  if (!img) return null
+  return img.height || null
 }
 
 /**
- * Builds a full URL for a Strapi image
- * @param image - Strapi image structure: { data: StrapiImage | null } | null
- * @param baseUrl - Base URL for the Strapi instance (optional)
- * @returns string | null - The full image URL or null if not available
+ * Get categories color from Strapi category object
+ * @param category - Strapi category object with color property
+ * @returns string - The category color or a default color if not available
  */
-export function getStrapiImageFullUrl(
-  image: { data: StrapiImage | null } | null | undefined,
-  baseUrl?: string,
-): string | null {
-  const url = getStrapiImageUrl(image)
-  if (!url) return null
-
-  // If URL is already absolute, return it as is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url
-  }
-
-  // If baseUrl is provided and URL is relative, combine them
-  if (baseUrl) {
-    return `${baseUrl.replace(/\/$/, '')}${url}`
-  }
-
-  return url
+export function getStrapiCategoryColor(category: Category) {
+  dbg('strapi.ts [getStrapiCategoryColor]', 'getStrapiCategoryColor', { category })
+  return category?.color || 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
 }
 
-/**
- * Checks if a Strapi image exists and has a valid URL
- * @param image - Strapi image structure: { data: StrapiImage | null } | null
- * @returns boolean - True if image exists and has a URL
- */
-export function hasStrapiImage(image: { data: StrapiImage | null } | null | undefined): boolean {
-  return !!image?.data?.url
-}
-
-/**
- * Gets responsive image URLs from Strapi formats
- * @param image - Strapi image structure: { data: StrapiImage | null } | null
- * @returns object with different size URLs
- */
-export function getStrapiImageFormats(image: { data: StrapiImage | null } | null | undefined): {
-  thumbnail?: string
-  small?: string
-  medium?: string
-  large?: string
-  original: string | null
-} {
-  const imageData = image?.data
-  if (!imageData) return { original: null }
-
-  const formats = (imageData.formats as Record<string, { url: string }>) || {}
-
-  return {
-    thumbnail: formats.thumbnail?.url,
-    small: formats.small?.url,
-    medium: formats.medium?.url,
-    large: formats.large?.url,
-    original: imageData.url,
+// Helper to turn multiple accepted shapes into a single StrapiImage or null
+function normalizeImageShape(
+  image?: StrapiImage | { data?: StrapiImage | StrapiImage[] | null } | StrapiImage[] | null,
+): StrapiImage | null {
+  if (!image) return null
+  // If it's an array, use the first item
+  if (Array.isArray(image)) return (image.length > 0 ? image[0] : null) as StrapiImage | null
+  // If it's an object with a `data` prop
+  if (typeof image === 'object' && 'data' in image) {
+    const d = (image as { data?: StrapiImage | StrapiImage[] | null }).data
+    if (!d) return null
+    if (Array.isArray(d)) return (d.length > 0 ? d[0] : null) as StrapiImage | null
+    return d as StrapiImage
   }
-}
-
-/**
- * Creates a srcset string for responsive images
- * @param image - Strapi image structure: { data: StrapiImage | null } | null
- * @param baseUrl - Base URL for the Strapi instance (optional)
- * @returns string - srcset string for responsive images
- */
-export function getStrapiImageSrcSet(
-  image: { data: StrapiImage | null } | null | undefined,
-  baseUrl?: string,
-): string {
-  const formats = getStrapiImageFormats(image)
-  const srcSet: string[] = []
-
-  if (formats.small) {
-    srcSet.push(`${baseUrl ? baseUrl + formats.small : formats.small} 500w`)
-  }
-  if (formats.medium) {
-    srcSet.push(`${baseUrl ? baseUrl + formats.medium : formats.medium} 750w`)
-  }
-  if (formats.large) {
-    srcSet.push(`${baseUrl ? baseUrl + formats.large : formats.large} 1000w`)
-  }
-  if (formats.original) {
-    srcSet.push(`${baseUrl ? baseUrl + formats.original : formats.original} 1920w`)
-  }
-
-  return srcSet.join(', ')
+  // Otherwise assume it's a StrapiImage
+  return image as StrapiImage
 }

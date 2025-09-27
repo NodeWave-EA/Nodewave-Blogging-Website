@@ -1,0 +1,15 @@
+// Central services barrel — re-exports individual service modules and provides a convenient consolidated object.
+
+export * from './api'
+export * from './authors'
+export * from './axiosClient'
+export * from './categories'
+export * from './comments'
+export * from './contact'
+export * from './newsletter'
+export * from './pages'
+export * from './placeholder'
+export * from './posts'
+export * from './queryBuilder'
+export * from './settings'
+export * from './tags'

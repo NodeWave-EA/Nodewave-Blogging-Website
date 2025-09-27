@@ -218,7 +218,7 @@
 
 <script setup lang="ts">
   import { useCompanyInfo } from '@/composables/useCompanyInfo';
-  import { contactService } from '@/services/contact';
+  import { contactService } from '@/services';
   import type { ContactForm } from '@/types';
   import { updateSEO } from '@/utils/seo';
   import {

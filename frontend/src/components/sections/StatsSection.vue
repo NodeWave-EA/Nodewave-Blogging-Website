@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-	import { authorsApi, blogPostsApi, categoriesApi } from '@/services/blog';
+	import { authorsApi, blogPostsApi, categoriesApi } from '@/services';
 	import { BookOpenIcon } from '@heroicons/vue/24/outline';
 	import { onMounted, ref } from 'vue';
 

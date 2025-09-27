@@ -121,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-  import { categoriesApi } from '@/services/blog';
+  import { categoriesApi } from '@/services';
   import type { Category } from '@/types';
   import { updateSEO } from '@/utils/seo';
   import {

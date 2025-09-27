@@ -1,4 +1,4 @@
-import { apiService } from '@/services/api'
+import { apiService } from '@/services'
 import type { CompanyInfo } from '@/types'
 import { computed, ref } from 'vue'
 

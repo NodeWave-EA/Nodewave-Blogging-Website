@@ -12,7 +12,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <!-- Section Title -->
       <div class="text-center mb-16" data-aos="fade-up">
-        <h2 class="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white bg-clip-text text-transparent mb-4">
+        <h2
+          class="text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-white dark:via-slate-200 dark:to-white bg-clip-text text-transparent mb-4">
           Latest Articles
         </h2>
       </div>
@@ -38,7 +39,9 @@
           class="group relative inline-flex items-center px-8 py-4 text-lg font-semibold rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-xl hover:shadow-2xl backdrop-blur-sm transform hover:scale-105">
           <LoadingSpinner v-if="loading" class="w-5 h-5 mr-3" />
           {{ loading ? 'Loading...' : 'Load More Articles' }}
-          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <div
+            class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300">
+          </div>
         </button>
       </div>
     </div>
@@ -46,18 +49,19 @@
 </template>
 
 <script setup lang="ts">
-  import BlogCard from '@/components/blog/BlogCard.vue'
-  import BlogFilters from '@/components/blog/BlogFilters.vue'
-  import BlogPostSkeleton from '@/components/ui/BlogPostSkeleton.vue'
-  import EmptyState from '@/components/ui/EmptyState.vue'
-  import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
-  import PageHeader from '@/components/ui/PageHeader.vue'
-  import { blogPostsApi, categoriesApi } from '@/services/blog'
-  import type { BlogPost, Category } from '@/types'
-  import { debounce } from '@/utils/format'
-  import { updateSEO } from '@/utils/seo'
-  import { computed, onMounted, ref, watch } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
+  import BlogCard from '@/components/blog/BlogCard.vue';
+  import BlogFilters from '@/components/blog/BlogFilters.vue';
+  import BlogPostSkeleton from '@/components/blog/BlogPostSkeleton.vue';
+  import EmptyState from '@/components/ui/EmptyState.vue';
+  import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
+  import PageHeader from '@/components/ui/PageHeader.vue';
+  import { blogPostsApi, categoriesApi } from '@/services';
+  import type { BlogPost, Category } from '@/types';
+  import { dbg } from '@/utils/debug';
+  import { debounce } from '@/utils/format';
+  import { updateSEO } from '@/utils/seo';
+  import { computed, onMounted, ref, watch } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
 
   const route = useRoute()
   const router = useRouter()
@@ -89,6 +93,8 @@
         sortOrder: getSortOrder(sortBy.value),
       })
 
+      dbg('blog/index.vue', 'Fetched posts:', response)
+
       if (response.data) {
         if (append) {
           posts.value.push(...response.data)
@@ -98,8 +104,8 @@
           currentPage.value = 1
         }
 
+        totalPosts.value = response.meta?.pagination?.total || response.data.length
         totalPages.value = response.meta?.pagination?.pageCount || 1
-        totalPosts.value = response.meta?.pagination?.total || 0
       }
     } catch (error) {
       console.error('Failed to fetch posts:', error)

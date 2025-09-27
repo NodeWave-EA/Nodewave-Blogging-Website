@@ -1,15 +1,15 @@
 <script setup lang="ts">
-  import { useCompanyInfo } from '@/composables/useCompanyInfo'
-  import { useTheme } from '@/composables/useTheme'
-  import { computed, onMounted, onUnmounted, ref } from 'vue'
-  import { RouterView, useRoute } from 'vue-router'
+  import { useCompanyInfo } from '@/composables/useCompanyInfo';
+  import { useTheme } from '@/composables/useTheme';
+  import { computed, onMounted, onUnmounted, ref } from 'vue';
+  import { RouterView, useRoute } from 'vue-router';
 
   // Layout Components
-  import AppFooter from '@/components/layout/AppFooter.vue'
-  import AppHeader from '@/components/layout/AppHeader.vue'
-  import Background from '@/components/ui/Background.vue'
-  import BackToTop from '@/components/ui/BackToTop.vue'
-  import NewsletterPopup from '@/components/ui/NewsletterPopup.vue'
+  import AppFooter from '@/components/layout/AppFooter.vue';
+  import AppHeader from '@/components/layout/AppHeader.vue';
+  import Background from '@/components/layout/Background.vue';
+  import BackToTop from '@/components/layout/BackToTop.vue';
+  import NewsletterPopup from '@/components/newsletter/NewsletterPopup.vue';
 
   // Theme & Company Info
   const { initializeTheme } = useTheme()

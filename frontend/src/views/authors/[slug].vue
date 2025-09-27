@@ -44,13 +44,8 @@
           <div class="flex flex-col md:flex-row items-center gap-8">
             <!-- Author Avatar -->
             <div class="flex-shrink-0">
-              <img v-if="author?.profile_picture && getStrapiImageUrl(author.profile_picture)"
-                :src="getStrapiImageUrl(author.profile_picture)!" :alt="author?.name || 'Author'"
+              <img :src="getStrapiImageUrl(author?.avatar) ?? ''" :alt="author?.name || 'Author'"
                 class="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-zinc-800 shadow-lg" />
-              <div v-else
-                class="w-32 h-32 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center border-4 border-white dark:border-zinc-800 shadow-lg">
-                <span class="text-3xl font-bold text-white">{{ author?.name?.[0] || 'A' }}</span>
-              </div>
             </div>
 
             <!-- Author Info -->
@@ -59,8 +54,8 @@
                 {{ author?.name }}
               </h1>
 
-              <p v-if="author?.role" class="text-xl text-blue-600 dark:text-blue-400 font-semibold mb-4">
-                {{ author.role }}
+              <p v-if="author?.job_title" class="text-xl text-blue-600 dark:text-blue-400 font-semibold mb-4">
+                {{ author.job_title }}
               </p>
 
               <p v-if="author?.bio" class="text-lg text-black dark:text-white mb-6 leading-relaxed">
@@ -91,8 +86,8 @@
               <div v-if="author?.social_links" class="flex items-center justify-center md:justify-start gap-4">
                 <span class="text-sm font-medium text-black dark:text-white">Follow:</span>
 
-                <a v-if="author.social_links.twitter" :href="author.social_links.twitter" target="_blank"
-                  rel="noopener noreferrer"
+                <a v-if="getSocialUrl(author.social_links, 'twitter')"
+                  :href="getSocialUrl(author.social_links, 'twitter')" target="_blank" rel="noopener noreferrer"
                   class="inline-flex items-center justify-center p-2 rounded-full transition-all text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10"
                   title="Twitter">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -101,8 +96,8 @@
                   </svg>
                 </a>
 
-                <a v-if="author.social_links.linkedin" :href="author.social_links.linkedin" target="_blank"
-                  rel="noopener noreferrer"
+                <a v-if="getSocialUrl(author.social_links, 'linkedin')"
+                  :href="getSocialUrl(author.social_links, 'linkedin')" target="_blank" rel="noopener noreferrer"
                   class="inline-flex items-center justify-center p-2 rounded-full transition-all text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10"
                   title="LinkedIn">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -111,8 +106,8 @@
                   </svg>
                 </a>
 
-                <a v-if="author.social_links.github" :href="author.social_links.github" target="_blank"
-                  rel="noopener noreferrer"
+                <a v-if="getSocialUrl(author.social_links, 'github')"
+                  :href="getSocialUrl(author.social_links, 'github')" target="_blank" rel="noopener noreferrer"
                   class="inline-flex items-center justify-center p-2 rounded-full transition-all text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10"
                   title="GitHub">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -121,8 +116,8 @@
                   </svg>
                 </a>
 
-                <a v-if="author.social_links.website" :href="author.social_links.website" target="_blank"
-                  rel="noopener noreferrer"
+                <a v-if="getSocialUrl(author.social_links, 'website')"
+                  :href="getSocialUrl(author.social_links, 'website')" target="_blank" rel="noopener noreferrer"
                   class="inline-flex items-center justify-center p-2 rounded-full transition-all text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10"
                   title="Website">
                   <GlobeAltIcon class="w-5 h-5" />
@@ -132,12 +127,12 @@
           </div>
 
           <!-- Author Specialties -->
-          <div v-if="author?.specialties && author.specialties.length > 0" class="mt-8">
+          <div v-if="author?.expertise_areas && author.expertise_areas.length > 0" class="mt-8">
             <h3 class="text-lg font-semibold text-black dark:text-white mb-4">Specialties</h3>
             <div class="flex flex-wrap gap-2">
-              <span v-for="specialty in author.specialties" :key="specialty"
+              <span v-for="tag in author.expertise_areas" :key="tag.id"
                 class="px-3 py-1 text-sm font-medium rounded-full bg-transparent text-black dark:text-white border border-black dark:border-white">
-                {{ specialty }}
+                {{ tag.name }}
               </span>
             </div>
           </div>
@@ -213,6 +208,7 @@
   import BlogCard from '../../components/blog/BlogCard.vue';
 
   // Services & Types
+  import { getSocialUrl } from '@/utils/social';
   import { authorsApi, blogPostsApi } from '../../services/blog';
   import type { Author, BlogPost, PaginationMeta } from '../../types';
 

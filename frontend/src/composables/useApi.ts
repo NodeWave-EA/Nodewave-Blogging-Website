@@ -1,9 +1,10 @@
-import { ref, reactive } from 'vue'
-import type { LoadingState } from '../types'
+import { reactive, ref } from 'vue';
+// Local loading shape to avoid depending on a project-level type that isn't exported
+type LocalLoadingState = { isLoading: boolean; error: string | null }
 
 export function useApi<T>() {
   const data = ref<T | null>(null)
-  const loading = reactive<LoadingState>({
+  const loading = reactive<LocalLoadingState>({
     isLoading: false,
     error: null,
   })
@@ -47,7 +48,7 @@ export function usePaginatedApi<T>() {
   const totalPages = ref(0)
   const pageSize = ref(10)
 
-  const loading = reactive<LoadingState>({
+  const loading = reactive<LocalLoadingState>({
     isLoading: false,
     error: null,
   })

@@ -1,6 +1,6 @@
-import { ref, reactive } from 'vue'
-import { blogPostsApi, categoriesApi, authorsApi, tagsApi } from '@/services/blog'
-import type { BlogPost, Category, Author, Tag } from '@/types'
+import { authorsApi, blogPostsApi, categoriesApi, tagsApi } from '@/services'
+import type { Author, BlogPost, Category, Tag } from '@/types'
+import { reactive, ref } from 'vue'
 
 interface BlogDataState {
   posts: BlogPost[]
@@ -49,7 +49,7 @@ export function useBlogData() {
     }
   }
 
-  const fetchCategories = async (params?: any) => {
+  const fetchCategories = async () => {
     try {
       setLoading(true)
       setError(null)
@@ -65,7 +65,7 @@ export function useBlogData() {
     }
   }
 
-  const fetchAuthors = async (params?: any) => {
+  const fetchAuthors = async () => {
     try {
       setLoading(true)
       setError(null)
@@ -81,7 +81,7 @@ export function useBlogData() {
     }
   }
 
-  const fetchTags = async (params?: any) => {
+  const fetchTags = async () => {
     try {
       setLoading(true)
       setError(null)

@@ -4,6 +4,10 @@
 import type { BlogPost, SEO, BlogSetting, Author, Category, Tag } from '@/types'
 import { getStrapiImageUrl } from './strapi'
 
+const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337'
+const placeholderImageUrl = strapiBaseUrl + import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
+const siteUrl = import.meta.env.VITE_SITE_URL || 'http://localhost:5173'
+
 export interface SEOData {
   title?: string
   description?: string
@@ -27,6 +31,7 @@ export interface MetaTags {
   description?: string
   keywords?: string
   image?: string
+  logoUrl?: string
   url?: string
   type?: string
   siteName?: string
@@ -44,15 +49,15 @@ export interface MetaTags {
  * Generate meta tags for a blog post
  */
 export function generatePostMetaTags(post: BlogPost, baseUrl: string = ''): MetaTags {
-  const title = post.seo?.metaTitle || post.title
-  const description = post.seo?.metaDescription || post.excerpt || ''
-  const imageUrl = getStrapiImageUrl(post.featured_image)
-  const image = imageUrl ? `${baseUrl}${imageUrl}` : undefined
-  const url = `${baseUrl}/blog/${post.slug}`
+  const title = post.seo?.meta_title || post.title
+  const description = post.seo?.meta_description || post.excerpt || ''
+  const imageUrl = getStrapiImageUrl(post.featured_image) || placeholderImageUrl
+  const image = imageUrl
+  const url = `${siteUrl}/blog/${post.slug}`
   const publishedTime = post.published_at_custom || post.publishedAt
   const modifiedTime = post.updatedAt
   const author = 'NodeWave Team'
-  const keywords = post.seo?.metaKeywords
+  const keywords = post.seo?.meta_keywords
 
   return {
     title: `${title} | NodeWave Blog`,
@@ -66,23 +71,19 @@ export function generatePostMetaTags(post: BlogPost, baseUrl: string = ''): Meta
     publishedTime,
     modifiedTime,
     author,
-    robots: post.seo?.metaRobots || 'index, follow',
-    canonical: post.seo?.canonicalURL || url,
+    robots: post.seo?.robots || 'index, follow',
+    canonical: post.seo?.canonical_url || url,
   }
 }
 
 /**
  * Generate meta tags for category pages
  */
-export function generateCategoryMetaTags(
-  categoryName: string,
-  categoryDescription?: string,
-  baseUrl: string = '',
-): MetaTags {
-  const title = `${categoryName} Articles | NodeWave Blog`
-  const description =
-    categoryDescription || `Read the latest articles about ${categoryName} from NodeWave.`
-  const url = `${baseUrl}/categories/${categoryName.toLowerCase().replace(/\s+/g, '-')}`
+export function generateCategoryMetaTags(category: Category): MetaTags {
+
+  const title = category.name
+  const description = category.description || `Posts in the ${category.name} category`
+  const url = `${siteUrl}/categories/${category.slug}`
 
   return {
     title,
@@ -101,25 +102,23 @@ export function generateCategoryMetaTags(
  */
 export function generateHomepageMetaTags(
   blogSettings?: BlogSetting,
-  baseUrl: string = '',
 ): MetaTags {
-  const title = blogSettings?.site_title || 'NodeWave Blog'
+  const title = blogSettings?.site_name || 'NodeWave Blog'
   const description =
     blogSettings?.site_description ||
     'Latest insights, tutorials, and updates from NodeWave - your trusted technology partner.'
-  const logoUrl = getStrapiImageUrl(blogSettings?.site_logo)
-  const image = logoUrl ? `${baseUrl}${logoUrl}` : undefined
+  const logoUrl = getStrapiImageUrl(blogSettings?.site_logo) ?? undefined
 
   return {
     title,
     description,
-    image,
-    url: baseUrl,
+     logoUrl,
+    url: siteUrl,
     type: 'website',
     siteName: title,
     locale: 'en_US',
     robots: 'index, follow',
-    canonical: baseUrl,
+    canonical: siteUrl,
   }
 }
 

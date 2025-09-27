@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-  import { apiService } from '@/services/api';
+  import { apiService } from '@/services';
   import type { Category, SearchResult, SearchResults } from '@/types';
   import { debounce } from '@/utils/debounce';
   import {

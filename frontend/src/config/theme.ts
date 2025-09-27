@@ -5,7 +5,7 @@
  * All styling follows TailwindCSS v4 conventions with zinc/slate/neutral colors.
  */
 
-import type { BackgroundConfig } from '@/components/ui/Background.vue'
+import type { BackgroundConfig } from '@/components/layout/Background.vue';
 
 // Page-specific background configurations using modern design system
 export const pageBackgroundConfigs: Record<string, Partial<BackgroundConfig>> = {

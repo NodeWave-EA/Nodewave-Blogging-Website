@@ -1,33 +1,36 @@
 <template>
-  <!-- Header spacer to prevent content jump -->
+  <!-- Spacer -->
   <div :class="[
     'transition-all duration-500',
     isScrolled ? 'h-14 lg:h-16' : 'h-16 lg:h-20',
   ]"></div>
 
   <header ref="headerRef" :class="[
-    'fixed left-2 right-2 lg:left-6 lg:right-6 z-50 transition-all duration-500 border border-border/20 backdrop-blur-md',
+    'fixed left-3 right-3 lg:left-6 lg:right-6 z-50 transition-all duration-500 border border-border/20',
+    'backdrop-blur-xl bg-white/70 dark:bg-zinc-900/70',
     isScrolled
-      ? 'top-3 lg:top-6 rounded-2xl shadow-lg ring-1 ring-border/10'
+      ? 'top-3 lg:top-6 rounded-2xl shadow-xl ring-1 ring-border/10'
       : 'top-0 rounded-none shadow-sm',
   ]">
     <nav :class="[
       'max-w-7xl mx-auto flex flex-col',
       isScrolled ? 'px-6 lg:px-8' : 'px-4 lg:px-6',
     ]">
+      <!-- Top Row -->
       <div :class="[
         'flex justify-between items-center w-full',
         isScrolled ? 'h-14 lg:h-16 py-2' : 'h-16 lg:h-20 py-3',
       ]">
-        <!-- Logo (Theme-aware, improved accessibility & style) -->
+        <!-- Logo -->
         <div class="flex-shrink-0 z-10">
           <RouterLink to="/" class="flex items-center gap-3 group relative" aria-label="Home">
             <img v-if="currentLogo" :src="currentLogo" :alt="companyName + ' logo'" :class="[
-              'w-auto transition-all duration-300 group-hover:scale-105 relative z-10 drop-shadow-sm',
+              'w-auto transition-transform duration-300 group-hover:scale-105 drop-shadow-sm',
               isScrolled ? 'h-7 lg:h-8' : 'h-8 lg:h-10',
             ]" loading="lazy" decoding="async" />
             <span v-else :class="[
-              'font-bold font-mono bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent transition-all duration-300 relative z-10',
+              'font-bold font-mono bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent',
+              'transition-all duration-300',
               isScrolled ? 'text-lg lg:text-xl' : 'text-xl lg:text-2xl',
             ]">
               {{ companyName }}
@@ -35,28 +38,26 @@
           </RouterLink>
         </div>
 
-        <!-- Desktop Navigation -->
+        <!-- Desktop Nav -->
         <div class="hidden lg:flex flex-1 justify-center">
           <AppNavigation type="desktop" />
         </div>
 
-        <!-- Right side: Search, Theme Toggle, Mobile Menu -->
+        <!-- Actions -->
         <div class="flex items-center gap-1 lg:gap-2">
-          <!-- Search Button -->
+          <!-- Search -->
           <button @click="openSearch"
-            class="p-3 rounded-xl bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
+            class="p-2.5 lg:p-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
             aria-label="Search">
             <MagnifyingGlassIcon class="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
           </button>
 
           <!-- Theme Toggle -->
-          <div class="relative">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
 
-          <!-- Mobile menu button -->
+          <!-- Mobile Menu -->
           <button @click="toggleMobileMenu"
-            class="lg:hidden p-3 rounded-xl bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
+            class="lg:hidden p-2.5 lg:p-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
             aria-label="Menu">
             <Bars3Icon v-if="!mobileMenuOpen" class="w-6 h-6 transition-transform duration-200 group-hover:scale-110" />
             <XMarkIcon v-else class="w-6 h-6 transition-transform duration-200 group-hover:rotate-90" />
@@ -64,8 +65,13 @@
         </div>
       </div>
 
-      <!-- Mobile Navigation -->
-      <AppNavigation type="mobile" :mobile-menu-open="mobileMenuOpen" @close-mobile-menu="mobileMenuOpen = false" />
+      <!-- Mobile Nav -->
+      <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
+        <AppNavigation v-if="mobileMenuOpen" type="mobile" :mobile-menu-open="mobileMenuOpen"
+          @close-mobile-menu="mobileMenuOpen = false" class="lg:hidden" />
+      </transition>
     </nav>
 
     <!-- Search Modal -->
@@ -76,7 +82,7 @@
 <script setup lang="ts">
   import AppNavigation from '@/components/layout/AppNavigation.vue';
   import SearchModal from '@/components/ui/SearchModal.vue';
-  import ThemeToggle from '@/components/ui/ThemeToggle.vue';
+  import ThemeToggle from '@/components/layout/ThemeToggle.vue';
   import { useCompanyInfo } from '@/composables/useCompanyInfo';
   import { useTheme } from '@/composables/useTheme';
   import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/24/outline';

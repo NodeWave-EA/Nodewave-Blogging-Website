@@ -1,11 +1,13 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
 import AOS from 'aos'
 import NProgress from 'nprogress'
+import { createPinia } from 'pinia'
+import { createApp } from 'vue'
 
+import { usePlaceholderStore } from '@/stores/placeholder'
 import App from './App.vue'
-import router from './router'
 import { useTheme } from './composables/useTheme'
+import router from './router'
+
 
 // Import CSS
 import '@/assets/main.css'
@@ -57,33 +59,46 @@ router.onError(() => {
 const { initTheme } = useTheme()
 initTheme()
 
-// Mount the app
-app.mount('#app')
+// Ensure placeholder image is loaded and cached before app mount
+const placeholderStore = usePlaceholderStore()
 
-// Initialize AOS (Animate On Scroll) after mounting
-// Use requestAnimationFrame to ensure DOM is fully rendered
-requestAnimationFrame(() => {
-  AOS.init({
-    duration: 800, // Animation duration in milliseconds
-    once: false, // Whether animation should happen only once
-    mirror: true, // Whether elements should animate out while scrolling past them
-    offset: 120, // Offset (in pixels) from the original trigger point
-    delay: 0, // Delay in milliseconds
-    easing: 'ease-out-cubic',
-    disable: false, // Conditions when AOS should be disabled
-    startEvent: 'DOMContentLoaded', // Name of event, on which AOS should be initialized
-    animatedClassName: 'aos-animate', // Class applied on animation
-    anchorPlacement: 'top-bottom', // Defines which position of the element regarding to window should trigger the animation
-  })
+async function initApp() {
+  try {
+    await placeholderStore.initPlaceholder()
+  } catch (err) {
+    // Fail gracefully — app should still mount even if placeholder lookup fails
+    console.error('Failed to initialize placeholder store', err)
+  }
 
-  // Listen for theme changes and refresh AOS to ensure proper animations
-  window.addEventListener('themeChanged', () => {
-    // Small delay to ensure theme transition is complete
-    setTimeout(() => {
-      AOS.refresh()
-    }, 100)
+  // Mount the app
+  app.mount('#app')
+
+  // Initialize AOS (Animate On Scroll) after mounting
+  requestAnimationFrame(() => {
+    AOS.init({
+      duration: 800, // Animation duration in milliseconds
+      once: false, // Whether animation should happen only once
+      mirror: true, // Whether elements should animate out while scrolling past them
+      offset: 120, // Offset (in pixels) from the original trigger point
+      delay: 0, // Delay in milliseconds
+      easing: 'ease-out-cubic',
+      disable: false, // Conditions when AOS should be disabled
+      startEvent: 'DOMContentLoaded', // Name of event, on which AOS should be initialized
+      animatedClassName: 'aos-animate', // Class applied on animation
+      anchorPlacement: 'top-bottom', // Defines which position of the element regarding to window should trigger the animation
+    })
+
+    // Listen for theme changes and refresh AOS to ensure proper animations
+    window.addEventListener('themeChanged', () => {
+      // Small delay to ensure theme transition is complete
+      setTimeout(() => {
+        AOS.refresh()
+      }, 100)
+    })
   })
-})
+}
+
+initApp()
 
 // Handle page visibility changes to pause/resume animations
 document.addEventListener('visibilitychange', () => {

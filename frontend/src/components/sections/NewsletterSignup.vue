@@ -115,6 +115,8 @@
 </template>
 
 <script setup lang="ts">
+  import { apiService } from '@/services';
+  import { newsletterService } from '@/services/newsletter';
   import {
     BellIcon,
     CheckCircleIcon,
@@ -124,7 +126,6 @@
     StarIcon,
   } from '@heroicons/vue/24/outline';
   import { computed, onMounted, reactive, ref } from 'vue';
-  import { contentService } from '../../services/content';
   import LoadingSpinner from '../ui/LoadingSpinner.vue';
 
   // Form state
@@ -184,12 +185,7 @@
     loading.value = true
 
     try {
-      await contentService.subscribeToNewsletter({
-        email: form.email,
-        subscription_date: new Date().toISOString(),
-        subscribed: true,
-        source: 'website',
-      })
+      await newsletterService.subscribe(form.email)
 
       successMessage.value = '🎉 Thank you for subscribing!'
       // Persist subscription state
@@ -240,8 +236,7 @@
     }
     loading.value = true
     try {
-      const { newsletterApi } = await import('../../services/blog')
-      await newsletterApi.unsubscribe(subscribedEmail.value)
+      await newsletterService.unsubscribe(subscribedEmail.value)
     } catch (err: any) {
       console.error('Unsubscribe failed:', err)
       errorMessage.value = err?.response?.data?.message || 'Failed to unsubscribe.'
@@ -262,11 +257,8 @@
   // Load newsletter stats
   const loadNewsletterStats = async () => {
     try {
-      const response = await contentService.getNewsletterSubscribers({
-        pagination: { page: 1, pageSize: 1 },
-      })
-
-      newsletterStats.value.totalSubscribers = response.meta?.pagination?.total || 0
+      const response: any = await apiService.get('/newsletters?pagination[page]=1&pagination[pageSize]=1')
+      newsletterStats.value.totalSubscribers = (response?.meta?.pagination?.total) || 0
     } catch (error) {
       console.error('Failed to load newsletter stats:', error)
     }
