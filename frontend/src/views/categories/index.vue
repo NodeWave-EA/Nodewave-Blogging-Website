@@ -69,18 +69,20 @@
             <!-- Category Icon/Image -->
             <div class="mb-6">
               <div v-if="category.icon"
-                class="w-16 h-16 rounded-lg flex items-center justify-center text-2xl text-black dark:text-white bg-transparent">
-                {{ category.icon }}
+                class="w-16 h-16 rounded-lg flex items-center justify-center text-2xl bg-transparent"
+                :style="{ color: category.color || undefined }">
+                <font-awesome-icon v-if="parseIcon(category.icon)" :icon="parseIcon(category.icon)" class="w-8 h-8" />
               </div>
               <div v-else
                 class="w-16 h-16 rounded-lg flex items-center justify-center text-black dark:text-white bg-transparent">
-                <TagIcon class="w-8 h-8" />
+                <FolderIcon class="w-8 h-8" />
               </div>
             </div>
 
             <!-- Category Info -->
             <div class="flex-1">
-              <h3 class="text-xl font-bold text-black dark:text-white mb-3 group-hover:underline transition-colors">
+              <h3 class="text-xl font-bold mb-3 group-hover:underline transition-colors"
+                :style="{ color: category.color || undefined }">
                 {{ category.name }}
               </h3>
 
@@ -110,7 +112,8 @@
         </h2>
         <div class="flex flex-wrap justify-center gap-3">
           <router-link v-for="category in popularCategories" :key="category.id" :to="`/categories/${category.slug}`"
-            class="inline-flex items-center px-4 py-2 rounded-full border border-black dark:border-white text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 font-semibold text-sm transition-all">
+            class="inline-flex items-center px-4 py-2 rounded-full border border-black dark:border-white text-black dark:text-white hover:bg-black/10 dark:hover:bg-white/10 font-semibold text-sm transition-all"
+            :style="{ color: category.color || undefined, borderColor: category.color || undefined }">
             {{ category.name }}
             <span class="ml-2 text-xs opacity-75">({{ category.post_count }})</span>
           </router-link>
@@ -131,7 +134,6 @@
     DocumentTextIcon,
     ExclamationTriangleIcon,
     FolderIcon,
-    TagIcon,
   } from '@heroicons/vue/24/outline';
   import { computed, onMounted, ref } from 'vue';
 
@@ -149,6 +151,74 @@
   })
 
   // Methods
+  /**
+   * Parse a variety of icon string formats into a FontAwesome descriptor.
+   * Supported inputs:
+   * - 'github' -> ['fas','github'] (default to solid)
+   * - 'fab:github' or 'fab/github' -> ['fab','github']
+   * - 'fa-brands fa-github' -> ['fab','github']
+   * - 'fa-solid fa-tag' -> ['fas','tag']
+   * - 'fas:tag' -> ['fas','tag']
+   */
+  const parseIcon = (raw: string | undefined): [string, string] | null => {
+    if (!raw || typeof raw !== 'string') return null
+
+    const s = raw.trim()
+
+    // If using colon or slash separator: 'fab:github' or 'fab/github'
+    const colonMatch = s.match(/^([a-zA-Z0-9_-]+)[:\/](.+)$/)
+    if (colonMatch) {
+      const prefix = colonMatch[1].toLowerCase()
+      const name = colonMatch[2].replace(/^fa-/, '').replace(/^fab-/, '').replace(/^fas-/, '').replace(/^far-/, '')
+      if (prefix === 'fab' || prefix === 'fa-brands' || prefix === 'brands') return ['fab', name]
+      if (prefix === 'fas' || prefix === 'fa-solid' || prefix === 'solid') return ['fas', name]
+      if (prefix === 'far' || prefix === 'fa-regular' || prefix === 'regular') return ['far', name]
+      // Unknown prefix: fall back to solid
+      return ['fas', name]
+    }
+
+    // If space-separated fa classes: 'fa-brands fa-github' or 'fab fa-github'
+    if (s.includes(' ')) {
+      const parts = s.split(/\s+/)
+      let prefix = 'fas'
+      let name = ''
+      for (const p of parts) {
+        if (p.startsWith('fa-')) {
+          // fa- prefixed tokens
+          if (p.startsWith('fa-brands') || p === 'fa-brands' || p === 'fab') prefix = 'fab'
+          if (p.startsWith('fa-solid') || p === 'fa-solid' || p === 'fas') prefix = 'fas'
+          if (p.startsWith('fa-regular') || p === 'fa-regular' || p === 'far') prefix = 'far'
+          if (p.startsWith('fa-') && !p.startsWith('fa-brands') && !p.startsWith('fa-solid') && !p.startsWith('fa-regular')) {
+            name = p.replace(/^fa-/, '')
+          }
+        } else if (p.startsWith('fab') || p === 'fab' || p === 'fas' || p === 'far') {
+          if (p === 'fab') prefix = 'fab'
+          if (p === 'fas') prefix = 'fas'
+          if (p === 'far') prefix = 'far'
+        } else if (!name) {
+          // maybe the raw name appears among parts
+          name = p.replace(/^fa-/, '')
+        }
+      }
+      if (!name) {
+        // try to find the token that includes 'fa-<name>' pattern
+        const nameToken = parts.find((t) => /fa-[a-z0-9-]+/.test(t))
+        if (nameToken) name = nameToken.replace(/^fa-/, '')
+      }
+      if (!name) return null
+      return [prefix, name]
+    }
+
+    // If single token like 'fa-github' or 'fa-solid fa-github' condensed to single
+    if (s.startsWith('fa-')) {
+      // remove fa- prefix and default to solid
+      return ['fas', s.replace(/^fa-/, '')]
+    }
+
+    // If single bare name 'github' -> default to solid
+    return ['fas', s.replace(/^fa-/, '')]
+  }
+
   const fetchCategories = async () => {
     try {
       loading.value = true

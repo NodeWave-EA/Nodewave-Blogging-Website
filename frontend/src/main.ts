@@ -14,7 +14,23 @@ import '@/assets/main.css'
 import 'aos/dist/aos.css'
 import 'nprogress/nprogress.css'
 
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+/* import specific icons */
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+
+/* add icons to the library */
+library.add(fab, fas, far)
+
 const app = createApp(App)
+
+app.component('font-awesome-icon', FontAwesomeIcon)
 
 // Setup Pinia store
 const pinia = createPinia()
