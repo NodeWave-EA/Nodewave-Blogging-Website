@@ -9,7 +9,7 @@
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Blog & Insights
+            {{ tag }}
           </span>
         </div>
 
@@ -29,29 +29,14 @@
         <div class="mt-8 flex justify-center" data-aos="fade-up" data-aos-delay="300">
           <div class="w-24 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-full"></div>
         </div>
-
-        <!-- Stats or Additional Info -->
-        <div class="mt-12 flex flex-wrap justify-center gap-8 text-center" data-aos="fade-up" data-aos-delay="400">
-          <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl px-6 py-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
-            <div class="text-2xl font-bold text-slate-900 dark:text-white">50+</div>
-            <div class="text-sm text-slate-600 dark:text-slate-400">Articles</div>
-          </div>
-          <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl px-6 py-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
-            <div class="text-2xl font-bold text-slate-900 dark:text-white">10+</div>
-            <div class="text-sm text-slate-600 dark:text-slate-400">Categories</div>
-          </div>
-          <div class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl px-6 py-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
-            <div class="text-2xl font-bold text-slate-900 dark:text-white">1000+</div>
-            <div class="text-sm text-slate-600 dark:text-slate-400">Readers</div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-interface Props {
+  interface Props {
+  tag?: string
   title: string
   description?: string
 }

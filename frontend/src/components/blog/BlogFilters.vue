@@ -49,18 +49,8 @@
           <label class="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
             Sort by:
           </label>
-          <div class="relative group w-52">
-            <select v-model="localSort"
-              class="appearance-none w-full bg-transparent border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-base rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 px-4 py-3 pr-12 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="popular">Most Popular</option>
-              <option value="title">Alphabetical</option>
-            </select>
-            <div
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 dark:text-slate-400">
-              <ChevronDownIcon class="h-5 w-5 transition-transform group-hover:rotate-180" />
-            </div>
+          <div class="w-52">
+            <SortOptions v-model="localSort" :options="sortOptions" />
           </div>
         </div>
       </div>
@@ -114,11 +104,20 @@
   import { ChevronDownIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/24/outline';
   import { computed, ref, watch } from 'vue';
   import type { Category } from '../../types';
+  import SortOptions from './SortOptions.vue';
+
+  const sortOptions = [
+    { label: 'Featured', value: 'featured' },
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Oldest First', value: 'oldest' },
+    { label: 'Most Popular', value: 'popular' },
+    { label: 'Alphabetical', value: 'title' },
+  ]
 
   interface Props {
     search?: string
     category?: string
-    sort?: 'newest' | 'oldest' | 'popular' | 'title'
+    sort?: 'newest' | 'oldest' | 'popular' | 'title' | 'featured'
     categories?: Category[]
     showResultsSummary?: boolean
     resultsCount?: number

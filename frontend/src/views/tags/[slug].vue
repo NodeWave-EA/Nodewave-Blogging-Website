@@ -110,13 +110,7 @@
             <!-- Sort Options -->
             <div class="flex items-center gap-4">
               <label class="text-sm text-black dark:text-white">Sort by:</label>
-              <select v-model="sortBy" @change="sortPosts"
-                class="px-3 py-2 text-sm border border-black dark:border-white rounded-lg bg-transparent text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="title">Title A-Z</option>
-                <option value="popular">Most Popular</option>
-              </select>
+              <SortOptions v-model="sortBy" :options="sortOptions" />
             </div>
           </div>
 
@@ -188,6 +182,7 @@
   import { computed, onMounted, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import BlogCard from '../../components/blog/BlogCard.vue';
+  import SortOptions from '../../components/blog/SortOptions.vue';
   import { blogPostsApi, tagsApi } from '../../services/blog';
   import type { BlogPost, Tag } from '../../types';
   import { updateSEO } from '../../utils/seo';
@@ -206,11 +201,26 @@
   const currentPage = ref(1)
   const sortBy = ref('newest')
 
+  const sortOptions = [
+    { label: 'Featured', value: 'featured' },
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Oldest First', value: 'oldest' },
+    { label: 'Title A-Z', value: 'title' },
+    { label: 'Most Popular', value: 'popular' },
+  ]
+
   // Computed properties
   const sortedPosts = computed(() => {
     const sorted = [...posts.value]
 
     switch (sortBy.value) {
+      case 'featured':
+        return sorted.sort((a, b) => {
+          const aFeat = a.featured ? 1 : 0
+          const bFeat = b.featured ? 1 : 0
+          if (bFeat - aFeat !== 0) return bFeat - aFeat
+          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        })
       case 'oldest':
         return sorted.sort(
           (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
@@ -316,9 +326,6 @@
     }
   }
 
-  const sortPosts = () => {
-    // Computed property will handle the actual sorting
-  }
 
   const getTagSize = (postCount: number | undefined): string => {
     const count = postCount || 0

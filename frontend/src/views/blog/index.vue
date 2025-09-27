@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-screen">
     <!-- Page Header -->
-    <PageHeader title="Our Blog" description="Discover insights, stories, and updates from our team" />
+    <PageHeader tag="Blog & Insights" title="Our Blog"
+      description="Discover insights, stories, and updates from our team" />
 
     <!-- Search and Filters -->
     <BlogFilters v-model:search="searchQuery" v-model:category="selectedCategory" v-model:sort="sortBy"

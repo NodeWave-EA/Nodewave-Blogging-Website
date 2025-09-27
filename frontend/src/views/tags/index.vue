@@ -113,33 +113,6 @@
               </router-link>
             </div>
           </div>
-
-          <!-- Tag Statistics -->
-          <div v-if="tags.length > 0" class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div
-              class="text-center p-6 bg-transparent backdrop-blur-xl rounded-xl border border-black dark:border-white">
-              <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                {{ tags.length }}
-              </div>
-              <div class="text-black dark:text-white">Total Tags</div>
-            </div>
-
-            <div
-              class="text-center p-6 bg-transparent backdrop-blur-xl rounded-xl border border-black dark:border-white">
-              <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
-                {{ totalPosts }}
-              </div>
-              <div class="text-black dark:text-white">Tagged Posts</div>
-            </div>
-
-            <div
-              class="text-center p-6 bg-transparent backdrop-blur-xl rounded-xl border border-black dark:border-white">
-              <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                {{ Math.round(averageTagsPerPost * 10) / 10 }}
-              </div>
-              <div class="text-black dark:text-white">Avg Tags/Post</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
