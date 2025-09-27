@@ -47,9 +47,8 @@
                     {{ category.name }}
                   </span>
                 </div>
-                <time :datetime="post.published_at_custom || post.publishedAt"
-                  class="text-sm text-zinc-500 dark:text-zinc-400">
-                  {{ formatDate(post.published_at_custom || post.publishedAt) }}
+                <time :datetime="getPostDateISO(post)" class="text-sm text-zinc-500 dark:text-zinc-400">
+                  {{ formatDate(post) }}
                 </time>
               </div>
 
@@ -136,7 +135,7 @@
   import { onMounted, ref } from 'vue';
   import { blogPostsApi } from '../../services/blog';
   import type { BlogPost } from '../../types';
-  import { formatDate } from '../../utils/format';
+  import { formatDate, getPostDateISO } from '../../utils/format';
   import EmptyState from '../ui/EmptyState.vue';
   import BlogPostSkeleton from './BlogPostSkeleton.vue';
 

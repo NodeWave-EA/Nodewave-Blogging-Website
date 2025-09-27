@@ -57,13 +57,13 @@
     <!-- Content -->
     <div class="p-6 lg:p-7 relative z-20">
       <!-- Date -->
-      <time :datetime="post.published_at_custom || post.publishedAt"
+      <time :datetime="getPostDateISO(post)"
         class="inline-flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        {{ formatDate(post.published_at_custom || post.publishedAt) }}
+        {{ formatDate(post) }}
       </time>
 
       <!-- Title (clickable) -->
@@ -128,7 +128,7 @@
 <script setup lang="ts">
   import type { BlogPost } from '@/types';
   import { generateExcerpt } from '@/utils/contentRenderer';
-  import { calculateReadingTime, formatDate, formatNumber } from '@/utils/format';
+  import { calculateReadingTime, formatDate, formatNumber, getPostDateISO } from '@/utils/format';
   import { getStrapiImageAltText, getStrapiImageUrl } from '@/utils/strapi';
   import {
     ClockIcon,

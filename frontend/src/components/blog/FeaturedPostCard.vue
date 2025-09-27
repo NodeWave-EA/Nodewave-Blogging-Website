@@ -76,9 +76,9 @@
 							{{ category.name }}
 						</router-link>
 					</div>
-					<time :datetime="post.published_at_custom || post.publishedAt"
+					<time :datetime="getPostDateISO(post)"
 						class="text-xs text-zinc-500 dark:text-zinc-400">
-						{{ formatDate(post.published_at_custom || post.publishedAt) }}
+						{{ formatDate(post) }}
 					</time>
 				</div>
 
@@ -135,7 +135,7 @@
 
 <script lang="ts" setup>
 	import type { BlogPost } from '@/types';
-	import { formatDate } from '@/utils/format';
+	import { formatDate, getPostDateISO } from '@/utils/format';
 	import { getStrapiImageAltText, getStrapiImageUrl } from '@/utils/strapi';
 	import { DocumentTextIcon } from '@heroicons/vue/24/outline';
 	import { computed, ref } from 'vue';

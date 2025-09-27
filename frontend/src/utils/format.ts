@@ -6,18 +6,16 @@
  * Format date to readable string
  */
 export function formatDate(
-  date: string | Date,
+  date: unknown,
   options?: {
     format?: 'full' | 'short' | 'medium' | 'long' | 'relative'
     locale?: string
   },
 ): string {
   const { format = 'medium', locale = 'en-US' } = options || {}
-  const dateObj = typeof date === 'string' ? new Date(date) : date
+  const dateObj = resolveToDate(date)
 
-  if (!dateObj || isNaN(dateObj.getTime())) {
-    return 'Invalid date'
-  }
+  if (!dateObj) return 'Invalid date'
 
   switch (format) {
     case 'full':
@@ -62,18 +60,15 @@ export function formatDate(
  * Format date and time to readable string
  */
 export function formatDateTime(
-  date: string | Date,
+  date: unknown,
   options?: {
     format?: 'full' | 'short' | 'medium'
     locale?: string
   },
 ): string {
   const { format = 'medium', locale = 'en-US' } = options || {}
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-
-  if (!dateObj || isNaN(dateObj.getTime())) {
-    return 'Invalid date'
-  }
+  const dateObj = resolveToDate(date)
+  if (!dateObj) return 'Invalid date'
 
   switch (format) {
     case 'full':
@@ -110,8 +105,9 @@ export function formatDateTime(
 /**
  * Format relative time (e.g., "2 days ago", "in 3 hours")
  */
-export function formatRelativeTime(date: string | Date): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
+export function formatRelativeTime(date: unknown): string {
+  const dateObj = resolveToDate(date)
+  if (!dateObj) return 'just now'
   const now = new Date()
   const diffInMs = now.getTime() - dateObj.getTime()
   const diffInSeconds = Math.floor(diffInMs / 1000)
@@ -145,7 +141,7 @@ export function formatRelativeTime(date: string | Date): string {
  * Format distance to now (alias for formatRelativeTime with options)
  */
 export function formatDistanceToNow(
-  date: string | Date,
+  date: unknown,
   options?: { addSuffix?: boolean },
 ): string {
   const { addSuffix = false } = options || {}
@@ -422,4 +418,67 @@ export function deepClone<T>(obj: T): T {
   }
 
   return obj
+}
+
+/**
+ * Resolve a variety of possible date representations into a Date instance.
+ * Supports:
+ * - JS Date objects
+ * - ISO date strings
+ * - numeric timestamps
+ * - nested Strapi shapes like { data: { attributes: { publishedAt: '...' }}}
+ * - objects containing common keys: publishedAt, published_at, published_at_custom, createdAt, created_at, updatedAt, updated_at
+ */
+function resolveToDate(input: unknown): Date | null {
+  if (!input && input !== 0) return null
+  if (input instanceof Date) return input
+
+  if (typeof input === 'number') {
+    const d = new Date(input)
+    return isNaN(d.getTime()) ? null : d
+  }
+
+  if (typeof input === 'string') {
+    const d = new Date(input)
+    return isNaN(d.getTime()) ? null : d
+  }
+
+  if (typeof input === 'object' && input !== null) {
+    // @ts-ignore - dynamic access for robustness
+    const obj = input as Record<string, unknown>
+
+    // Unwrap common Strapi shapes
+    if (obj.data) return resolveToDate((obj.data as any).attributes ?? obj.data)
+    if (obj.attributes) return resolveToDate((obj.attributes as any).publishedAt ?? obj.attributes)
+
+    // Known date-like keys
+    const keys = [
+      'publishedAt',
+      'published_at',
+      'published_at_custom',
+      'published_at_custom',
+      'createdAt',
+      'created_at',
+      'updatedAt',
+      'updated_at',
+      'date',
+    ]
+
+    for (const k of keys) {
+      if (k in obj && obj[k] !== undefined && obj[k] !== null) {
+        return resolveToDate(obj[k])
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Resolve input to an ISO date string if possible.
+ * Returns undefined when a valid date cannot be resolved.
+ */
+export function getPostDateISO(input: unknown): string | undefined {
+  const d = resolveToDate(input)
+  return d ? d.toISOString() : undefined
 }

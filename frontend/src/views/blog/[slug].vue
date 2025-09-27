@@ -92,8 +92,8 @@
             <!-- Publish Date -->
             <div class="flex items-center gap-2">
               <CalendarIcon class="w-5 h-5" />
-              <time :datetime="post.publishedAt">
-                {{ formatDate(post.publishedAt) }}
+              <time :datetime="getPostDateISO(post)">
+                {{ formatDate(post) }}
               </time>
             </div>
 
@@ -199,7 +199,6 @@
   import { fetchRelatedPosts } from '@/utils/relatedPosts';
   import {
     ArrowLeftIcon,
-    ArrowUpIcon,
     CalendarIcon,
     ChevronRightIcon,
     ClipboardIcon,
@@ -213,7 +212,7 @@
   import { blogPostsApi } from '../../services/blog';
   import type { BlogPost } from '../../types';
   import { processPostContent } from '../../utils/contentRenderer';
-  import { formatDate, formatNumber } from '../../utils/format';
+  import { formatDate, formatNumber, getPostDateISO } from '../../utils/format';
   import { updateSEO } from '../../utils/seo';
   import { getStrapiImageAlt, getStrapiImageUrl } from '../../utils/strapi';
 
