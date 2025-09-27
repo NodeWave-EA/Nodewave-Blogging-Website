@@ -8,6 +8,153 @@ import { factories } from '@strapi/strapi'
 const viewRateLimit = new Map<string, number>() // key: `${ip}:${id}` -> timestamp
 const likeRateLimit = new Map<string, number>()
 
+// Helper: build absolute URL for media or paths (module-scoped helper)
+const buildAbsoluteUrl = (maybeUrl: unknown, siteUrl: string, ctx: any) => {
+  if (!maybeUrl) return null
+  const url = String(maybeUrl)
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  const base = siteUrl || (ctx?.request?.origin ?? '')
+  if (!base) return url
+  return base.replace(/\/$/, '') + '/' + url.replace(/^\//, '')
+}
+
+// Helper: extract media url from Strapi file object or string
+const resolveMediaUrl = (media: any, siteUrl: string, ctx: any) => {
+  if (!media) return null
+  if (typeof media === 'string') return buildAbsoluteUrl(media, siteUrl, ctx)
+  const url = media.url ?? media?.data?.attributes?.url ?? media?.data?.url ?? media?.attributes?.url
+  return buildAbsoluteUrl(url, siteUrl, ctx)
+}
+
+// Default shapes for SEO and Social Sharing components so API always returns them
+const seoDefaults = {
+  meta_title: '',
+  meta_description: '',
+  meta_keywords: '',
+  canonical_url: null,
+  og_title: '',
+  og_description: '',
+  og_image: null,
+  og_type: 'article',
+  twitter_card: 'summary_large_image',
+  twitter_title: '',
+  twitter_description: '',
+  twitter_image: null,
+  robots: 'index,follow',
+  structured_data: null,
+}
+
+const socialDefaults = {
+  enable_sharing: true,
+  platforms: ['twitter', 'facebook', 'linkedin', 'pinterest', 'whatsapp', 'telegram', 'reddit'],
+  custom_message: null,
+  hashtags: null,
+  via_username: null,
+}
+
+// Build JSON-LD structured data for a blog post entity
+const buildStructuredData = async (post: any, ctx: any) => {
+  try {
+    if (!post) return null
+
+    // Derive a stable absolute base URL for generating absolute links in structured data.
+    // Prefer an explicit public URL env var, otherwise use request origin, finally fallback to localhost.
+    const envBase = (process.env.STRAPI_PUBLIC_URL as string) || (process.env.VITE_STRAPI_BASE_URL as string) || ''
+    const reqOrigin = ctx?.request?.origin ?? ''
+    const baseUrl = envBase || reqOrigin || 'http://localhost:1337'
+
+    // Normalize canonical URL: if post.seo.canonical_url is absolute, use it; if relative, join with baseUrl
+    const candidateCanonical = (post?.seo?.canonical_url as string) || (post?.canonical_url as string) || ''
+    const canonicalUrl = candidateCanonical
+      ? candidateCanonical.startsWith('http://') || candidateCanonical.startsWith('https://')
+        ? candidateCanonical
+        : `${baseUrl.replace(/\/$/, '')}/${candidateCanonical.replace(/^\//, '')}`
+      : `${baseUrl.replace(/\/$/, '')}/blog/${String(post.slug ?? post.id).replace(/^\//, '')}`
+
+    // Resolve featured/og images to absolute URLs using baseUrl
+    const featuredImageUrl = resolveMediaUrl(post.seo?.og_image || post.featured_image, baseUrl, ctx)
+
+    const author = post.author || null
+    const authorName = author?.name ?? 'Unknown'
+    const authorWebsite = author?.website ?? null
+
+    // Keywords: prefer SEO keywords, else tags names
+    const keywords = post?.seo?.meta_keywords || (post.tags || []).map((t: any) => t.name).filter(Boolean).join(',')
+
+    // Article section: categories names
+    const articleSection = (post.categories || []).map((c: any) => c.name).filter(Boolean).join(',')
+
+    // Word count: crude HTML-stripping word count from content/excerpt
+    const contentStr = String(post.content || post.excerpt || '')
+    const plain = contentStr.replace(/<[^>]+>/g, ' ')
+    const words = plain.split(/\s+/).filter(Boolean)
+    const wordCount = words.length
+
+    // Reading time fallback: use post.reading_time or derive from word count (200 wpm)
+    const readingTime = post.reading_time ?? Math.max(1, Math.round(wordCount / 200))
+
+    // publisher.logo
+    const publisherLogo = resolveMediaUrl(post.author?.avatar || post.featured_image, baseUrl, ctx) ?? (featuredImageUrl ? { '@type': 'ImageObject', url: featuredImageUrl } : undefined)
+
+    const sd: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title ?? undefined,
+      alternativeHeadline: post.excerpt ?? undefined,
+      description: post?.seo?.meta_description ?? post.excerpt ?? undefined,
+      image: featuredImageUrl ? [featuredImageUrl] : undefined,
+      author: author
+        ? [
+          {
+            '@type': 'Person',
+            name: authorName,
+            url: authorWebsite ?? undefined,
+          },
+        ]
+        : undefined,
+      publisher: {
+        '@type': 'Organization',
+        // Prefer explicit publisher information in the post's social_sharing component if provided
+        name: (post.social_sharing && (post.social_sharing.publisher_name || post.social_sharing.publisher)) || (post.author?.company as any) || authorName,
+        logo: publisherLogo,
+      },
+      datePublished: post.publishedAt ?? post.createdAt ?? undefined,
+      dateModified: post.updatedAt ?? undefined,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': canonicalUrl,
+      },
+      keywords: (post.seo?.meta_keywords || post.meta_keywords || keywords) || undefined,
+      articleSection: articleSection || undefined,
+      inLanguage: post?.locale ?? 'en',
+      isFamilyFriendly: true,
+      wordCount: wordCount,
+      timeRequired: 'PT' + String(readingTime) + 'M',
+    }
+
+    // Clean undefined values from the object so JSON-LD stays compact
+    const cleaned: Record<string, unknown> = {}
+    Object.keys(sd).forEach((k) => {
+      const v = (sd as any)[k]
+      if (v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0)) cleaned[k] = v
+    })
+
+    return cleaned
+  } catch (err) {
+    // Fail silently; structured data is optional
+    strapi.log.error('structuredData generation failed', err)
+    return null
+  }
+}
+
+// Ensure SEO and social_sharing components exist on a post (mutates and returns the post)
+const ensureSeoSocial = (post: any) => {
+  if (!post) return post
+  post.seo = { ...(seoDefaults as any), ...(post.seo || {}) }
+  post.social_sharing = { ...(socialDefaults as any), ...(post.social_sharing || {}) }
+  return post
+}
+
 export default factories.createCoreController('api::blog-post.blog-post', ({ strapi }) => ({
   // Override the default find method to include populate
   async find(ctx) {
@@ -15,18 +162,34 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
     const entity = await strapi.entityService.findMany('api::blog-post.blog-post', {
       ...query,
       populate: {
-        seo: true,
+        seo: { populate: ['og_image', 'twitter_image'] },
+        social_sharing: true,
         featured_image: true,
         author: {
-          populate: {
-            avatar: true,
-          },
+          populate: ['avatar', 'social_links'],
         },
         categories: true,
         tags: true,
       },
     })
-    return { data: entity }
+
+    // Ensure defaults for each returned post
+    const normalized = Array.isArray(entity) ? entity.map((p) => ensureSeoSocial(p as any)) : entity
+
+    // Generate structured_data for each post in the list (non-persistent, response only)
+    if (Array.isArray(normalized)) {
+      await Promise.all(
+        normalized.map(async (p: any) => {
+          try {
+            p.seo.structured_data = await buildStructuredData(p, ctx)
+          } catch (e) {
+            // ignore per-post structured data errors
+          }
+        }),
+      )
+    }
+
+    return { data: normalized }
   },
 
   // Override the default findOne method to include populate
@@ -36,15 +199,16 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
     // Get the blog post
     const entity = await strapi.entityService.findOne('api::blog-post.blog-post', id as string, {
       populate: {
-        seo: true,
+        seo: { populate: ['og_image', 'twitter_image'] },
+        social_sharing: true,
         featured_image: true,
         author: {
-          populate: {
-            avatar: true,
-          },
+          populate: ['avatar', 'social_links'],
         },
         categories: true,
         tags: true,
+        gallery: true,
+        related_posts: { populate: ['author', 'featured_image', 'categories'] },
       },
     })
 
@@ -52,7 +216,12 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
       return ctx.notFound()
     }
 
-    return { data: entity }
+    // Normalize and return the entity with defaulted SEO and social_sharing
+    const normalizedEntity = ensureSeoSocial(entity as any)
+    const structuredData = await buildStructuredData(normalizedEntity, ctx)
+      // Attach generated structured data into the seo object for API consumers
+      ; (normalizedEntity as any).seo = { ...(normalizedEntity as any).seo, structured_data: structuredData }
+    return { data: normalizedEntity }
   },
 
   async findBySlug(ctx) {
@@ -83,8 +252,10 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
     }
 
     const post = entity[0]
-
-    return { data: post }
+    const normalizedPost = ensureSeoSocial(post as any)
+    const structuredData = await buildStructuredData(normalizedPost, ctx)
+      ; (normalizedPost as any).seo = { ...(normalizedPost as any).seo, structured_data: structuredData }
+    return { data: normalizedPost }
   },
 
   async findFeatured(ctx) {
@@ -105,7 +276,20 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
       ...ctx.query,
     })
 
-    return { data: entity }
+    const normalized = Array.isArray(entity) ? entity.map((p) => ensureSeoSocial(p as any)) : entity
+    if (Array.isArray(normalized)) {
+      await Promise.all(
+        normalized.map(async (p: any) => {
+          try {
+            p.seo.structured_data = await buildStructuredData(p, ctx)
+          } catch (e) {
+            // ignore
+          }
+        }),
+      )
+    }
+
+    return { data: normalized }
   },
 
   async findByCategory(ctx) {
@@ -133,7 +317,18 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
 
     // Access the blog_posts property from the populated category
     const categoryData = category[0] as Record<string, unknown>
-    return { data: categoryData.blog_posts ?? [] }
+    const posts = (categoryData.blog_posts ?? []) as any[]
+    const normalized = posts.map((p) => ensureSeoSocial(p))
+    await Promise.all(
+      normalized.map(async (p: any) => {
+        try {
+          p.seo.structured_data = await buildStructuredData(p, ctx)
+        } catch (e) {
+          // ignore
+        }
+      }),
+    )
+    return { data: normalized }
   },
 
   async findByTag(ctx) {
@@ -161,7 +356,18 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
 
     // Access the blog_posts property from the populated tag
     const tagData = tag[0] as Record<string, unknown>
-    return { data: tagData.blog_posts ?? [] }
+    const posts = (tagData.blog_posts ?? []) as any[]
+    const normalized = posts.map((p) => ensureSeoSocial(p))
+    await Promise.all(
+      normalized.map(async (p: any) => {
+        try {
+          p.seo.structured_data = await buildStructuredData(p, ctx)
+        } catch (e) {
+          // ignore
+        }
+      }),
+    )
+    return { data: normalized }
   },
 
   async search(ctx) {

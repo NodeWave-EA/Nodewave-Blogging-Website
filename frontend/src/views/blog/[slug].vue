@@ -206,6 +206,7 @@
 <script setup lang="ts">
   import { incrementView, toggleLikePost } from '@/services/postMetrics';
   import { usePostMetricsStore } from '@/stores/postMetrics';
+  import { dbg } from '@/utils/debug';
   import { fetchRelatedPosts } from '@/utils/relatedPosts';
   import {
     ArrowLeftIcon,
@@ -218,7 +219,7 @@
     HeartIcon as HeartOutline,
   } from '@heroicons/vue/24/outline';
   import { HeartIcon as HeartSolid } from '@heroicons/vue/24/solid';
-  import { computed, onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import BlogCard from '../../components/blog/BlogCard.vue';
   import { blogPostsApi } from '../../services/blog';
@@ -270,6 +271,7 @@
       error.value = null
 
       const response = await blogPostsApi.getBySlug(slug)
+      dbg('BlogPostView', 'fetchPost', { slug, response })
       post.value = response.data
 
       // Fetch related posts
@@ -447,6 +449,163 @@
       error.value = 'No blog post slug provided.'
       loading.value = false
     }
+  })
+
+  // Structured data injection: place generated JSON-LD into <head> for SEO crawlers
+  const SD_SCRIPT_ID = 'nw-structured-data'
+  let sdScript: HTMLScriptElement | null = null
+
+  const CANONICAL_ID = 'nw-canonical-link'
+  const OG_TITLE_ID = 'nw-og-title'
+  const OG_DESCRIPTION_ID = 'nw-og-description'
+  const OG_IMAGE_ID = 'nw-og-image'
+  const TWITTER_CARD_ID = 'nw-twitter-card'
+  const TWITTER_TITLE_ID = 'nw-twitter-title'
+  const TWITTER_DESCRIPTION_ID = 'nw-twitter-description'
+  const TWITTER_IMAGE_ID = 'nw-twitter-image'
+
+  function removeStructuredDataScript() {
+    try {
+      const existing = document.getElementById(SD_SCRIPT_ID)
+      if (existing && existing.parentNode) existing.parentNode.removeChild(existing)
+      sdScript = null
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function removeMetaTags() {
+    try {
+      const c = document.getElementById(CANONICAL_ID)
+      if (c && c.parentNode) c.parentNode.removeChild(c)
+        ;[OG_TITLE_ID, OG_DESCRIPTION_ID, OG_IMAGE_ID].forEach((id) => {
+          const m = document.getElementById(id)
+          if (m && m.parentNode) m.parentNode.removeChild(m)
+        })
+        ;[TWITTER_CARD_ID, TWITTER_TITLE_ID, TWITTER_DESCRIPTION_ID, TWITTER_IMAGE_ID].forEach((id) => {
+          const m = document.getElementById(id)
+          if (m && m.parentNode) m.parentNode.removeChild(m)
+        })
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function ensureMetaTag(prop: string, content: string | null, id: string) {
+    try {
+      if (!content) return
+      let el = document.getElementById(id) as HTMLMetaElement | null
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', prop)
+        el.id = id
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function ensureMetaTagName(name: string, content: string | null, id: string) {
+    try {
+      if (!content) return
+      let el = document.getElementById(id) as HTMLMetaElement | null
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('name', name)
+        el.id = id
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function ensureCanonical(href: string | null) {
+    try {
+      if (!href) return
+      let link = document.getElementById(CANONICAL_ID) as HTMLLinkElement | null
+      if (!link) {
+        link = document.createElement('link')
+        link.rel = 'canonical'
+        link.id = CANONICAL_ID
+        document.head.appendChild(link)
+      }
+      link.href = href
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function updateStructuredData() {
+    try {
+      removeMetaTags()
+      removeStructuredDataScript()
+      if (!post.value) return
+      const structured = (post.value as any).seo?.structured_data
+      if (structured) {
+        const script = document.createElement('script')
+        script.type = 'application/ld+json'
+        script.id = SD_SCRIPT_ID
+        script.text = typeof structured === 'string' ? structured : JSON.stringify(structured)
+        document.head.appendChild(script)
+        sdScript = script
+
+        // Also update canonical and Open Graph meta tags using seo fields
+        const canonical = post.value.seo?.canonical_url || post.value.canonical_url
+        // Normalize canonical into absolute URL if it's relative — prefer window.location origin
+        let canonicalAbs: string | null = null
+        if (canonical) {
+          if (String(canonical).startsWith('http')) {
+            canonicalAbs = canonical
+          } else {
+            // Ensure the canonical path uses the /blog/ prefix unless the provided path already contains it
+            let path = String(canonical)
+            if (!path.startsWith('/')) path = `/${path}`
+            if (!path.startsWith('/blog/')) path = `/blog/${path.replace(/^\//, '')}`
+            canonicalAbs = `${window.location.origin}${path}`
+          }
+        }
+        ensureCanonical(canonicalAbs)
+
+        const ogTitle = post.value.seo?.og_title || post.value.meta_title || post.value.title || null
+        const ogDesc = post.value.seo?.og_description || post.value.meta_description || post.value.excerpt || null
+        const ogImageUrl = getStrapiImageUrl(post.value.seo?.og_image || post.value.featured_image) || null
+
+        ensureMetaTag('og:title', ogTitle, OG_TITLE_ID)
+        ensureMetaTag('og:description', ogDesc, OG_DESCRIPTION_ID)
+        ensureMetaTag('og:image', ogImageUrl, OG_IMAGE_ID)
+
+        // Twitter meta tags
+        const twitterCard = post.value.seo?.twitter_card || post.value.seo?.twitter_card || 'summary_large_image'
+        const twitterTitle = post.value.seo?.twitter_title || ogTitle
+        const twitterDesc = post.value.seo?.twitter_description || ogDesc
+        const twitterImage = getStrapiImageUrl(post.value.seo?.twitter_image || post.value.seo?.og_image || post.value.featured_image) || ogImageUrl
+
+        ensureMetaTagName('twitter:card', twitterCard, TWITTER_CARD_ID)
+        ensureMetaTagName('twitter:title', twitterTitle, TWITTER_TITLE_ID)
+        ensureMetaTagName('twitter:description', twitterDesc, TWITTER_DESCRIPTION_ID)
+        ensureMetaTagName('twitter:image', twitterImage, TWITTER_IMAGE_ID)
+      }
+    } catch (e) {
+      console.error('Failed to update structured data script/meta tags:', e)
+    }
+  }
+
+  // Keep the JSON-LD in sync with the post reactive value
+  watch(
+    () => post.value,
+    () => {
+      updateStructuredData()
+    },
+    { immediate: true },
+  )
+
+  onUnmounted(() => {
+    removeStructuredDataScript()
+    removeMetaTags()
   })
 
   const VIEWED_KEY = 'nw_viewed_posts'

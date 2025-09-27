@@ -54,13 +54,17 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "gallery": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "author": {
       "type": "relation",
@@ -142,21 +146,31 @@
     "social_sharing": {
       "type": "component",
       "repeatable": false,
+      "required": true,
       "component": "shared.social-sharing"
     },
     "seo": {
       "type": "component",
       "repeatable": false,
+      "required": true,
       "component": "shared.seo"
     },
     "status": {
       "type": "enumeration",
-      "enum": ["draft", "published", "archived"],
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
       "default": "draft"
     },
     "priority": {
       "type": "enumeration",
-      "enum": ["low", "normal", "high"],
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ],
       "default": "normal"
     }
   }

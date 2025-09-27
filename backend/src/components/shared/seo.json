@@ -32,16 +32,27 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "og_type": {
       "type": "enumeration",
-      "enum": ["website", "article", "profile"],
+      "enum": [
+        "website",
+        "article",
+        "profile"
+      ],
       "default": "article"
     },
     "twitter_card": {
       "type": "enumeration",
-      "enum": ["summary", "summary_large_image", "app", "player"],
+      "enum": [
+        "summary",
+        "summary_large_image",
+        "app",
+        "player"
+      ],
       "default": "summary_large_image"
     },
     "twitter_title": {
@@ -56,15 +67,19 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "robots": {
       "type": "enumeration",
-      "enum": ["index,follow", "noindex,follow", "index,nofollow", "noindex,nofollow"],
+      "enum": [
+        "index,follow",
+        "noindex,follow",
+        "index,nofollow",
+        "noindex,nofollow"
+      ],
       "default": "index,follow"
-    },
-    "structured_data": {
-      "type": "json"
     }
   }
 }

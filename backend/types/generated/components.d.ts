@@ -50,7 +50,6 @@ export interface SharedSeo extends Struct.ComponentSchema {
       ['index,follow', 'noindex,follow', 'index,nofollow', 'noindex,nofollow']
     > &
       Schema.Attribute.DefaultTo<'index,follow'>
-    structured_data: Schema.Attribute.JSON
     twitter_card: Schema.Attribute.Enumeration<
       ['summary', 'summary_large_image', 'app', 'player']
     > &

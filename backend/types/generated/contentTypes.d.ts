@@ -523,9 +523,10 @@ export interface ApiBlogPostBlogPost extends Struct.CollectionTypeSchema {
         number
       >
     related_posts: Schema.Attribute.Relation<'manyToMany', 'api::blog-post.blog-post'>
-    seo: Schema.Attribute.Component<'shared.seo', false>
+    seo: Schema.Attribute.Component<'shared.seo', false> & Schema.Attribute.Required
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required & Schema.Attribute.Unique
-    social_sharing: Schema.Attribute.Component<'shared.social-sharing', false>
+    social_sharing: Schema.Attribute.Component<'shared.social-sharing', false> &
+      Schema.Attribute.Required
     status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
       Schema.Attribute.DefaultTo<'draft'>
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>
