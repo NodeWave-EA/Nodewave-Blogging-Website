@@ -54,13 +54,8 @@
               </div>
             </div>
 
-            <h1 class="text-4xl md:text-5xl font-bold text-black dark:text-white mb-6">
-              #{{ tag.name }}
-            </h1>
-
-            <p v-if="tag.description" class="text-xl text-black dark:text-white mb-8 max-w-2xl mx-auto">
-              {{ tag.description }}
-            </p>
+            <PageHeader :tag="tag?.name ? `#${tag.name}` : undefined" :title="tag?.name ? `#${tag.name}` : ''"
+              :description="tag?.description ?? undefined" size="regular" />
 
             <!-- Stats -->
             <div class="flex items-center justify-center gap-6 text-black dark:text-white">
@@ -180,6 +175,7 @@
 </template>
 
 <script setup lang="ts">
+  import PageHeader from '@/components/ui/PageHeader.vue';
   import {
     ArrowLeftIcon,
     CalendarIcon,

@@ -27,26 +27,10 @@
 
     <!-- Categories Content -->
     <div v-else class="py-8">
-      <!-- Header -->
-      <header class="bg-transparent backdrop-blur-xl py-16 mb-12">
-        <div class="container mx-auto px-4 max-w-4xl text-center">
-          <!-- Breadcrumb -->
-          <nav class="flex items-center justify-center space-x-2 text-sm text-black dark:text-white mb-8">
-            <router-link to="/" class="hover:underline">Home</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <router-link to="/blog" class="hover:underline">Blog</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <span class="text-black dark:text-white">Categories</span>
-          </nav>
-
-          <h1 class="text-4xl md:text-5xl font-bold text-black dark:text-white mb-6">
-            Explore by Category
-          </h1>
-          <p class="text-xl text-black dark:text-white max-w-2xl mx-auto">
-            Browse our blog posts organized by categories to find exactly what you're looking for.
-          </p>
-        </div>
-      </header>
+      <!-- Page Header -->
+      <PageHeader tag="Categories" title="Explore by Category"
+        description="Browse our blog posts organized by categories to find exactly what you're looking for."
+        size="regular" />
 
       <!-- Categories Grid -->
       <div class="container mx-auto px-4 max-w-6xl">
@@ -121,6 +105,7 @@
 </template>
 
 <script setup lang="ts">
+  import PageHeader from '@/components/ui/PageHeader.vue';
   import { blogPostsApi, categoriesApi } from '@/services';
   import type { Category } from '@/types';
   import { dbg } from '@/utils/debug';
@@ -128,7 +113,6 @@
   import {
     ArrowLeftIcon,
     ArrowRightIcon,
-    ChevronRightIcon,
     DocumentTextIcon,
     ExclamationTriangleIcon,
     FolderIcon,

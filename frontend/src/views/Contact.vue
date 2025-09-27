@@ -1,20 +1,9 @@
 <template>
   <div class="min-h-screen py-8 bg-transparent">
-    <!-- Hero Section -->
-    <div class="py-16 mb-8 bg-transparent">
-      <div class="container mx-auto px-4 max-w-3xl text-center">
-        <h1 class="text-4xl md:text-5xl font-bold font-mono text-foreground mb-4 tracking-tight">
-          Contact Us
-        </h1>
-        <p class="text-lg md:text-xl text-foreground leading-relaxed mb-2">
-          We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-        </p>
-        <p class="text-base text-muted-foreground max-w-2xl mx-auto font-mono">
-          For urgent matters, please use the contact details below. For general inquiries, use the form and our team
-          will get back to you promptly.
-        </p>
-      </div>
-    </div>
+    <!-- Page Header -->
+    <PageHeader tag="Contact" title="Contact Us"
+      description="We'd love to hear from you. Send us a message and we'll respond as soon as possible."
+      size="regular" />
 
     <!-- Contact Content -->
     <div class="container mx-auto px-4 max-w-6xl">
@@ -217,6 +206,7 @@
 </template>
 
 <script setup lang="ts">
+  import PageHeader from '@/components/ui/PageHeader.vue';
   import { useCompanyInfo } from '@/composables/useCompanyInfo';
   import { contactService } from '@/services';
   import type { ContactForm } from '@/types';

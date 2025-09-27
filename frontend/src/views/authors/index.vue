@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-transparent">
+
     <!-- Loading State -->
     <div v-if="loading" class="py-16">
       <div class="container mx-auto px-4">
@@ -29,25 +30,10 @@
     <!-- Authors Content -->
     <div v-else class="py-8">
       <!-- Header -->
-      <header class="bg-transparent backdrop-blur-xl py-16 mb-12">
-        <div class="container mx-auto px-4 max-w-4xl text-center">
-          <!-- Breadcrumb -->
-          <nav class="flex items-center justify-center space-x-2 text-sm text-black dark:text-white mb-8">
-            <router-link to="/" class="hover:underline">Home</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <router-link to="/blog" class="hover:underline">Blog</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <span class="text-black dark:text-white">Authors</span>
-          </nav>
-
-          <h1 class="text-4xl md:text-5xl font-bold text-black dark:text-white mb-6">
-            Meet Our Authors
-          </h1>
-          <p class="text-xl text-black dark:text-white max-w-2xl mx-auto">
-            Discover the talented writers and experts behind our blog content.
-          </p>
-        </div>
-      </header>
+      <div class="container mx-auto px-4 max-w-4xl text-center">
+        <PageHeader tag="Authors" title="Meet Our Authors"
+          description="Discover the talented writers and experts behind our blog content." size="regular" />
+      </div>
 
       <!-- Authors Grid -->
       <div class="container mx-auto px-4 max-w-6xl">
@@ -176,10 +162,10 @@
 </template>
 
 <script setup lang="ts">
+  import PageHeader from '@/components/ui/PageHeader.vue';
   import { getSocialUrl } from '@/utils/social';
   import {
     ArrowLeftIcon,
-    ChevronRightIcon,
     DocumentTextIcon,
     ExclamationTriangleIcon,
     GlobeAltIcon,

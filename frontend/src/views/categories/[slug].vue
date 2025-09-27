@@ -21,38 +21,13 @@
 
     <!-- Category Content -->
     <div v-else-if="category" class="py-8">
-      <!-- Header -->
-      <header class="bg-transparent backdrop-blur-xl py-16 mb-12">
         <div class="container mx-auto px-4 max-w-4xl">
-          <!-- Breadcrumb -->
-          <nav class="flex items-center space-x-2 text-sm text-black dark:text-white mb-8">
-            <router-link to="/" class="hover:underline">Home</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <router-link to="/blog" class="hover:underline">Blog</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <router-link to="/categories" class="hover:underline">Categories</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <span class="text-black dark:text-white">{{ category.name }}</span>
-          </nav>
-
           <!-- Category Header -->
           <div class="text-center">
-            <!-- Category Icon -->
-            <div class="mb-6 flex justify-center">
-              <div :class="getCategoryColor(category.name)">
-                <CategoryIcon :icon="category.icon" :color="category.color" size="w-10 h-10" />
-              </div>
-            </div>
-
-            <h1 class="text-4xl md:text-5xl font-bold text-black dark:text-white mb-2">
-              {{ category.name }}
-            </h1>
-            <p v-if="category.description" class="text-xl text-black dark:text-white mb-8 max-w-2xl mx-auto">
-              {{ category.description }}
-            </p>
-
-            <!-- Stats -->
-            <div class="flex items-center justify-center gap-6 text-black dark:text-white">
+            <PageHeader :tag="category?.name" :title="category?.name ?? ''"
+              :description="category?.description ?? undefined" size="regular" />
+            <!-- Stats (kept below header) -->
+            <div class="flex items-center justify-center gap-6 text-black dark:text-white mt-4">
               <div class="flex items-center gap-2">
                 <DocumentTextIcon class="w-5 h-5" />
                 <span>{{ posts.length }} {{ posts.length === 1 ? 'post' : 'posts' }}</span>
@@ -70,8 +45,7 @@
             </div>
           </div>
         </div>
-      </header>
-
+        
       <!-- Posts Grid -->
       <div class="container mx-auto px-4 max-w-6xl">
         <!-- Posts -->
@@ -153,6 +127,7 @@
 </template>
 
 <script setup lang="ts">
+  import PageHeader from '@/components/ui/PageHeader.vue';
   import {
     ArrowLeftIcon,
     CalendarIcon,
@@ -165,7 +140,6 @@
   import BlogCard from '../../components/blog/BlogCard.vue';
   import SortOptions from '../../components/blog/SortOptions.vue';
   import CategoryDetailSkeleton from '../../components/category/CategoryDetailSkeleton.vue';
-  import CategoryIcon from '../../components/category/CategoryIcon.vue';
   import { blogPostsApi, categoriesApi } from '../../services/blog';
   import type { BlogPost, Category } from '../../types';
   import { updateSEO } from '../../utils/seo';

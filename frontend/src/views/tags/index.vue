@@ -40,12 +40,9 @@
             <span class="text-black dark:text-white">Tags</span>
           </nav>
 
-          <h1 class="text-4xl md:text-5xl font-bold text-black dark:text-white mb-6">
-            Explore by Tags
-          </h1>
-          <p class="text-xl text-black dark:text-white max-w-2xl mx-auto">
-            Discover content through our comprehensive tag system. Find exactly what interests you.
-          </p>
+          <PageHeader tag="Tags" title="Explore by Tags"
+            description="Discover content through our comprehensive tag system. Find exactly what interests you."
+            size="regular" />
         </div>
       </header>
 
@@ -120,6 +117,7 @@
 </template>
 
 <script setup lang="ts">
+  import PageHeader from '@/components/ui/PageHeader.vue';
   import {
     ArrowLeftIcon,
     ChevronRightIcon,
@@ -168,11 +166,6 @@
     return tags.value.reduce((sum, tag) => sum + (tag.post_count || 0), 0)
   })
 
-  const averageTagsPerPost = computed(() => {
-    const postsWithTags = tags.value.filter((tag) => (tag.post_count || 0) > 0)
-    if (postsWithTags.length === 0) return 0
-    return totalPosts.value / postsWithTags.length
-  })
 
   // Methods
   const fetchTags = async () => {
