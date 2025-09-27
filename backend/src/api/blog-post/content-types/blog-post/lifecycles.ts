@@ -48,9 +48,11 @@ export default {
     ss.enable_sharing = ss.enable_sharing !== undefined ? ss.enable_sharing : true
     ss.platforms = ss.platforms || ['twitter', 'facebook', 'linkedin', 'pinterest', 'whatsapp', 'telegram', 'reddit']
 
-    // Set published_at_custom if not provided
-    if (!data.published_at_custom && data.publishedAt) {
-      data.published_at_custom = data.publishedAt
+    // Ensure status reflects publish state: when creating, default to 'published' if publishedAt present, otherwise 'draft'
+    if (data.publishedAt) {
+      data.status = 'published'
+    } else {
+      data.status = (data.status as string) || 'draft'
     }
   },
 
@@ -85,6 +87,15 @@ export default {
     const ss = data.social_sharing as any
     ss.enable_sharing = ss.enable_sharing !== undefined ? ss.enable_sharing : true
     ss.platforms = ss.platforms || ['twitter', 'facebook', 'linkedin', 'pinterest', 'whatsapp', 'telegram', 'reddit']
+
+    // If the update payload explicitly changes publishedAt (publish/unpublish action), update status accordingly.
+    if (Object.prototype.hasOwnProperty.call(data, 'publishedAt')) {
+      if (data.publishedAt) {
+        data.status = 'published'
+      } else {
+        data.status = 'draft'
+      }
+    }
   },
 
   async afterCreate() {

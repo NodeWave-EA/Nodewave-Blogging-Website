@@ -5,7 +5,7 @@
 import { factories } from '@strapi/strapi'
 
 interface SearchResult {
-  type: 'post' | 'author' | 'category' | 'tag' | 'page'
+  type: 'post' | 'author' | 'category' | 'tag'
   id: number
   title: string
   slug: string
@@ -100,20 +100,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
         })
       }
 
-      // Add pages
-      if (searchData.pages && Array.isArray(searchData.pages)) {
-        searchData.pages.forEach((page: any) => {
-          results.push({
-            type: 'page',
-            id: page.id,
-            title: page.title,
-            slug: page.slug,
-            excerpt: page.excerpt || stripHtml(page.content).slice(0, 200),
-            url: `/${page.slug}`,
-            relevanceScore: calculateRelevance(q, page.title, page.content),
-          })
-        })
-      }
+      // Pages removed — skip page results
 
       // Sort by relevance score
       results.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
@@ -284,7 +271,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
 
 // Helper functions
 async function performGlobalSearch(query: string, limit: number, strapi: any) {
-  const [posts, authors, categories, tags, pages] = await Promise.all([
+  const [posts, authors, categories, tags] = await Promise.all([
     strapi.entityService.findMany('api::blog-post.blog-post', {
       filters: {
         $or: [
@@ -331,15 +318,6 @@ async function performGlobalSearch(query: string, limit: number, strapi: any) {
       },
       limit: Math.floor(limit * 0.05),
     }),
-
-    strapi.entityService.findMany('api::page.page', {
-      filters: {
-        $or: [{ title: { $containsi: query } }, { content: { $containsi: query } }],
-        publishedAt: { $notNull: true },
-      },
-      populate: ['featured_image'],
-      limit: Math.floor(limit * 0.05),
-    }),
   ])
 
   return {
@@ -347,8 +325,7 @@ async function performGlobalSearch(query: string, limit: number, strapi: any) {
     authors,
     categories,
     tags,
-    pages,
-    total: posts.length + authors.length + categories.length + tags.length + pages.length,
+    total: posts.length + authors.length + categories.length + tags.length,
   }
 }
 

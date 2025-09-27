@@ -63,13 +63,27 @@ const buildStructuredData = async (post: any, ctx: any) => {
     const reqOrigin = ctx?.request?.origin ?? ''
     const baseUrl = envBase || reqOrigin || 'http://localhost:1337'
 
-    // Normalize canonical URL: if post.seo.canonical_url is absolute, use it; if relative, join with baseUrl
+    // Normalize canonical values. Use the Strapi base (baseUrl) for media links, but prefer a FRONTEND site URL
+    // for the page identity (mainEntityOfPage.@id). The frontend site URL can be provided via
+    // process.env.VITE_SITE_URL or process.env.FRONTEND_SITE_URL. Fallbacks: request origin or empty.
     const candidateCanonical = (post?.seo?.canonical_url as string) || (post?.canonical_url as string) || ''
-    const canonicalUrl = candidateCanonical
+
+    // Frontend base (for canonical page URL in structured data)
+    const frontendEnv = (process.env.VITE_SITE_URL as string) || (process.env.FRONTEND_SITE_URL as string) || ''
+    const frontendOrigin = (ctx?.request?.headers?.origin as string) || (ctx?.request?.origin ?? '')
+    const frontendBase = frontendEnv || frontendOrigin || ''
+
+    // canonical URL for media/strapi vs canonical URL for the public page
+
+    const canonicalForFrontend = candidateCanonical
       ? candidateCanonical.startsWith('http://') || candidateCanonical.startsWith('https://')
         ? candidateCanonical
-        : `${baseUrl.replace(/\/$/, '')}/${candidateCanonical.replace(/^\//, '')}`
-      : `${baseUrl.replace(/\/$/, '')}/blog/${String(post.slug ?? post.id).replace(/^\//, '')}`
+        : frontendBase
+          ? `${frontendBase.replace(/\/$/, '')}/${candidateCanonical.replace(/^\//, '')}`
+          : `${baseUrl.replace(/\/$/, '')}/${candidateCanonical.replace(/^\//, '')}`
+      : frontendBase
+        ? `${frontendBase.replace(/\/$/, '')}/blog/${String(post.slug ?? post.id).replace(/^\//, '')}`
+        : `${baseUrl.replace(/\/$/, '')}/blog/${String(post.slug ?? post.id).replace(/^\//, '')}`
 
     // Resolve featured/og images to absolute URLs using baseUrl
     const featuredImageUrl = resolveMediaUrl(post.seo?.og_image || post.featured_image, baseUrl, ctx)
@@ -122,7 +136,8 @@ const buildStructuredData = async (post: any, ctx: any) => {
       dateModified: post.updatedAt ?? undefined,
       mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': canonicalUrl,
+        // Use the frontend canonical URL when available so structured data points to the public page
+        '@id': canonicalForFrontend,
       },
       keywords: (post.seo?.meta_keywords || post.meta_keywords || keywords) || undefined,
       articleSection: articleSection || undefined,

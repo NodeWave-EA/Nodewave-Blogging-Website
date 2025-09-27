@@ -21,8 +21,7 @@ export interface BlogPost {
 	like_count?: number
 	featured?: boolean
 	allow_comments?: boolean
-	published_at_custom?: string
-	status?: 'draft' | 'published' | 'archived'
+	status?: 'draft' | 'published'
 	priority?: 'low' | 'normal' | 'high'
 	createdAt: string
 	updatedAt: string

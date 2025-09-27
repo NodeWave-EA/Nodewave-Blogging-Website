@@ -427,7 +427,7 @@ export function deepClone<T>(obj: T): T {
  * - ISO date strings
  * - numeric timestamps
  * - nested Strapi shapes like { data: { attributes: { publishedAt: '...' }}}
- * - objects containing common keys: publishedAt, published_at, published_at_custom, createdAt, created_at, updatedAt, updated_at
+ * - objects containing common keys: publishedAt, published_at, createdAt, created_at, updatedAt, updated_at
  */
 function resolveToDate(input: unknown): Date | null {
   if (!input && input !== 0) return null
@@ -455,8 +455,6 @@ function resolveToDate(input: unknown): Date | null {
     const keys = [
       'publishedAt',
       'published_at',
-      'published_at_custom',
-      'published_at_custom',
       'createdAt',
       'created_at',
       'updatedAt',

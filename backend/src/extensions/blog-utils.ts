@@ -129,7 +129,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    * Search content across multiple content types
    */
   async globalSearch(query: string, limit = 20) {
-    const [posts, authors, categories, tags, pages] = await Promise.all([
+    const [posts, authors, categories, tags] = await Promise.all([
       strapi.entityService.findMany('api::blog-post.blog-post', {
         filters: {
           $or: [
@@ -176,15 +176,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         },
         limit: Math.floor(limit * 0.05),
       }),
-
-      strapi.entityService.findMany('api::page.page', {
-        filters: {
-          $or: [{ title: { $containsi: query } }, { content: { $containsi: query } }],
-          publishedAt: { $notNull: true },
-        },
-        populate: ['featured_image'],
-        limit: Math.floor(limit * 0.05),
-      }),
     ])
 
     return {
@@ -192,8 +183,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       authors,
       categories,
       tags,
-      pages,
-      total: posts.length + authors.length + categories.length + tags.length + pages.length,
+      total: posts.length + authors.length + categories.length + tags.length,
     }
   },
 })

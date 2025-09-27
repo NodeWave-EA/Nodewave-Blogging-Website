@@ -513,7 +513,6 @@ export interface ApiBlogPostBlogPost extends Struct.CollectionTypeSchema {
       }>
     priority: Schema.Attribute.Enumeration<['low', 'normal', 'high']> &
       Schema.Attribute.DefaultTo<'normal'>
-    published_at_custom: Schema.Attribute.DateTime
     publishedAt: Schema.Attribute.DateTime
     reading_time: Schema.Attribute.Integer &
       Schema.Attribute.SetMinMax<
@@ -527,7 +526,7 @@ export interface ApiBlogPostBlogPost extends Struct.CollectionTypeSchema {
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required & Schema.Attribute.Unique
     social_sharing: Schema.Attribute.Component<'shared.social-sharing', false> &
       Schema.Attribute.Required
-    status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
+    status: Schema.Attribute.Enumeration<['draft', 'published']> &
       Schema.Attribute.DefaultTo<'draft'>
     tags: Schema.Attribute.Relation<'manyToMany', 'api::tag.tag'>
     title: Schema.Attribute.String &
@@ -910,86 +909,6 @@ export interface ApiNewsletterNewsletter extends Struct.CollectionTypeSchema {
     subscribed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>
     subscription_date: Schema.Attribute.DateTime &
       Schema.Attribute.DefaultTo<'2024-01-01T00:00:00.000Z'>
-    updatedAt: Schema.Attribute.DateTime
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
-  }
-}
-
-export interface ApiPagePage extends Struct.CollectionTypeSchema {
-  collectionName: 'pages'
-  info: {
-    description: 'Static pages like About, Contact, Privacy Policy'
-    displayName: 'Page'
-    pluralName: 'pages'
-    singularName: 'page'
-  }
-  options: {
-    draftAndPublish: true
-  }
-  pluginOptions: {
-    i18n: {
-      localized: true
-    }
-  }
-  attributes: {
-    content: Schema.Attribute.RichText &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }>
-    createdAt: Schema.Attribute.DateTime
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
-    excerpt: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }> &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 500
-      }>
-    featured_image: Schema.Attribute.Media<'images'>
-    locale: Schema.Attribute.String
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>
-    menu_order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
-    meta_description: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }> &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 160
-      }>
-    meta_title: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }> &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 60
-      }>
-    publishedAt: Schema.Attribute.DateTime
-    seo: Schema.Attribute.Component<'shared.seo', false>
-    show_in_menu: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>
-    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required & Schema.Attribute.Unique
-    template: Schema.Attribute.Enumeration<
-      ['default', 'contact', 'about', 'privacy', 'terms', 'custom']
-    > &
-      Schema.Attribute.DefaultTo<'default'>
-    title: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }> &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 255
-      }>
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
   }
@@ -1497,7 +1416,6 @@ declare module '@strapi/strapi' {
       'api::comment.comment': ApiCommentComment
       'api::company-info.company-info': ApiCompanyInfoCompanyInfo
       'api::newsletter.newsletter': ApiNewsletterNewsletter
-      'api::page.page': ApiPagePage
       'api::tag.tag': ApiTagTag
       'plugin::content-releases.release': PluginContentReleasesRelease
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction

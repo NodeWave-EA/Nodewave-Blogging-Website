@@ -140,9 +140,6 @@
       "type": "boolean",
       "default": true
     },
-    "published_at_custom": {
-      "type": "datetime"
-    },
     "social_sharing": {
       "type": "component",
       "repeatable": false,
@@ -159,8 +156,7 @@
       "type": "enumeration",
       "enum": [
         "draft",
-        "published",
-        "archived"
+        "published"
       ],
       "default": "draft"
     },

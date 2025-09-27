@@ -1,7 +1,7 @@
 /**
  * SEO and meta tag utilities
  */
-import type { BlogPost, SEO, BlogSetting, Author, Category, Tag } from '@/types'
+import type { BlogPost, BlogSetting, Category } from '@/types'
 import { getStrapiImageUrl } from './strapi'
 
 const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337'
@@ -54,7 +54,7 @@ export function generatePostMetaTags(post: BlogPost, baseUrl: string = ''): Meta
   const imageUrl = getStrapiImageUrl(post.featured_image) || placeholderImageUrl
   const image = imageUrl
   const url = `${siteUrl}/blog/${post.slug}`
-  const publishedTime = post.published_at_custom || post.publishedAt
+  const publishedTime = post.publishedAt
   const modifiedTime = post.updatedAt
   const author = 'NodeWave Team'
   const keywords = post.seo?.meta_keywords
@@ -112,7 +112,7 @@ export function generateHomepageMetaTags(
   return {
     title,
     description,
-     logoUrl,
+    logoUrl,
     url: siteUrl,
     type: 'website',
     siteName: title,
@@ -392,7 +392,7 @@ export function generatePostStructuredData(post: BlogPost, baseUrl: string = '')
     description: post.excerpt || '',
     image: fullImageUrl,
     url,
-    datePublished: post.published_at_custom || post.publishedAt,
+    datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     author: {
       '@type': 'Person',

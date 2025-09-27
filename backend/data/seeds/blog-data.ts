@@ -303,48 +303,6 @@ CMD ["npm", "start"]</code></pre>
     },
   ],
 
-  // Sample pages
-  pages: [
-    {
-      title: 'About Us',
-      slug: 'about',
-      content: `
-        <h2>Welcome to Our Blog</h2>
-        <p>We are a team of passionate developers and technologists sharing our knowledge and experiences with the community.</p>
-
-        <h3>Our Mission</h3>
-        <p>To provide high-quality, practical content that helps developers grow their skills and stay up-to-date with the latest technologies.</p>
-
-        <h3>Our Team</h3>
-        <p>Our diverse team brings together expertise from various areas of software development, from frontend and backend development to DevOps and mobile technologies.</p>
-      `,
-      excerpt: 'Learn more about our mission and the team behind this blog.',
-      template: 'about',
-      show_in_menu: true,
-      menu_order: 1,
-      meta_title: 'About Us - Developer Blog',
-      meta_description:
-        'Learn about our mission and the team of passionate developers behind this blog.',
-    },
-    {
-      title: 'Contact',
-      slug: 'contact',
-      content: `
-        <h2>Get in Touch</h2>
-        <p>We'd love to hear from you! Whether you have questions, suggestions, or just want to say hello, feel free to reach out.</p>
-
-        <h3>Email</h3>
-        <p>You can reach us at: <a href="mailto:hello@example.com">hello@example.com</a></p>
-
-        <h3>Social Media</h3>
-        <p>Follow us on our social media channels for the latest updates and announcements.</p>
-      `,
-      template: 'contact',
-      show_in_menu: true,
-      menu_order: 2,
-    },
-  ],
-
   // Blog settings
   blogSettings: {
     site_name: 'DevBlog',
@@ -444,51 +402,33 @@ export const seedDatabase = async (strapi: Core.Strapi) => {
           author: authors[i % authors.length].id,
           categories: categories[i % categories.length].id,
           tags: tags[i % tags.length].id,
-          status: (status || 'published') as 'draft' | 'published' | 'archived',
+          status: (status || 'published') as 'draft' | 'published',
           priority: (priority || 'normal') as 'low' | 'normal' | 'high',
           seo: seo
             ? {
-                ...seo,
-                og_type: (seo.og_type || 'article') as 'website' | 'article' | 'profile',
-                twitter_card: (seo.twitter_card || 'summary_large_image') as
-                  | 'summary'
-                  | 'summary_large_image'
-                  | 'app'
-                  | 'player',
-                robots: (seo.robots || 'index,follow') as
-                  | 'index,follow'
-                  | 'noindex,follow'
-                  | 'index,nofollow'
-                  | 'noindex,nofollow',
-              }
+              ...seo,
+              og_type: (seo.og_type || 'article') as 'website' | 'article' | 'profile',
+              twitter_card: (seo.twitter_card || 'summary_large_image') as
+                | 'summary'
+                | 'summary_large_image'
+                | 'app'
+                | 'player',
+              robots: (seo.robots || 'index,follow') as
+                | 'index,follow'
+                | 'noindex,follow'
+                | 'index,nofollow'
+                | 'noindex,nofollow',
+            }
             : undefined,
           social_sharing: social_sharing
             ? {
-                ...social_sharing,
-              }
+              ...social_sharing,
+            }
             : undefined,
           publishedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000), // Stagger publication dates
         },
       })
       console.log(`Created blog post: ${post.title}`)
-    }
-
-    // Seed pages
-    console.log('📄 Seeding pages...')
-    for (const pageData of seedData.pages) {
-      await strapi.entityService.create('api::page.page', {
-        data: {
-          ...pageData,
-          publishedAt: new Date(),
-          template: pageData.template as
-            | 'default'
-            | 'contact'
-            | 'about'
-            | 'privacy'
-            | 'terms'
-            | 'custom',
-        },
-      })
     }
 
     // Seed blog settings
@@ -521,7 +461,7 @@ export const seedDatabase = async (strapi: Core.Strapi) => {
 
     console.log('✅ Database seeding completed successfully!')
     console.log(
-      `Created: ${categories.length} categories, ${tags.length} tags, ${authors.length} authors, ${seedData.blogPosts.length} posts, ${seedData.pages.length} pages`
+      `Created: ${categories.length} categories, ${tags.length} tags, ${authors.length} authors, ${seedData.blogPosts.length} posts`
     )
   } catch (error) {
     console.error('❌ Error seeding database:', error)
