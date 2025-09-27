@@ -76,8 +76,7 @@
 							{{ category.name }}
 						</router-link>
 					</div>
-					<time :datetime="getPostDateISO(post)"
-						class="text-xs text-zinc-500 dark:text-zinc-400">
+					<time :datetime="getPostDateISO(post)" class="text-xs text-zinc-500 dark:text-zinc-400">
 						{{ formatDate(post) }}
 					</time>
 				</div>
