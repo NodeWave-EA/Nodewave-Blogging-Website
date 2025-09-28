@@ -32,8 +32,8 @@
 
       <!-- Results Scrollable (modular) -->
       <div class="max-h-96 overflow-y-auto custom-scroll">
-        <SearchResults :results="searchResults" :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex"
-          :total="totalResults" :recentSearches="recentSearches" :popularCategories="popularCategories"
+        <SearchResults :results="currentResults" :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex"
+          :total="totalResults" :recentSearches="recentSearches" :popularCategories="popularCategories" :mode="mode"
           :groups="computedGroups" @select-result="onSelectResult" @view-all="onViewAll"
           @select-suggestion="onSelectSuggestion" @select-category="onSelectCategory"
           @jump-to="(i) => (selectedIndex = i)" />
@@ -99,12 +99,16 @@
   const searchInput = ref<any>(null)
   const rootRef = ref<HTMLElement | null>(null)
   const searchQuery = ref('')
+  const suggestionItems = ref<SearchResult[]>([])
   const searchResults = ref<SearchResult[]>([])
+  const mode = ref<'idle' | 'suggest' | 'results'>('idle')
   const loading = ref(false)
   const selectedIndex = ref(0)
   const recentSearches = ref<string[]>([])
   const popularCategories = ref<Category[]>([])
   const totalResults = ref(0)
+
+  const currentResults = computed(() => (mode.value === 'suggest' ? suggestionItems.value : searchResults.value))
 
   // Computed
   const isOpen = computed(() => props.modelValue)
@@ -126,6 +130,8 @@
       return
     }
 
+    // mark we are showing full search results
+    mode.value = 'results'
     loading.value = true
     selectedIndex.value = 0
 
@@ -172,7 +178,17 @@
           title: s.text,
           slug: s.slug || undefined,
           excerpt: '',
-          url: s.url || (s.type === 'post' ? `/blog/${s.slug}` : s.type === 'author' ? `/authors/${s.slug}` : s.type === 'category' ? `/categories/${s.slug}` : s.type === 'tag' ? `/tags/${s.slug}` : '/'),
+          url:
+            s.url ||
+            (s.type === 'post'
+              ? `/blog/${s.slug}`
+              : s.type === 'author'
+                ? `/authors/${s.slug}`
+                : s.type === 'category'
+                  ? `/categories/${s.slug}`
+                  : s.type === 'tag'
+                    ? `/tags/${s.slug}`
+                    : '/'),
         }
         return {
           ...base,
@@ -180,14 +196,23 @@
         }
       })
 
-      searchResults.value = suggestions as any
+      suggestionItems.value = suggestions as any
       totalResults.value = suggestions.length
+      selectedIndex.value = 0
+      // show suggestion mode while user is actively typing
+      mode.value = 'suggest'
     } catch (e) {
       console.error('Suggest error', e)
     } finally {
       loading.value = false
     }
   }, 250)
+
+  // When user stops typing, perform the full search automatically
+  const performAutoSearch = debounce(async () => {
+    if (!searchQuery.value.trim()) return
+    await performSearchImmediate()
+  }, 600)
 
   // For compatibility, keep a performSearch wrapper that calls the immediate full search
 
@@ -249,23 +274,95 @@
   }
 
   // Suggestions selection
-  const selectSuggestion = (payload: string | { text: string; type: string; url?: string; slug?: string }) => {
+  const selectSuggestion = async (payload: string | { text: string; type: string; url?: string; slug?: string }) => {
     if (typeof payload === 'string') {
       searchQuery.value = payload
-      performSearchImmediate()
+      // user selected a recent text search — run full search immediately
+      await performSearchImmediate()
       return
     }
 
-    // If suggestion includes a direct URL (category/tag/post/author), navigate immediately
-    if (payload.url) {
-      router.push(payload.url)
-      close()
-      return
-    }
-
-    // Fallback: treat as text
+    // Instead of navigating directly, show a filtered result list so user can choose between multiple matches.
     searchQuery.value = payload.text
-    performSearchImmediate()
+    selectedIndex.value = 0
+    mode.value = 'results'
+    loading.value = true
+    try {
+      // Prefer the quick endpoint when a type is provided for more focused results
+      if (payload.type) {
+        const resp: any = await searchService.quick(payload.text, payload.type, 20)
+        // quick endpoint returns { data: [...] }
+        const rows: any[] = resp?.data || []
+        if (rows.length > 0) {
+          const mapped = rows.map((r: any) => {
+            switch (payload.type) {
+              case 'post':
+                return {
+                  type: 'post',
+                  id: r.id,
+                  title: r.title,
+                  slug: r.slug,
+                  excerpt: r.excerpt || r.description || '',
+                  url: `/blog/${r.slug}`,
+                  highlightedTitle: highlightText(r.title || '', searchQuery.value),
+                }
+              case 'author':
+                return {
+                  type: 'author',
+                  id: r.id,
+                  title: r.name,
+                  slug: r.slug,
+                  excerpt: r.bio || r.job_title || '',
+                  url: `/authors/${r.slug}`,
+                  highlightedTitle: highlightText(r.name || '', searchQuery.value),
+                }
+              case 'category':
+                return {
+                  type: 'category',
+                  id: r.id,
+                  title: r.name,
+                  slug: r.slug,
+                  excerpt: r.description || '',
+                  url: `/categories/${r.slug}`,
+                  highlightedTitle: highlightText(r.name || '', searchQuery.value),
+                }
+              case 'tag':
+                return {
+                  type: 'tag',
+                  id: r.id,
+                  title: r.name,
+                  slug: r.slug,
+                  excerpt: r.description || '',
+                  url: `/tags/${r.slug}`,
+                  highlightedTitle: highlightText(r.name || '', searchQuery.value),
+                }
+              default:
+                return {
+                  type: payload.type as any,
+                  id: r.id,
+                  title: r.title || r.name || '',
+                  slug: r.slug,
+                  excerpt: r.excerpt || r.description || '',
+                  url: r.slug ? `/${payload.type}/${r.slug}` : '/',
+                  highlightedTitle: highlightText(r.title || r.name || '', searchQuery.value),
+                }
+            }
+          })
+          searchResults.value = mapped as any
+          totalResults.value = mapped.length
+          addToRecentSearches(searchQuery.value)
+          return
+        }
+      }
+
+      // If quick didn't return anything, fall back to full search to show more possibilities
+      await performSearchImmediate()
+    } catch (e) {
+      console.error('selectSuggestion quick search error', e)
+      await performSearchImmediate()
+    } finally {
+      loading.value = false
+    }
   }
 
   const selectCategorySuggestion = (slug: string) => {
@@ -359,16 +456,21 @@
     }
   }
 
-  // Watch for search query changes — use suggestions for typeahead
+  // Watch for search query changes — show suggestions while typing and auto-search when user stops
   watch(searchQuery, (val) => {
     if (!val || !val.trim()) {
       // if query cleared, show recent searches/popular categories
+      suggestionItems.value = []
       searchResults.value = []
       totalResults.value = 0
       loading.value = false
+      mode.value = 'idle'
       return
     }
+    // Show typeahead suggestions quickly
     performSuggest()
+    // If user pauses typing, automatically run full search and show full results
+    performAutoSearch()
   })
 
   // Focus input when opened
@@ -423,7 +525,7 @@
   })
 
   // Handlers for child component events
-  const onSelectSuggestion = (q: string) => selectSuggestion(q)
+  const onSelectSuggestion = (payload: any) => selectSuggestion(payload)
   const onSelectCategory = (slug: string) => selectCategorySuggestion(slug)
   const onSelectResult = (r: SearchResult) => selectResult(r)
   const onViewAll = () => {

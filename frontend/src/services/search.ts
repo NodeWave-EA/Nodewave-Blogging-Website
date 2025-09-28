@@ -16,4 +16,11 @@ export const searchService = {
 			params: { q: query, limit },
 		})
 	},
+
+	// Quick search endpoint for type-filtered quick results
+	quick: async (query: string, type?: string, limit = 10) => {
+		return apiService.get<any>('/search/quick', {
+			params: { q: query, type, limit },
+		})
+	},
 }

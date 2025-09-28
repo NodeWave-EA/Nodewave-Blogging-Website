@@ -44,49 +44,64 @@
 			</div>
 
 			<div v-else>
-				<div v-if="results.length === 0" class="p-6 text-center text-zinc-500">
-					No results for "{{ query }}"
+				<!-- If the parent set mode to suggest and we have results, render them as suggestions -->
+				<div v-if="props.mode === 'suggest'">
+					<h4 class="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">Suggestions</h4>
+					<div class="flex flex-col gap-2 mb-3">
+						<button v-for="(s, idx) in props.results" :key="'sugg-' + idx"
+							@click="$emit('select-suggestion', { text: s.title, type: s.type, url: s.url, slug: s.slug })"
+							class="text-left px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800">
+							<div class="font-medium text-zinc-900 dark:text-white">{{ s.title }}</div>
+							<div class="text-sm text-zinc-500 dark:text-zinc-400">{{ titleForType(s.type) }}</div>
+						</button>
+					</div>
 				</div>
 
 				<div v-else>
-					<!-- Grouped header shortcuts -->
-					<div class="flex items-center gap-3 px-3 mb-3">
-						<button v-for="(g) in groups" :key="g.type" @click="jumpToGroup(g.start)"
-							class="px-3 py-1 rounded-full text-sm bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700">
-							{{ titleForType(g.type) }} ({{ g.count }})
-						</button>
+					<div v-if="results.length === 0" class="p-6 text-center text-zinc-500">
+						No results for "{{ query }}"
 					</div>
 
-					<ul class="divide-y divide-zinc-100 dark:divide-zinc-800">
-						<li v-for="(r, idx) in results" :key="r.type + '-' + r.id" :ref="el => setItemRef(el, idx)"
-							:class="['p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer', selectedIndex === idx ? 'bg-zinc-100 dark:bg-zinc-800' : '']"
-							@click="$emit('select-result', r)">
-							<div class="flex items-start gap-3">
-								<div class="w-12 flex-shrink-0">
-									<template v-if="getResultImage(r)">
-										<img :src="getResultImage(r) || undefined" :alt="r.title"
-											class="w-12 h-8 object-cover rounded-md" />
-									</template>
-									<template v-else>
-										<component :is="iconForType(r.type)" class="w-6 h-6 text-zinc-600 dark:text-zinc-300" />
-									</template>
-								</div>
-								<div class="flex-1">
-									<div class="flex items-center justify-between gap-4">
-										<div>
-											<div class="font-semibold text-zinc-900 dark:text-white">
-												<span v-html="r.highlightedTitle || sanitize(r.title)"></span>
+					<div v-else>
+						<!-- Grouped header shortcuts -->
+						<div class="flex items-center gap-3 px-3 mb-3">
+							<button v-for="(g) in groups" :key="g.type" @click="jumpToGroup(g.start)"
+								class="px-3 py-1 rounded-full text-sm bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700">
+								{{ titleForType(g.type) }} ({{ g.count }})
+							</button>
+						</div>
+
+						<ul class="divide-y divide-zinc-100 dark:divide-zinc-800">
+							<li v-for="(r, idx) in results" :key="r.type + '-' + r.id" :ref="el => setItemRef(el, idx)"
+								:class="['p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer', selectedIndex === idx ? 'bg-zinc-100 dark:bg-zinc-800' : '']"
+								@click="$emit('select-result', r)">
+								<div class="flex items-start gap-3">
+									<div class="w-12 flex-shrink-0">
+										<template v-if="getResultImage(r)">
+											<img :src="getResultImage(r) || undefined" :alt="r.title"
+												class="w-12 h-8 object-cover rounded-md" />
+										</template>
+										<template v-else>
+											<component :is="iconForType(r.type)" class="w-6 h-6 text-zinc-600 dark:text-zinc-300" />
+										</template>
+									</div>
+									<div class="flex-1">
+										<div class="flex items-center justify-between gap-4">
+											<div>
+												<div class="font-semibold text-zinc-900 dark:text-white">
+													<span v-html="r.highlightedTitle || sanitize(r.title)"></span>
+												</div>
+												<div class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
+													<span v-html="r.highlightedExcerpt || sanitize(r.excerpt)"></span>
+												</div>
 											</div>
-											<div class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
-												<span v-html="r.highlightedExcerpt || sanitize(r.excerpt)"></span>
-											</div>
+											<div class="text-xs text-zinc-400 dark:text-zinc-500">{{ r.type }}</div>
 										</div>
-										<div class="text-xs text-zinc-400 dark:text-zinc-500">{{ r.type }}</div>
 									</div>
 								</div>
-							</div>
-						</li>
-					</ul>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -109,6 +124,7 @@
 		recentSearches: string[]
 		popularCategories: Category[]
 		groups?: { type: string; start: number; count: number }[]
+		mode?: 'idle' | 'suggest' | 'results'
 	}>()
 
 	const emit = defineEmits(['select-result', 'view-all', 'select-suggestion', 'select-category', 'jump-to'])
