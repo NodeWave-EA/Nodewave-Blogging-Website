@@ -77,6 +77,14 @@ initTheme()
 // Ensure placeholder image is loaded and cached before app mount
 const placeholderStore = usePlaceholderStore()
 
+// Initialize offline-first search in background (optional)
+import { offlineSearch } from '@/services/offlineSearch'
+
+// Run offline search init in background after app mount so UI isn't blocked
+setTimeout(() => {
+  offlineSearch.init().catch((e) => console.warn('offlineSearch init failed', e))
+}, 2000)
+
 async function initApp() {
   try {
     await placeholderStore.initPlaceholder()

@@ -68,8 +68,8 @@
 </template>
 
 <script setup lang="ts">
-  import { apiService, searchService } from '@/services';
-  import type { Category, SearchResult, SearchResults as SearchResultsType } from '@/types';
+  import { offlineSearch } from '@/services';
+  import type { Category, SearchResult } from '@/types';
   import { debounce } from '@/utils/debounce';
   import { dbg } from '@/utils/debug';
   import { highlightText } from '@/utils/highlight';
@@ -138,21 +138,26 @@
     selectedIndex.value = 0
 
     try {
-      const response: SearchResultsType = await searchService.search(searchQuery.value, 20)
+      // Use local-only offlineSearch
+      const docs = await offlineSearch.search(searchQuery.value, 20)
+      dbg('SearchModal.vue', 'performSearchImmediate (local) docs', docs)
 
-      dbg('SearchModal.vue', 'performSearchImmediate response', response)
-
-      // Apply highlighting to title/excerpt
-      const results = (response.results || []).map((r) => ({
-        ...r,
-        highlightedTitle: highlightText(r.title || '', searchQuery.value),
-        highlightedExcerpt: highlightText(r.excerpt || '', searchQuery.value),
-      }))
-
-      searchResults.value = results as any
-      totalResults.value = response.total || results.length
-
-      // Add to recent searches
+      const results: any[] = []
+      for (const r of (docs || [])) {
+        const kind = (r.title ? 'post' : r.name ? 'author' : r.description ? 'category' : 'post') as 'post' | 'author' | 'category' | 'tag'
+        results.push({
+          type: kind,
+          id: Number(r.id) || 0,
+          title: r.title || r.name || '',
+          slug: r.slug,
+          excerpt: r.excerpt || r.description || r.bio || '',
+          url: r.slug ? (r.title ? `/blog/${r.slug}` : `/${r.slug}`) : '/',
+          highlightedTitle: highlightText((r.title || r.name || ''), searchQuery.value),
+          highlightedExcerpt: highlightText((r.excerpt || r.description || r.bio || ''), searchQuery.value),
+        })
+      }
+      searchResults.value = results
+      totalResults.value = results.length
       addToRecentSearches(searchQuery.value)
     } catch (error) {
       console.error('Search error:', error)
@@ -168,7 +173,7 @@
     if (!searchQuery.value.trim()) return
     try {
       loading.value = true
-      const resp: any = await searchService.suggest(searchQuery.value, 8)
+      const resp: any = await offlineSearch.suggest(searchQuery.value, 8)
 
       dbg('SearchModal.vue', 'performSuggest response', resp)
 
@@ -203,7 +208,7 @@
       selectedIndex.value = 0
       // While typing, also request a few preview results (top matches) to show beneath suggestions
       try {
-        const qResp: any = await searchService.quick(searchQuery.value, undefined, 4)
+        const qResp: any = await offlineSearch.quick(searchQuery.value, undefined, 4)
         const rows: any[] = qResp?.data || []
         previewResults.value = rows.map((r: any) => ({
           type: (r.type as any) || (r.title ? 'post' : 'post'),
@@ -258,14 +263,8 @@
   // Categories
   const loadPopularCategories = async () => {
     try {
-      const response: { data: Category[] } = await apiService.get('/categories', {
-        params: {
-          sort: 'post_count:desc',
-          pagination: { limit: 6 },
-          populate: 'blog_posts',
-        },
-      })
-      popularCategories.value = response.data || []
+      const cats = await offlineSearch.getPopularCategories(6)
+      popularCategories.value = cats || []
     } catch (error) {
       console.error('Error loading categories:', error)
     }
@@ -310,7 +309,7 @@
     try {
       // Prefer the quick endpoint when a type is provided for more focused results
       if (payload.type) {
-        const resp: any = await searchService.quick(payload.text, payload.type, 20)
+        const resp: any = await offlineSearch.quick(payload.text, payload.type, 20)
         // quick endpoint returns { data: [...] }
         const rows: any[] = resp?.data || []
         if (rows.length > 0) {
