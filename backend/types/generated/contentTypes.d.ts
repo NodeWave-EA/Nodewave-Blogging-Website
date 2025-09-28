@@ -710,6 +710,14 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
       }>
     order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>
     parent_category: Schema.Attribute.Relation<'manyToOne', 'api::category.category'>
+    post_count: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>
     publishedAt: Schema.Attribute.DateTime
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required & Schema.Attribute.Unique
     sub_categories: Schema.Attribute.Relation<'oneToMany', 'api::category.category'>
@@ -958,6 +966,14 @@ export interface ApiTagTag extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 50
       }>
+    post_count: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<0>
     publishedAt: Schema.Attribute.DateTime
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required & Schema.Attribute.Unique
     trending: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>

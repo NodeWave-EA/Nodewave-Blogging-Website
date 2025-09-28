@@ -82,6 +82,8 @@
   const featured = ref<BlogPost[]>([])
   const loading = ref(true)
 
+  const emit = defineEmits<{ (e: 'loaded'): void }>()
+
   const loadFeaturedFromApi = async (background = false) => {
     try {
       if (!background) loading.value = true
@@ -97,6 +99,14 @@
       featured.value = featured.value || []
     } finally {
       if (!background) loading.value = false
+      // Notify parent that the initial (non-background) load completed
+      if (!background) {
+        try {
+          emit('loaded')
+        } catch (e) {
+          // ignore
+        }
+      }
       dbg('FeaturedPosts.vue', 'loadFeatured finished')
     }
   }
