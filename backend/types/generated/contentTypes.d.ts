@@ -552,7 +552,7 @@ export interface ApiBlogPostBlogPost extends Struct.CollectionTypeSchema {
   }
 }
 
-export interface ApiBlogSettingBlogSetting extends Struct.SingleTypeSchema {
+export interface ApiBlogSettingBlogSetting extends Struct.CollectionTypeSchema {
   collectionName: 'blog_settings'
   info: {
     description: 'Global blog configuration and settings'
@@ -775,7 +775,7 @@ export interface ApiCommentComment extends Struct.CollectionTypeSchema {
   }
 }
 
-export interface ApiCompanyInfoCompanyInfo extends Struct.SingleTypeSchema {
+export interface ApiCompanyInfoCompanyInfo extends Struct.CollectionTypeSchema {
   collectionName: 'company_infos'
   info: {
     description: 'General company information and settings for the blog'
@@ -792,21 +792,11 @@ export interface ApiCompanyInfoCompanyInfo extends Struct.SingleTypeSchema {
     }
   }
   attributes: {
-    about_company: Schema.Attribute.RichText &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }>
+    about_company: Schema.Attribute.RichText
     address: Schema.Attribute.Text
     comments_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>
     company_name: Schema.Attribute.String &
       Schema.Attribute.Required &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }> &
       Schema.Attribute.DefaultTo<'NodeWave'>
     contact_email: Schema.Attribute.Email & Schema.Attribute.Required
     contact_phone: Schema.Attribute.String
@@ -826,36 +816,15 @@ export interface ApiCompanyInfoCompanyInfo extends Struct.SingleTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::company-info.company-info'>
     logo: Schema.Attribute.Media<'images'>
     logo_dark: Schema.Attribute.Media<'images'>
-    meta_keywords: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }>
-    mission_statement: Schema.Attribute.RichText &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }>
+    meta_keywords: Schema.Attribute.Text
+    mission_statement: Schema.Attribute.RichText
     newsletter_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>
     og_image: Schema.Attribute.Media<'images'>
     publishedAt: Schema.Attribute.DateTime
     seo: Schema.Attribute.Component<'shared.seo', false>
-    site_description: Schema.Attribute.Text &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }>
+    site_description: Schema.Attribute.Text & Schema.Attribute.Required
     site_title: Schema.Attribute.String &
       Schema.Attribute.Required &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }> &
       Schema.Attribute.DefaultTo<'NodeWave Blog'>
     social_links: Schema.Attribute.Component<'shared.social-link', true>
     team_size: Schema.Attribute.Integer &
@@ -867,12 +836,7 @@ export interface ApiCompanyInfoCompanyInfo extends Struct.SingleTypeSchema {
       >
     updatedAt: Schema.Attribute.DateTime
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private
-    vision_statement: Schema.Attribute.RichText &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true
-        }
-      }>
+    vision_statement: Schema.Attribute.RichText
     website_url: Schema.Attribute.String & Schema.Attribute.Required
   }
 }

@@ -3,7 +3,7 @@
  * Run this script to populate your blog with sample data
  */
 
-import type { Core } from '@strapi/strapi'
+import type { Core } from '@strapi/strapi';
 
 const seedData = {
   // Sample categories
@@ -329,6 +329,26 @@ CMD ["npm", "start"]</code></pre>
       { platform: 'linkedin', url: 'https://linkedin.com/company/devblog', username: 'devblog' },
     ],
   },
+
+  // Company info (convertible single-type -> collection seed)
+  companyInfo: {
+    site_title: 'DevBlog',
+    site_description: 'A blog for developers, by developers. Sharing knowledge and tutorials.',
+    company_name: 'DevBlog LLC',
+    contact_email: 'hello@devblog.example.com',
+    contact_phone: '+1 (555) 123-4567',
+    address: '123 Dev Street, Tech City, TX',
+    website_url: 'https://devblog.example.com',
+    social_links: [
+      { platform: 'twitter', url: 'https://twitter.com/devblog', username: 'devblog' },
+      { platform: 'github', url: 'https://github.com/devblog', username: 'devblog' },
+    ],
+    about_company: '<p>DevBlog is a community-driven blog for software developers.</p>',
+    mission_statement: '<p>Share practical, high-quality developer content.</p>',
+    vision_statement: '<p>Empower developers worldwide through education.</p>',
+    newsletter_enabled: true,
+    comments_enabled: true,
+  },
 }
 
 /**
@@ -406,24 +426,24 @@ export const seedDatabase = async (strapi: Core.Strapi) => {
           priority: (priority || 'normal') as 'low' | 'normal' | 'high',
           seo: seo
             ? {
-                ...seo,
-                og_type: (seo.og_type || 'article') as 'website' | 'article' | 'profile',
-                twitter_card: (seo.twitter_card || 'summary_large_image') as
-                  | 'summary'
-                  | 'summary_large_image'
-                  | 'app'
-                  | 'player',
-                robots: (seo.robots || 'index,follow') as
-                  | 'index,follow'
-                  | 'noindex,follow'
-                  | 'index,nofollow'
-                  | 'noindex,nofollow',
-              }
+              ...seo,
+              og_type: (seo.og_type || 'article') as 'website' | 'article' | 'profile',
+              twitter_card: (seo.twitter_card || 'summary_large_image') as
+                | 'summary'
+                | 'summary_large_image'
+                | 'app'
+                | 'player',
+              robots: (seo.robots || 'index,follow') as
+                | 'index,follow'
+                | 'noindex,follow'
+                | 'index,nofollow'
+                | 'noindex,nofollow',
+            }
             : undefined,
           social_sharing: social_sharing
             ? {
-                ...social_sharing,
-              }
+              ...social_sharing,
+            }
             : undefined,
           publishedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000), // Stagger publication dates
         },
@@ -439,6 +459,33 @@ export const seedDatabase = async (strapi: Core.Strapi) => {
         theme: seedData.blogSettings.theme as 'light' | 'dark' | 'auto',
         social_links:
           seedData.blogSettings.social_links?.map(link => ({
+            platform: link.platform as
+              | 'twitter'
+              | 'facebook'
+              | 'instagram'
+              | 'linkedin'
+              | 'github'
+              | 'youtube'
+              | 'tiktok'
+              | 'pinterest'
+              | 'discord'
+              | 'telegram'
+              | 'whatsapp'
+              | 'website'
+              | 'other',
+            url: link.url,
+            username: link.username,
+          })) || [],
+      },
+    })
+
+    // Seed company info (now a collection-type)
+    console.log('🏢 Seeding company info...')
+    await strapi.entityService.create('api::company-info.company-info', {
+      data: {
+        ...seedData.companyInfo,
+        social_links:
+          seedData.companyInfo.social_links?.map(link => ({
             platform: link.platform as
               | 'twitter'
               | 'facebook'

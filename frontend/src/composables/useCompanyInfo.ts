@@ -1,5 +1,6 @@
 import { apiService } from '@/services'
 import type { CompanyInfo } from '@/types'
+import { dbg } from '@/utils/debug'
 import { computed, ref } from 'vue'
 
 const companyInfo = ref<CompanyInfo | null>(null)
@@ -12,10 +13,9 @@ export function useCompanyInfo() {
     error.value = null
 
     try {
-      // Strapi single-type endpoint in this project is mounted at /company-info
-      // apiService.get returns the parsed response, which is the company info object directly
-      const response = await apiService.get<CompanyInfo>('/company-info?populate=*')
-      companyInfo.value = response
+      const response = await apiService.get<CompanyInfo[]>('/company-infos?populate=*')
+      dbg('useCompanyInfo.ts', 'Fetched company info:', response)
+      companyInfo.value = response[0] || null
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch company info'
       console.error('Error fetching company info:', err)
