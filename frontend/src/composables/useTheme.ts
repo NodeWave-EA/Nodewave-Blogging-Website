@@ -1,9 +1,10 @@
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
 // Global theme state - singleton pattern
-const globalTheme = ref<ThemeMode>('system')
+// Default to dark theme and persist to localStorage when first initialized
+const globalTheme = ref<ThemeMode>('dark')
 const isDark = ref(false)
 const systemTheme = ref<'light' | 'dark'>('light')
 let mediaQuery: MediaQueryList | null = null
@@ -23,11 +24,24 @@ export function useTheme() {
 
   const initTheme = () => {
     // Get theme from localStorage or default to 'system'
-    const stored = localStorage.getItem('theme') as ThemeMode
+    let stored: ThemeMode | null = null
+    try {
+      stored = localStorage.getItem('theme') as ThemeMode | null
+    } catch (err) {
+      // localStorage may be unavailable in some environments — ignore
+      stored = null
+    }
+
     if (stored && ['light', 'dark', 'system'].includes(stored)) {
       globalTheme.value = stored
     } else {
-      globalTheme.value = 'system'
+      // default to dark and persist this choice
+      globalTheme.value = 'dark'
+      try {
+        localStorage.setItem('theme', 'dark')
+      } catch (err) {
+        // ignore write errors
+      }
     }
 
     // Initialize system theme detection
