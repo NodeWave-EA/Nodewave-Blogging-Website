@@ -2,16 +2,17 @@
 	<div
 		class="bg-transparent backdrop-blur-xl rounded-xl p-8 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-black dark:border-white">
 		<!-- Avatar -->
-		<div class="text-center mb-6">
-			<div class="relative inline-block">
-				<router-link :to="authorLink" class="group inline-block relative">
+		<div class="text-center mb-6 relative">
+			<div class="inline-block">
+				<router-link :to="authorLink" class="group inline-block">
 					<img :src="avatarUrl" :alt="author.name"
 						:class="['w-24 h-24 rounded-full object-cover shadow-lg transition-all duration-300', avatarRingClass]" />
-					<span v-if="postsCount > 0" :class="postBadgeClass">{{ postsCount }}
-						<span class="sr-only">posts</span>
-					</span>
 				</router-link>
 			</div>
+			<!-- post badge positioned to match skeleton -->
+			<span v-if="postsCount > 0" :class="postBadgeClass">{{ postsCount }}
+				<span class="sr-only">posts</span>
+			</span>
 		</div>
 
 		<!-- Info -->
@@ -65,8 +66,8 @@
 
 	const postBadgeClass = computed(() =>
 		author.featured
-			? 'absolute -bottom-2 right-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-600 text-white border border-blue-600 dark:bg-blue-800 dark:border-blue-800 z-20'
-			: 'absolute -bottom-2 right-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-black text-white dark:bg-white dark:text-black border border-black dark:border-white z-20',
+			? 'absolute -bottom-2 right-6 w-8 h-6 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-600 text-white border border-blue-600 dark:bg-blue-800 dark:border-blue-800 z-20'
+			: 'absolute -bottom-2 right-6 w-8 h-6 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold rounded-full bg-black text-white dark:bg-white dark:text-black border border-black dark:border-white z-20',
 	)
 </script>
 
