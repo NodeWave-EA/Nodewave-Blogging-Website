@@ -4,15 +4,15 @@
  */
 
 module.exports = {
-	type: 'admin',
-	routes: [
-		{
-			method: 'GET',
-			path: '/super-admin-status',
-			handler: 'admin-status.checkSuperAdminStatus',
-			config: {
-				auth: false, // Allow unauthenticated access for registration check
-			},
-		},
-	],
-};
+  type: 'admin',
+  routes: [
+    {
+      method: 'GET',
+      path: '/super-admin-status',
+      handler: 'admin-status.checkSuperAdminStatus',
+      config: {
+        auth: false, // Allow unauthenticated access for registration check
+      },
+    },
+  ],
+}

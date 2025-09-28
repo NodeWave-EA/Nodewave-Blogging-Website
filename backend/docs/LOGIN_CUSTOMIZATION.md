@@ -24,12 +24,14 @@ This document explains the custom login page features implemented for NodeWave B
 ### Login Page Script Injection
 
 **File**: `/public/admin/login-customization.js`
+
 - Automatically loaded on admin pages
 - Detects login page and injects registration link
 - Handles SPA navigation and route changes
 - Uses MutationObserver for dynamic content
 
 **Configuration**: `/src/admin/app.tsx`
+
 ```typescript
 head: {
   script: [
@@ -44,11 +46,13 @@ head: {
 ### Middleware Protection
 
 **File**: `/src/middlewares/admin-registration-control.js`
+
 - Intercepts requests to `/admin/auth/register-admin`
 - Checks for existing Super Admin users
 - Redirects or blocks based on Super Admin existence
 
 **Registration**: `/config/server.ts`
+
 ```typescript
 middlewares: [
   // ... other middlewares
@@ -75,6 +79,7 @@ middlewares: [
 ## Styling
 
 The registration link uses Strapi's design tokens:
+
 - **Primary Color**: `#4945ff` (Strapi blue)
 - **Hover Color**: `#271fe0` (Darker blue)
 - **Background on Hover**: `#f6f6f9` (Light gray)

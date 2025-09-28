@@ -1,5 +1,5 @@
-import type { Core } from '@strapi/strapi';
-import { seedDatabase } from '../data/seeds/blog-data';
+import type { Core } from '@strapi/strapi'
+import { seedDatabase } from '../data/seeds/blog-data'
 
 /**
  * Bootstrap script for users-permissions
@@ -8,15 +8,15 @@ import { seedDatabase } from '../data/seeds/blog-data';
 async function bootstrapUsersPermissions(strapi: Core.Strapi) {
   try {
     // Wait for database connection
-    await strapi.db.connection.raw('SELECT 1');
+    await strapi.db.connection.raw('SELECT 1')
 
     // Check if Author role exists
     let authorRole = await strapi.query('plugin::users-permissions.role').findOne({
       where: { type: 'author' },
-    });
+    })
 
     if (!authorRole) {
-      console.log('📝 Creating Author role for users-permissions...');
+      console.log('📝 Creating Author role for users-permissions...')
 
       // Create the Author role
       authorRole = await strapi.query('plugin::users-permissions.role').create({
@@ -25,20 +25,19 @@ async function bootstrapUsersPermissions(strapi: Core.Strapi) {
           type: 'author',
           description: 'Default role for blog authors',
         },
-      });
+      })
 
-      console.log('✅ Author role created successfully');
+      console.log('✅ Author role created successfully')
     } else {
-      console.log('📝 Author role already exists');
+      console.log('📝 Author role already exists')
     }
 
     // Set up basic permissions for Author role
     if (authorRole) {
-      await setupAuthorPermissions(strapi, authorRole.id);
+      await setupAuthorPermissions(strapi, authorRole.id)
     }
-
   } catch (error) {
-    console.error('❌ Error in users-permissions bootstrap:', error);
+    console.error('❌ Error in users-permissions bootstrap:', error)
   }
 }
 
@@ -74,16 +73,18 @@ async function setupAuthorPermissions(strapi: Core.Strapi, roleId: number) {
       { action: 'api::comment.comment.create', enabled: true },
       { action: 'api::comment.comment.update', enabled: true },
       { action: 'api::comment.comment.delete', enabled: true },
-    ];
+    ]
 
     for (const permission of authorPermissions) {
       // Check if permission already exists
-      const existingPermission = await strapi.query('plugin::users-permissions.permission').findOne({
-        where: {
-          action: permission.action,
-          role: roleId,
-        },
-      });
+      const existingPermission = await strapi
+        .query('plugin::users-permissions.permission')
+        .findOne({
+          where: {
+            action: permission.action,
+            role: roleId,
+          },
+        })
 
       if (!existingPermission) {
         // Create the permission
@@ -94,13 +95,13 @@ async function setupAuthorPermissions(strapi: Core.Strapi, roleId: number) {
             policy: '',
             role: roleId,
           },
-        });
+        })
       }
     }
 
-    console.log('✅ Author role permissions configured');
+    console.log('✅ Author role permissions configured')
   } catch (error) {
-    console.error('❌ Error setting up author permissions:', error);
+    console.error('❌ Error setting up author permissions:', error)
   }
 }
 
@@ -124,7 +125,7 @@ export default {
    */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     // Bootstrap users-permissions Author role
-    await bootstrapUsersPermissions(strapi);
+    await bootstrapUsersPermissions(strapi)
 
     // Check if we should seed the database
     const shouldSeed = process.env.SEED_DATABASE === 'true'

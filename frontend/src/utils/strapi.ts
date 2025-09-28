@@ -7,7 +7,8 @@ import type { Category, StrapiImage } from '@/types'
 import { dbg, moduleLoaded } from './debug'
 
 const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337'
-const _placeholderPath = import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
+const _placeholderPath =
+  import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
 const placeholderImageUrl = `${strapiBaseUrl.replace(/\/$/, '')}${_placeholderPath.startsWith('/') ? '' : '/'}${_placeholderPath}`
 const PLACEHOLDER_LOCALSTORAGE_KEY = 'nw_placeholder_image_url'
 
@@ -19,11 +20,7 @@ moduleLoaded('strapi.ts')
  * @returns string | null - The image URL or null if not available
  */
 export function getStrapiImageUrl(
-  image?:
-    | StrapiImage
-    | { data?: StrapiImage | StrapiImage[] | null }
-    | StrapiImage[]
-    | null,
+  image?: StrapiImage | { data?: StrapiImage | StrapiImage[] | null } | StrapiImage[] | null,
 ): string | null {
   dbg('strapi.ts [getStrapiImageUrl]', 'getStrapiImageUrl', { image })
 
@@ -31,7 +28,10 @@ export function getStrapiImageUrl(
 
   if (normalized && normalized.url) {
     if (normalized.url.startsWith('/')) {
-      dbg('strapi.ts [getStrapiImageUrl]', 'relative URL detected, prepending base URL', { strapiBaseUrl, imageUrl: normalized.url })
+      dbg('strapi.ts [getStrapiImageUrl]', 'relative URL detected, prepending base URL', {
+        strapiBaseUrl,
+        imageUrl: normalized.url,
+      })
       return `${strapiBaseUrl.replace(/\/$/, '')}${normalized.url}`
     }
     return normalized.url
@@ -61,9 +61,7 @@ export function getStrapiImageUrl(
  * @param image - Strapi image structure: { data: StrapiImage | null } | StrapiImage | null
  * @returns string | null - The image caption or null if not available
  */
-export function getStrapiImageCaption(
-  image?: StrapiImage | { data?: StrapiImage | null } | null,
-) {
+export function getStrapiImageCaption(image?: StrapiImage | { data?: StrapiImage | null } | null) {
   const img = normalizeImageShape(image)
   dbg('strapi.ts [getStrapiImageCaption]', 'getStrapiImageCaption', { img })
   if (!img) return null

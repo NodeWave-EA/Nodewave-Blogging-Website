@@ -1,7 +1,7 @@
-import type { ApiResponse, Comment, CommentForm } from '@/types';
-import { moduleLoaded } from '@/utils/debug';
-import { apiService } from './api';
-import { buildStrapiQuery } from './queryBuilder';
+import type { ApiResponse, Comment, CommentForm } from '@/types'
+import { moduleLoaded } from '@/utils/debug'
+import { apiService } from './api'
+import { buildStrapiQuery } from './queryBuilder'
 
 moduleLoaded('comments.ts')
 
@@ -44,20 +44,20 @@ moduleLoaded('comments.ts')
  * // const created = await commentsApi.create({ name: 'Alice', content: 'Great post!', blog_post: 42 });
  */
 export const commentsApi = {
-	getByPostId: async (postId: number): Promise<ApiResponse<Comment[]>> => {
-		const params = {
-			'filters[blog_post][id][$eq]': postId,
-			'filters[approved][$eq]': true,
-			'populate[parent_comment]': '*',
-			'sort[0]': 'createdAt:asc',
-			publicationState: 'live',
-		}
+  getByPostId: async (postId: number): Promise<ApiResponse<Comment[]>> => {
+    const params = {
+      'filters[blog_post][id][$eq]': postId,
+      'filters[approved][$eq]': true,
+      'populate[parent_comment]': '*',
+      'sort[0]': 'createdAt:asc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		return apiService.get<ApiResponse<Comment[]>>(`/comments?${queryString}`)
-	},
+    const queryString = buildStrapiQuery(params)
+    return apiService.get<ApiResponse<Comment[]>>(`/comments?${queryString}`)
+  },
 
-	create: async (data: CommentForm): Promise<{ data: Comment }> => {
-		return apiService.post<{ data: Comment }>('/comments', { data })
-	},
+  create: async (data: CommentForm): Promise<{ data: Comment }> => {
+    return apiService.post<{ data: Comment }>('/comments', { data })
+  },
 }

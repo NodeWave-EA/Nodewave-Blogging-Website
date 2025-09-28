@@ -1,6 +1,7 @@
 # Admin Registration Setup Guide
 
 This guide#### ✅ **Allowed Actions:**
+
 - **Blog Posts**: Create, Read, Update
 - **Categories**: Create, Read, Update
 - **Tags**: Create, Read, Update
@@ -16,6 +17,7 @@ This guide#### ✅ **Allowed Actions:**
 ## Overview
 
 The admin panel supports secure user registration with automatic role assignment:
+
 - **First user** becomes **Super Admin** (only one allowed)
 - **Subsequent users** become **Authors** with content management permissions
 - **Super Admin** can promote users to Editor or keep them as Authors
@@ -56,12 +58,14 @@ ADMIN_REGISTRATION_ENABLED=true
 New users who register will automatically receive the "Author" role with these permissions:
 
 #### ✅ **Author Role Capabilities:**
+
 - **Content Management**: Can manage content they have created
 - **Blog Posts**: Create, read, update, and publish their own posts
 - **Media Library**: Upload and manage images for their content
 - **Categories & Tags**: Use existing categories and tags for their posts
 
 #### ❌ **Author Restrictions:**
+
 - **Cannot edit other users' content**: Only their own posts
 - **Cannot create categories or tags**: Can only use existing ones
 - **Cannot delete content**: No delete permissions
@@ -101,11 +105,13 @@ New users who register will automatically receive the "Author" role with these p
 ### Development vs Production
 
 **Development:**
+
 ```env
 ADMIN_REGISTRATION_ENABLED=true
 ```
 
 **Production:**
+
 ```env
 ADMIN_REGISTRATION_ENABLED=false  # Recommended for security
 ```
@@ -136,6 +142,7 @@ To modify what Content Creator users can do:
 ### Creating Additional Roles
 
 You can create specialized roles like:
+
 - **"Editor"** - Can publish/unpublish content
 - **"Author"** - Can only manage their own posts
 - **"Moderator"** - Can manage comments and user content

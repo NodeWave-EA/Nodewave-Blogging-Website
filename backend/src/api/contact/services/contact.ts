@@ -4,28 +4,33 @@
  */
 
 interface ContactFormData {
-	name: string
-	email: string
-	subject: string
-	message: string
+  name: string
+  email: string
+  subject: string
+  message: string
 }
 
 interface AutoReplyData {
-	name: string
-	email: string
-	subject: string
+  name: string
+  email: string
+  subject: string
 }
 
 export default () => ({
-	/**
-	 * Send admin notification email
-	 */
-	async sendAdminNotification({ name, email, subject, message }: ContactFormData): Promise<boolean> {
-		try {
-			const adminEmail = process.env.ADMIN_EMAIL || 'admin@nodewave.blog'
-			const companyName = process.env.COMPANY_NAME || 'NodeWave Blog'
+  /**
+   * Send admin notification email
+   */
+  async sendAdminNotification({
+    name,
+    email,
+    subject,
+    message,
+  }: ContactFormData): Promise<boolean> {
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@nodewave.blog'
+      const companyName = process.env.COMPANY_NAME || 'NodeWave Blog'
 
-			const html = `
+      const html = `
         <!DOCTYPE html>
         <html>
           <head>
@@ -146,7 +151,7 @@ export default () => ({
         </html>
       `
 
-			const text = `
+      const text = `
 New Contact Form Submission
 
 Name: ${name}
@@ -161,31 +166,31 @@ Received on ${new Date().toLocaleString()} via ${companyName} contact form
 Reply directly to this email to respond to ${name}.
       `
 
-			await strapi.plugins.email.services.email.send({
-				to: adminEmail,
-				from: process.env.EMAIL_DEFAULT_FROM || 'noreply@nodewave.blog',
-				replyTo: email, // Allow admin to reply directly to the user
-				subject: `[Contact Form] ${subject}`,
-				text,
-				html,
-			})
+      await strapi.plugins.email.services.email.send({
+        to: adminEmail,
+        from: process.env.EMAIL_DEFAULT_FROM || 'noreply@nodewave.blog',
+        replyTo: email, // Allow admin to reply directly to the user
+        subject: `[Contact Form] ${subject}`,
+        text,
+        html,
+      })
 
-			return true
-		} catch (error) {
-			strapi.log.error('Failed to send admin notification email:', error)
-			return false
-		}
-	},
+      return true
+    } catch (error) {
+      strapi.log.error('Failed to send admin notification email:', error)
+      return false
+    }
+  },
 
-	/**
-	 * Send auto-reply email to user
-	 */
-	async sendAutoReply({ name, email, subject }: AutoReplyData): Promise<boolean> {
-		try {
-			const companyName = process.env.COMPANY_NAME || 'NodeWave Blog'
-			const supportEmail = process.env.EMAIL_DEFAULT_REPLY_TO || 'support@nodewave.blog'
+  /**
+   * Send auto-reply email to user
+   */
+  async sendAutoReply({ name, email, subject }: AutoReplyData): Promise<boolean> {
+    try {
+      const companyName = process.env.COMPANY_NAME || 'NodeWave Blog'
+      const supportEmail = process.env.EMAIL_DEFAULT_REPLY_TO || 'support@nodewave.blog'
 
-			const html = `
+      const html = `
         <!DOCTYPE html>
         <html>
           <head>
@@ -304,7 +309,7 @@ Reply directly to this email to respond to ${name}.
         </html>
       `
 
-			const text = `
+      const text = `
 Hello ${name},
 
 Thank you for reaching out to us! Your email about "${subject}" has been received and we appreciate you taking the time to contact us.
@@ -321,19 +326,19 @@ This is an automated confirmation email. Please do not reply to this message.
 © ${new Date().getFullYear()} ${companyName}. All rights reserved.
       `
 
-			await strapi.plugins.email.services.email.send({
-				to: email,
-				from: process.env.EMAIL_DEFAULT_FROM || 'noreply@nodewave.blog',
-				replyTo: supportEmail,
-				subject: `Re: ${subject} - Message Received`,
-				text,
-				html,
-			})
+      await strapi.plugins.email.services.email.send({
+        to: email,
+        from: process.env.EMAIL_DEFAULT_FROM || 'noreply@nodewave.blog',
+        replyTo: supportEmail,
+        subject: `Re: ${subject} - Message Received`,
+        text,
+        html,
+      })
 
-			return true
-		} catch (error) {
-			strapi.log.error('Failed to send auto-reply email:', error)
-			return false
-		}
-	},
+      return true
+    } catch (error) {
+      strapi.log.error('Failed to send auto-reply email:', error)
+      return false
+    }
+  },
 })

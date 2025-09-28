@@ -8,7 +8,6 @@ import App from './App.vue'
 import { useTheme } from './composables/useTheme'
 import router from './router'
 
-
 // Import CSS
 import '@/assets/main.css'
 import 'aos/dist/aos.css'

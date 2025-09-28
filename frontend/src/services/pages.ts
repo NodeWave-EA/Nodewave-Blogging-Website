@@ -1,7 +1,7 @@
-import type { ApiResponse, Page } from '@/types';
-import { moduleLoaded } from '@/utils/debug';
-import { apiService } from './api';
-import { buildStrapiQuery } from './queryBuilder';
+import type { ApiResponse, Page } from '@/types'
+import { moduleLoaded } from '@/utils/debug'
+import { apiService } from './api'
+import { buildStrapiQuery } from './queryBuilder'
 
 moduleLoaded('pages.ts')
 
@@ -42,31 +42,31 @@ moduleLoaded('pages.ts')
  * const menuPages = response.data;
  */
 export const pagesApi = {
-	getBySlug: async (slug: string): Promise<{ data: Page }> => {
-		const params = {
-			'filters[slug][$eq]': slug,
-			populate: '*',
-			publicationState: 'live',
-		}
+  getBySlug: async (slug: string): Promise<{ data: Page }> => {
+    const params = {
+      'filters[slug][$eq]': slug,
+      populate: '*',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const response = await apiService.get<ApiResponse<Page[]>>(`/pages?${queryString}`)
+    const queryString = buildStrapiQuery(params)
+    const response = await apiService.get<ApiResponse<Page[]>>(`/pages?${queryString}`)
 
-		if (!response.data || response.data.length === 0) {
-			throw new Error('Page not found')
-		}
+    if (!response.data || response.data.length === 0) {
+      throw new Error('Page not found')
+    }
 
-		return { data: response.data[0] }
-	},
+    return { data: response.data[0] }
+  },
 
-	getMenuPages: async (): Promise<ApiResponse<Page[]>> => {
-		const params = {
-			'filters[show_in_menu][$eq]': true,
-			'sort[0]': 'menu_order:asc',
-			publicationState: 'live',
-		}
+  getMenuPages: async (): Promise<ApiResponse<Page[]>> => {
+    const params = {
+      'filters[show_in_menu][$eq]': true,
+      'sort[0]': 'menu_order:asc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		return apiService.get<ApiResponse<Page[]>>(`/pages?${queryString}`)
-	},
+    const queryString = buildStrapiQuery(params)
+    return apiService.get<ApiResponse<Page[]>>(`/pages?${queryString}`)
+  },
 }

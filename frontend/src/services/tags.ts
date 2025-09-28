@@ -1,7 +1,7 @@
-import type { ApiResponse, Tag } from '@/types';
-import { moduleLoaded } from '@/utils/debug';
-import { apiService } from './api';
-import { buildStrapiQuery } from './queryBuilder';
+import type { ApiResponse, Tag } from '@/types'
+import { moduleLoaded } from '@/utils/debug'
+import { apiService } from './api'
+import { buildStrapiQuery } from './queryBuilder'
 
 moduleLoaded('tags.ts')
 
@@ -34,44 +34,44 @@ moduleLoaded('tags.ts')
  * - Query strings are constructed using `buildStrapiQuery` and endpoints are requested via `apiService.get`.
  */
 export const tagsApi = {
-	getAll: async (): Promise<ApiResponse<Tag[]>> => {
-		const params = {
-			populate: '*',
-			'sort[0]': 'name:asc',
-			publicationState: 'live',
-		}
+  getAll: async (): Promise<ApiResponse<Tag[]>> => {
+    const params = {
+      populate: '*',
+      'sort[0]': 'name:asc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		return apiService.get<ApiResponse<Tag[]>>(`/tags?${queryString}`)
-	},
+    const queryString = buildStrapiQuery(params)
+    return apiService.get<ApiResponse<Tag[]>>(`/tags?${queryString}`)
+  },
 
-	getBySlug: async (slug: string): Promise<{ data: Tag }> => {
-		const params = {
-			'filters[slug][$eq]': slug,
-			populate: '*',
-			publicationState: 'live',
-		}
+  getBySlug: async (slug: string): Promise<{ data: Tag }> => {
+    const params = {
+      'filters[slug][$eq]': slug,
+      populate: '*',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const response = await apiService.get<ApiResponse<Tag[]>>(`/tags?${queryString}`)
+    const queryString = buildStrapiQuery(params)
+    const response = await apiService.get<ApiResponse<Tag[]>>(`/tags?${queryString}`)
 
-		if (!response.data || response.data.length === 0) {
-			throw new Error('Tag not found')
-		}
+    if (!response.data || response.data.length === 0) {
+      throw new Error('Tag not found')
+    }
 
-		return { data: response.data[0] }
-	},
+    return { data: response.data[0] }
+  },
 
-	getRelated: async (tagId: number, limit = 6): Promise<ApiResponse<Tag[]>> => {
-		const params = {
-			'filters[id][$ne]': tagId,
-			'pagination[pageSize]': limit,
-			'sort[0]': 'name:asc',
-			populate: '*',
-			publicationState: 'live',
-		}
+  getRelated: async (tagId: number, limit = 6): Promise<ApiResponse<Tag[]>> => {
+    const params = {
+      'filters[id][$ne]': tagId,
+      'pagination[pageSize]': limit,
+      'sort[0]': 'name:asc',
+      populate: '*',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		return apiService.get<ApiResponse<Tag[]>>(`/tags?${queryString}`)
-	},
+    const queryString = buildStrapiQuery(params)
+    return apiService.get<ApiResponse<Tag[]>>(`/tags?${queryString}`)
+  },
 }

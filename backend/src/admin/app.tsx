@@ -78,7 +78,6 @@ export default {
         console.log('⚠️ No Super Admin found - First user will become Super Admin')
         console.log('✅ register-admin route available for first admin')
       }
-
     } catch (error) {
       console.error('❌ Error during bootstrap:', error)
     }

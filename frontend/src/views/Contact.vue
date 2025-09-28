@@ -1,9 +1,12 @@
 <template>
   <div class="min-h-screen py-8 bg-transparent">
     <!-- Page Header -->
-    <PageHeader tag="Contact" title="Contact Us"
+    <PageHeader
+      tag="Contact"
+      title="Contact Us"
       description="We'd love to hear from you. Send us a message and we'll respond as soon as possible."
-      size="regular" />
+      size="regular"
+    />
 
     <!-- Contact Content -->
     <div class="container mx-auto px-4 max-w-6xl">
@@ -20,30 +23,35 @@
             <!-- Email -->
             <div v-if="companyInfo?.contact_email" class="flex items-start gap-4">
               <div
-                class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 border border-border bg-transparent">
+                class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 border border-border bg-transparent"
+              >
                 <EnvelopeIcon class="w-6 h-6 text-primary" />
               </div>
               <div>
                 <h3 class="font-semibold font-mono text-foreground mb-1">Email</h3>
-                <a :href="`mailto:${companyInfo.contact_email}`" class="text-primary hover:underline font-mono">
+                <a
+                  :href="`mailto:${companyInfo.contact_email}`"
+                  class="text-primary hover:underline font-mono"
+                >
                   {{ companyInfo.contact_email }}
                 </a>
-                <p class="text-sm text-muted-foreground mt-1 font-mono">
-                  Send us an email anytime
-                </p>
+                <p class="text-sm text-muted-foreground mt-1 font-mono">Send us an email anytime</p>
               </div>
             </div>
 
             <!-- Phone -->
             <div v-if="companyInfo?.contact_phone" class="flex items-start gap-4">
               <div
-                class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 border border-border bg-transparent">
+                class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 border border-border bg-transparent"
+              >
                 <PhoneIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
                 <h3 class="font-semibold font-mono text-foreground mb-1">Phone</h3>
-                <a :href="`tel:${companyInfo.contact_phone}`"
-                  class="text-green-600 dark:text-green-400 hover:underline font-mono">
+                <a
+                  :href="`tel:${companyInfo.contact_phone}`"
+                  class="text-green-600 dark:text-green-400 hover:underline font-mono"
+                >
                   {{ companyInfo.contact_phone }}
                 </a>
                 <p class="text-sm text-muted-foreground mt-1 font-mono">
@@ -55,7 +63,8 @@
             <!-- Address -->
             <div v-if="companyInfo?.address" class="flex items-start gap-4">
               <div
-                class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 border border-border bg-transparent">
+                class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 border border-border bg-transparent"
+              >
                 <MapPinIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
@@ -70,10 +79,15 @@
           <div v-if="companyInfo?.social_links?.length" class="mt-8">
             <h3 class="font-semibold font-mono text-foreground mb-4">Follow Us</h3>
             <div class="flex space-x-4">
-              <a v-for="social in companyInfo.social_links" :key="social.platform" :href="social.url" target="_blank"
+              <a
+                v-for="social in companyInfo.social_links"
+                :key="social.platform"
+                :href="social.url"
+                target="_blank"
                 rel="noopener noreferrer"
                 class="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground border border-border hover:bg-muted hover:text-primary transition-colors"
-                :title="social.platform">
+                :title="social.platform"
+              >
                 <GlobeAltIcon class="w-5 h-5" />
               </a>
             </div>
@@ -90,9 +104,14 @@
               <label for="name" class="block text-sm font-medium font-mono text-foreground mb-2">
                 Name *
               </label>
-              <input id="name" v-model="form.name" type="text" required
+              <input
+                id="name"
+                v-model="form.name"
+                type="text"
+                required
                 class="w-full px-4 py-3 border border-border rounded-lg bg-transparent text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors font-mono"
-                placeholder="Your full name" />
+                placeholder="Your full name"
+              />
             </div>
 
             <!-- Email -->
@@ -100,9 +119,14 @@
               <label for="email" class="block text-sm font-medium font-mono text-foreground mb-2">
                 Email *
               </label>
-              <input id="email" v-model="form.email" type="email" required
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                required
                 class="w-full px-4 py-3 border border-border rounded-lg bg-transparent text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors font-mono"
-                placeholder="your.email@example.com" />
+                placeholder="your.email@example.com"
+              />
             </div>
 
             <!-- Subject -->
@@ -110,9 +134,14 @@
               <label for="subject" class="block text-sm font-medium font-mono text-foreground mb-2">
                 Subject *
               </label>
-              <input id="subject" v-model="form.subject" type="text" required
+              <input
+                id="subject"
+                v-model="form.subject"
+                type="text"
+                required
                 class="w-full px-4 py-3 border border-border rounded-lg bg-transparent text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors font-mono"
-                placeholder="What's this about?" />
+                placeholder="What's this about?"
+              />
             </div>
 
             <!-- Message -->
@@ -120,14 +149,22 @@
               <label for="message" class="block text-sm font-medium font-mono text-foreground mb-2">
                 Message *
               </label>
-              <textarea id="message" v-model="form.message" rows="5" required
+              <textarea
+                id="message"
+                v-model="form.message"
+                rows="5"
+                required
                 class="w-full px-4 py-3 border border-border rounded-lg bg-transparent text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none font-mono"
-                placeholder="Tell us what you'd like to discuss..."></textarea>
+                placeholder="Tell us what you'd like to discuss..."
+              ></textarea>
             </div>
 
             <!-- Submit Button -->
-            <button type="submit" :disabled="isSubmitting"
-              class="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold font-mono rounded-lg hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md">
+            <button
+              type="submit"
+              :disabled="isSubmitting"
+              class="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold font-mono rounded-lg hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
+            >
               <span v-if="isSubmitting" class="flex items-center justify-center">
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                 Sending...
@@ -137,10 +174,14 @@
           </form>
 
           <!-- Success Message -->
-          <div v-if="showSuccess"
-            class="mt-6 p-4 bg-transparent border border-green-500 dark:border-green-400 rounded-lg">
+          <div
+            v-if="showSuccess"
+            class="mt-6 p-4 bg-transparent border border-green-500 dark:border-green-400 rounded-lg"
+          >
             <div class="flex items-start">
-              <CheckCircleIcon class="w-5 h-5 text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+              <CheckCircleIcon
+                class="w-5 h-5 text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0"
+              />
               <div>
                 <p class="text-green-700 dark:text-green-300 font-mono font-semibold mb-2">
                   Thank you for your message! We'll get back to you soon.
@@ -150,7 +191,10 @@
           </div>
 
           <!-- Error Message -->
-          <div v-if="error" class="mt-6 p-4 bg-transparent border border-red-500 dark:border-red-400 rounded-lg">
+          <div
+            v-if="error"
+            class="mt-6 p-4 bg-transparent border border-red-500 dark:border-red-400 rounded-lg"
+          >
             <div class="flex items-center">
               <ExclamationTriangleIcon class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />
               <p class="text-red-700 dark:text-red-300 font-mono">
@@ -176,17 +220,13 @@
             </p>
           </div>
           <div class="rounded-lg p-6 border border-border bg-transparent">
-            <h3 class="font-semibold font-mono text-foreground mb-2">
-              Can I suggest blog topics?
-            </h3>
+            <h3 class="font-semibold font-mono text-foreground mb-2">Can I suggest blog topics?</h3>
             <p class="text-muted-foreground text-sm font-mono">
               Absolutely! We love hearing content ideas from our readers.
             </p>
           </div>
           <div class="rounded-lg p-6 border border-border bg-transparent">
-            <h3 class="font-semibold font-mono text-foreground mb-2">
-              Do you accept guest posts?
-            </h3>
+            <h3 class="font-semibold font-mono text-foreground mb-2">Do you accept guest posts?</h3>
             <p class="text-muted-foreground text-sm font-mono">
               We consider guest contributions. Please include details about your proposed topic.
             </p>
@@ -206,90 +246,90 @@
 </template>
 
 <script setup lang="ts">
-  import PageHeader from '@/components/ui/PageHeader.vue';
-  import { useCompanyInfo } from '@/composables/useCompanyInfo';
-  import { contactService } from '@/services';
-  import type { ContactForm } from '@/types';
-  import { updateSEO } from '@/utils/seo';
-  import {
-    CheckCircleIcon,
-    EnvelopeIcon,
-    ExclamationTriangleIcon,
-    GlobeAltIcon,
-    MapPinIcon,
-    PhoneIcon,
-  } from '@heroicons/vue/24/outline';
-  import { onMounted, reactive, ref } from 'vue';
+import PageHeader from '@/components/ui/PageHeader.vue'
+import { useCompanyInfo } from '@/composables/useCompanyInfo'
+import { contactService } from '@/services'
+import type { ContactForm } from '@/types'
+import { updateSEO } from '@/utils/seo'
+import {
+  CheckCircleIcon,
+  EnvelopeIcon,
+  ExclamationTriangleIcon,
+  GlobeAltIcon,
+  MapPinIcon,
+  PhoneIcon,
+} from '@heroicons/vue/24/outline'
+import { onMounted, reactive, ref } from 'vue'
 
-  // Composables
-  const { companyInfo, fetchCompanyInfo } = useCompanyInfo()
+// Composables
+const { companyInfo, fetchCompanyInfo } = useCompanyInfo()
 
-  // Reactive data
-  const form = reactive<ContactForm>({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  })
+// Reactive data
+const form = reactive<ContactForm>({
+  name: '',
+  email: '',
+  subject: '',
+  message: '',
+})
 
-  const isSubmitting = ref(false)
-  const showSuccess = ref(false)
-  const error = ref<string | null>(null)
-  const successDetails = ref<{ adminNotificationSent: boolean; autoReplySent: boolean } | null>(null)
+const isSubmitting = ref(false)
+const showSuccess = ref(false)
+const error = ref<string | null>(null)
+const successDetails = ref<{ adminNotificationSent: boolean; autoReplySent: boolean } | null>(null)
 
-  // Methods
-  const handleSubmit = async () => {
-    try {
-      isSubmitting.value = true
-      error.value = null
-      showSuccess.value = false
+// Methods
+const handleSubmit = async () => {
+  try {
+    isSubmitting.value = true
+    error.value = null
+    showSuccess.value = false
 
-      // Submit form to backend API
-      const response = await contactService.submitContactForm(form)
+    // Submit form to backend API
+    const response = await contactService.submitContactForm(form)
 
-      if (response.success) {
-        showSuccess.value = true
-        successDetails.value = response.data
+    if (response.success) {
+      showSuccess.value = true
+      successDetails.value = response.data
 
-        // Reset form
-        Object.assign(form, {
-          name: '',
-          email: '',
-          subject: '',
-          message: '',
-        })
+      // Reset form
+      Object.assign(form, {
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+      })
 
-        // Hide success message after 10 seconds
-        setTimeout(() => {
-          showSuccess.value = false
-          successDetails.value = null
-        }, 10000)
-      } else {
-        throw new Error(response.message || 'Failed to send message')
-      }
-    } catch (err: any) {
-      console.error('Failed to send message:', err)
-      error.value = err.message || 'Failed to send message. Please try again or contact us directly.'
-
-      // Hide error message after 8 seconds
+      // Hide success message after 10 seconds
       setTimeout(() => {
-        error.value = null
-      }, 8000)
-    } finally {
-      isSubmitting.value = false
+        showSuccess.value = false
+        successDetails.value = null
+      }, 10000)
+    } else {
+      throw new Error(response.message || 'Failed to send message')
     }
+  } catch (err: any) {
+    console.error('Failed to send message:', err)
+    error.value = err.message || 'Failed to send message. Please try again or contact us directly.'
+
+    // Hide error message after 8 seconds
+    setTimeout(() => {
+      error.value = null
+    }, 8000)
+  } finally {
+    isSubmitting.value = false
   }
+}
 
-  // Lifecycle
-  onMounted(async () => {
-    // Update SEO
-    updateSEO({
-      title: 'Contact Us',
-      description: "Get in touch with us. We'd love to hear from you.",
-      type: 'website',
-    })
-
-    // Fetch company info
-    await fetchCompanyInfo()
+// Lifecycle
+onMounted(async () => {
+  // Update SEO
+  updateSEO({
+    title: 'Contact Us',
+    description: "Get in touch with us. We'd love to hear from you.",
+    type: 'website',
   })
+
+  // Fetch company info
+  await fetchCompanyInfo()
+})
 </script>

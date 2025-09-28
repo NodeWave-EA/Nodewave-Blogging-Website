@@ -1,11 +1,11 @@
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
 // Global theme state - singleton pattern
-let globalTheme = ref<ThemeMode>('system')
-let isDark = ref(false)
-let systemTheme = ref<'light' | 'dark'>('light')
+const globalTheme = ref<ThemeMode>('system')
+const isDark = ref(false)
+const systemTheme = ref<'light' | 'dark'>('light')
 let mediaQuery: MediaQueryList | null = null
 
 export function useTheme() {
@@ -241,7 +241,7 @@ function handleSystemThemeChange(e: MediaQueryListEvent) {
     }
 
     // Update meta theme color
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', e.matches ? '#0f172a' : '#ffffff')
     }

@@ -54,17 +54,13 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "gallery": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "author": {
       "type": "relation",
@@ -154,19 +150,12 @@
     },
     "status": {
       "type": "enumeration",
-      "enum": [
-        "draft",
-        "published"
-      ],
+      "enum": ["draft", "published"],
       "default": "draft"
     },
     "priority": {
       "type": "enumeration",
-      "enum": [
-        "low",
-        "normal",
-        "high"
-      ],
+      "enum": ["low", "normal", "high"],
       "default": "normal"
     }
   }

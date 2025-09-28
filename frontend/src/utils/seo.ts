@@ -5,7 +5,8 @@ import type { BlogPost, BlogSetting, Category } from '@/types'
 import { getStrapiImageUrl } from './strapi'
 
 const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337'
-const placeholderImageUrl = strapiBaseUrl + import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
+const placeholderImageUrl =
+  strapiBaseUrl + import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
 const siteUrl = import.meta.env.VITE_SITE_URL || 'http://localhost:5173'
 
 export interface SEOData {
@@ -48,7 +49,7 @@ export interface MetaTags {
 /**
  * Generate meta tags for a blog post
  */
-export function generatePostMetaTags(post: BlogPost, baseUrl: string = ''): MetaTags {
+export function generatePostMetaTags(post: BlogPost): MetaTags {
   const title = post.seo?.meta_title || post.title
   const description = post.seo?.meta_description || post.excerpt || ''
   const imageUrl = getStrapiImageUrl(post.featured_image) || placeholderImageUrl
@@ -80,7 +81,6 @@ export function generatePostMetaTags(post: BlogPost, baseUrl: string = ''): Meta
  * Generate meta tags for category pages
  */
 export function generateCategoryMetaTags(category: Category): MetaTags {
-
   const title = category.name
   const description = category.description || `Posts in the ${category.name} category`
   const url = `${siteUrl}/categories/${category.slug}`
@@ -100,9 +100,7 @@ export function generateCategoryMetaTags(category: Category): MetaTags {
 /**
  * Generate meta tags for the homepage
  */
-export function generateHomepageMetaTags(
-  blogSettings?: BlogSetting,
-): MetaTags {
+export function generateHomepageMetaTags(blogSettings?: BlogSetting): MetaTags {
   const title = blogSettings?.site_name || 'NodeWave Blog'
   const description =
     blogSettings?.site_description ||

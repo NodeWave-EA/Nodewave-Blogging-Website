@@ -1,7 +1,7 @@
-import type { ApiResponse, BlogSetting } from '@/types';
-import { moduleLoaded } from '@/utils/debug';
-import { apiService } from './api';
-import { buildStrapiQuery } from './queryBuilder';
+import type { ApiResponse, BlogSetting } from '@/types'
+import { moduleLoaded } from '@/utils/debug'
+import { apiService } from './api'
+import { buildStrapiQuery } from './queryBuilder'
 
 moduleLoaded('settings.ts')
 
@@ -37,20 +37,20 @@ moduleLoaded('settings.ts')
  * @see apiService.get
  */
 export const blogSettingsApi = {
-	get: async (): Promise<{ data: BlogSetting }> => {
-		const params = {
-			populate: '*',
-		}
+  get: async (): Promise<{ data: BlogSetting }> => {
+    const params = {
+      populate: '*',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const response = await apiService.get<ApiResponse<BlogSetting[]>>(
-			`/blog-settings?${queryString}`,
-		)
+    const queryString = buildStrapiQuery(params)
+    const response = await apiService.get<ApiResponse<BlogSetting[]>>(
+      `/blog-settings?${queryString}`,
+    )
 
-		if (!response.data || response.data.length === 0) {
-			throw new Error('Blog settings not found')
-		}
+    if (!response.data || response.data.length === 0) {
+      throw new Error('Blog settings not found')
+    }
 
-		return { data: response.data[0] }
-	},
+    return { data: response.data[0] }
+  },
 }

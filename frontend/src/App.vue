@@ -1,74 +1,74 @@
 <script setup lang="ts">
-  import { useCompanyInfo } from '@/composables/useCompanyInfo';
-  import { useTheme } from '@/composables/useTheme';
-  import { computed, onMounted, onUnmounted, ref } from 'vue';
-  import { RouterView, useRoute } from 'vue-router';
+import { useCompanyInfo } from '@/composables/useCompanyInfo'
+import { useTheme } from '@/composables/useTheme'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 
-  // Layout Components
-  import AppFooter from '@/components/layout/AppFooter.vue';
-  import AppHeader from '@/components/layout/AppHeader.vue';
-  import Background from '@/components/layout/Background.vue';
-  import BackToTop from '@/components/layout/BackToTop.vue';
-  import NewsletterPopup from '@/components/newsletter/NewsletterPopup.vue';
+// Layout Components
+import AppFooter from '@/components/layout/AppFooter.vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
+import Background from '@/components/layout/Background.vue'
+import BackToTop from '@/components/layout/BackToTop.vue'
+import NewsletterPopup from '@/components/newsletter/NewsletterPopup.vue'
 
-  // Theme & Company Info
-  const { initializeTheme } = useTheme()
-  const { companyInfo, fetchCompanyInfo } = useCompanyInfo()
+// Theme & Company Info
+const { initializeTheme } = useTheme()
+const { companyInfo, fetchCompanyInfo } = useCompanyInfo()
 
-  // Route-based background logic
-  const route = useRoute()
-  const currentPage = computed(() => {
-    if (route.name) {
-      return String(route.name).toLowerCase()
-    }
-    const path = route.path.slice(1)
-    if (!path) return 'home'
-    if (path.startsWith('blog/') && path !== 'blog') {
-      return 'post'
-    }
-    return path.split('/')[0] || 'home'
-  })
+// Route-based background logic
+const route = useRoute()
+const currentPage = computed(() => {
+  if (route.name) {
+    return String(route.name).toLowerCase()
+  }
+  const path = route.path.slice(1)
+  if (!path) return 'home'
+  if (path.startsWith('blog/') && path !== 'blog') {
+    return 'post'
+  }
+  return path.split('/')[0] || 'home'
+})
 
-  // Newsletter popup
-  const showNewsletterPopup = ref(false)
-  const openNewsletterNow = ref(false)
-  let newsletterTimer: NodeJS.Timeout | null = null
+// Newsletter popup
+const showNewsletterPopup = ref(false)
+const openNewsletterNow = ref(false)
+let newsletterTimer: NodeJS.Timeout | null = null
 
-  onMounted(async () => {
-    // Initialize theme
-    initializeTheme()
+onMounted(async () => {
+  // Initialize theme
+  initializeTheme()
 
-    // Fetch company info
-    await fetchCompanyInfo()
+  // Fetch company info
+  await fetchCompanyInfo()
 
-    // Show newsletter popup after 30s (if enabled)
-    if (companyInfo.value?.newsletter_enabled) {
-      newsletterTimer = setTimeout(() => {
-        const hasSeenPopup = localStorage.getItem('newsletter-popup-seen')
-        if (!hasSeenPopup) {
-          showNewsletterPopup.value = true
-          localStorage.setItem('newsletter-popup-seen', 'true')
-        }
-      }, 30000)
-    }
+  // Show newsletter popup after 30s (if enabled)
+  if (companyInfo.value?.newsletter_enabled) {
+    newsletterTimer = setTimeout(() => {
+      const hasSeenPopup = localStorage.getItem('newsletter-popup-seen')
+      if (!hasSeenPopup) {
+        showNewsletterPopup.value = true
+        localStorage.setItem('newsletter-popup-seen', 'true')
+      }
+    }, 30000)
+  }
 
-    // Open newsletter popup on CTA click
-    const openHandler = () => {
-      openNewsletterNow.value = true
-      showNewsletterPopup.value = true
-    }
-    window.addEventListener('open-newsletter', openHandler)
-      // Store to remove later
-      ; (window as any)._openNewsletterHandler = openHandler
-  })
+  // Open newsletter popup on CTA click
+  const openHandler = () => {
+    openNewsletterNow.value = true
+    showNewsletterPopup.value = true
+  }
+  window.addEventListener('open-newsletter', openHandler)
+  // Store to remove later
+  ;(window as any)._openNewsletterHandler = openHandler
+})
 
-  onUnmounted(() => {
-    if (newsletterTimer) {
-      clearTimeout(newsletterTimer)
-    }
-    const h = (window as any)._openNewsletterHandler
-    if (h) window.removeEventListener('open-newsletter', h)
-  })
+onUnmounted(() => {
+  if (newsletterTimer) {
+    clearTimeout(newsletterTimer)
+  }
+  const h = (window as any)._openNewsletterHandler
+  if (h) window.removeEventListener('open-newsletter', h)
+})
 </script>
 
 <template>
@@ -91,52 +91,59 @@
     <BackToTop />
 
     <!-- Newsletter Popup -->
-    <NewsletterPopup v-if="showNewsletterPopup" :open-on-mount="openNewsletterNow"
-      @close="() => { showNewsletterPopup = false; openNewsletterNow = false }" />
+    <NewsletterPopup
+      v-if="showNewsletterPopup"
+      :open-on-mount="openNewsletterNow"
+      @close="
+        () => {
+          showNewsletterPopup = false
+          openNewsletterNow = false
+        }
+      "
+    />
   </div>
 </template>
 
 <style scoped>
+/* App-specific styles */
+#app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
 
-  /* App-specific styles */
-  #app {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    line-height: 1.6;
-  }
+/* Ensure smooth transitions for the entire app */
+#app * {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-  /* Ensure smooth transitions for the entire app */
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
   #app * {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-    transition-duration: 0.3s;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  #app {
+    filter: contrast(1.2);
+  }
+}
+
+/* Print styles */
+@media print {
+  #app {
+    background: white !important;
   }
 
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    #app * {
-      transition-duration: 0.01ms !important;
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-    }
+  /* Hide interactive elements during print */
+  .no-print {
+    display: none !important;
   }
-
-  /* High contrast mode support */
-  @media (prefers-contrast: high) {
-    #app {
-      filter: contrast(1.2);
-    }
-  }
-
-  /* Print styles */
-  @media print {
-    #app {
-      background: white !important;
-    }
-
-    /* Hide interactive elements during print */
-    .no-print {
-      display: none !important;
-    }
-  }
+}
 </style>

@@ -406,24 +406,24 @@ export const seedDatabase = async (strapi: Core.Strapi) => {
           priority: (priority || 'normal') as 'low' | 'normal' | 'high',
           seo: seo
             ? {
-              ...seo,
-              og_type: (seo.og_type || 'article') as 'website' | 'article' | 'profile',
-              twitter_card: (seo.twitter_card || 'summary_large_image') as
-                | 'summary'
-                | 'summary_large_image'
-                | 'app'
-                | 'player',
-              robots: (seo.robots || 'index,follow') as
-                | 'index,follow'
-                | 'noindex,follow'
-                | 'index,nofollow'
-                | 'noindex,nofollow',
-            }
+                ...seo,
+                og_type: (seo.og_type || 'article') as 'website' | 'article' | 'profile',
+                twitter_card: (seo.twitter_card || 'summary_large_image') as
+                  | 'summary'
+                  | 'summary_large_image'
+                  | 'app'
+                  | 'player',
+                robots: (seo.robots || 'index,follow') as
+                  | 'index,follow'
+                  | 'noindex,follow'
+                  | 'index,nofollow'
+                  | 'noindex,nofollow',
+              }
             : undefined,
           social_sharing: social_sharing
             ? {
-              ...social_sharing,
-            }
+                ...social_sharing,
+              }
             : undefined,
           publishedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000), // Stagger publication dates
         },

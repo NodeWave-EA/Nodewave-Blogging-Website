@@ -3,7 +3,6 @@
     <!-- Content Container -->
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
-
         <!-- About Section -->
         <AboutSection />
 
@@ -17,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-  import AboutSection from '@/components/sections/AboutSection.vue';
-  import CallToActionSection from '@/components/sections/CallToActionSection.vue';
-  import StatsSection from '@/components/sections/StatsSection.vue';
+import AboutSection from '@/components/sections/AboutSection.vue'
+import CallToActionSection from '@/components/sections/CallToActionSection.vue'
+import StatsSection from '@/components/sections/StatsSection.vue'
 </script>

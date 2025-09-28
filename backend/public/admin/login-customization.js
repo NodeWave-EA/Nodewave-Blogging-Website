@@ -5,55 +5,59 @@
 
 // Function to check if super admin exists
 async function checkSuperAdminExists() {
-	try {
-		// Use our custom API endpoint to check super admin status
-		const response = await fetch('/admin/super-admin-status');
+  try {
+    // Use our custom API endpoint to check super admin status
+    const response = await fetch('/admin/super-admin-status')
 
-		if (response.ok) {
-			const data = await response.json();
-			console.log('Super admin status:', data);
-			return data.hasSuperAdmin;
-		} else {
-			console.warn('Could not check super admin status, response not ok:', response.status);
-			return true; // Default to true for security
-		}
-	} catch (error) {
-		console.warn('Could not check super admin status:', error);
-		return true; // Default to true for security
-	}
+    if (response.ok) {
+      const data = await response.json()
+      console.log('Super admin status:', data)
+      return data.hasSuperAdmin
+    } else {
+      console.warn('Could not check super admin status, response not ok:', response.status)
+      return true // Default to true for security
+    }
+  } catch (error) {
+    console.warn('Could not check super admin status:', error)
+    return true // Default to true for security
+  }
 }
 
 // Function to handle admin registration page
 async function handleAdminRegistrationPage() {
-	if (window.location.pathname !== '/admin/auth/register-admin') {
-		return;
-	}
+  if (window.location.pathname !== '/admin/auth/register-admin') {
+    return
+  }
 
-	const hasSuperAdmin = await checkSuperAdminExists();
-	if (hasSuperAdmin) {
-		console.log('🚫 Redirecting from register-admin - Super Admin already exists');
-		window.location.href = '/admin/auth/register';
-	}
+  const hasSuperAdmin = await checkSuperAdminExists()
+  if (hasSuperAdmin) {
+    console.log('🚫 Redirecting from register-admin - Super Admin already exists')
+    window.location.href = '/admin/auth/register'
+  }
 }
 
 // Function to inject registration link
 function addRegistrationLink() {
-	// Check if we're on the login page and not already injected
-	if (window.location.pathname !== '/admin/auth/login' || document.querySelector('#nodewave-registration-link')) {
-		return
-	}
+  // Check if we're on the login page and not already injected
+  if (
+    window.location.pathname !== '/admin/auth/login' ||
+    document.querySelector('#nodewave-registration-link')
+  ) {
+    return
+  }
 
-	// Wait for login form to be rendered
-	const interval = setInterval(() => {
-		const loginForm = document.querySelector('form[role="presentation"]') ||
-			document.querySelector('form[aria-labelledby="login-title"]') ||
-			document.querySelector('form')
+  // Wait for login form to be rendered
+  const interval = setInterval(() => {
+    const loginForm =
+      document.querySelector('form[role="presentation"]') ||
+      document.querySelector('form[aria-labelledby="login-title"]') ||
+      document.querySelector('form')
 
-		if (loginForm && !document.querySelector('#nodewave-registration-link')) {
-			// Create registration link container
-			const linkContainer = document.createElement('div')
-			linkContainer.id = 'nodewave-registration-link'
-			linkContainer.innerHTML = `
+    if (loginForm && !document.querySelector('#nodewave-registration-link')) {
+      // Create registration link container
+      const linkContainer = document.createElement('div')
+      linkContainer.id = 'nodewave-registration-link'
+      linkContainer.innerHTML = `
         <style>
           #nodewave-registration-link {
             display: flex;
@@ -122,51 +126,51 @@ function addRegistrationLink() {
         </a>
       `
 
-			// Insert after the form
-			if (loginForm && !document.querySelector('#nodewave-registration-link')) {
-				// Insert directly after the login form so the link appears below it
-				loginForm.insertAdjacentElement('afterend', linkContainer)
-				clearInterval(interval)
-				console.log('✅ Registration link added to login page')
-			}
-		}
-	}, 500)
+      // Insert after the form
+      if (loginForm && !document.querySelector('#nodewave-registration-link')) {
+        // Insert directly after the login form so the link appears below it
+        loginForm.insertAdjacentElement('afterend', linkContainer)
+        clearInterval(interval)
+        console.log('✅ Registration link added to login page')
+      }
+    }
+  }, 500)
 
-	// Clear interval after 10 seconds to prevent infinite checking
-	setTimeout(() => clearInterval(interval), 10000)
+  // Clear interval after 10 seconds to prevent infinite checking
+  setTimeout(() => clearInterval(interval), 10000)
 }
 
 // Main initialization function
 function initialize() {
-	addRegistrationLink();
-	handleAdminRegistrationPage();
+  addRegistrationLink()
+  handleAdminRegistrationPage()
 }
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', initialize)
+  document.addEventListener('DOMContentLoaded', initialize)
 } else {
-	initialize()
+  initialize()
 }
 
 // Also check when navigation occurs (for SPAs)
 window.addEventListener('popstate', () => {
-	setTimeout(initialize, 100)
+  setTimeout(initialize, 100)
 })
 
 // Watch for route changes in SPAs
-if (typeof (window as any).__nodewave_originalPushState === 'undefined') {
-	(window as any).__nodewave_originalPushState = history.pushState
-	history.pushState = function (state, title, url) {
-		(window as any).__nodewave_originalPushState.call(history, state, title, url)
-		setTimeout(initialize, 100)
-	}
+if (typeof window.__nodewave_originalPushState === 'undefined') {
+  window.__nodewave_originalPushState = history.pushState
+  history.pushState = function (state, title, url) {
+    window.__nodewave_originalPushState.call(history, state, title, url)
+    setTimeout(initialize, 100)
+  }
 }
 
-if (typeof (window as any).__nodewave_originalReplaceState === 'undefined') {
-	(window as any).__nodewave_originalReplaceState = history.replaceState
-	history.replaceState = function (state, title, url) {
-		(window as any).__nodewave_originalReplaceState.call(history, state, title, url)
-		setTimeout(initialize, 100)
-	}
+if (typeof window.__nodewave_originalReplaceState === 'undefined') {
+  window.__nodewave_originalReplaceState = history.replaceState
+  history.replaceState = function (state, title, url) {
+    window.__nodewave_originalReplaceState.call(history, state, title, url)
+    setTimeout(initialize, 100)
+  }
 }

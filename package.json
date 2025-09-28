@@ -17,6 +17,7 @@
   "author": "Gideon-Yebei",
   "type": "module",
   "scripts": {
+    "lint": "eslint . --fix",
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,vue,md,yml,webmanifest,html,mts}'"
   },
   "devDependencies": {

@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2025-09-27T15:58:34.539Z"
+    "x-generation-date": "2025-09-27T20:04:11.766Z"
   },
   "servers": [
     {
@@ -38,9 +38,7 @@
     "schemas": {
       "Error": {
         "type": "object",
-        "required": [
-          "error"
-        ],
+        "required": ["error"],
         "properties": {
           "data": {
             "nullable": true,
@@ -77,16 +75,10 @@
       },
       "AuthorRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
-            "required": [
-              "name",
-              "slug",
-              "email"
-            ],
+            "required": ["name", "slug", "email"],
             "type": "object",
             "properties": {
               "name": {
@@ -248,11 +240,7 @@
       },
       "Author": {
         "type": "object",
-        "required": [
-          "name",
-          "slug",
-          "email"
-        ],
+        "required": ["name", "slug", "email"],
         "properties": {
           "id": {
             "type": "number"
@@ -1663,9 +1651,6 @@
                               }
                             }
                           },
-                          "post_count": {
-                            "type": "integer"
-                          },
                           "trending": {
                             "type": "boolean"
                           },
@@ -2227,9 +2212,6 @@
                       "featured": {
                         "type": "boolean"
                       },
-                      "post_count": {
-                        "type": "integer"
-                      },
                       "order": {
                         "type": "integer"
                       },
@@ -2356,18 +2338,11 @@
                 },
                 "status": {
                   "type": "string",
-                  "enum": [
-                    "draft",
-                    "published"
-                  ]
+                  "enum": ["draft", "published"]
                 },
                 "priority": {
                   "type": "string",
-                  "enum": [
-                    "low",
-                    "normal",
-                    "high"
-                  ]
+                  "enum": ["low", "normal", "high"]
                 },
                 "createdAt": {
                   "type": "string",
@@ -2729,20 +2704,11 @@
           },
           "og_type": {
             "type": "string",
-            "enum": [
-              "website",
-              "article",
-              "profile"
-            ]
+            "enum": ["website", "article", "profile"]
           },
           "twitter_card": {
             "type": "string",
-            "enum": [
-              "summary",
-              "summary_large_image",
-              "app",
-              "player"
-            ]
+            "enum": ["summary", "summary_large_image", "app", "player"]
           },
           "twitter_title": {
             "type": "string"
@@ -2881,29 +2847,16 @@
           },
           "robots": {
             "type": "string",
-            "enum": [
-              "index,follow",
-              "noindex,follow",
-              "index,nofollow",
-              "noindex,nofollow"
-            ]
+            "enum": ["index,follow", "noindex,follow", "index,nofollow", "noindex,nofollow"]
           }
         }
       },
       "BlogPostRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
-            "required": [
-              "title",
-              "slug",
-              "content",
-              "social_sharing",
-              "seo"
-            ],
+            "required": ["title", "slug", "content", "social_sharing", "seo"],
             "type": "object",
             "properties": {
               "title": {
@@ -3031,18 +2984,11 @@
               },
               "status": {
                 "type": "string",
-                "enum": [
-                  "draft",
-                  "published"
-                ]
+                "enum": ["draft", "published"]
               },
               "priority": {
                 "type": "string",
-                "enum": [
-                  "low",
-                  "normal",
-                  "high"
-                ]
+                "enum": ["low", "normal", "high"]
               },
               "locale": {
                 "type": "string"
@@ -3102,13 +3048,7 @@
       },
       "BlogPost": {
         "type": "object",
-        "required": [
-          "title",
-          "slug",
-          "content",
-          "social_sharing",
-          "seo"
-        ],
+        "required": ["title", "slug", "content", "social_sharing", "seo"],
         "properties": {
           "id": {
             "type": "number"
@@ -4654,9 +4594,6 @@
                           "featured": {
                             "type": "boolean"
                           },
-                          "post_count": {
-                            "type": "integer"
-                          },
                           "order": {
                             "type": "integer"
                           },
@@ -4756,9 +4693,6 @@
                                 }
                               }
                             }
-                          },
-                          "post_count": {
-                            "type": "integer"
                           },
                           "trending": {
                             "type": "boolean"
@@ -4869,18 +4803,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "draft",
-                        "published"
-                      ]
+                      "enum": ["draft", "published"]
                     },
                     "priority": {
                       "type": "string",
-                      "enum": [
-                        "low",
-                        "normal",
-                        "high"
-                      ]
+                      "enum": ["low", "normal", "high"]
                     },
                     "createdAt": {
                       "type": "string",
@@ -5331,18 +5258,11 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "draft",
-              "published"
-            ]
+            "enum": ["draft", "published"]
           },
           "priority": {
             "type": "string",
-            "enum": [
-              "low",
-              "normal",
-              "high"
-            ]
+            "enum": ["low", "normal", "high"]
           },
           "createdAt": {
             "type": "string",
@@ -5410,15 +5330,10 @@
       },
       "BlogSettingRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
-            "required": [
-              "site_name",
-              "site_url"
-            ],
+            "required": ["site_name", "site_url"],
             "type": "object",
             "properties": {
               "site_name": {
@@ -5517,11 +5432,7 @@
               },
               "theme": {
                 "type": "string",
-                "enum": [
-                  "light",
-                  "dark",
-                  "auto"
-                ]
+                "enum": ["light", "dark", "auto"]
               },
               "timezone": {
                 "type": "string"
@@ -5590,10 +5501,7 @@
       },
       "BlogSetting": {
         "type": "object",
-        "required": [
-          "site_name",
-          "site_url"
-        ],
+        "required": ["site_name", "site_url"],
         "properties": {
           "id": {
             "type": "number"
@@ -7133,9 +7041,6 @@
                           "featured": {
                             "type": "boolean"
                           },
-                          "post_count": {
-                            "type": "integer"
-                          },
                           "order": {
                             "type": "integer"
                           },
@@ -7235,9 +7140,6 @@
                                 }
                               }
                             }
-                          },
-                          "post_count": {
-                            "type": "integer"
                           },
                           "trending": {
                             "type": "boolean"
@@ -7348,18 +7250,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "draft",
-                        "published"
-                      ]
+                      "enum": ["draft", "published"]
                     },
                     "priority": {
                       "type": "string",
-                      "enum": [
-                        "low",
-                        "normal",
-                        "high"
-                      ]
+                      "enum": ["low", "normal", "high"]
                     },
                     "createdAt": {
                       "type": "string",
@@ -7787,11 +7682,7 @@
           },
           "theme": {
             "type": "string",
-            "enum": [
-              "light",
-              "dark",
-              "auto"
-            ]
+            "enum": ["light", "dark", "auto"]
           },
           "timezone": {
             "type": "string"
@@ -8182,11 +8073,7 @@
                 },
                 "theme": {
                   "type": "string",
-                  "enum": [
-                    "light",
-                    "dark",
-                    "auto"
-                  ]
+                  "enum": ["light", "dark", "auto"]
                 },
                 "timezone": {
                   "type": "string"
@@ -8266,15 +8153,10 @@
       },
       "CategoryRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
-            "required": [
-              "name",
-              "slug"
-            ],
+            "required": ["name", "slug"],
             "type": "object",
             "properties": {
               "name": {
@@ -8345,9 +8227,6 @@
               "featured": {
                 "type": "boolean"
               },
-              "post_count": {
-                "type": "integer"
-              },
               "order": {
                 "type": "integer"
               },
@@ -8415,10 +8294,7 @@
       },
       "Category": {
         "type": "object",
-        "required": [
-          "name",
-          "slug"
-        ],
+        "required": ["name", "slug"],
         "properties": {
           "id": {
             "type": "number"
@@ -9856,9 +9732,6 @@
                                   }
                                 }
                               },
-                              "post_count": {
-                                "type": "integer"
-                              },
                               "trending": {
                                 "type": "boolean"
                               },
@@ -10300,18 +10173,11 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "draft",
-                        "published"
-                      ]
+                      "enum": ["draft", "published"]
                     },
                     "priority": {
                       "type": "string",
-                      "enum": [
-                        "low",
-                        "normal",
-                        "high"
-                      ]
+                      "enum": ["low", "normal", "high"]
                     },
                     "createdAt": {
                       "type": "string",
@@ -10369,9 +10235,6 @@
               },
               "featured": {
                 "type": "boolean"
-              },
-              "post_count": {
-                "type": "integer"
               },
               "order": {
                 "type": "integer"
@@ -10466,9 +10329,6 @@
           "featured": {
             "type": "boolean"
           },
-          "post_count": {
-            "type": "integer"
-          },
           "order": {
             "type": "integer"
           },
@@ -10544,16 +10404,10 @@
       },
       "CommentRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
-            "required": [
-              "content",
-              "author_name",
-              "author_email"
-            ],
+            "required": ["content", "author_name", "author_email"],
             "type": "object",
             "properties": {
               "content": {
@@ -10636,12 +10490,7 @@
               },
               "report_reason": {
                 "type": "string",
-                "enum": [
-                  "spam",
-                  "inappropriate",
-                  "offensive",
-                  "other"
-                ]
+                "enum": ["spam", "inappropriate", "offensive", "other"]
               },
               "locale": {
                 "type": "string"
@@ -10701,11 +10550,7 @@
       },
       "Comment": {
         "type": "object",
-        "required": [
-          "content",
-          "author_name",
-          "author_email"
-        ],
+        "required": ["content", "author_name", "author_email"],
         "properties": {
           "id": {
             "type": "number"
@@ -11832,9 +11677,6 @@
                             }
                           }
                         },
-                        "post_count": {
-                          "type": "integer"
-                        },
                         "trending": {
                           "type": "boolean"
                         },
@@ -12396,9 +12238,6 @@
                     "featured": {
                       "type": "boolean"
                     },
-                    "post_count": {
-                      "type": "integer"
-                    },
                     "order": {
                       "type": "integer"
                     },
@@ -12525,18 +12364,11 @@
               },
               "status": {
                 "type": "string",
-                "enum": [
-                  "draft",
-                  "published"
-                ]
+                "enum": ["draft", "published"]
               },
               "priority": {
                 "type": "string",
-                "enum": [
-                  "low",
-                  "normal",
-                  "high"
-                ]
+                "enum": ["low", "normal", "high"]
               },
               "createdAt": {
                 "type": "string",
@@ -12680,12 +12512,7 @@
               },
               "report_reason": {
                 "type": "string",
-                "enum": [
-                  "spam",
-                  "inappropriate",
-                  "offensive",
-                  "other"
-                ]
+                "enum": ["spam", "inappropriate", "offensive", "other"]
               },
               "createdAt": {
                 "type": "string",
@@ -12785,12 +12612,7 @@
           },
           "report_reason": {
             "type": "string",
-            "enum": [
-              "spam",
-              "inappropriate",
-              "offensive",
-              "other"
-            ]
+            "enum": ["spam", "inappropriate", "offensive", "other"]
           },
           "createdAt": {
             "type": "string",
@@ -12858,9 +12680,7 @@
       },
       "CompanyInfoRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
             "required": [
@@ -14780,14 +14600,10 @@
       },
       "NewsletterRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
-            "required": [
-              "email"
-            ],
+            "required": ["email"],
             "type": "object",
             "properties": {
               "email": {
@@ -14806,13 +14622,7 @@
               },
               "source": {
                 "type": "string",
-                "enum": [
-                  "website",
-                  "social",
-                  "referral",
-                  "api",
-                  "import"
-                ]
+                "enum": ["website", "social", "referral", "api", "import"]
               },
               "preferences": {
                 "$ref": "#/components/schemas/SharedNewsletterPreferencesComponent"
@@ -14895,9 +14705,7 @@
       },
       "Newsletter": {
         "type": "object",
-        "required": [
-          "email"
-        ],
+        "required": ["email"],
         "properties": {
           "id": {
             "type": "number"
@@ -14921,13 +14729,7 @@
           },
           "source": {
             "type": "string",
-            "enum": [
-              "website",
-              "social",
-              "referral",
-              "api",
-              "import"
-            ]
+            "enum": ["website", "social", "referral", "api", "import"]
           },
           "preferences": {
             "$ref": "#/components/schemas/SharedNewsletterPreferencesComponent"
@@ -16220,9 +16022,6 @@
                                     }
                                   }
                                 },
-                                "post_count": {
-                                  "type": "integer"
-                                },
                                 "trending": {
                                   "type": "boolean"
                                 },
@@ -16664,18 +16463,11 @@
                       },
                       "status": {
                         "type": "string",
-                        "enum": [
-                          "draft",
-                          "published"
-                        ]
+                        "enum": ["draft", "published"]
                       },
                       "priority": {
                         "type": "string",
-                        "enum": [
-                          "low",
-                          "normal",
-                          "high"
-                        ]
+                        "enum": ["low", "normal", "high"]
                       },
                       "createdAt": {
                         "type": "string",
@@ -16733,9 +16525,6 @@
                 },
                 "featured": {
                   "type": "boolean"
-                },
-                "post_count": {
-                  "type": "integer"
                 },
                 "order": {
                   "type": "integer"
@@ -16870,13 +16659,7 @@
                 },
                 "source": {
                   "type": "string",
-                  "enum": [
-                    "website",
-                    "social",
-                    "referral",
-                    "api",
-                    "import"
-                  ]
+                  "enum": ["website", "social", "referral", "api", "import"]
                 },
                 "preferences": {
                   "$ref": "#/components/schemas/SharedNewsletterPreferencesComponent"
@@ -16976,20 +16759,11 @@
           },
           "frequency": {
             "type": "string",
-            "enum": [
-              "daily",
-              "weekly",
-              "monthly",
-              "never"
-            ]
+            "enum": ["daily", "weekly", "monthly", "never"]
           },
           "digest_format": {
             "type": "string",
-            "enum": [
-              "html",
-              "text",
-              "markdown"
-            ]
+            "enum": ["html", "text", "markdown"]
           },
           "include_featured": {
             "type": "boolean"
@@ -17007,15 +16781,10 @@
       },
       "TagRequest": {
         "type": "object",
-        "required": [
-          "data"
-        ],
+        "required": ["data"],
         "properties": {
           "data": {
-            "required": [
-              "name",
-              "slug"
-            ],
+            "required": ["name", "slug"],
             "type": "object",
             "properties": {
               "name": {
@@ -17043,9 +16812,6 @@
                   ],
                   "example": "string or id"
                 }
-              },
-              "post_count": {
-                "type": "integer"
               },
               "trending": {
                 "type": "boolean"
@@ -17111,10 +16877,7 @@
       },
       "Tag": {
         "type": "object",
-        "required": [
-          "name",
-          "slug"
-        ],
+        "required": ["name", "slug"],
         "properties": {
           "id": {
             "type": "number"
@@ -18242,9 +18005,6 @@
                               }
                             }
                           },
-                          "post_count": {
-                            "type": "integer"
-                          },
                           "trending": {
                             "type": "boolean"
                           },
@@ -18806,9 +18566,6 @@
                       "featured": {
                         "type": "boolean"
                       },
-                      "post_count": {
-                        "type": "integer"
-                      },
                       "order": {
                         "type": "integer"
                       },
@@ -18935,18 +18692,11 @@
                 },
                 "status": {
                   "type": "string",
-                  "enum": [
-                    "draft",
-                    "published"
-                  ]
+                  "enum": ["draft", "published"]
                 },
                 "priority": {
                   "type": "string",
-                  "enum": [
-                    "low",
-                    "normal",
-                    "high"
-                  ]
+                  "enum": ["low", "normal", "high"]
                 },
                 "createdAt": {
                   "type": "string",
@@ -19001,9 +18751,6 @@
                 }
               }
             }
-          },
-          "post_count": {
-            "type": "integer"
           },
           "trending": {
             "type": "boolean"
@@ -19283,10 +19030,7 @@
     }
   },
   "x-strapi-config": {
-    "plugins": [
-      "upload",
-      "users-permissions"
-    ]
+    "plugins": ["upload", "users-permissions"]
   },
   "externalDocs": {
     "description": "Find out more",
@@ -19357,9 +19101,7 @@
             }
           }
         },
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "name": "sort",
@@ -19529,9 +19271,7 @@
             }
           }
         },
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [],
         "operationId": "post/authors",
         "requestBody": {
@@ -19610,9 +19350,7 @@
             }
           }
         },
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "name": "id",
@@ -19690,9 +19428,7 @@
             }
           }
         },
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "name": "id",
@@ -19781,9 +19517,7 @@
             }
           }
         },
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "name": "id",
@@ -19863,9 +19597,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-post"
-        ],
+        "tags": ["Blog-post"],
         "parameters": [
           {
             "name": "sort",
@@ -20035,9 +19767,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-post"
-        ],
+        "tags": ["Blog-post"],
         "parameters": [],
         "operationId": "post/blog-posts",
         "requestBody": {
@@ -20116,9 +19846,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-post"
-        ],
+        "tags": ["Blog-post"],
         "parameters": [
           {
             "name": "id",
@@ -20196,9 +19924,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-post"
-        ],
+        "tags": ["Blog-post"],
         "parameters": [
           {
             "name": "id",
@@ -20287,9 +20013,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-post"
-        ],
+        "tags": ["Blog-post"],
         "parameters": [
           {
             "name": "id",
@@ -20369,9 +20093,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-setting"
-        ],
+        "tags": ["Blog-setting"],
         "parameters": [
           {
             "name": "sort",
@@ -20541,9 +20263,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-setting"
-        ],
+        "tags": ["Blog-setting"],
         "parameters": [],
         "operationId": "put/blog-setting",
         "requestBody": {
@@ -20621,9 +20341,7 @@
             }
           }
         },
-        "tags": [
-          "Blog-setting"
-        ],
+        "tags": ["Blog-setting"],
         "parameters": [],
         "operationId": "delete/blog-setting"
       }
@@ -20692,9 +20410,7 @@
             }
           }
         },
-        "tags": [
-          "Category"
-        ],
+        "tags": ["Category"],
         "parameters": [
           {
             "name": "sort",
@@ -20864,9 +20580,7 @@
             }
           }
         },
-        "tags": [
-          "Category"
-        ],
+        "tags": ["Category"],
         "parameters": [],
         "operationId": "post/categories",
         "requestBody": {
@@ -20945,9 +20659,7 @@
             }
           }
         },
-        "tags": [
-          "Category"
-        ],
+        "tags": ["Category"],
         "parameters": [
           {
             "name": "id",
@@ -21025,9 +20737,7 @@
             }
           }
         },
-        "tags": [
-          "Category"
-        ],
+        "tags": ["Category"],
         "parameters": [
           {
             "name": "id",
@@ -21116,9 +20826,7 @@
             }
           }
         },
-        "tags": [
-          "Category"
-        ],
+        "tags": ["Category"],
         "parameters": [
           {
             "name": "id",
@@ -21198,9 +20906,7 @@
             }
           }
         },
-        "tags": [
-          "Comment"
-        ],
+        "tags": ["Comment"],
         "parameters": [
           {
             "name": "sort",
@@ -21370,9 +21076,7 @@
             }
           }
         },
-        "tags": [
-          "Comment"
-        ],
+        "tags": ["Comment"],
         "parameters": [],
         "operationId": "post/comments",
         "requestBody": {
@@ -21451,9 +21155,7 @@
             }
           }
         },
-        "tags": [
-          "Comment"
-        ],
+        "tags": ["Comment"],
         "parameters": [
           {
             "name": "id",
@@ -21531,9 +21233,7 @@
             }
           }
         },
-        "tags": [
-          "Comment"
-        ],
+        "tags": ["Comment"],
         "parameters": [
           {
             "name": "id",
@@ -21622,9 +21322,7 @@
             }
           }
         },
-        "tags": [
-          "Comment"
-        ],
+        "tags": ["Comment"],
         "parameters": [
           {
             "name": "id",
@@ -21704,9 +21402,7 @@
             }
           }
         },
-        "tags": [
-          "Company-info"
-        ],
+        "tags": ["Company-info"],
         "parameters": [
           {
             "name": "sort",
@@ -21876,9 +21572,7 @@
             }
           }
         },
-        "tags": [
-          "Company-info"
-        ],
+        "tags": ["Company-info"],
         "parameters": [],
         "operationId": "put/company-info",
         "requestBody": {
@@ -21956,9 +21650,7 @@
             }
           }
         },
-        "tags": [
-          "Company-info"
-        ],
+        "tags": ["Company-info"],
         "parameters": [],
         "operationId": "delete/company-info"
       }
@@ -22027,9 +21719,7 @@
             }
           }
         },
-        "tags": [
-          "Newsletter"
-        ],
+        "tags": ["Newsletter"],
         "parameters": [
           {
             "name": "sort",
@@ -22199,9 +21889,7 @@
             }
           }
         },
-        "tags": [
-          "Newsletter"
-        ],
+        "tags": ["Newsletter"],
         "parameters": [],
         "operationId": "post/newsletters",
         "requestBody": {
@@ -22280,9 +21968,7 @@
             }
           }
         },
-        "tags": [
-          "Newsletter"
-        ],
+        "tags": ["Newsletter"],
         "parameters": [
           {
             "name": "id",
@@ -22360,9 +22046,7 @@
             }
           }
         },
-        "tags": [
-          "Newsletter"
-        ],
+        "tags": ["Newsletter"],
         "parameters": [
           {
             "name": "id",
@@ -22451,9 +22135,7 @@
             }
           }
         },
-        "tags": [
-          "Newsletter"
-        ],
+        "tags": ["Newsletter"],
         "parameters": [
           {
             "name": "id",
@@ -22533,9 +22215,7 @@
             }
           }
         },
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [
           {
             "name": "sort",
@@ -22705,9 +22385,7 @@
             }
           }
         },
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [],
         "operationId": "post/tags",
         "requestBody": {
@@ -22786,9 +22464,7 @@
             }
           }
         },
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [
           {
             "name": "id",
@@ -22866,9 +22542,7 @@
             }
           }
         },
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [
           {
             "name": "id",
@@ -22957,9 +22631,7 @@
             }
           }
         },
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [
           {
             "name": "id",
@@ -22994,18 +22666,14 @@
           }
         },
         "summary": "",
-        "tags": [
-          "Upload - File"
-        ],
+        "tags": ["Upload - File"],
         "requestBody": {
           "description": "Upload files",
           "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {
-                "required": [
-                  "files"
-                ],
+                "required": ["files"],
                 "type": "object",
                 "properties": {
                   "path": {
@@ -23068,9 +22736,7 @@
           }
         },
         "summary": "",
-        "tags": [
-          "Upload - File"
-        ],
+        "tags": ["Upload - File"],
         "requestBody": {
           "description": "Upload files",
           "required": true,
@@ -23106,9 +22772,7 @@
     },
     "/upload/files": {
       "get": {
-        "tags": [
-          "Upload - File"
-        ],
+        "tags": ["Upload - File"],
         "responses": {
           "200": {
             "description": "Get a list of files",
@@ -23140,9 +22804,7 @@
             }
           }
         ],
-        "tags": [
-          "Upload - File"
-        ],
+        "tags": ["Upload - File"],
         "responses": {
           "200": {
             "description": "Get a specific file",
@@ -23169,9 +22831,7 @@
             }
           }
         ],
-        "tags": [
-          "Upload - File"
-        ],
+        "tags": ["Upload - File"],
         "responses": {
           "200": {
             "description": "Delete a file",
@@ -23200,9 +22860,7 @@
             }
           }
         ],
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Login with a provider",
         "description": "Redirects to provider login before being redirect to /auth/{provider}/callback",
         "responses": {
@@ -23224,9 +22882,7 @@
     },
     "/auth/local": {
       "post": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Local login",
         "description": "Returns a jwt token and user info",
         "requestBody": {
@@ -23277,9 +22933,7 @@
     },
     "/auth/local/register": {
       "post": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Register a user",
         "description": "Returns a jwt token and user info",
         "requestBody": {
@@ -23334,9 +22988,7 @@
     },
     "/auth/{provider}/callback": {
       "get": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Default Callback from provider auth",
         "parameters": [
           {
@@ -23375,9 +23027,7 @@
     },
     "/auth/forgot-password": {
       "post": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Send rest password email",
         "requestBody": {
           "required": true,
@@ -23407,9 +23057,7 @@
                   "properties": {
                     "ok": {
                       "type": "string",
-                      "enum": [
-                        true
-                      ]
+                      "enum": [true]
                     }
                   }
                 }
@@ -23431,9 +23079,7 @@
     },
     "/auth/reset-password": {
       "post": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Rest user password",
         "requestBody": {
           "required": true,
@@ -23487,9 +23133,7 @@
     },
     "/auth/change-password": {
       "post": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Update user's own password",
         "requestBody": {
           "required": true,
@@ -23497,11 +23141,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "password",
-                  "currentPassword",
-                  "passwordConfirmation"
-                ],
+                "required": ["password", "currentPassword", "passwordConfirmation"],
                 "properties": {
                   "password": {
                     "type": "string"
@@ -23543,9 +23183,7 @@
     },
     "/auth/email-confirmation": {
       "get": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Confirm user email",
         "parameters": [
           {
@@ -23576,9 +23214,7 @@
     },
     "/auth/send-email-confirmation": {
       "post": {
-        "tags": [
-          "Users-Permissions - Auth"
-        ],
+        "tags": ["Users-Permissions - Auth"],
         "summary": "Send confirmation email",
         "requestBody": {
           "required": true,
@@ -23608,9 +23244,7 @@
                     },
                     "sent": {
                       "type": "string",
-                      "enum": [
-                        true
-                      ]
+                      "enum": [true]
                     }
                   }
                 }
@@ -23632,9 +23266,7 @@
     },
     "/users-permissions/permissions": {
       "get": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Get default generated permissions",
         "responses": {
           "200": {
@@ -23703,9 +23335,7 @@
     },
     "/users-permissions/roles": {
       "get": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "List roles",
         "responses": {
           "200": {
@@ -23764,9 +23394,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Create a role",
         "requestBody": {
           "$ref": "#/components/requestBodies/Users-Permissions-RoleRequest"
@@ -23781,9 +23409,7 @@
                   "properties": {
                     "ok": {
                       "type": "string",
-                      "enum": [
-                        true
-                      ]
+                      "enum": [true]
                     }
                   }
                 }
@@ -23805,9 +23431,7 @@
     },
     "/users-permissions/roles/{id}": {
       "get": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Get a role",
         "parameters": [
           {
@@ -23872,9 +23496,7 @@
     },
     "/users-permissions/roles/{role}": {
       "put": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Update a role",
         "parameters": [
           {
@@ -23900,9 +23522,7 @@
                   "properties": {
                     "ok": {
                       "type": "string",
-                      "enum": [
-                        true
-                      ]
+                      "enum": [true]
                     }
                   }
                 }
@@ -23922,9 +23542,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Delete a role",
         "parameters": [
           {
@@ -23947,9 +23565,7 @@
                   "properties": {
                     "ok": {
                       "type": "string",
-                      "enum": [
-                        true
-                      ]
+                      "enum": [true]
                     }
                   }
                 }
@@ -23971,9 +23587,7 @@
     },
     "/users": {
       "get": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Get list of users",
         "responses": {
           "200": {
@@ -24014,9 +23628,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Create a user",
         "requestBody": {
           "required": true,
@@ -24024,11 +23636,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "username",
-                  "email",
-                  "password"
-                ],
+                "required": ["username", "email", "password"],
                 "properties": {
                   "email": {
                     "type": "string"
@@ -24105,9 +23713,7 @@
     },
     "/users/{id}": {
       "get": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Get a user",
         "parameters": [
           {
@@ -24154,9 +23760,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Update a user",
         "parameters": [
           {
@@ -24175,11 +23779,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "username",
-                  "email",
-                  "password"
-                ],
+                "required": ["username", "email", "password"],
                 "properties": {
                   "email": {
                     "type": "string"
@@ -24254,9 +23854,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Delete a user",
         "parameters": [
           {
@@ -24309,9 +23907,7 @@
     },
     "/users/me": {
       "get": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Get authenticated user info",
         "responses": {
           "200": {
@@ -24349,9 +23945,7 @@
     },
     "/users/count": {
       "get": {
-        "tags": [
-          "Users-Permissions - Users & Roles"
-        ],
+        "tags": ["Users-Permissions - Users & Roles"],
         "summary": "Get user count",
         "responses": {
           "200": {

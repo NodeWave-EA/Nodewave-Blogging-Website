@@ -8,7 +8,6 @@ interface LifecycleEvent {
   }
 }
 
-
 // Small helper to resolve upload file to absolute url when given an id or object
 
 export default {
@@ -16,8 +15,8 @@ export default {
     const { data } = event.params
 
     // Initialize seo and social_sharing components so admin panel shows them by default
-    data.seo = { ...(data.seo as Record<string, unknown> || {}) }
-    data.social_sharing = { ...(data.social_sharing as Record<string, unknown> || {}) }
+    data.seo = { ...((data.seo as Record<string, unknown>) || {}) }
+    data.social_sharing = { ...((data.social_sharing as Record<string, unknown>) || {}) }
 
     // Calculate reading time if content is provided
     if (data.content) {
@@ -46,7 +45,15 @@ export default {
     // Ensure social sharing defaults
     const ss = data.social_sharing as any
     ss.enable_sharing = ss.enable_sharing !== undefined ? ss.enable_sharing : true
-    ss.platforms = ss.platforms || ['twitter', 'facebook', 'linkedin', 'pinterest', 'whatsapp', 'telegram', 'reddit']
+    ss.platforms = ss.platforms || [
+      'twitter',
+      'facebook',
+      'linkedin',
+      'pinterest',
+      'whatsapp',
+      'telegram',
+      'reddit',
+    ]
 
     // Ensure status reflects publish state: when creating, default to 'published' if publishedAt present, otherwise 'draft'
     if (data.publishedAt) {
@@ -60,8 +67,8 @@ export default {
     const { data } = event.params
 
     // Ensure seo/social_sharing exist
-    data.seo = { ...(data.seo as Record<string, unknown> || {}) }
-    data.social_sharing = { ...(data.social_sharing as Record<string, unknown> || {}) }
+    data.seo = { ...((data.seo as Record<string, unknown>) || {}) }
+    data.social_sharing = { ...((data.social_sharing as Record<string, unknown>) || {}) }
 
     // Calculate reading time if content is updated
     if (data.content) {
@@ -86,7 +93,15 @@ export default {
 
     const ss = data.social_sharing as any
     ss.enable_sharing = ss.enable_sharing !== undefined ? ss.enable_sharing : true
-    ss.platforms = ss.platforms || ['twitter', 'facebook', 'linkedin', 'pinterest', 'whatsapp', 'telegram', 'reddit']
+    ss.platforms = ss.platforms || [
+      'twitter',
+      'facebook',
+      'linkedin',
+      'pinterest',
+      'whatsapp',
+      'telegram',
+      'reddit',
+    ]
 
     // If the update payload explicitly changes publishedAt (publish/unpublish action), update status accordingly.
     if (Object.prototype.hasOwnProperty.call(data, 'publishedAt')) {

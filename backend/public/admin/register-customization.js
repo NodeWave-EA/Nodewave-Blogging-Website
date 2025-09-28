@@ -5,362 +5,388 @@
 
 // Function to fix registration form
 function fixRegistrationForm() {
-	// Check if we're on the registration page
-	if (!window.location.pathname.includes('/admin/auth/register') || window.location.pathname.includes('register-admin')) {
-		return;
-	}
+  // Check if we're on the registration page
+  if (
+    !window.location.pathname.includes('/admin/auth/register') ||
+    window.location.pathname.includes('register-admin')
+  ) {
+    return
+  }
 
-	// Wait for the form to be rendered
-	const interval = setInterval(() => {
-		const form = document.querySelector('form[data-testid="login-form"]') ||
-			document.querySelector('form[role="presentation"]') ||
-			document.querySelector('form');
+  // Wait for the form to be rendered
+  const interval = setInterval(() => {
+    const form =
+      document.querySelector('form[data-testid="login-form"]') ||
+      document.querySelector('form[role="presentation"]') ||
+      document.querySelector('form')
 
-		if (form && !document.querySelector('#nodewave-form-enhanced')) {
-			enhanceRegistrationForm(form);
-			clearInterval(interval);
-		}
-	}, 500);
+    if (form && !document.querySelector('#nodewave-form-enhanced')) {
+      enhanceRegistrationForm(form)
+      clearInterval(interval)
+    }
+  }, 500)
 
-	// Clear interval after 15 seconds
-	setTimeout(() => clearInterval(interval), 15000);
+  // Clear interval after 15 seconds
+  setTimeout(() => clearInterval(interval), 15000)
 }
 
 // Function to enhance the registration form
 function enhanceRegistrationForm(form) {
-	console.log('✅ Enhancing registration form...');
+  console.log('✅ Enhancing registration form...')
 
-	// Add a marker to prevent multiple enhancements
-	const marker = document.createElement('div');
-	marker.id = 'nodewave-form-enhanced';
-	marker.style.display = 'none';
-	form.appendChild(marker);
+  // Add a marker to prevent multiple enhancements
+  const marker = document.createElement('div')
+  marker.id = 'nodewave-form-enhanced'
+  marker.style.display = 'none'
+  form.appendChild(marker)
 
-	// Fix email field - more aggressive approach
-	const emailInput = findEmailInput(form);
+  // Fix email field - more aggressive approach
+  const emailInput = findEmailInput(form)
 
-	if (emailInput) {
-		console.log('📧 Fixing email input field...');
+  if (emailInput) {
+    console.log('📧 Fixing email input field...')
 
-		// Remove all possible disabled attributes and styling
-		emailInput.disabled = false;
-		emailInput.readOnly = false;
-		emailInput.required = true;
-		emailInput.removeAttribute('disabled');
-		emailInput.removeAttribute('readonly');
-		emailInput.removeAttribute('aria-disabled');
+    // Remove all possible disabled attributes and styling
+    emailInput.disabled = false
+    emailInput.readOnly = false
+    emailInput.required = true
+    emailInput.removeAttribute('disabled')
+    emailInput.removeAttribute('readonly')
+    emailInput.removeAttribute('aria-disabled')
 
-		// Set proper attributes
-		emailInput.setAttribute('type', 'email');
-		emailInput.setAttribute('autoComplete', 'email');
-		emailInput.setAttribute('placeholder', 'Enter your email address');
+    // Set proper attributes
+    emailInput.setAttribute('type', 'email')
+    emailInput.setAttribute('autoComplete', 'email')
+    emailInput.setAttribute('placeholder', 'Enter your email address')
 
-		// Force enable styling
-		emailInput.style.backgroundColor = '#ffffff !important';
-		emailInput.style.opacity = '1 !important';
-		emailInput.style.cursor = 'text !important';
-		emailInput.style.pointerEvents = 'auto !important';
-		emailInput.style.color = '#374151 !important';
+    // Force enable styling
+    emailInput.style.backgroundColor = '#ffffff !important'
+    emailInput.style.opacity = '1 !important'
+    emailInput.style.cursor = 'text !important'
+    emailInput.style.pointerEvents = 'auto !important'
+    emailInput.style.color = '#374151 !important'
 
-		// Remove disabled classes
-		emailInput.classList.remove('disabled', 'readonly', 'cursor-not-allowed');
-		emailInput.classList.add('cursor-text');
+    // Remove disabled classes
+    emailInput.classList.remove('disabled', 'readonly', 'cursor-not-allowed')
+    emailInput.classList.add('cursor-text')
 
-		// Apply TailwindCSS v4 utility classes for styling
-		emailInput.classList.add('w-full', 'px-4', 'py-2', 'border', 'rounded-md', 'focus:outline-none', 'focus:ring-2');
+    // Apply TailwindCSS v4 utility classes for styling
+    emailInput.classList.add(
+      'w-full',
+      'px-4',
+      'py-2',
+      'border',
+      'rounded-md',
+      'focus:outline-none',
+      'focus:ring-2'
+    )
 
-		// Add validation
-		emailInput.addEventListener('blur', validateEmail);
-		emailInput.addEventListener('input', handleEmailInput);
+    // Add validation
+    emailInput.addEventListener('blur', validateEmail)
+    emailInput.addEventListener('input', handleEmailInput)
 
-		// Force focus capability
-		emailInput.addEventListener('click', function () {
-			this.focus();
-		});
+    // Force focus capability
+    emailInput.addEventListener('click', function () {
+      this.focus()
+    })
 
-		// Watch for dynamic changes that might disable it again
-		const observer = new MutationObserver(function (mutations) {
-			mutations.forEach(function (mutation) {
-				if (mutation.type === 'attributes' && (mutation.attributeName === 'disabled' || mutation.attributeName === 'readonly')) {
-					emailInput.disabled = false;
-					emailInput.readOnly = false;
-					emailInput.style.backgroundColor = '#ffffff !important';
-					emailInput.style.opacity = '1 !important';
-					emailInput.style.cursor = 'text !important';
-				}
-			});
-		});
+    // Watch for dynamic changes that might disable it again
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (
+          mutation.type === 'attributes' &&
+          (mutation.attributeName === 'disabled' || mutation.attributeName === 'readonly')
+        ) {
+          emailInput.disabled = false
+          emailInput.readOnly = false
+          emailInput.style.backgroundColor = '#ffffff !important'
+          emailInput.style.opacity = '1 !important'
+          emailInput.style.cursor = 'text !important'
+        }
+      })
+    })
 
-		observer.observe(emailInput, { attributes: true });
-	}
+    observer.observe(emailInput, { attributes: true })
+  }
 
-	// Find and enhance other form fields
-	const usernameInput = form.querySelector('input[name="username"]') ||
-		form.querySelector('input[placeholder*="username" i]') ||
-		form.querySelector('input[placeholder*="name" i]');
+  // Find and enhance other form fields
+  const usernameInput =
+    form.querySelector('input[name="username"]') ||
+    form.querySelector('input[placeholder*="username" i]') ||
+    form.querySelector('input[placeholder*="name" i]')
 
-	const passwordInput = form.querySelector('input[type="password"]') ||
-		form.querySelector('input[name="password"]');
+  const passwordInput =
+    form.querySelector('input[type="password"]') || form.querySelector('input[name="password"]')
 
-	if (usernameInput) {
-		usernameInput.required = true;
-		usernameInput.classList.add('w-full', 'px-4', 'py-2', 'border', 'rounded-md');
-		usernameInput.setAttribute('required', 'true');
-	}
+  if (usernameInput) {
+    usernameInput.required = true
+    usernameInput.classList.add('w-full', 'px-4', 'py-2', 'border', 'rounded-md')
+    usernameInput.setAttribute('required', 'true')
+  }
 
-	if (passwordInput) {
-		passwordInput.required = true;
-		passwordInput.classList.add('w-full', 'px-4', 'py-2', 'border', 'rounded-md');
-		passwordInput.setAttribute('required', 'true');
-	}
+  if (passwordInput) {
+    passwordInput.required = true
+    passwordInput.classList.add('w-full', 'px-4', 'py-2', 'border', 'rounded-md')
+    passwordInput.setAttribute('required', 'true')
+  }
 
-	// Add placeholder and aria-label for accessibility
-	if (emailInput) {
-		emailInput.setAttribute('placeholder', emailInput.getAttribute('placeholder') || 'you@domain.com');
-		emailInput.setAttribute('aria-label', emailInput.getAttribute('aria-label') || 'Email');
-	}
+  // Add placeholder and aria-label for accessibility
+  if (emailInput) {
+    emailInput.setAttribute(
+      'placeholder',
+      emailInput.getAttribute('placeholder') || 'you@domain.com'
+    )
+    emailInput.setAttribute('aria-label', emailInput.getAttribute('aria-label') || 'Email')
+  }
 
-	if (usernameInput) {
-		usernameInput.setAttribute('placeholder', usernameInput.getAttribute('placeholder') || 'Your display name');
-		usernameInput.setAttribute('aria-label', usernameInput.getAttribute('aria-label') || 'Username');
-	}
+  if (usernameInput) {
+    usernameInput.setAttribute(
+      'placeholder',
+      usernameInput.getAttribute('placeholder') || 'Your display name'
+    )
+    usernameInput.setAttribute('aria-label', usernameInput.getAttribute('aria-label') || 'Username')
+  }
 
-	if (passwordInput) {
-		passwordInput.setAttribute('placeholder', passwordInput.getAttribute('placeholder') || 'Choose a strong password');
-		passwordInput.setAttribute('aria-label', passwordInput.getAttribute('aria-label') || 'Password');
-	}
+  if (passwordInput) {
+    passwordInput.setAttribute(
+      'placeholder',
+      passwordInput.getAttribute('placeholder') || 'Choose a strong password'
+    )
+    passwordInput.setAttribute('aria-label', passwordInput.getAttribute('aria-label') || 'Password')
+  }
 
-	// Add custom styling for better UX
-	addFormStyles();
+  // Add custom styling for better UX
+  addFormStyles()
 
-	// Add form submission handler for better error handling
-	form.addEventListener('submit', handleFormSubmission);
+  // Add form submission handler for better error handling
+  form.addEventListener('submit', handleFormSubmission)
 
-	console.log('✅ Registration form enhanced successfully');
+  console.log('✅ Registration form enhanced successfully')
 }
 
 // More comprehensive email input finder
 function findEmailInput(form) {
-	// Try multiple selectors to find email input
-	const selectors = [
-		'input[type="email"]',
-		'input[name="email"]',
-		'input[placeholder*="email" i]',
-		'input[placeholder*="Email" i]',
-		'input[id*="email" i]',
-		'input[autocomplete="email"]'
-	];
+  // Try multiple selectors to find email input
+  const selectors = [
+    'input[type="email"]',
+    'input[name="email"]',
+    'input[placeholder*="email" i]',
+    'input[placeholder*="Email" i]',
+    'input[id*="email" i]',
+    'input[autocomplete="email"]',
+  ]
 
-	for (const selector of selectors) {
-		const input = form.querySelector(selector);
-		if (input) {
-			return input;
-		}
-	}
+  for (const selector of selectors) {
+    const input = form.querySelector(selector)
+    if (input) {
+      return input
+    }
+  }
 
-	// Fallback: look for any input that might be an email field
-	const inputs = form.querySelectorAll('input[type="text"], input:not([type])');
-	for (const input of inputs) {
-		const placeholder = input.placeholder?.toLowerCase() || '';
-		const name = input.name?.toLowerCase() || '';
-		const id = input.id?.toLowerCase() || '';
+  // Fallback: look for any input that might be an email field
+  const inputs = form.querySelectorAll('input[type="text"], input:not([type])')
+  for (const input of inputs) {
+    const placeholder = input.placeholder?.toLowerCase() || ''
+    const name = input.name?.toLowerCase() || ''
+    const id = input.id?.toLowerCase() || ''
 
-		if (placeholder.includes('email') || name.includes('email') || id.includes('email')) {
-			return input;
-		}
-	}
+    if (placeholder.includes('email') || name.includes('email') || id.includes('email')) {
+      return input
+    }
+  }
 
-	return null;
+  return null
 }
 
 // Handle email input changes
 function handleEmailInput(event) {
-	const input = event.target;
-	// Remove any error styling as user types
-	removeFieldError(input);
+  const input = event.target
+  // Remove any error styling as user types
+  removeFieldError(input)
 
-	// Ensure the field stays enabled
-	if (input.disabled || input.readOnly) {
-		input.disabled = false;
-		input.readOnly = false;
-	}
+  // Ensure the field stays enabled
+  if (input.disabled || input.readOnly) {
+    input.disabled = false
+    input.readOnly = false
+  }
 }
 
 // Email validation function
 function validateEmail(event) {
-	const input = event.target;
-	const email = input.value.trim();
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const input = event.target
+  const email = input.value.trim()
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-	removeFieldError(input);
+  removeFieldError(input)
 
-	if (!email) {
-		showFieldError(input, 'Email is required');
-		return false;
-	}
+  if (!email) {
+    showFieldError(input, 'Email is required')
+    return false
+  }
 
-	if (!emailRegex.test(email)) {
-		showFieldError(input, 'Please enter a valid email address');
-		return false;
-	}
+  if (!emailRegex.test(email)) {
+    showFieldError(input, 'Please enter a valid email address')
+    return false
+  }
 
-	showFieldSuccess(input);
-	return true;
+  showFieldSuccess(input)
+  return true
 }
 
 // Username validation function
 function validateUsername(event) {
-	const input = event.target;
-	const username = input.value.trim();
+  const input = event.target
+  const username = input.value.trim()
 
-	removeFieldError(input);
+  removeFieldError(input)
 
-	if (!username) {
-		showFieldError(input, 'Username is required');
-		return false;
-	}
+  if (!username) {
+    showFieldError(input, 'Username is required')
+    return false
+  }
 
-	if (username.length < 3) {
-		showFieldError(input, 'Username must be at least 3 characters long');
-		return false;
-	}
+  if (username.length < 3) {
+    showFieldError(input, 'Username must be at least 3 characters long')
+    return false
+  }
 
-	showFieldSuccess(input);
-	return true;
+  showFieldSuccess(input)
+  return true
 }
 
 // Password validation function
 function validatePassword(event) {
-	const input = event.target;
-	const password = input.value;
+  const input = event.target
+  const password = input.value
 
-	removeFieldError(input);
+  removeFieldError(input)
 
-	if (!password) {
-		showFieldError(input, 'Password is required');
-		return false;
-	}
+  if (!password) {
+    showFieldError(input, 'Password is required')
+    return false
+  }
 
-	if (password.length < 6) {
-		showFieldError(input, 'Password must be at least 6 characters long');
-		return false;
-	}
+  if (password.length < 6) {
+    showFieldError(input, 'Password must be at least 6 characters long')
+    return false
+  }
 
-	showFieldSuccess(input);
-	return true;
+  showFieldSuccess(input)
+  return true
 }
 
 // Show field error with modern styling
 function showFieldError(input, message) {
-	const container = input.closest('div') || input.parentElement;
-	let errorElement = container.querySelector('.field-error');
+  const container = input.closest('div') || input.parentElement
+  let errorElement = container.querySelector('.field-error')
 
-	if (!errorElement) {
-		errorElement = document.createElement('div');
-		errorElement.className = 'field-error';
-		container.appendChild(errorElement);
-	}
+  if (!errorElement) {
+    errorElement = document.createElement('div')
+    errorElement.className = 'field-error'
+    container.appendChild(errorElement)
+  }
 
-	errorElement.textContent = message;
-	input.classList.add('error');
-	input.classList.remove('success');
+  errorElement.textContent = message
+  input.classList.add('error')
+  input.classList.remove('success')
 }
 
 // Show field success with modern styling
 function showFieldSuccess(input) {
-	input.classList.add('success');
-	input.classList.remove('error');
+  input.classList.add('success')
+  input.classList.remove('error')
 }
 
 // Remove field error
 function removeFieldError(input) {
-	const container = input.closest('div') || input.parentElement;
-	const errorElement = container.querySelector('.field-error');
+  const container = input.closest('div') || input.parentElement
+  const errorElement = container.querySelector('.field-error')
 
-	if (errorElement) {
-		errorElement.remove();
-	}
+  if (errorElement) {
+    errorElement.remove()
+  }
 
-	input.classList.remove('error', 'success');
+  input.classList.remove('error', 'success')
 }
 
 // Handle form submission with enhanced feedback
 function handleFormSubmission(event) {
-	console.log('📝 Processing registration form submission...');
+  console.log('📝 Processing registration form submission...')
 
-	const form = event.target;
-	const emailInput = findEmailInput(form);
-	const usernameInput = form.querySelector('input[name="username"]') ||
-		form.querySelector('input[placeholder*="username" i]') ||
-		form.querySelector('input[placeholder*="name" i]');
-	const passwordInput = form.querySelector('input[type="password"]') ||
-		form.querySelector('input[name="password"]');
+  const form = event.target
+  const emailInput = findEmailInput(form)
+  const usernameInput =
+    form.querySelector('input[name="username"]') ||
+    form.querySelector('input[placeholder*="username" i]') ||
+    form.querySelector('input[placeholder*="name" i]')
+  const passwordInput =
+    form.querySelector('input[type="password"]') || form.querySelector('input[name="password"]')
 
-	let isValid = true;
+  let isValid = true
 
-	// Validate all fields
-	if (emailInput && !validateEmail({ target: emailInput })) {
-		isValid = false;
-	}
+  // Validate all fields
+  if (emailInput && !validateEmail({ target: emailInput })) {
+    isValid = false
+  }
 
-	if (usernameInput && !validateUsername({ target: usernameInput })) {
-		isValid = false;
-	}
+  if (usernameInput && !validateUsername({ target: usernameInput })) {
+    isValid = false
+  }
 
-	if (passwordInput && !validatePassword({ target: passwordInput })) {
-		isValid = false;
-	}
+  if (passwordInput && !validatePassword({ target: passwordInput })) {
+    isValid = false
+  }
 
-	if (!isValid) {
-		event.preventDefault();
-		console.log('❌ Form validation failed');
+  if (!isValid) {
+    event.preventDefault()
+    console.log('❌ Form validation failed')
 
-		// Show user-friendly error message
-		showFormError(form, 'Please fix the errors above before submitting.');
-		return false;
-	}
+    // Show user-friendly error message
+    showFormError(form, 'Please fix the errors above before submitting.')
+    return false
+  }
 
-	// Show loading state
-	const submitButton = form.querySelector('button[type="submit"]');
-	if (submitButton) {
-		const originalText = submitButton.textContent;
-		const originalHTML = submitButton.innerHTML;
+  // Show loading state
+  const submitButton = form.querySelector('button[type="submit"]')
+  if (submitButton) {
+    const originalText = submitButton.textContent
+    const originalHTML = submitButton.innerHTML
 
-		submitButton.innerHTML = `
+    submitButton.innerHTML = `
 			<svg style="display: inline-block; width: 1rem; height: 1rem; margin-right: 0.5rem; animation: spin 1s linear infinite;" fill="none" viewBox="0 0 24 24">
 				<circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 				<path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 			</svg>
 			Creating Account...
-		`;
-		submitButton.disabled = true;
+		`
+    submitButton.disabled = true
 
-		// Add spin animation
-		const style = document.createElement('style');
-		style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-		document.head.appendChild(style);
+    // Add spin animation
+    const style = document.createElement('style')
+    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }'
+    document.head.appendChild(style)
 
-		// Reset button after 15 seconds if something goes wrong
-		setTimeout(() => {
-			submitButton.innerHTML = originalHTML || originalText;
-			submitButton.disabled = false;
-			removeFormError(form);
-		}, 15000);
-	}
+    // Reset button after 15 seconds if something goes wrong
+    setTimeout(() => {
+      submitButton.innerHTML = originalHTML || originalText
+      submitButton.disabled = false
+      removeFormError(form)
+    }, 15000)
+  }
 
-	// Remove any existing error messages
-	removeFormError(form);
+  // Remove any existing error messages
+  removeFormError(form)
 
-	console.log('✅ Form validation passed, submitting...');
+  console.log('✅ Form validation passed, submitting...')
 }
 
 // Show form-level error message
 function showFormError(form, message) {
-	removeFormError(form); // Remove existing error first
+  removeFormError(form) // Remove existing error first
 
-	const errorDiv = document.createElement('div');
-	errorDiv.className = 'form-error';
-	errorDiv.style.cssText = `
+  const errorDiv = document.createElement('div')
+  errorDiv.className = 'form-error'
+  errorDiv.style.cssText = `
 		background-color: #fef2f2;
 		border: 1px solid #fecaca;
 		color: #dc2626;
@@ -371,35 +397,35 @@ function showFormError(form, message) {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-	`;
+	`
 
-	errorDiv.innerHTML = `
+  errorDiv.innerHTML = `
 		<svg style="width: 1rem; height: 1rem; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 		</svg>
 		${message}
-	`;
+	`
 
-	form.insertBefore(errorDiv, form.firstChild);
+  form.insertBefore(errorDiv, form.firstChild)
 }
 
 // Remove form-level error message
 function removeFormError(form) {
-	const errorDiv = form.querySelector('.form-error');
-	if (errorDiv) {
-		errorDiv.remove();
-	}
+  const errorDiv = form.querySelector('.form-error')
+  if (errorDiv) {
+    errorDiv.remove()
+  }
 }
 
 // Add custom styles
 function addFormStyles() {
-	if (document.querySelector('#nodewave-registration-styles')) {
-		return;
-	}
+  if (document.querySelector('#nodewave-registration-styles')) {
+    return
+  }
 
-	const styles = document.createElement('style');
-	styles.id = 'nodewave-registration-styles';
-	styles.innerHTML = `
+  const styles = document.createElement('style')
+  styles.id = 'nodewave-registration-styles'
+  styles.innerHTML = `
 		/* Field error styling with TailwindCSS v4 approach */
 		.field-error {
 			color: #ef4444 !important;
@@ -526,19 +552,22 @@ function addFormStyles() {
 		.form-group:focus-within {
 			transform: translateY(-1px);
 		}
-	`;
+	`
 
-	document.head.appendChild(styles);
+  document.head.appendChild(styles)
 }
 
 // Add helpful information about registration
 function addRegistrationInfo() {
-	if (window.location.pathname.includes('/admin/auth/register') && !window.location.pathname.includes('register-admin')) {
-		const form = document.querySelector('form');
-		if (form && !document.querySelector('.registration-info')) {
-			const infoDiv = document.createElement('div');
-			infoDiv.className = 'registration-info';
-			infoDiv.innerHTML = `
+  if (
+    window.location.pathname.includes('/admin/auth/register') &&
+    !window.location.pathname.includes('register-admin')
+  ) {
+    const form = document.querySelector('form')
+    if (form && !document.querySelector('.registration-info')) {
+      const infoDiv = document.createElement('div')
+      infoDiv.className = 'registration-info'
+      infoDiv.innerHTML = `
 				<div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
 					<svg style="width: 1.25rem; height: 1.25rem; color: #4f46e5;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -551,40 +580,40 @@ function addRegistrationInfo() {
 					<div style="margin-bottom: 0.5rem;">🔐 Use a valid email address for account recovery and notifications</div>
 					<div>🚀 Start publishing your content immediately after registration</div>
 				</div>
-			`;
+			`
 
-			form.insertBefore(infoDiv, form.firstChild);
-		}
-	}
+      form.insertBefore(infoDiv, form.firstChild)
+    }
+  }
 }
 
 // Main initialization function
 function initializeRegistrationEnhancements() {
-	fixRegistrationForm();
-	addRegistrationInfo();
+  fixRegistrationForm()
+  addRegistrationInfo()
 }
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', initializeRegistrationEnhancements);
+  document.addEventListener('DOMContentLoaded', initializeRegistrationEnhancements)
 } else {
-	initializeRegistrationEnhancements();
+  initializeRegistrationEnhancements()
 }
 
 // Also initialize on navigation changes
 window.addEventListener('popstate', () => {
-	setTimeout(initializeRegistrationEnhancements, 100);
-});
+  setTimeout(initializeRegistrationEnhancements, 100)
+})
 
 // Watch for route changes in SPAs
-const originalPushState = history.pushState;
+const originalPushState = history.pushState
 history.pushState = function (state, title, url) {
-	originalPushState.call(history, state, title, url);
-	setTimeout(initializeRegistrationEnhancements, 100);
-};
+  originalPushState.call(history, state, title, url)
+  setTimeout(initializeRegistrationEnhancements, 100)
+}
 
-const originalReplaceState = history.replaceState;
+const originalReplaceState = history.replaceState
 history.replaceState = function (state, title, url) {
-	originalReplaceState.call(history, state, title, url);
-	setTimeout(initializeRegistrationEnhancements, 100);
-};
+  originalReplaceState.call(history, state, title, url)
+  setTimeout(initializeRegistrationEnhancements, 100)
+}

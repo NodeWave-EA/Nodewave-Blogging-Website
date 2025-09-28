@@ -8,20 +8,21 @@
  */
 
 export function isDebug(): boolean {
-	try {
-		const env = (import.meta as any).env || {}
-		return String(env.VITE_DEBUG || env.DEBUG || '').toLowerCase() === 'true'
-	} catch (e) {
-		return false
-	}
+  try {
+    const env = (import.meta as any).env || {}
+    return String(env.VITE_DEBUG || env.DEBUG || '').toLowerCase() === 'true'
+  } catch (e) {
+    console.error('Error determining debug mode:', e)
+    return false
+  }
 }
 
 export function dbg(file: string, ...args: any[]) {
-	if (!isDebug()) return
-	// Ensure the prefix includes the brackets exactly as requested by the user
-	console.log(`[${file}]`, ...args)
+  if (!isDebug()) return
+  // Ensure the prefix includes the brackets exactly as requested by the user
+  console.log(`[${file}]`, ...args)
 }
 
 export function moduleLoaded(file: string) {
-	dbg(file, 'loaded')
+  dbg(file, 'loaded')
 }

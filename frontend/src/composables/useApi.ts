@@ -1,4 +1,4 @@
-import { reactive, ref } from 'vue';
+import { reactive, ref } from 'vue'
 // Local loading shape to avoid depending on a project-level type that isn't exported
 type LocalLoadingState = { isLoading: boolean; error: string | null }
 

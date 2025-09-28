@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'   # only trigger if backend changes
+      - 'backend/**' # only trigger if backend changes
 
 jobs:
   sync-backend:

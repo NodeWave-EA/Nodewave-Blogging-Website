@@ -10,9 +10,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api'
 const API_TOKEN = import.meta.env.VITE_API_TOKEN
 
 if (!API_TOKEN) {
-	console.error('[axiosClient] VITE_API_TOKEN is not set. Requests to Strapi will fail without a valid API token.')
-	console.error('[axiosClient] Please add VITE_API_TOKEN to your .env file.')
-	throw new Error('VITE_API_TOKEN is required to access the Strapi API. Check your .env file.')
+  console.error(
+    '[axiosClient] VITE_API_TOKEN is not set. Requests to Strapi will fail without a valid API token.',
+  )
+  console.error('[axiosClient] Please add VITE_API_TOKEN to your .env file.')
+  throw new Error('VITE_API_TOKEN is required to access the Strapi API. Check your .env file.')
 }
 
 // Create axios instance
@@ -46,43 +48,50 @@ if (!API_TOKEN) {
  * @see https://github.com/axios/axios
  */
 export const axiosClient: AxiosInstance = axios.create({
-	baseURL: API_BASE_URL,
-	timeout: 30000,
-	headers: {
-		'Content-Type': 'application/json',
-		Authorization: `Bearer ${API_TOKEN}`,
-	},
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${API_TOKEN}`,
+  },
 })
 
 // Request interceptor
 axiosClient.interceptors.request.use(
-	(config) => {
-		NProgress.start()
-		config.headers = config.headers || {}
-		config.headers.Authorization = `Bearer ${API_TOKEN}`
-		dbg('axiosClient.ts', 'request', { url: config.url, method: config.method, headers: Object.keys(config.headers || {}) })
-		return config
-	},
-	(error) => {
-		NProgress.done()
-		dbg('axiosClient.ts', 'request error', { error })
-		return Promise.reject(error)
-	},
+  (config) => {
+    NProgress.start()
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${API_TOKEN}`
+    dbg('axiosClient.ts', 'request', {
+      url: config.url,
+      method: config.method,
+      headers: Object.keys(config.headers || {}),
+    })
+    return config
+  },
+  (error) => {
+    NProgress.done()
+    dbg('axiosClient.ts', 'request error', { error })
+    return Promise.reject(error)
+  },
 )
 
 // Response interceptor
 axiosClient.interceptors.response.use(
-	(response) => {
-		NProgress.done()
-		dbg('axiosClient.ts', 'response', { url: response.config?.url, status: response.status })
-		return response
-	},
-	(error) => {
-		NProgress.done()
-		dbg('axiosClient.ts', 'response error', { error: error?.response?.status, url: error?.config?.url })
-		if (error.response?.status === 401) {
-			localStorage.removeItem('token')
-		}
-		return Promise.reject(error)
-	},
+  (response) => {
+    NProgress.done()
+    dbg('axiosClient.ts', 'response', { url: response.config?.url, status: response.status })
+    return response
+  },
+  (error) => {
+    NProgress.done()
+    dbg('axiosClient.ts', 'response error', {
+      error: error?.response?.status,
+      url: error?.config?.url,
+    })
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+    }
+    return Promise.reject(error)
+  },
 )

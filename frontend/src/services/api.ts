@@ -1,17 +1,21 @@
-import { dbg, moduleLoaded } from '@/utils/debug';
-import type { AxiosRequestConfig } from 'axios';
-import { axiosClient } from './axiosClient';
-import { buildStrapiQuery } from './queryBuilder';
+import { dbg, moduleLoaded } from '@/utils/debug'
+import type { AxiosRequestConfig } from 'axios'
+import { axiosClient } from './axiosClient'
+import { buildStrapiQuery } from './queryBuilder'
 
-moduleLoaded('api.ts');
+moduleLoaded('api.ts')
 
 // Configuration
 const API_TOKEN = import.meta.env.VITE_API_TOKEN
 
 // Enforce presence of API token — this project expects a token to access Strapi endpoints
 if (!API_TOKEN) {
-	dbg('api.ts', 'Error', 'VITE_API_TOKEN is not set. Requests to Strapi will fail without a valid API token.');
-	throw new Error('VITE_API_TOKEN is required to access the Strapi API. Check your .env file.')
+  dbg(
+    'api.ts',
+    'Error',
+    'VITE_API_TOKEN is not set. Requests to Strapi will fail without a valid API token.',
+  )
+  throw new Error('VITE_API_TOKEN is required to access the Strapi API. Check your .env file.')
 }
 
 /**
@@ -80,34 +84,34 @@ if (!API_TOKEN) {
  * @returns The result produced by the centralized `buildStrapiQuery` function (format depends on that implementation).
  */
 export const apiService = {
-	get: async <T>(url: string, config?: AxiosRequestConfig) => {
-		dbg('api.ts', 'apiService.get', { url })
-		const response = await axiosClient.get<T>(url, config)
-		dbg('api.ts', 'apiService.get -> returned', { url, status: (response as any)?.status })
-		return response.data
-	},
+  get: async <T>(url: string, config?: AxiosRequestConfig) => {
+    dbg('api.ts', 'apiService.get', { url })
+    const response = await axiosClient.get<T>(url, config)
+    dbg('api.ts', 'apiService.get -> returned', { url, status: (response as any)?.status })
+    return response.data
+  },
 
-	post: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => {
-		dbg('api.ts', 'apiService.post', { url })
-		const response = await axiosClient.post<T>(url, data, config)
-		dbg('api.ts', 'apiService.post -> returned', { url, status: (response as any)?.status })
-		return response.data
-	},
+  post: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => {
+    dbg('api.ts', 'apiService.post', { url })
+    const response = await axiosClient.post<T>(url, data, config)
+    dbg('api.ts', 'apiService.post -> returned', { url, status: (response as any)?.status })
+    return response.data
+  },
 
-	put: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => {
-		dbg('api.ts', 'apiService.put', { url })
-		const response = await axiosClient.put<T>(url, data, config)
-		dbg('api.ts', 'apiService.put -> returned', { url, status: (response as any)?.status })
-		return response.data
-	},
+  put: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => {
+    dbg('api.ts', 'apiService.put', { url })
+    const response = await axiosClient.put<T>(url, data, config)
+    dbg('api.ts', 'apiService.put -> returned', { url, status: (response as any)?.status })
+    return response.data
+  },
 
-	delete: async <T>(url: string, config?: AxiosRequestConfig) => {
-		dbg('api.ts', 'apiService.delete', { url })
-		const response = await axiosClient.delete<T>(url, config)
-		dbg('api.ts', 'apiService.delete -> returned', { url, status: (response as any)?.status })
-		return response.data
-	},
+  delete: async <T>(url: string, config?: AxiosRequestConfig) => {
+    dbg('api.ts', 'apiService.delete', { url })
+    const response = await axiosClient.delete<T>(url, config)
+    dbg('api.ts', 'apiService.delete -> returned', { url, status: (response as any)?.status })
+    return response.data
+  },
 
-	// Utility function for backward compatibility — delegates to centralized query builder
-	buildStrapiQuery: (params: Record<string, unknown>) => buildStrapiQuery(params),
+  // Utility function for backward compatibility — delegates to centralized query builder
+  buildStrapiQuery: (params: Record<string, unknown>) => buildStrapiQuery(params),
 }

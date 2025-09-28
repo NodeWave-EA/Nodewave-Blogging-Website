@@ -30,13 +30,7 @@
     },
     "source": {
       "type": "enumeration",
-      "enum": [
-        "website",
-        "social",
-        "referral",
-        "api",
-        "import"
-      ],
+      "enum": ["website", "social", "referral", "api", "import"],
       "default": "website"
     },
     "preferences": {

@@ -1,7 +1,7 @@
-import type { ApiResponse, Category } from '@/types';
-import { moduleLoaded } from '@/utils/debug';
-import { apiService } from './api';
-import { buildStrapiQuery } from './queryBuilder';
+import type { ApiResponse, Category } from '@/types'
+import { moduleLoaded } from '@/utils/debug'
+import { apiService } from './api'
+import { buildStrapiQuery } from './queryBuilder'
 
 moduleLoaded('categories.ts')
 
@@ -32,31 +32,31 @@ moduleLoaded('categories.ts')
  * @public
  */
 export const categoriesApi = {
-	getAll: async (): Promise<ApiResponse<Category[]>> => {
-		const params = {
-			populate: '*',
-			'sort[0]': 'name:asc',
-			publicationState: 'live',
-		}
+  getAll: async (): Promise<ApiResponse<Category[]>> => {
+    const params = {
+      populate: '*',
+      'sort[0]': 'name:asc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		return apiService.get<ApiResponse<Category[]>>(`/categories?${queryString}`)
-	},
+    const queryString = buildStrapiQuery(params)
+    return apiService.get<ApiResponse<Category[]>>(`/categories?${queryString}`)
+  },
 
-	getBySlug: async (slug: string): Promise<{ data: Category }> => {
-		const params = {
-			'filters[slug][$eq]': slug,
-			populate: '*',
-			publicationState: 'live',
-		}
+  getBySlug: async (slug: string): Promise<{ data: Category }> => {
+    const params = {
+      'filters[slug][$eq]': slug,
+      populate: '*',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const response = await apiService.get<ApiResponse<Category[]>>(`/categories?${queryString}`)
+    const queryString = buildStrapiQuery(params)
+    const response = await apiService.get<ApiResponse<Category[]>>(`/categories?${queryString}`)
 
-		if (!response.data || response.data.length === 0) {
-			throw new Error('Category not found')
-		}
+    if (!response.data || response.data.length === 0) {
+      throw new Error('Category not found')
+    }
 
-		return { data: response.data[0] }
-	},
+    return { data: response.data[0] }
+  },
 }

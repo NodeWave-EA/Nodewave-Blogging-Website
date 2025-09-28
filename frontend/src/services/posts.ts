@@ -1,7 +1,7 @@
-import type { ApiResponse, BlogFilters, BlogPost } from '@/types';
-import { dbg, moduleLoaded } from '@/utils/debug';
-import { apiService } from './api';
-import { buildStrapiQuery } from './queryBuilder';
+import type { ApiResponse, BlogFilters, BlogPost } from '@/types'
+import { dbg, moduleLoaded } from '@/utils/debug'
+import { apiService } from './api'
+import { buildStrapiQuery } from './queryBuilder'
 
 moduleLoaded('posts.ts')
 
@@ -78,250 +78,270 @@ moduleLoaded('posts.ts')
  * @public
  */
 export const blogPostsApi = {
-	getAll: async (
-		page = 1,
-		pageSize = 12,
-		filters: BlogFilters = {},
-	): Promise<ApiResponse<BlogPost[]>> => {
-		const params: Record<string, unknown> = {
-			'pagination[page]': page,
-			'pagination[pageSize]': pageSize,
-			'populate[author][populate]': '*',
-			'populate[categories]': '*',
-			'populate[tags]': '*',
-			'populate[featured_image]': '*',
-			'populate[seo]': '*',
-			'sort[0]': filters.sortBy
-				? `${filters.sortBy}:${filters.sortOrder || 'desc'}`
-				: 'publishedAt:desc',
-			publicationState: 'live',
-		}
+  getAll: async (
+    page = 1,
+    pageSize = 12,
+    filters: BlogFilters = {},
+  ): Promise<ApiResponse<BlogPost[]>> => {
+    const params: Record<string, unknown> = {
+      'pagination[page]': page,
+      'pagination[pageSize]': pageSize,
+      'populate[author][populate]': '*',
+      'populate[categories]': '*',
+      'populate[tags]': '*',
+      'populate[featured_image]': '*',
+      'populate[seo]': '*',
+      'sort[0]': filters.sortBy
+        ? `${filters.sortBy}:${filters.sortOrder || 'desc'}`
+        : 'publishedAt:desc',
+      publicationState: 'live',
+    }
 
-		if (filters.search) {
-			params['filters[$or][0][title][$containsi]'] = filters.search
-			params['filters[$or][1][excerpt][$containsi]'] = filters.search
-			params['filters[$or][2][content][$containsi]'] = filters.search
-		}
+    if (filters.search) {
+      params['filters[$or][0][title][$containsi]'] = filters.search
+      params['filters[$or][1][excerpt][$containsi]'] = filters.search
+      params['filters[$or][2][content][$containsi]'] = filters.search
+    }
 
-		if (filters.categories && filters.categories.length > 0) {
-			filters.categories.forEach((category, index) => {
-				params[`filters[categories][slug][$in][${index}]`] = category
-			})
-		}
+    if (filters.categories && filters.categories.length > 0) {
+      filters.categories.forEach((category, index) => {
+        params[`filters[categories][slug][$in][${index}]`] = category
+      })
+    }
 
-		if (filters.tags && filters.tags.length > 0) {
-			filters.tags.forEach((tag, index) => {
-				params[`filters[tags][slug][$in][${index}]`] = tag
-			})
-		}
+    if (filters.tags && filters.tags.length > 0) {
+      filters.tags.forEach((tag, index) => {
+        params[`filters[tags][slug][$in][${index}]`] = tag
+      })
+    }
 
-		if (filters.authors && filters.authors.length > 0) {
-			filters.authors.forEach((author, index) => {
-				params[`filters[author][slug][$in][${index}]`] = author
-			})
-		}
+    if (filters.authors && filters.authors.length > 0) {
+      filters.authors.forEach((author, index) => {
+        params[`filters[author][slug][$in][${index}]`] = author
+      })
+    }
 
-		if (filters.featured !== undefined) {
-			params['filters[featured][$eq]'] = filters.featured
-		}
+    if (filters.featured !== undefined) {
+      params['filters[featured][$eq]'] = filters.featured
+    }
 
-		if (filters.dateFrom) {
-			params['filters[publishedAt][$gte]'] = filters.dateFrom
-		}
+    if (filters.dateFrom) {
+      params['filters[publishedAt][$gte]'] = filters.dateFrom
+    }
 
-		if (filters.dateTo) {
-			params['filters[publishedAt][$lte]'] = filters.dateTo
-		}
+    if (filters.dateTo) {
+      params['filters[publishedAt][$lte]'] = filters.dateTo
+    }
 
-		const queryString = buildStrapiQuery(params)
-		dbg('posts.ts [blogPostsApi]', 'getAll', { url: `/blog-posts?${queryString}` })
-		const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-		dbg('posts.ts [blogPostsApi]', 'getAll -> response received', { ok: !!resp, dataLen: resp?.data?.length })
-		return resp
-	},
+    const queryString = buildStrapiQuery(params)
+    dbg('posts.ts [blogPostsApi]', 'getAll', { url: `/blog-posts?${queryString}` })
+    const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    dbg('posts.ts [blogPostsApi]', 'getAll -> response received', {
+      ok: !!resp,
+      dataLen: resp?.data?.length,
+    })
+    return resp
+  },
 
-	getBySlug: async (slug: string): Promise<{ data: BlogPost }> => {
-		dbg('posts.ts', 'getBySlug', { slug })
-		const params = {
-			'filters[slug][$eq]': slug,
-			'populate[author][populate]': '*',
-			'populate[categories]': '*',
-			'populate[tags]': '*',
-			'populate[featured_image]': '*',
-			'populate[gallery]': '*',
-			'populate[related_posts][populate][0]': 'featured_image',
-			'populate[related_posts][populate][1]': 'author',
-			'populate[social_sharing]': '*',
-			'populate[seo]': '*',
-			publicationState: 'live',
-		}
+  getBySlug: async (slug: string): Promise<{ data: BlogPost }> => {
+    dbg('posts.ts', 'getBySlug', { slug })
+    const params = {
+      'filters[slug][$eq]': slug,
+      'populate[author][populate]': '*',
+      'populate[categories]': '*',
+      'populate[tags]': '*',
+      'populate[featured_image]': '*',
+      'populate[gallery]': '*',
+      'populate[related_posts][populate][0]': 'featured_image',
+      'populate[related_posts][populate][1]': 'author',
+      'populate[social_sharing]': '*',
+      'populate[seo]': '*',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const response = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    const queryString = buildStrapiQuery(params)
+    const response = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
 
-		if (!response.data || response.data.length === 0) {
-			dbg('posts.ts', 'getBySlug -> not found', { slug })
-			throw new Error('Blog post not found')
-		}
+    if (!response.data || response.data.length === 0) {
+      dbg('posts.ts', 'getBySlug -> not found', { slug })
+      throw new Error('Blog post not found')
+    }
 
-		const post = (response.data[0])
-		dbg('posts.ts', 'getBySlug -> returning post', { id: post.id })
-		return { data: post }
-	},
+    const post = response.data[0]
+    dbg('posts.ts', 'getBySlug -> returning post', { id: post.id })
+    return { data: post }
+  },
 
-	getFeatured: async (limit = 6): Promise<ApiResponse<BlogPost[]>> => {
-		dbg('posts.ts', 'getFeatured', { limit })
-		const params = {
-			'filters[featured][$eq]': true,
-			'pagination[pageSize]': limit,
-			'populate[author][populate]': '*',
-			'populate[categories]': '*',
-			'populate[featured_image]': '*',
-			'sort[0]': 'publishedAt:desc',
-			publicationState: 'live',
-		}
+  getFeatured: async (limit = 6): Promise<ApiResponse<BlogPost[]>> => {
+    dbg('posts.ts', 'getFeatured', { limit })
+    const params = {
+      'filters[featured][$eq]': true,
+      'pagination[pageSize]': limit,
+      'populate[author][populate]': '*',
+      'populate[categories]': '*',
+      'populate[featured_image]': '*',
+      'sort[0]': 'publishedAt:desc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-		dbg('posts.ts', 'getFeatured -> response length', { len: resp?.data?.length })
-		return resp
-	},
+    const queryString = buildStrapiQuery(params)
+    const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    dbg('posts.ts', 'getFeatured -> response length', { len: resp?.data?.length })
+    return resp
+  },
 
-	getLatest: async (limit = 12): Promise<ApiResponse<BlogPost[]>> => {
-		dbg('posts.ts', 'getLatest', { limit })
-		const params = {
-			'pagination[pageSize]': limit,
-			'populate[author][populate]': '*',
-			'populate[categories]': '*',
-			'populate[featured_image]': '*',
-			'sort[0]': 'publishedAt:desc',
-			publicationState: 'live',
-		}
+  getLatest: async (limit = 12): Promise<ApiResponse<BlogPost[]>> => {
+    dbg('posts.ts', 'getLatest', { limit })
+    const params = {
+      'pagination[pageSize]': limit,
+      'populate[author][populate]': '*',
+      'populate[categories]': '*',
+      'populate[featured_image]': '*',
+      'sort[0]': 'publishedAt:desc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-		dbg('posts.ts', 'getLatest -> response length', { len: resp?.data?.length })
-		return resp
-	},
+    const queryString = buildStrapiQuery(params)
+    const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    dbg('posts.ts', 'getLatest -> response length', { len: resp?.data?.length })
+    return resp
+  },
 
-	getRelated: async (postId: number, limit = 4): Promise<ApiResponse<BlogPost[]>> => {
-		dbg('posts.ts', 'getRelated', { postId, limit })
-		const params = {
-			'filters[id][$ne]': postId,
-			'pagination[pageSize]': limit,
-			'populate[author][populate]': '*',
-			'populate[featured_image]': '*',
-			'sort[0]': 'publishedAt:desc',
-			publicationState: 'live',
-		}
+  getRelated: async (postId: number, limit = 4): Promise<ApiResponse<BlogPost[]>> => {
+    dbg('posts.ts', 'getRelated', { postId, limit })
+    const params = {
+      'filters[id][$ne]': postId,
+      'pagination[pageSize]': limit,
+      'populate[author][populate]': '*',
+      'populate[featured_image]': '*',
+      'sort[0]': 'publishedAt:desc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-		dbg('posts.ts', 'getRelated -> response length', { len: resp?.data?.length })
-		return resp
-	},
+    const queryString = buildStrapiQuery(params)
+    const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    dbg('posts.ts', 'getRelated -> response length', { len: resp?.data?.length })
+    return resp
+  },
 
-	toggleLike: async (id: number): Promise<{ data: BlogPost }> => {
-		dbg('posts.ts', 'toggleLike', { id })
-		const r = await apiService.put<{ data: BlogPost }>(`/blog-posts/${id}/like`)
-		if (r?.data) r.data = (r.data)
-		dbg('posts.ts', 'toggleLike -> returned', { ok: !!r, id: r?.data?.id })
-		return r
-	},
+  toggleLike: async (id: number): Promise<{ data: BlogPost }> => {
+    dbg('posts.ts', 'toggleLike', { id })
+    const r = await apiService.put<{ data: BlogPost }>(`/blog-posts/${id}/like`)
+    dbg('posts.ts', 'toggleLike -> returned', { ok: !!r, id: r?.data?.id })
+    return r
+  },
 
-	getByCategory: async (
-		categoryId: number,
-		options: { page?: number; pageSize?: number; featured?: boolean; sortBy?: string; sortOrder?: string } = {},
-	): Promise<ApiResponse<BlogPost[]>> => {
-		dbg('posts.ts', 'getByCategory', { categoryId, options })
-		const params: Record<string, unknown> = {
-			'filters[categories][id][$eq]': categoryId,
-			'pagination[page]': options.page || 1,
-			'pagination[pageSize]': options.pageSize || 12,
-			'populate[author][populate]': '*',
-			'populate[categories]': '*',
-			'populate[tags]': '*',
-			'populate[featured_image]': '*',
-			publicationState: 'live',
-		}
+  getByCategory: async (
+    categoryId: number,
+    options: {
+      page?: number
+      pageSize?: number
+      featured?: boolean
+      sortBy?: string
+      sortOrder?: string
+    } = {},
+  ): Promise<ApiResponse<BlogPost[]>> => {
+    dbg('posts.ts', 'getByCategory', { categoryId, options })
+    const params: Record<string, unknown> = {
+      'filters[categories][id][$eq]': categoryId,
+      'pagination[page]': options.page || 1,
+      'pagination[pageSize]': options.pageSize || 12,
+      'populate[author][populate]': '*',
+      'populate[categories]': '*',
+      'populate[tags]': '*',
+      'populate[featured_image]': '*',
+      publicationState: 'live',
+    }
 
-		if (options.sortBy) {
-			params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
-		} else {
-			params['sort[0]'] = 'publishedAt:desc'
-		}
+    if (options.sortBy) {
+      params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
+    } else {
+      params['sort[0]'] = 'publishedAt:desc'
+    }
 
-		if (options.featured !== undefined) {
-			params['filters[featured][$eq]'] = options.featured
-		}
+    if (options.featured !== undefined) {
+      params['filters[featured][$eq]'] = options.featured
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-		dbg('posts.ts', 'getByCategory -> response length', { len: resp?.data?.length })
-		return resp
-	},
+    const queryString = buildStrapiQuery(params)
+    const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    dbg('posts.ts', 'getByCategory -> response length', { len: resp?.data?.length })
+    return resp
+  },
 
-	getByAuthor: async (
-		authorId: number,
-		options: { page?: number; pageSize?: number; featured?: boolean; sortBy?: string; sortOrder?: string } = {},
-	): Promise<ApiResponse<BlogPost[]>> => {
-		dbg('posts.ts', 'getByAuthor', { authorId, options })
-		const params: Record<string, unknown> = {
-			'filters[author][id][$eq]': authorId,
-			'pagination[page]': options.page || 1,
-			'pagination[pageSize]': options.pageSize || 12,
-			'populate[author][populate]': '*',
-			'populate[categories]': '*',
-			'populate[tags]': '*',
-			'populate[featured_image]': '*',
-			publicationState: 'live',
-		}
+  getByAuthor: async (
+    authorId: number,
+    options: {
+      page?: number
+      pageSize?: number
+      featured?: boolean
+      sortBy?: string
+      sortOrder?: string
+    } = {},
+  ): Promise<ApiResponse<BlogPost[]>> => {
+    dbg('posts.ts', 'getByAuthor', { authorId, options })
+    const params: Record<string, unknown> = {
+      'filters[author][id][$eq]': authorId,
+      'pagination[page]': options.page || 1,
+      'pagination[pageSize]': options.pageSize || 12,
+      'populate[author][populate]': '*',
+      'populate[categories]': '*',
+      'populate[tags]': '*',
+      'populate[featured_image]': '*',
+      publicationState: 'live',
+    }
 
-		if (options.sortBy) {
-			params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
-		} else {
-			params['sort[0]'] = 'publishedAt:desc'
-		}
+    if (options.sortBy) {
+      params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
+    } else {
+      params['sort[0]'] = 'publishedAt:desc'
+    }
 
-		if (options.featured !== undefined) {
-			params['filters[featured][$eq]'] = options.featured
-		}
+    if (options.featured !== undefined) {
+      params['filters[featured][$eq]'] = options.featured
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-		dbg('posts.ts', 'getByAuthor -> response length', { len: resp?.data?.length })
-		return resp
-	},
+    const queryString = buildStrapiQuery(params)
+    const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    dbg('posts.ts', 'getByAuthor -> response length', { len: resp?.data?.length })
+    return resp
+  },
 
-	getByTag: async (
-		tagId: number,
-		options: { page?: number; pageSize?: number; featured?: boolean; sortBy?: string; sortOrder?: string } = {},
-	): Promise<ApiResponse<BlogPost[]>> => {
-		dbg('posts.ts', 'getByTag', { tagId, options })
-		const params: Record<string, unknown> = {
-			'filters[tags][id][$eq]': tagId,
-			'pagination[page]': options.page || 1,
-			'pagination[pageSize]': options.pageSize || 12,
-			'populate[author][populate]': '*',
-			'populate[categories]': '*',
-			'populate[tags]': '*',
-			'populate[featured_image]': '*',
-			publicationState: 'live',
-		}
+  getByTag: async (
+    tagId: number,
+    options: {
+      page?: number
+      pageSize?: number
+      featured?: boolean
+      sortBy?: string
+      sortOrder?: string
+    } = {},
+  ): Promise<ApiResponse<BlogPost[]>> => {
+    dbg('posts.ts', 'getByTag', { tagId, options })
+    const params: Record<string, unknown> = {
+      'filters[tags][id][$eq]': tagId,
+      'pagination[page]': options.page || 1,
+      'pagination[pageSize]': options.pageSize || 12,
+      'populate[author][populate]': '*',
+      'populate[categories]': '*',
+      'populate[tags]': '*',
+      'populate[featured_image]': '*',
+      publicationState: 'live',
+    }
 
-		if (options.sortBy) {
-			params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
-		} else {
-			params['sort[0]'] = 'publishedAt:desc'
-		}
+    if (options.sortBy) {
+      params['sort[0]'] = `${options.sortBy}:${options.sortOrder || 'desc'}`
+    } else {
+      params['sort[0]'] = 'publishedAt:desc'
+    }
 
-		if (options.featured !== undefined) {
-			params['filters[featured][$eq]'] = options.featured
-		}
+    if (options.featured !== undefined) {
+      params['filters[featured][$eq]'] = options.featured
+    }
 
-		const queryString = buildStrapiQuery(params)
-		const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-		dbg('posts.ts', 'getByTag -> response length', { len: resp?.data?.length })
-		return resp
-	},
+    const queryString = buildStrapiQuery(params)
+    const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
+    dbg('posts.ts', 'getByTag -> response length', { len: resp?.data?.length })
+    return resp
+  },
 }

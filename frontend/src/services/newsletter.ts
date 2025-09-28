@@ -1,5 +1,5 @@
 import type { ApiResponse, Newsletter } from '@/types'
-import { moduleLoaded } from '@/utils/debug'
+import { dbg, moduleLoaded } from '@/utils/debug'
 import { apiService } from './api'
 
 moduleLoaded('newsletter.ts')
@@ -52,27 +52,28 @@ moduleLoaded('newsletter.ts')
  * 'Unsubscribe endpoint not implemented in backend' until a backend endpoint is added.
  */
 export const newsletterService = {
-	async subscribe(email: string): Promise<ApiResponse<Newsletter>> {
-		return apiService.post<ApiResponse<Newsletter>>('/newsletters', {
-			data: {
-				email,
-				status: 'subscribed',
-			},
-		})
-	},
+  async subscribe(email: string): Promise<ApiResponse<Newsletter>> {
+    return apiService.post<ApiResponse<Newsletter>>('/newsletters', {
+      data: {
+        email,
+        status: 'subscribed',
+      },
+    })
+  },
 
-	async unsubscribe(email?: string): Promise<void> {
-		// Try to call a backend unsubscribe endpoint if implemented.
-		// If no email is provided or the endpoint is not available, throw a helpful error.
-		if (!email) throw new Error('Email required to unsubscribe')
+  async unsubscribe(email?: string): Promise<void> {
+    // Try to call a backend unsubscribe endpoint if implemented.
+    // If no email is provided or the endpoint is not available, throw a helpful error.
+    if (!email) throw new Error('Email required to unsubscribe')
 
-		try {
-			// Use a conventional route if backend provides it
-			await apiService.post('/newsletters/unsubscribe', { data: { email } })
-			return
-		} catch (err) {
-			// Endpoint not implemented or returned an error; surface a clear message
-			throw new Error('Unsubscribe endpoint not implemented in backend')
-		}
-	},
+    try {
+      // Use a conventional route if backend provides it
+      await apiService.post('/newsletters/unsubscribe', { data: { email } })
+      return
+    } catch (err) {
+      // Endpoint not implemented or returned an error; surface a clear message
+      dbg('newsletterService.unsubscribe', 'error', err)
+      throw new Error('Unsubscribe endpoint not implemented in backend')
+    }
+  },
 }

@@ -14,7 +14,7 @@ export function useCompanyInfo() {
     try {
       // Strapi single-type endpoint in this project is mounted at /company-info
       // apiService.get returns the parsed response, which is the company info object directly
-      const response = await apiService.get<CompanyInfo>("/company-info?populate=*")
+      const response = await apiService.get<CompanyInfo>('/company-info?populate=*')
       companyInfo.value = response
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch company info'

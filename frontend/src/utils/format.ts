@@ -140,10 +140,7 @@ export function formatRelativeTime(date: unknown): string {
 /**
  * Format distance to now (alias for formatRelativeTime with options)
  */
-export function formatDistanceToNow(
-  date: unknown,
-  options?: { addSuffix?: boolean },
-): string {
+export function formatDistanceToNow(date: unknown, options?: { addSuffix?: boolean }): string {
   const { addSuffix = false } = options || {}
   const result = formatRelativeTime(date)
 

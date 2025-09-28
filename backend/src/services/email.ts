@@ -4,63 +4,62 @@
  */
 
 interface EmailOptions {
-	to: string
-	subject: string
-	text?: string
-	html?: string
-	from?: string
-	replyTo?: string
-	attachments?: Array<{
-		filename: string
-		content: Buffer | string
-		contentType?: string
-	}>
+  to: string
+  subject: string
+  text?: string
+  html?: string
+  from?: string
+  replyTo?: string
+  attachments?: Array<{
+    filename: string
+    content: Buffer | string
+    contentType?: string
+  }>
 }
 
-
 class EmailService {
-	private strapi: any
+  private strapi: any
 
-	constructor(strapi: any) {
-		this.strapi = strapi
-	}
+  constructor(strapi: any) {
+    this.strapi = strapi
+  }
 
-	/**
-	 * Send email using configured provider
-	 */
-	async sendEmail(options: EmailOptions): Promise<boolean> {
-		try {
-			const emailConfig = this.strapi.config.get('plugin.email', {})
-			const defaultFrom = emailConfig.settings?.defaultFrom || 'noreply@nodewave.blog'
-			const defaultReplyTo = emailConfig.settings?.defaultReplyTo || 'support@nodewave.blog'
+  /**
+   * Send email using configured provider
+   */
+  async sendEmail(options: EmailOptions): Promise<boolean> {
+    try {
+      const emailConfig = this.strapi.config.get('plugin.email', {})
+      const defaultFrom = emailConfig.settings?.defaultFrom || 'noreply@nodewave.blog'
+      const defaultReplyTo = emailConfig.settings?.defaultReplyTo || 'support@nodewave.blog'
 
-			const emailData = {
-				to: options.to,
-				from: options.from || defaultFrom,
-				replyTo: options.replyTo || defaultReplyTo,
-				subject: options.subject,
-				text: options.text,
-				html: options.html,
-				attachments: options.attachments,
-			}
+      const emailData = {
+        to: options.to,
+        from: options.from || defaultFrom,
+        replyTo: options.replyTo || defaultReplyTo,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+        attachments: options.attachments,
+      }
 
-			await this.strapi.plugins.email.services.email.send(emailData)
+      await this.strapi.plugins.email.services.email.send(emailData)
 
-			this.strapi.log.info(`Email sent successfully to ${options.to}`)
-			return true
-		} catch (error) {
-			this.strapi.log.error('Failed to send email:', error)
-			return false
-		}
-	}
+      this.strapi.log.info(`Email sent successfully to ${options.to}`)
+      return true
+    } catch (error) {
+      this.strapi.log.error('Failed to send email:', error)
+      return false
+    }
+  }
 
-	/**
-	 * Send newsletter confirmation email
-	 */
-	async sendNewsletterConfirmation(email: string, confirmationToken: string): Promise<boolean> {
-		const confirmationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/newsletter/confirm?token=${confirmationToken}`
+  /**
+   * Send newsletter confirmation email
+   */
+  async sendNewsletterConfirmation(email: string, confirmationToken: string): Promise<boolean> {
+    const confirmationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/newsletter/confirm?token=${confirmationToken}`
 
-		const html = `
+    const html = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -96,7 +95,7 @@ class EmailService {
       </html>
     `
 
-		const text = `
+    const text = `
       Confirm Your Newsletter Subscription
 
       Thank you for subscribing to our newsletter!
@@ -109,26 +108,26 @@ class EmailService {
       © ${new Date().getFullYear()} NodeWave Blog. All rights reserved.
     `
 
-		return this.sendEmail({
-			to: email,
-			subject: 'Confirm Your Newsletter Subscription - NodeWave Blog',
-			text,
-			html,
-		})
-	}
+    return this.sendEmail({
+      to: email,
+      subject: 'Confirm Your Newsletter Subscription - NodeWave Blog',
+      text,
+      html,
+    })
+  }
 
-	/**
-	 * Send contact form notification
-	 */
-	async sendContactFormNotification(formData: {
-		name: string
-		email: string
-		subject?: string
-		message: string
-	}): Promise<boolean> {
-		const adminEmail = process.env.ADMIN_EMAIL || 'admin@nodewave.blog'
+  /**
+   * Send contact form notification
+   */
+  async sendContactFormNotification(formData: {
+    name: string
+    email: string
+    subject?: string
+    message: string
+  }): Promise<boolean> {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@nodewave.blog'
 
-		const html = `
+    const html = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -172,52 +171,52 @@ class EmailService {
       </html>
     `
 
-		return this.sendEmail({
-			to: adminEmail,
-			subject: `New Contact Form: ${formData.subject || 'From ' + formData.name}`,
-			html,
-			replyTo: formData.email,
-		})
-	}
+    return this.sendEmail({
+      to: adminEmail,
+      subject: `New Contact Form: ${formData.subject || 'From ' + formData.name}`,
+      html,
+      replyTo: formData.email,
+    })
+  }
 
-	/**
-	 * Send test email to verify SMTP configuration
-	 */
-	async sendTestEmail(testEmail?: string): Promise<boolean> {
-		const emailConfig = this.strapi.config.get('plugin.email', {})
-		const recipient = testEmail || emailConfig.settings?.testAddress || 'test@example.com'
+  /**
+   * Send test email to verify SMTP configuration
+   */
+  async sendTestEmail(testEmail?: string): Promise<boolean> {
+    const emailConfig = this.strapi.config.get('plugin.email', {})
+    const recipient = testEmail || emailConfig.settings?.testAddress || 'test@example.com'
 
-		return this.sendEmail({
-			to: recipient,
-			subject: 'NodeWave Blog - Email Configuration Test',
-			text: 'This is a test email to verify your email configuration is working correctly.',
-			html: `
+    return this.sendEmail({
+      to: recipient,
+      subject: 'NodeWave Blog - Email Configuration Test',
+      text: 'This is a test email to verify your email configuration is working correctly.',
+      html: `
         <h2>Email Configuration Test</h2>
         <p>This is a test email to verify your SMTP configuration is working correctly.</p>
         <p><strong>Provider:</strong> SMTP (${process.env.SMTP_HOST || 'Unknown'})</p>
         <p><strong>Sent at:</strong> ${new Date().toISOString()}</p>
       `,
-		})
-	}
+    })
+  }
 
-	/**
-	 * Send admin notification
-	 */
-	async sendAdminNotification(subject: string, message: string): Promise<boolean> {
-		const adminEmail = process.env.ADMIN_EMAIL || 'admin@nodewave.blog'
+  /**
+   * Send admin notification
+   */
+  async sendAdminNotification(subject: string, message: string): Promise<boolean> {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@nodewave.blog'
 
-		return this.sendEmail({
-			to: adminEmail,
-			subject: `[NodeWave Blog] ${subject}`,
-			text: message,
-			html: `
+    return this.sendEmail({
+      to: adminEmail,
+      subject: `[NodeWave Blog] ${subject}`,
+      text: message,
+      html: `
         <h2>${subject}</h2>
         <p>${message.replace(/\n/g, '<br>')}</p>
         <hr>
         <small>This is an automated notification from NodeWave Blog.</small>
       `,
-		})
-	}
+    })
+  }
 }
 
 // Export service factory

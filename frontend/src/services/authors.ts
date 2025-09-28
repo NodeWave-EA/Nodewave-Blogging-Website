@@ -38,18 +38,18 @@ moduleLoaded('authors.ts')
  *   @returns A promise resolving to an object with a `data` field containing the Author.
  */
 export const authorsApi = {
-	getAll: async (): Promise<ApiResponse<Author[]>> => {
-		const params = {
-			populate: '*',
-			'sort[0]': 'name:asc',
-			publicationState: 'live',
-		}
+  getAll: async (): Promise<ApiResponse<Author[]>> => {
+    const params = {
+      populate: '*',
+      'sort[0]': 'name:asc',
+      publicationState: 'live',
+    }
 
-		const queryString = buildStrapiQuery(params)
-		return apiService.get<ApiResponse<Author[]>>(`/authors?${queryString}`)
-	},
+    const queryString = buildStrapiQuery(params)
+    return apiService.get<ApiResponse<Author[]>>(`/authors?${queryString}`)
+  },
 
-	getBySlug: async (slug: string): Promise<{ data: Author }> => {
-		return apiService.get<{ data: Author }>(`/authors/slug/${slug}`)
-	},
+  getBySlug: async (slug: string): Promise<{ data: Author }> => {
+    return apiService.get<{ data: Author }>(`/authors/slug/${slug}`)
+  },
 }
