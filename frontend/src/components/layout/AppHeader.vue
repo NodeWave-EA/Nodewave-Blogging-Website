@@ -18,17 +18,8 @@
         <!-- Logo -->
         <div class="flex-shrink-0 z-10">
           <RouterLink to="/" class="flex items-center gap-3 group relative" aria-label="Home">
-            <img v-if="currentLogo" :src="currentLogo" :alt="companyName + ' logo'" :class="[
-              'w-auto transition-transform duration-300 group-hover:scale-105 drop-shadow-sm',
-              isScrolled ? 'h-7 lg:h-8' : 'h-8 lg:h-10',
-            ]" loading="lazy" decoding="async" />
-            <span v-else :class="[
-              'font-bold font-mono bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent',
-              'transition-all duration-300',
-              isScrolled ? 'text-lg lg:text-xl' : 'text-xl lg:text-2xl',
-            ]">
-              {{ companyName }}
-            </span>
+            <Logo :text="brandText" :width="logoWidth" :height="logoHeight"
+              class="w-auto transition-transform duration-300 group-hover:scale-105 drop-shadow-sm" />
           </RouterLink>
         </div>
 
@@ -47,7 +38,7 @@
           </button>
 
           <!-- Theme Toggle -->
-          <ThemeToggle />
+          <!-- <ThemeToggle /> -->
 
           <!-- Mobile Menu -->
           <button @click.stop="toggleMobileMenu"
@@ -75,30 +66,23 @@
 
 <script setup lang="ts">
   import AppNavigation from '@/components/layout/AppNavigation.vue';
-  import ThemeToggle from '@/components/layout/ThemeToggle.vue';
+  import Logo from '@/components/layout/NodewaveLogo.vue';
   import SearchModal from '@/components/ui/SearchModal.vue';
-  import { useCompanyInfo } from '@/composables/useCompanyInfo';
-  import { useTheme } from '@/composables/useTheme';
   import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/24/outline';
   import { computed, onMounted, onUnmounted, ref } from 'vue';
   import { RouterLink } from 'vue-router';
 
-  const { logo, logoDark, companyName } = useCompanyInfo()
-  const { actualTheme } = useTheme()
+  const brandText = 'NodeWave EA'
+
+  // Responsive logo sizing driven by scroll state
+  const logoHeight = computed(() => (isScrolled.value ? 32 : 48))
+  const logoWidth = computed(() => Math.round(logoHeight.value * 5))
 
   const mobileMenuOpen = ref(false)
   const searchOpen = ref(false)
 
   // Scroll state for floating navigation
   const isScrolled = ref(false)
-
-  // Current logo based on theme
-  const currentLogo = computed(() => {
-    if (actualTheme.value === 'dark') {
-      return logoDark.value || logo.value
-    }
-    return logo.value
-  })
 
   // Open search modal
   const openSearch = () => {
