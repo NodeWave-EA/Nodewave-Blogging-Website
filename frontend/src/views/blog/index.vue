@@ -1,13 +1,19 @@
 <template>
   <div class="min-h-screen">
-    <!-- Page Header -->
-    <PageHeader tag="Blog & Insights" title="Our Blog"
-      description="Discover insights, stories, and updates from our team" />
+    <!-- Full-page skeleton while initial data loads; renders entire header+filters+posts -->
+    <BlogPageSkeleton v-if="pageLoading" />
 
-    <!-- Filters (search disabled here because global search exists in navigation) -->
-    <BlogFilters :show-search="false" v-model:category="selectedCategories" v-model:sort="sortBy"
-      :categories="categories" :results-count="posts.length" :total-count="totalPosts"
-      @filter-change="handleFilterChange" />
+    <template v-else>
+      <!-- Page Header -->
+      <PageHeader tag="Blog & Insights" title="Our Blog"
+        description="Discover insights, stories, and updates from our team" />
+
+      <!-- Filters (search disabled here because global search exists in navigation) -->
+      <BlogFilters :show-search="false" v-model:category="selectedCategories" v-model:sort="sortBy"
+        :categories="categories" :results-count="posts.length" :total-count="totalPosts"
+        @filter-change="handleFilterChange" />
+    </template>
+
     <div v-if="usingFeaturedFallback"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm text-slate-600 dark:text-slate-400">
       No featured posts found — showing latest posts instead.
@@ -23,8 +29,9 @@
         </h2>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading && posts.length === 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Loading state handled at top-level (pageLoading). Show individual post skeletons only for subsequent loads -->
+      <div v-if="loading && posts.length === 0 && !pageLoading"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <BlogPostSkeleton v-for="n in 6" :key="n" />
       </div>
 
@@ -56,6 +63,7 @@
 <script setup lang="ts">
   import BlogCard from '@/components/blog/BlogCard.vue';
   import BlogFilters from '@/components/blog/BlogFilters.vue';
+  import BlogPageSkeleton from '@/components/blog/BlogPageSkeleton.vue';
   import BlogPostSkeleton from '@/components/blog/BlogPostSkeleton.vue';
   import EmptyState from '@/components/ui/EmptyState.vue';
   import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
@@ -73,6 +81,8 @@
   // Reactive data
   const searchQuery = ref('')
   const selectedCategories = ref<string[]>([])
+  // Page-level loading state to show full-page skeleton until initial API calls complete
+  const pageLoading = ref(true)
   const sortBy = ref<'newest' | 'oldest' | 'popular' | 'title' | 'featured'>('title')
   const usingFeaturedFallback = ref(false)
   const categories = ref<Category[]>([])
@@ -225,8 +235,10 @@
     else if (Array.isArray(catQuery)) selectedCategories.value = catQuery as string[]
     else selectedCategories.value = (catQuery as string).split(',').map((s) => s.trim()).filter(Boolean)
 
-    // Fetch data
+    // Fetch initial data (posts + categories)
     await Promise.all([fetchPosts(), fetchCategories()])
+    // Hide full-page skeleton once initial data has loaded (regardless of errors)
+    pageLoading.value = false
 
     // Update SEO
     updateSEO({
