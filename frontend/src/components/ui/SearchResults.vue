@@ -18,7 +18,8 @@
 				<div v-if="popularCategories.length" class="mb-4">
 					<h4 class="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">Popular categories</h4>
 					<div class="flex flex-wrap gap-2">
-						<button v-for="c in popularCategories" :key="c.id" @click="$emit('select-category', c.slug)"
+						<button v-for="c in popularCategories" :key="c.id"
+							@click="$emit('select-suggestion', { text: c.name, type: 'category', slug: c.slug })"
 							class="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 rounded-full text-sm text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50">
 							{{ c.name }}
 						</button>
@@ -44,11 +45,11 @@
 			</div>
 
 			<div v-else>
-				<!-- If the parent set mode to suggest and we have results, render them as suggestions -->
-				<div v-if="props.mode === 'suggest'">
+				<!-- Render suggestions if present -->
+				<div v-if="props.suggestions && props.suggestions.length">
 					<h4 class="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">Suggestions</h4>
 					<div class="flex flex-col gap-2 mb-3">
-						<button v-for="(s, idx) in props.results" :key="'sugg-' + idx"
+						<button v-for="(s, idx) in props.suggestions" :key="'sugg-' + idx"
 							@click="$emit('select-suggestion', { text: s.title, type: s.type, url: s.url, slug: s.slug })"
 							class="text-left px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800">
 							<div class="font-medium text-zinc-900 dark:text-white">{{ s.title }}</div>
@@ -57,13 +58,21 @@
 					</div>
 				</div>
 
-				<div v-else>
+				<div>
 					<div v-if="results.length === 0" class="p-6 text-center text-zinc-500">
 						No results for "{{ query }}"
 					</div>
 
 					<div v-else>
 						<!-- Grouped header shortcuts -->
+						<div v-if="props.filteredFor" class="px-3 mb-2">
+							<div class="text-xs text-zinc-500 dark:text-zinc-400">Showing filtered results for "<span
+									class="font-medium text-zinc-900 dark:text-white">{{ props.filteredFor.text }}</span>"
+								({{ titleForType(props.filteredFor.type) }}) • <kbd
+									class="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs">Alt+Enter</kbd> to open top
+								suggestion</div>
+						</div>
+
 						<div class="flex items-center gap-3 px-3 mb-3">
 							<button v-for="(g) in groups" :key="g.type" @click="jumpToGroup(g.start)"
 								class="px-3 py-1 rounded-full text-sm bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700">
@@ -72,7 +81,10 @@
 						</div>
 
 						<ul class="divide-y divide-zinc-100 dark:divide-zinc-800">
-							<li v-for="(r, idx) in results" :key="r.type + '-' + r.id" :ref="el => setItemRef(el, idx)"
+							<!-- If preview results are provided (mixed mode), render those first as top results -->
+							<li
+								v-for="(r, idx) in (props.previewResults && props.previewResults.length ? props.previewResults : props.results)"
+								:key="r.type + '-' + r.id" :ref="el => setItemRef(el, idx)"
 								:class="['p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer', selectedIndex === idx ? 'bg-zinc-100 dark:bg-zinc-800' : '']"
 								@click="$emit('select-result', r)">
 								<div class="flex items-start gap-3">
@@ -116,7 +128,12 @@
 	import { watch } from 'vue';
 
 	const props = defineProps<{
+		// full results
 		results: (SearchResult & { highlightedTitle?: string; highlightedExcerpt?: string })[]
+		// server-side suggestions
+		suggestions: (SearchResult & { highlightedTitle?: string; highlightedExcerpt?: string })[]
+		// preview results shown while suggestions are visible
+		previewResults: (SearchResult & { highlightedTitle?: string; highlightedExcerpt?: string })[]
 		loading: boolean
 		query: string
 		selectedIndex: number
@@ -124,10 +141,11 @@
 		recentSearches: string[]
 		popularCategories: Category[]
 		groups?: { type: string; start: number; count: number }[]
-		mode?: 'idle' | 'suggest' | 'results'
+		mode?: 'idle' | 'suggest' | 'results' | 'mixed'
+		filteredFor?: { text: string; type: string } | null
 	}>()
 
-	const emit = defineEmits(['select-result', 'view-all', 'select-suggestion', 'select-category', 'jump-to'])
+	const emit = defineEmits(['select-result', 'view-all', 'select-suggestion', 'jump-to'])
 
 	const iconForType = (type: string) => {
 		if (type === 'post') return DocumentTextIcon

@@ -32,9 +32,10 @@
 
       <!-- Results Scrollable (modular) -->
       <div class="max-h-96 overflow-y-auto custom-scroll">
-        <SearchResults :results="currentResults" :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex"
-          :total="totalResults" :recentSearches="recentSearches" :popularCategories="popularCategories" :mode="mode"
-          :groups="computedGroups" @select-result="onSelectResult" @view-all="onViewAll"
+        <SearchResults :results="searchResults" :suggestions="suggestionItems" :previewResults="previewResults"
+          :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex" :total="totalResults"
+          :recentSearches="recentSearches" :popularCategories="popularCategories" :mode="mode"
+          :filteredFor="filteredFor" :groups="computedGroups" @select-result="onSelectResult" @view-all="onViewAll"
           @select-suggestion="onSelectSuggestion" @select-category="onSelectCategory"
           @jump-to="(i) => (selectedIndex = i)" />
       </div>
@@ -100,15 +101,16 @@
   const rootRef = ref<HTMLElement | null>(null)
   const searchQuery = ref('')
   const suggestionItems = ref<SearchResult[]>([])
+  const previewResults = ref<SearchResult[]>([])
   const searchResults = ref<SearchResult[]>([])
-  const mode = ref<'idle' | 'suggest' | 'results'>('idle')
+  const filteredFor = ref<{ text: string; type: string } | null>(null)
+  const mode = ref<'idle' | 'suggest' | 'results' | 'mixed'>('idle')
   const loading = ref(false)
   const selectedIndex = ref(0)
   const recentSearches = ref<string[]>([])
   const popularCategories = ref<Category[]>([])
   const totalResults = ref(0)
 
-  const currentResults = computed(() => (mode.value === 'suggest' ? suggestionItems.value : searchResults.value))
 
   // Computed
   const isOpen = computed(() => props.modelValue)
@@ -199,8 +201,26 @@
       suggestionItems.value = suggestions as any
       totalResults.value = suggestions.length
       selectedIndex.value = 0
-      // show suggestion mode while user is actively typing
-      mode.value = 'suggest'
+      // While typing, also request a few preview results (top matches) to show beneath suggestions
+      try {
+        const qResp: any = await searchService.quick(searchQuery.value, undefined, 4)
+        const rows: any[] = qResp?.data || []
+        previewResults.value = rows.map((r: any) => ({
+          type: (r.type as any) || (r.title ? 'post' : 'post'),
+          id: r.id,
+          title: r.title || r.name || '',
+          slug: r.slug,
+          excerpt: r.excerpt || r.description || r.bio || '',
+          url: r.slug ? (r.title ? `/blog/${r.slug}` : `/${r.slug}`) : '/',
+          highlightedTitle: highlightText((r.title || r.name || ''), searchQuery.value),
+          highlightedExcerpt: highlightText((r.excerpt || r.description || r.bio || ''), searchQuery.value),
+        }))
+      } catch (e) {
+        previewResults.value = []
+      }
+
+      // show mixed mode (suggestions + preview results)
+      mode.value = 'mixed'
     } catch (e) {
       console.error('Suggest error', e)
     } finally {
@@ -350,10 +370,14 @@
           })
           searchResults.value = mapped as any
           totalResults.value = mapped.length
+          // set filteredFor banner context so user knows this is a filtered view
+          filteredFor.value = { text: payload.text, type: payload.type }
           addToRecentSearches(searchQuery.value)
           return
         }
       }
+      // clear any previous filteredFor context when falling back to full search
+      filteredFor.value = null
 
       // If quick didn't return anything, fall back to full search to show more possibilities
       await performSearchImmediate()
@@ -363,11 +387,6 @@
     } finally {
       loading.value = false
     }
-  }
-
-  const selectCategorySuggestion = (slug: string) => {
-    router.push(`/categories/${slug}`)
-    close()
   }
 
   // Modal controls
@@ -420,6 +439,17 @@
         selectedIndex.value = Math.max(selectedIndex.value - 1, 0)
         break
       case 'Enter':
+        // If user presses Alt+Enter and we have suggestions, accept the top suggestion and navigate immediately
+        if (event.altKey && suggestionItems.value && suggestionItems.value.length) {
+          event.preventDefault()
+          const top = suggestionItems.value[0]
+          if (top && top.url) {
+            router.push(top.url)
+            close()
+            return
+          }
+        }
+
         event.preventDefault()
         if (searchResults.value[selectedIndex.value]) {
           selectResult(searchResults.value[selectedIndex.value])
@@ -526,7 +556,22 @@
 
   // Handlers for child component events
   const onSelectSuggestion = (payload: any) => selectSuggestion(payload)
-  const onSelectCategory = (slug: string) => selectCategorySuggestion(slug)
+  // categories emit using select-suggestion now, so onSelectCategory not needed
+  const onSelectCategory = (payload: string | { text?: string; type?: string; slug?: string }) => {
+    if (typeof payload === 'string') {
+      // convert to full suggestion payload and handle via selectSuggestion
+      selectSuggestion({ text: payload, type: 'category', slug: payload })
+      return
+    }
+
+    // Ensure we pass a fully-formed suggestion object (text required)
+    const full = {
+      text: payload.text || payload.slug || '',
+      type: payload.type || 'category',
+      slug: payload.slug,
+    }
+    selectSuggestion(full as any)
+  }
   const onSelectResult = (r: SearchResult) => selectResult(r)
   const onViewAll = () => {
     // open blog page with query param
