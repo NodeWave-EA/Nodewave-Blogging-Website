@@ -32,7 +32,7 @@
     "username": {
       "type": "string"
     },
-    "display_name": {
+    "color": {
       "type": "string"
     },
     "icon": {

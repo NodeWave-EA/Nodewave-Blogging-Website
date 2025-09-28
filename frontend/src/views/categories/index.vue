@@ -42,7 +42,11 @@
               <div v-if="category.icon"
                 class="w-16 h-16 rounded-lg flex items-center justify-center text-2xl bg-transparent"
                 :style="{ color: category.color || undefined }">
-                <font-awesome-icon v-if="parseIcon(category.icon)" :icon="parseIcon(category.icon)" class="w-8 h-8" />
+                <FontAwesomeIcon :icon="category.icon" :color="category.color" size="w-8 h-8">
+                  <template #default>
+                    <FolderIcon class="w-8 h-8" />
+                  </template>
+                </FontAwesomeIcon>
               </div>
               <div v-else
                 class="w-16 h-16 rounded-lg flex items-center justify-center text-black dark:text-white bg-transparent">
@@ -98,6 +102,7 @@
 </template>
 
 <script setup lang="ts">
+  import FontAwesomeIcon from '@/components/ui/FontAwesomeIcon.vue';
   import PageHeader from '@/components/ui/PageHeader.vue';
   import { blogPostsApi, categoriesApi } from '@/services';
   import type { Category } from '@/types';
@@ -127,83 +132,7 @@
   })
 
   // Methods
-  /**
-   * Parse a variety of icon string formats into a FontAwesome descriptor.
-   * Supported inputs:
-   * - 'github' -> ['fas','github'] (default to solid)
-   * - 'fab:github' or 'fab/github' -> ['fab','github']
-   * - 'fa-brands fa-github' -> ['fab','github']
-   * - 'fa-solid fa-tag' -> ['fas','tag']
-   * - 'fas:tag' -> ['fas','tag']
-   */
-  const parseIcon = (raw: string | undefined): [string, string] | null => {
-    if (!raw || typeof raw !== 'string') return null
-
-    const s = raw.trim()
-
-    // If using colon or slash separator: 'fab:github' or 'fab/github'
-    const colonMatch = s.match(/^([a-zA-Z0-9_-]+)[:/](.+)$/)
-    if (colonMatch) {
-      const prefix = colonMatch[1].toLowerCase()
-      const name = colonMatch[2]
-        .replace(/^fa-/, '')
-        .replace(/^fab-/, '')
-        .replace(/^fas-/, '')
-        .replace(/^far-/, '')
-      if (prefix === 'fab' || prefix === 'fa-brands' || prefix === 'brands') return ['fab', name]
-      if (prefix === 'fas' || prefix === 'fa-solid' || prefix === 'solid') return ['fas', name]
-      if (prefix === 'far' || prefix === 'fa-regular' || prefix === 'regular') return ['far', name]
-      // Unknown prefix: fall back to solid
-      return ['fas', name]
-    }
-
-    // If space-separated fa classes: 'fa-brands fa-github' or 'fab fa-github'
-    if (s.includes(' ')) {
-      const parts = s.split(/\s+/)
-      let prefix = 'fas'
-      let name = ''
-      for (const p of parts) {
-        if (p.startsWith('fa-')) {
-          // fa- prefixed tokens
-          if (p.startsWith('fa-brands') || p === 'fa-brands' || p === 'fab') prefix = 'fab'
-          if (p.startsWith('fa-solid') || p === 'fa-solid' || p === 'fas') prefix = 'fas'
-          if (p.startsWith('fa-regular') || p === 'fa-regular' || p === 'far') prefix = 'far'
-          if (
-            p.startsWith('fa-') &&
-            !p.startsWith('fa-brands') &&
-            !p.startsWith('fa-solid') &&
-            !p.startsWith('fa-regular')
-          ) {
-            name = p.replace(/^fa-/, '')
-          }
-        } else if (p.startsWith('fab') || p === 'fab' || p === 'fas' || p === 'far') {
-          if (p === 'fab') prefix = 'fab'
-          if (p === 'fas') prefix = 'fas'
-          if (p === 'far') prefix = 'far'
-        } else if (!name) {
-          // maybe the raw name appears among parts
-          name = p.replace(/^fa-/, '')
-        }
-      }
-      if (!name) {
-        // try to find the token that includes 'fa-<name>' pattern
-        const nameToken = parts.find((t) => /fa-[a-z0-9-]+/.test(t))
-        if (nameToken) name = nameToken.replace(/^fa-/, '')
-      }
-      if (!name) return null
-      return [prefix, name]
-    }
-
-    // If single token like 'fa-github' or 'fa-solid fa-github' condensed to single
-    if (s.startsWith('fa-')) {
-      // remove fa- prefix and default to solid
-      return ['fas', s.replace(/^fa-/, '')]
-    }
-
-    // If single bare name 'github' -> default to solid
-    return ['fas', s.replace(/^fa-/, '')]
-  }
-
+  // FontAwesome icon parsing moved into FontAwesomeIcon component; categories view now uses that wrapper.
   const fetchCategories = async () => {
     try {
       loading.value = true

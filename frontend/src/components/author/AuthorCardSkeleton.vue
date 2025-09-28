@@ -10,12 +10,6 @@
 			<div class="h-6 bg-zinc-200 dark:bg-zinc-700 rounded mb-3 w-3/4 mx-auto"></div>
 			<div class="h-4 bg-zinc-200 dark:bg-zinc-700 rounded mb-4 w-1/2 mx-auto"></div>
 
-			<div class="space-y-2 mb-4">
-				<div class="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-5/6 mx-auto"></div>
-				<div class="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-3/4 mx-auto"></div>
-				<div class="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-2/3 mx-auto"></div>
-			</div>
-
 			<div class="flex items-center justify-center gap-4 text-sm mb-4">
 				<div class="flex items-center gap-2">
 					<div class="w-4 h-4 rounded bg-zinc-200 dark:bg-zinc-700"></div>

@@ -3,6 +3,6 @@ export interface SocialLink {
   platform: string
   url: string
   username?: string
-  display_name?: string
+  color?: string
   icon?: string
 }

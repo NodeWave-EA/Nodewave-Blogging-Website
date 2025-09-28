@@ -73,7 +73,7 @@ export interface SharedSocialLink extends Struct.ComponentSchema {
     displayName: 'Social Link'
   }
   attributes: {
-    display_name: Schema.Attribute.String
+    color: Schema.Attribute.String
     icon: Schema.Attribute.String
     platform: Schema.Attribute.Enumeration<
       [
