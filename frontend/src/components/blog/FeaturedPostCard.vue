@@ -45,7 +45,7 @@
             <router-link
               v-for="cat in post.categories?.slice(0, 2) || []"
               :key="cat.id"
-              :to="`/category/${cat.slug}`"
+              :to="`/categories/${cat.slug}`"
               class="px-3 py-1 text-xs sm:text-sm font-medium bg-white/10 border border-white/20 rounded-full backdrop-blur-sm hover:bg-white/20 transition"
             >
               {{ cat.name }}
@@ -108,7 +108,7 @@
             <router-link
               v-for="category in post.categories?.slice(0, 1) || []"
               :key="category.id"
-              :to="`/category/${category.slug}`"
+              :to="`/categories/${category.slug}`"
               class="px-2 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-200 bg-zinc-100/70 dark:bg-zinc-800/70 rounded-full hover:bg-zinc-200/80"
             >
               {{ category.name }}
