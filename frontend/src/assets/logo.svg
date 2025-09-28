@@ -1,0 +1,57 @@
+<svg width="320" height="100" viewBox="0 0 320 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Nodewave Logo">
+  <defs>
+    <!-- Wave Gradient -->
+    <linearGradient id="waveGradient" x1="0" y1="80" x2="320" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A8FE3"/>
+      <stop offset="0.45" stop-color="#35BBFC"/>
+      <stop offset="0.8" stop-color="#15F0D7"/>
+      <stop offset="1" stop-color="#1170B0"/>
+    </linearGradient>
+    <!-- Text Gradient -->
+    <linearGradient id="textGradient" x1="0" y1="0" x2="320" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A8FE3"/>
+      <stop offset="1" stop-color="#15F0D7"/>
+    </linearGradient>
+    <!-- Shadow for wave -->
+    <filter id="waveShadow" x="-8" y="72" width="336" height="36" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <!-- Company Name -->
+  <text
+    x="24"
+    y="60"
+    font-family="Segoe UI, Arial, Helvetica, sans-serif"
+    font-size="48"
+    font-weight="bold"
+    letter-spacing="2"
+    fill="url(#textGradient)"
+    text-rendering="geometricPrecision"
+    style="user-select:none"
+  >
+    Nodewave
+  </text>
+
+  <!-- Modern wave element -->
+  <g filter="url(#waveShadow)">
+    <path
+      d="M0,82
+         Q40,95 80,90
+         Q120,80 160,88
+         Q200,96 240,84
+         Q280,78 320,90
+         L320,100 L0,100 Z"
+      fill="url(#waveGradient)"
+    />
+  </g>
+
+  <!-- Responsive transparent background for optimization on dark/light themes -->
+  <rect x="0" y="0" width="320" height="100" fill="none"/>
+
+  <!-- Optional dark mode preview -->
+  <!--
+  <rect x="0" y="0" width="320" height="100" fill="#181A20" opacity="0.0"/>
+  -->
+
+</svg>

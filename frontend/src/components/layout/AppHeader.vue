@@ -31,7 +31,7 @@
         <!-- Actions -->
         <div class="flex items-center gap-1 lg:gap-2">
           <!-- Search -->
-          <button @click="openSearch"
+          <button @click.stop="openSearch"
             class="p-2.5 lg:p-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 group"
             aria-label="Search">
             <MagnifyingGlassIcon class="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
@@ -59,8 +59,8 @@
       </transition>
     </nav>
 
-    <!-- Search Modal -->
-    <SearchModal v-if="searchOpen" @close="searchOpen = false" />
+    <!-- Search Modal (controlled via v-model) -->
+    <SearchModal :modelValue="searchOpen" @update:modelValue="(v) => (searchOpen = v)" @close="searchOpen = false" />
   </header>
 </template>
 

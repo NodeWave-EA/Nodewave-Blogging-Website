@@ -1,4 +1,4 @@
-import { dbg, moduleLoaded } from '@/utils/debug'
+import { moduleLoaded } from '@/utils/debug'
 import type { AxiosInstance } from 'axios'
 import axios from 'axios'
 import NProgress from 'nprogress'
@@ -62,16 +62,10 @@ axiosClient.interceptors.request.use(
     NProgress.start()
     config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${API_TOKEN}`
-    dbg('axiosClient.ts', 'request', {
-      url: config.url,
-      method: config.method,
-      headers: Object.keys(config.headers || {}),
-    })
     return config
   },
   (error) => {
     NProgress.done()
-    dbg('axiosClient.ts', 'request error', { error })
     return Promise.reject(error)
   },
 )
@@ -80,15 +74,10 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => {
     NProgress.done()
-    dbg('axiosClient.ts', 'response', { url: response.config?.url, status: response.status })
     return response
   },
   (error) => {
     NProgress.done()
-    dbg('axiosClient.ts', 'response error', {
-      error: error?.response?.status,
-      url: error?.config?.url,
-    })
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
     }

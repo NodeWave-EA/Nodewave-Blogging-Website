@@ -147,7 +147,8 @@
     showResultsSummary: false,
     resultsCount: 0,
     totalCount: 0,
-    showSearch: true,
+    // Disable local search by default — use the global search icon in the header
+    showSearch: false,
   })
 
   const emit = defineEmits<Emits>()

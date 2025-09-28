@@ -79,7 +79,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
             title: category.name,
             slug: category.slug,
             excerpt: category.description,
-            url: `/blog?category=${category.slug}`,
+            url: `/categories/${category.slug}`,
             relevanceScore: calculateRelevance(q, category.name, category.description),
           })
         })
@@ -94,7 +94,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
             title: tag.name,
             slug: tag.slug,
             excerpt: tag.description,
-            url: `/blog?tag=${tag.slug}`,
+            url: `/tags/${tag.slug}`,
             relevanceScore: calculateRelevance(q, tag.name, tag.description),
           })
         })
@@ -210,6 +210,24 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
           ])
 
           results = [...posts, ...authors]
+
+          // If nothing found in published entries and not in production, include drafts
+          if (results.length === 0 && process.env.NODE_ENV !== 'production') {
+            strapi.log.info('Quick search: no published results — falling back to drafts')
+            const [dPosts, dAuthors] = await Promise.all([
+              strapi.entityService.findMany('api::blog-post.blog-post', {
+                filters: { title: { $containsi: q } },
+                populate: { author: { populate: ['avatar'] }, featured_image: true },
+                limit: Math.floor(limit * 0.8),
+              }),
+              strapi.entityService.findMany('api::author.author', {
+                filters: { name: { $containsi: q } },
+                populate: ['avatar'],
+                limit: Math.floor(limit * 0.2),
+              }),
+            ])
+            results = [...dPosts, ...dAuthors]
+          }
           break
       }
 
@@ -228,21 +246,29 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
     }
 
     try {
-      const [posts, categories, tags] = await Promise.all([
+      // First attempt: only published content
+      const [posts, authors, categories, tags] = await Promise.all([
+        // request slug along with title so suggestions can link directly
         strapi.entityService.findMany('api::blog-post.blog-post', {
           filters: {
             title: { $containsi: q },
             publishedAt: { $notNull: true },
           },
-          fields: ['title'],
+          fields: ['title', 'slug'],
           limit: Math.floor(limit * 0.6),
+        }),
+        // include authors in suggestions (name)
+        strapi.entityService.findMany('api::author.author', {
+          filters: { name: { $containsi: q }, publishedAt: { $notNull: true } },
+          fields: ['name', 'slug'],
+          limit: Math.floor(limit * 0.1),
         }),
         strapi.entityService.findMany('api::category.category', {
           filters: {
             name: { $containsi: q },
             publishedAt: { $notNull: true },
           },
-          fields: ['name'],
+          fields: ['name', 'slug'],
           limit: Math.floor(limit * 0.2),
         }),
         strapi.entityService.findMany('api::tag.tag', {
@@ -250,16 +276,52 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
             name: { $containsi: q },
             publishedAt: { $notNull: true },
           },
-          fields: ['name'],
+          fields: ['name', 'slug'],
           limit: Math.floor(limit * 0.2),
         }),
       ])
 
+      // Build suggestions that include slugs and direct URLs to the appropriate frontend routes
       const suggestions = [
-        ...posts.map((post: any) => ({ text: post.title, type: 'post' })),
-        ...categories.map((category: any) => ({ text: category.name, type: 'category' })),
-        ...tags.map((tag: any) => ({ text: tag.name, type: 'tag' })),
+        ...posts.map((post: any) => ({ text: post.title, type: 'post', slug: post.slug, url: `/blog/${post.slug}` })),
+        ...authors.map((author: any) => ({ text: author.name, type: 'author', slug: author.slug, url: `/authors/${author.slug}` })),
+        ...categories.map((category: any) => ({ text: category.name, type: 'category', slug: category.slug, url: `/categories/${category.slug}` })),
+        ...tags.map((tag: any) => ({ text: tag.name, type: 'tag', slug: tag.slug, url: `/tags/${tag.slug}` })),
       ]
+
+      // If no published suggestions found and we're likely in a dev environment, fall back to including drafts
+      if (suggestions.length === 0 && process.env.NODE_ENV !== 'production') {
+        strapi.log.info('No published suggestions found — falling back to include drafts for search suggestions')
+        const [dPosts, dAuthors, dCategories, dTags] = await Promise.all([
+          strapi.entityService.findMany('api::blog-post.blog-post', {
+            filters: { title: { $containsi: q } },
+            fields: ['title', 'slug'],
+            limit: Math.floor(limit * 0.6),
+          }),
+          strapi.entityService.findMany('api::author.author', {
+            filters: { name: { $containsi: q } },
+            fields: ['name', 'slug'],
+            limit: Math.floor(limit * 0.1),
+          }),
+          strapi.entityService.findMany('api::category.category', {
+            filters: { name: { $containsi: q } },
+            fields: ['name', 'slug'],
+            limit: Math.floor(limit * 0.2),
+          }),
+          strapi.entityService.findMany('api::tag.tag', {
+            filters: { name: { $containsi: q } },
+            fields: ['name', 'slug'],
+            limit: Math.floor(limit * 0.2),
+          }),
+        ])
+
+        suggestions.push(
+          ...dPosts.map((post: any) => ({ text: post.title, type: 'post', slug: post.slug, url: `/blog/${post.slug}` })),
+          ...dAuthors.map((author: any) => ({ text: author.name, type: 'author', slug: author.slug, url: `/authors/${author.slug}` })),
+          ...dCategories.map((category: any) => ({ text: category.name, type: 'category', slug: category.slug, url: `/categories/${category.slug}` })),
+          ...dTags.map((tag: any) => ({ text: tag.name, type: 'tag', slug: tag.slug, url: `/tags/${tag.slug}` })),
+        )
+      }
 
       return { suggestions: suggestions.slice(0, limit) }
     } catch (error) {
@@ -319,6 +381,99 @@ async function performGlobalSearch(query: string, limit: number, strapi: any) {
       limit: Math.floor(limit * 0.05),
     }),
   ])
+
+  // If no matching published results found and running in a non-production environment,
+  // fall back to include drafts and unpublished entries to make development/testing easier.
+  if (
+    (posts?.length || 0) + (authors?.length || 0) + (categories?.length || 0) + (tags?.length || 0) === 0 &&
+    process.env.NODE_ENV !== 'production'
+  ) {
+    strapi.log.info('No published search results found — falling back to include drafts for global search')
+    const [dPosts, dAuthors, dCategories, dTags] = await Promise.all([
+      strapi.entityService.findMany('api::blog-post.blog-post', {
+        filters: {
+          $or: [
+            { title: { $containsi: query } },
+            { content: { $containsi: query } },
+            { excerpt: { $containsi: query } },
+          ],
+        },
+        populate: {
+          author: { populate: ['avatar'] },
+          featured_image: true,
+          categories: true,
+        },
+        limit: Math.floor(limit * 0.6),
+      }),
+
+      strapi.entityService.findMany('api::author.author', {
+        filters: {
+          $or: [
+            { name: { $containsi: query } },
+            { bio: { $containsi: query } },
+            { job_title: { $containsi: query } },
+          ],
+        },
+        populate: ['avatar'],
+        limit: Math.floor(limit * 0.2),
+      }),
+
+      strapi.entityService.findMany('api::category.category', {
+        filters: {
+          $or: [{ name: { $containsi: query } }, { description: { $containsi: query } }],
+        },
+        populate: ['featured_image'],
+        limit: Math.floor(limit * 0.1),
+      }),
+
+      strapi.entityService.findMany('api::tag.tag', {
+        filters: {
+          $or: [{ name: { $containsi: query } }, { description: { $containsi: query } }],
+        },
+        limit: Math.floor(limit * 0.05),
+      }),
+    ])
+
+    return {
+      posts: dPosts,
+      authors: dAuthors,
+      categories: dCategories,
+      tags: dTags,
+      total: dPosts.length + dAuthors.length + dCategories.length + dTags.length,
+    }
+  }
+
+  // If posts were not found, try a title-only published query to be more permissive
+  if ((posts?.length || 0) === 0) {
+    try {
+      const titleOnly = await strapi.entityService.findMany('api::blog-post.blog-post', {
+        filters: { title: { $containsi: query }, publishedAt: { $notNull: true } },
+        populate: { author: { populate: ['avatar'] }, featured_image: true, categories: true },
+        limit: Math.max(10, Math.floor(limit * 0.6)),
+      })
+      if (titleOnly && titleOnly.length > 0) {
+        posts.splice(0, posts.length, ...titleOnly)
+      }
+    } catch (e) {
+      strapi.log.debug('Title-only fallback failed', e)
+    }
+  }
+
+  // If authors were not found, try a name-only published query
+  if ((authors?.length || 0) === 0) {
+    try {
+      const nameOnly = await strapi.entityService.findMany('api::author.author', {
+        filters: { name: { $containsi: query }, publishedAt: { $notNull: true } },
+        populate: ['avatar'],
+        limit: Math.max(5, Math.floor(limit * 0.2)),
+      })
+      if (nameOnly && nameOnly.length > 0) {
+        authors.splice(0, authors.length, ...nameOnly)
+      }
+    } catch (e) {
+      strapi.log.debug('Author-name fallback failed', e)
+    }
+  }
 
   return {
     posts,
