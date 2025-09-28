@@ -7,11 +7,13 @@
         :class="{
           'text-blue-600 dark:text-blue-400': isCurrentRoute(item.href),
         }">
-        {{ item.name }}
-        <!-- Gradient underline -->
-        <span
-          class="absolute left-1/2 bottom-0 h-0.5 w-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 rounded-full transition-all duration-300 group-hover:w-full group-hover:left-0"
-          :class="isCurrentRoute(item.href) ? 'w-full left-0' : ''"></span>
+        <span class="nav-text relative inline-block">
+          <span class="block">{{ item.name }}</span>
+          <!-- Gradient underline -->
+          <span
+            class="absolute left-0 bottom-0 h-0.5 w-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 rounded-full transition-all duration-300 group-hover:w-full"
+            :class="isCurrentRoute(item.href) ? 'w-full' : ''"></span>
+        </span>
       </RouterLink>
     </div>
 

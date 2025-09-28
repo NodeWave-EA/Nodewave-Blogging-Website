@@ -4,9 +4,9 @@
 
   <header ref="headerRef" :class="[
     'fixed z-50 left-1/2 transform -translate-x-1/2 w-full max-w-7xl transition-all duration-500 border border-border/20 rounded-xl',
-    'backdrop-blur-xl bg-transparent',
+    'backdrop-blur-xl bg-white/40 dark:bg-zinc-900/40',
     isScrolled
-      ? 'top-3 lg:top-6 rounded-2xl shadow-xl ring-1 ring-border/10'
+      ? 'top-3 lg:top-6 rounded-2xl shadow-xl'
       : 'top-0 rounded-none shadow-sm',
   ]">
     <nav :class="['max-w-7xl mx-auto flex flex-col', isScrolled ? 'px-6 lg:px-8' : 'px-4 lg:px-6']">
