@@ -1,0 +1,93 @@
+{
+	"name": "NodeWave Blog",
+	"description": "NodeWave Blog - Latest News and Updates",
+	"short_name": "NodeWave",
+	"icons": [
+		{
+			"src": "/favicon-16x16.png",
+			"type": "image/png",
+			"sizes": "16x16"
+		},
+		{
+			"src": "/favicon-32x32.png",
+			"type": "image/png",
+			"sizes": "32x32"
+		},
+		{
+			"src": "/favicon-57x57.png",
+			"type": "image/png",
+			"sizes": "57x57"
+		},
+		{
+			"src": "/favicon-60x60.png",
+			"type": "image/png",
+			"sizes": "60x60"
+		},
+		{
+			"src": "/favicon-70x70.png",
+			"type": "image/png",
+			"sizes": "70x70"
+		},
+		{
+			"src": "/favicon-72x72.png",
+			"type": "image/png",
+			"sizes": "72x72"
+		},
+		{
+			"src": "/favicon-76x76.png",
+			"type": "image/png",
+			"sizes": "76x76"
+		},
+		{
+			"src": "/favicon-96x96.png",
+			"type": "image/png",
+			"sizes": "96x96"
+		},
+		{
+			"src": "/favicon-114x114.png",
+			"type": "image/png",
+			"sizes": "114x114"
+		},
+		{
+			"src": "/favicon-120x120.png",
+			"type": "image/png",
+			"sizes": "120x120"
+		},
+		{
+			"src": "/favicon-144x144.png",
+			"type": "image/png",
+			"sizes": "144x144"
+		},
+		{
+			"src": "/favicon-150x150.png",
+			"type": "image/png",
+			"sizes": "150x150"
+		},
+		{
+			"src": "/favicon-180x180.png",
+			"type": "image/png",
+			"sizes": "180x180"
+		},
+		{
+			"src": "/favicon-192x192.png",
+			"type": "image/png",
+			"sizes": "192x192"
+		},
+		{
+			"src": "/favicon-310x310.png",
+			"type": "image/png",
+			"sizes": "310x310"
+		}
+	],
+	"scope": "/",
+	"start_url": "/",
+	"display": "standalone",
+	"orientation": "portrait",
+	"display_override": [
+		"window-controls-overlay",
+		"standalone",
+		"minimal-ui"
+	],
+	"theme_color": "#33aaff",
+	"background_color": "#ffffff"
+}
