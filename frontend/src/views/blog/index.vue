@@ -5,8 +5,8 @@
       description="Discover insights, stories, and updates from our team" />
 
     <!-- Filters (search disabled here because global search exists in navigation) -->
-    <BlogFilters :show-search="false" v-model:category="selectedCategory" v-model:sort="sortBy" :categories="categories"
-       :results-count="posts.length" :total-count="totalPosts"
+    <BlogFilters :show-search="false" v-model:category="selectedCategories" v-model:sort="sortBy"
+      :categories="categories" :results-count="posts.length" :total-count="totalPosts"
       @filter-change="handleFilterChange" />
     <div v-if="usingFeaturedFallback"
       class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm text-slate-600 dark:text-slate-400">
@@ -72,7 +72,7 @@
 
   // Reactive data
   const searchQuery = ref('')
-  const selectedCategory = ref('')
+  const selectedCategories = ref<string[]>([])
   const sortBy = ref<'newest' | 'oldest' | 'popular' | 'title' | 'featured'>('title')
   const usingFeaturedFallback = ref(false)
   const categories = ref<Category[]>([])
@@ -94,7 +94,7 @@
       // Build filters for the API
       const filters: any = {
         search: searchQuery.value || undefined,
-        categories: selectedCategory.value ? [selectedCategory.value] : undefined,
+        categories: selectedCategories.value && selectedCategories.value.length ? selectedCategories.value : undefined,
       }
 
       if (sortBy.value === 'featured') {
@@ -184,7 +184,8 @@
     const query: Record<string, string> = {}
 
     if (searchQuery.value) query.search = searchQuery.value
-    if (selectedCategory.value) query.category = selectedCategory.value
+    if (selectedCategories.value && selectedCategories.value.length)
+      query.category = selectedCategories.value.join(',')
     if (sortBy.value !== 'title') query.sort = sortBy.value
 
     router.replace({
@@ -214,9 +215,15 @@
     // Set initial values from URL params
     // Note: searchQuery is still populated from the URL so global search navigation works
     searchQuery.value = (route.query.search as string) || ''
-    selectedCategory.value = (route.query.category as string) || ''
+    // legacy single-category assignment removed; we now use selectedCategories array
     sortBy.value =
       (route.query.sort as 'newest' | 'oldest' | 'popular' | 'title' | 'featured') || 'title'
+
+    // Parse category query which may be a comma-separated list or repeated params
+    const catQuery = route.query.category
+    if (!catQuery) selectedCategories.value = []
+    else if (Array.isArray(catQuery)) selectedCategories.value = catQuery as string[]
+    else selectedCategories.value = (catQuery as string).split(',').map((s) => s.trim()).filter(Boolean)
 
     // Fetch data
     await Promise.all([fetchPosts(), fetchCategories()])
