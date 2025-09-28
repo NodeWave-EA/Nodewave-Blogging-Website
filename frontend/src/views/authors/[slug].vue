@@ -18,60 +18,9 @@
 
     <!-- Author Content -->
     <div v-else-if="author" class="py-8">
-      <!-- Author Header -->
+      <!-- Author Header (modularized) -->
       <div class="container mx-auto px-4 max-w-4xl">
-        <div class="flex flex-col md:flex-row items-center gap-8">
-          <!-- Author Avatar -->
-          <div class="flex-shrink-0">
-            <img :src="getStrapiImageUrl(author?.avatar) ?? ''" :alt="author?.name || 'Author'"
-              class="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-zinc-800 shadow-lg" />
-          </div>
-
-          <!-- Author Info -->
-          <div class="flex-1 text-center md:text-left">
-            <h1 class="text-4xl font-bold text-black dark:text-white mb-2">
-              {{ author?.name }}
-            </h1>
-
-            <p v-if="author?.job_title" class="text-xl text-blue-600 dark:text-blue-400 font-semibold mb-4">
-              {{ author.job_title }}
-            </p>
-
-            <p v-if="author?.bio" class="text-lg text-black dark:text-white mb-6 leading-relaxed">
-              {{ author.bio }}
-            </p>
-
-            <!-- Author Stats -->
-            <div
-              class="flex items-center justify-center md:justify-start gap-6 text-sm text-black dark:text-white mb-6">
-              <div v-if="author?.follower_count" class="flex items-center gap-2">
-                <UsersIcon class="w-5 h-5" />
-                <span>{{ formatNumber(author.follower_count) }} followers</span>
-              </div>
-
-              <div v-if="author?.createdAt" class="flex items-center gap-2">
-                <CalendarIcon class="w-5 h-5" />
-                <span>Writing since
-                  {{
-                    new Date(author.createdAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                    })
-                  }}</span>
-              </div>
-            </div>
-
-            <!-- Social Links -->
-            <div v-if="author?.social_links" class="flex items-center justify-center md:justify-start gap-4">
-              <span class="text-sm font-medium text-black dark:text-white">Follow:</span>
-
-              <!-- Render each social link with a larger, consistent hit area and spacing. -->
-              <SocialLink v-for="(link, idx) in author.social_links" :key="link.url ?? link.platform ?? idx"
-                :link="link"
-                class="p-2 transition-all text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/5" />
-            </div>
-          </div>
-        </div>
+        <AuthorDetailHeader :author="author" />
 
         <!-- Author Specialties -->
         <div v-if="author?.expertise_areas && author.expertise_areas.length > 0" class="mt-8">
@@ -85,19 +34,24 @@
         </div>
       </div>
 
+      <!-- Author Bio (modularized) -->
+      <div class="container mx-auto px-4 max-w-4xl mt-12 mb-12">
+        <AuthorBio :content="author.bio" />
+      </div>
+
       <!-- Author's Posts -->
       <section class="container mx-auto px-4 max-w-6xl">
-        <div class="mb-8">
-          <h2 class="text-2xl font-bold text-black dark:text-white mb-2">
+        <div class="mb-12 text-center">
+          <h2 class="text-2xl md:text-3xl font-bold text-black dark:text-white mb-2">
             Posts by {{ author?.name }}
           </h2>
-          <p class="text-black dark:text-white">
+          <p class="text-sm text-zinc-600 dark:text-zinc-300">
             {{ posts.length }} {{ posts.length === 1 ? 'post' : 'posts' }} published
           </p>
         </div>
 
         <!-- Posts Grid -->
-        <div v-if="posts.length > 0" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div v-if="posts.length > 0" class="grid gap-12 md:grid-cols-2 lg:grid-cols-3 mt-8">
           <BlogCard v-for="post in posts" :key="post.id" :post="post"
             class="hover:scale-105 transition-transform duration-300" />
         </div>
@@ -140,17 +94,16 @@
 
 <script setup lang="ts">
   import {
-    CalendarIcon,
     DocumentTextIcon,
     ExclamationTriangleIcon,
-    UsersIcon,
   } from '@heroicons/vue/24/outline';
   import { computed, onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
 
   // Components
+  import AuthorBio from '@/components/author/AuthorBio.vue';
+  import AuthorDetailHeader from '@/components/author/AuthorDetailHeader.vue';
   import AuthorPageSkeleton from '@/components/author/AuthorPageSkeleton.vue';
-  import SocialLink from '@/components/author/SocialLink.vue';
   import BlogCard from '../../components/blog/BlogCard.vue';
 
   // Services & Types
@@ -158,7 +111,6 @@
   import type { Author, BlogPost, PaginationMeta } from '../../types';
 
   // Utils
-  import { getStrapiImageUrl } from '../../utils/strapi';
 
   const route = useRoute()
 
@@ -178,14 +130,6 @@
   const slug = computed(() => route.params.slug as string)
 
   // Utility function to format numbers
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M'
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K'
-    }
-    return num.toString()
-  }
 
   // Fetch author data
   const fetchAuthor = async () => {
