@@ -86,6 +86,7 @@ if (!API_TOKEN) {
 export const apiService = {
   get: async <T>(url: string, config?: AxiosRequestConfig) => {
     const response = await axiosClient.get<T>(url, config)
+    dbg('services/api.ts', 'GET', { url, status: response.status, response })
     return response.data
   },
 

@@ -20,54 +20,31 @@
     <!-- Tag Content -->
     <div v-else-if="tag" class="py-8">
       <!-- Header -->
-      <header class="bg-transparent backdrop-blur-xl py-16 mb-12">
-        <div class="container mx-auto px-4 max-w-4xl">
-          <!-- Breadcrumb -->
-          <nav class="flex items-center space-x-2 text-sm text-black dark:text-white mb-8">
-            <router-link to="/" class="hover:underline">Home</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <router-link to="/blog" class="hover:underline">Blog</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <router-link to="/tags" class="hover:underline">Tags</router-link>
-            <ChevronRightIcon class="w-4 h-4" />
-            <span class="text-black dark:text-white">#{{ tag.name }}</span>
-          </nav>
+      <div class="container mx-auto px-4 max-w-4xl">
+         <!-- Tag Header -->
+        <div class="text-center">
+          <PageHeader :tag="tag?.name ? `#${tag.name}` : undefined" :title="tag?.name ? `#${tag.name}` : ''"
+            :description="tag?.description ?? undefined" size="regular" />
 
-          <!-- Tag Header -->
-          <div class="text-center">
-            <!-- Tag Icon -->
-            <div class="mb-6 flex justify-center">
-              <div class="inline-block">
-                <div
-                  class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-xl">
-                  #
-                </div>
-              </div>
+          <!-- Stats -->
+          <div class="flex items-center justify-center gap-6 text-black dark:text-white">
+            <div class="flex items-center gap-2">
+              <DocumentTextIcon class="w-5 h-5" />
+              <span>{{ posts.length }} {{ posts.length === 1 ? 'post' : 'posts' }}</span>
             </div>
-
-            <PageHeader :tag="tag?.name ? `#${tag.name}` : undefined" :title="tag?.name ? `#${tag.name}` : ''"
-              :description="tag?.description ?? undefined" size="regular" />
-
-            <!-- Stats -->
-            <div class="flex items-center justify-center gap-6 text-black dark:text-white">
-              <div class="flex items-center gap-2">
-                <DocumentTextIcon class="w-5 h-5" />
-                <span>{{ posts.length }} {{ posts.length === 1 ? 'post' : 'posts' }}</span>
-              </div>
-              <div v-if="tag.createdAt" class="flex items-center gap-2">
-                <CalendarIcon class="w-5 h-5" />
-                <span>Since
-                  {{
+            <div v-if="tag.createdAt" class="flex items-center gap-2">
+              <CalendarIcon class="w-5 h-5" />
+              <span>Since
+                {{
                     new Date(tag.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                     })
                   }}</span>
-              </div>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       <!-- Posts Grid -->
       <div class="container mx-auto px-4 max-w-6xl">
@@ -186,6 +163,8 @@
   // Reactive data
   const tag = ref<Tag | null>(null)
   const posts = ref<BlogPost[]>([])
+  // Tracks whether posts were loaded from the tag object's nested `blog_posts` (non-paginated)
+  const postsFromNested = ref(false)
   const relatedTags = ref<Tag[]>([])
   const tagCloud = ref<Tag[]>([])
   const loading = ref(true)
@@ -245,28 +224,37 @@
         return
       }
 
-      // Fetch posts for this tag
+      // Fetch posts for this tag.
+      // First check whether the tag payload contains nested `blog_posts` (some endpoints include it).
+      postsFromNested.value = false
       usingFeaturedFallback.value = false
-      let postsResponse = await blogPostsApi.getByTag(tag.value.id, {
-        page: 1,
-        pageSize: 12,
-        featured: sortBy.value === 'featured' && !usingFeaturedFallback.value,
-        sortBy: 'publishedAt',
-        sortOrder: 'desc',
-      })
-
-      if (sortBy.value === 'featured' && (!postsResponse.data || postsResponse.data.length === 0)) {
-        usingFeaturedFallback.value = true
-        postsResponse = await blogPostsApi.getByTag(tag.value.id, {
-          page: 1,
-          pageSize: 12,
+      const nested = (tag.value as any).blog_posts
+      if (Array.isArray(nested) && nested.length > 0) {
+        // Use nested posts when available — these are typically fully populated by the tags endpoint
+        posts.value = nested as BlogPost[]
+        postsFromNested.value = true
+        hasMore.value = false // nested results are not paginated here
+      } else {
+        // Fall back to a slug-filtered paginated query via blogPostsApi.getAll
+        let postsResponse = await blogPostsApi.getAll(1, 12, {
+          tags: [tag.value.slug],
+          featured: sortBy.value === 'featured' && !usingFeaturedFallback.value,
           sortBy: 'publishedAt',
           sortOrder: 'desc',
         })
-      }
 
-      posts.value = postsResponse.data || []
-      hasMore.value = (postsResponse.meta?.pagination?.pageCount || 1) > 1
+        if (sortBy.value === 'featured' && (!postsResponse.data || postsResponse.data.length === 0)) {
+          usingFeaturedFallback.value = true
+          postsResponse = await blogPostsApi.getAll(1, 12, {
+            tags: [tag.value.slug],
+            sortBy: 'publishedAt',
+            sortOrder: 'desc',
+          })
+        }
+
+        posts.value = postsResponse.data || []
+        hasMore.value = (postsResponse.meta?.pagination?.pageCount || 1) > 1
+      }
 
       // Fetch related tags and tag cloud
       await Promise.all([fetchRelatedTags(), fetchTagCloud()])
@@ -309,23 +297,27 @@
 
   const loadMore = async () => {
     if (!tag.value || loadingMore.value || !hasMore.value) return
+    // If posts were loaded as nested `blog_posts` from the tag payload, there's no server-side pagination
+    // available from that source — do nothing on loadMore.
+    if (postsFromNested.value) {
+      hasMore.value = false
+      return
+    }
 
     try {
       loadingMore.value = true
       currentPage.value += 1
 
-      let response = await blogPostsApi.getByTag(tag.value.id, {
-        page: currentPage.value,
-        pageSize: 12,
+      let response = await blogPostsApi.getAll(currentPage.value, 12, {
+        tags: [tag.value.slug],
         featured: sortBy.value === 'featured' && !usingFeaturedFallback.value,
         sortBy: 'publishedAt',
         sortOrder: 'desc',
       })
 
       if (usingFeaturedFallback.value) {
-        response = await blogPostsApi.getByTag(tag.value.id, {
-          page: currentPage.value,
-          pageSize: 12,
+        response = await blogPostsApi.getAll(currentPage.value, 12, {
+          tags: [tag.value.slug],
           sortBy: 'publishedAt',
           sortOrder: 'desc',
         })

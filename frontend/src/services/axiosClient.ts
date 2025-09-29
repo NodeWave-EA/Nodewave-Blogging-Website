@@ -1,4 +1,4 @@
-import { moduleLoaded } from '@/utils/debug'
+import { dbg, moduleLoaded } from '@/utils/debug'
 import type { AxiosInstance } from 'axios'
 import axios from 'axios'
 import NProgress from 'nprogress'
@@ -8,6 +8,8 @@ moduleLoaded('axiosClient.ts')
 // Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api'
 const API_TOKEN = import.meta.env.VITE_API_TOKEN
+
+dbg('services/axiosClient.ts', 'Config', { API_BASE_URL, hasToken: !!API_TOKEN })
 
 if (!API_TOKEN) {
   console.error(

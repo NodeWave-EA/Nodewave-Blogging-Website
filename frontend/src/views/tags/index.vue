@@ -147,7 +147,7 @@
       error.value = null
 
       const response = await tagsApi.getAll()
-      dbg('[Tags]', 'Fetch tags response:', response)
+      dbg('Tags/index.vue', 'fetchTags response', { response })
 
       tags.value = response.data || []
 
@@ -165,9 +165,6 @@
       loading.value = false
     }
   }
-
-  // Populate tag.post_count by asking the posts API for the total matching posts for each tag.
-  // This is a best-effort fallback when the tag object doesn't contain a reliable post_count.
 
   // Lifecycle
   onMounted(() => {

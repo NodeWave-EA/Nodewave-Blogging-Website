@@ -26,6 +26,16 @@
 
       <!-- Categories Grid -->
       <div class="container mx-auto px-4 max-w-6xl">
+        <!-- Sort and count -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+          <div class="text-sm text-black dark:text-white">{{ categories.length }}
+            {{ categories.length === 1 ? 'category' : 'categories' }}</div>
+          <div class="flex items-center gap-4">
+            <label class="text-sm text-black dark:text-white">Sort by:</label>
+            <SortOptions v-model="sortBy" :options="sortOptions" />
+          </div>
+        </div>
+
         <div v-if="categories.length === 0" class="text-center py-16">
           <FolderIcon class="w-16 h-16 text-black dark:text-white mx-auto mb-4" />
           <h3 class="text-xl font-semibold text-black dark:text-white mb-2">No Categories Found</h3>
@@ -35,7 +45,7 @@
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <router-link v-for="category in categories" :key="category.id" :to="`/categories/${category.slug}`"
+          <router-link v-for="category in sortedCategories" :key="category.id" :to="`/categories/${category.slug}`"
             class="group bg-transparent backdrop-blur-xl rounded-xl p-8 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-black dark:border-white">
             <!-- Category Icon/Image -->
             <div class="mb-6">
@@ -102,6 +112,7 @@
 </template>
 
 <script setup lang="ts">
+  import SortOptions from '@/components/blog/SortOptions.vue';
   import FontAwesomeIcon from '@/components/ui/FontAwesomeIcon.vue';
   import PageHeader from '@/components/ui/PageHeader.vue';
   import { blogPostsApi, categoriesApi } from '@/services';
@@ -122,6 +133,41 @@
   const categories = ref<Category[]>([])
   const loading = ref(true)
   const error = ref<string | null>(null)
+  const sortBy = ref('post_count')
+  const sortOptions = [
+    { label: 'Most Popular', value: 'post_count' },
+    { label: 'Trending', value: 'trending' },
+    { label: 'Name A-Z', value: 'name' },
+    { label: 'Recently Added', value: 'recent' },
+  ]
+
+  const sortedCategories = computed(() => {
+    const list = [...categories.value]
+    // comparator depending on sortBy
+    const comparator = (a: Category, b: Category) => {
+      switch (sortBy.value) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'recent':
+          return (
+            new Date(b.updatedAt || b.createdAt).getTime() -
+            new Date(a.updatedAt || a.createdAt).getTime()
+          )
+        case 'trending':
+          return (Number(Boolean(b.trending)) - Number(Boolean(a.trending))) || (b.post_count || 0) - (a.post_count || 0)
+        case 'post_count':
+        default:
+          return (b.post_count || 0) - (a.post_count || 0)
+      }
+    }
+
+    // Prefer trending first, then apply comparator
+    return list.sort((a, b) => {
+      const trendingDiff = Number(Boolean(b.trending)) - Number(Boolean(a.trending))
+      if (trendingDiff !== 0) return trendingDiff
+      return comparator(a, b)
+    })
+  })
 
   // Computed properties
   const popularCategories = computed(() => {

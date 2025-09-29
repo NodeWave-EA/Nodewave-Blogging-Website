@@ -1,3 +1,5 @@
+import type { BlogPost } from "./blogPost"
+
 export interface Tag {
   id: number
   documentId: string
@@ -5,11 +7,13 @@ export interface Tag {
   slug: string
   description?: string
   color?: string
+  trending: boolean
   post_count?: number
-  trending?: boolean
+  blog_posts?: BlogPost[]
   meta_description?: string | null
   createdAt: string
   updatedAt: string
   publishedAt: string
   locale: string | null
+  localizations?: []
 }

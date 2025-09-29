@@ -7,6 +7,7 @@ export interface Category {
   color: string | null
   icon?: string
   featured?: boolean
+  trending?: boolean
   post_count?: number
   order?: number
   meta_title?: string | null
