@@ -1,24 +1,15 @@
 <template>
-	<div class="p-4">
+	<div class="p-4 h-full flex flex-col min-h-0">
 		<SearchSkeleton v-if="loading" />
 
 		<div v-else>
 			<div v-if="!query">
 				<!-- Suggestions: recent searches and popular categories -->
-				<div v-if="recentSearches.length" class="mb-4">
-					<h4 class="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">Recent searches</h4>
-					<div class="flex flex-wrap gap-2">
-						<button v-for="q in recentSearches" :key="q" @click="$emit('select-suggestion', q)"
-							class="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full text-sm text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700">
-							{{ q }}
-						</button>
-					</div>
-				</div>
 
-				<div v-if="popularCategories.length" class="mb-4">
+				<div v-if="popularCategories && popularCategories.length" class="mb-4">
 					<h4 class="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">Popular categories</h4>
 					<div class="flex flex-wrap gap-2">
-						<button v-for="c in popularCategories" :key="c.id"
+						<button v-for="c in (popularCategories || [])" :key="c.id"
 							@click="$emit('select-suggestion', { text: c.name, type: 'category', slug: c.slug })"
 							class="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 rounded-full text-sm text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50">
 							{{ c.name }}
@@ -39,25 +30,35 @@
 					</div>
 				</div>
 
-				<div v-if="!recentSearches.length && !popularCategories.length" class="text-sm text-zinc-500">
+				<div v-if="!(popularCategories && popularCategories.length)" class="text-sm text-zinc-500">
 					Start typing to search posts, authors, categories and tags.
 				</div>
 			</div>
 
 			<div v-else>
-				<!-- Render suggestions if present -->
-				<div v-if="props.suggestions && props.suggestions.length">
+				<!-- Filtered for banner (if any) -->
+				<div v-if="filteredFor" class="px-3 mb-2">
+					<div class="text-xs text-zinc-500 dark:text-zinc-400">Showing results for "<span
+							class="font-medium text-zinc-900 dark:text-white">{{ filteredFor.text }}</span>"
+						({{ titleForType(filteredFor.type) }}) • <kbd
+							class="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs">Alt+Enter</kbd> to open top
+						suggestion</div>
+				</div>
+
+				<!-- Suggestions block -->
+				<div v-if="suggestions && suggestions.length" class="mb-4">
 					<h4 class="text-sm font-semibold text-zinc-700 dark:text-zinc-200 mb-2">Suggestions</h4>
-					<div class="flex flex-col gap-2 mb-3">
-						<button v-for="(s, idx) in props.suggestions" :key="'sugg-' + idx"
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+						<button v-for="(s, idx) in suggestions" :key="'sugg-' + idx"
 							@click="$emit('select-suggestion', { text: s.title, type: s.type, url: s.url, slug: s.slug })"
-							class="text-left px-3 py-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800">
+							class="text-left p-3 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-transparent hover:border-zinc-100 dark:hover:border-zinc-700 transition">
 							<div class="font-medium text-zinc-900 dark:text-white">{{ s.title }}</div>
 							<div class="text-sm text-zinc-500 dark:text-zinc-400">{{ titleForType(s.type) }}</div>
 						</button>
 					</div>
 				</div>
 
+				<!-- Results header -->
 				<div>
 					<div v-if="results.length === 0" class="p-6 text-center text-zinc-500">
 						No results for "{{ query }}"
@@ -65,10 +66,10 @@
 
 					<div v-else>
 						<!-- Grouped header shortcuts -->
-						<div v-if="props.filteredFor" class="px-3 mb-2">
+						<div v-if="filteredFor" class="px-3 mb-2">
 							<div class="text-xs text-zinc-500 dark:text-zinc-400">Showing filtered results for "<span
-									class="font-medium text-zinc-900 dark:text-white">{{ props.filteredFor.text }}</span>"
-								({{ titleForType(props.filteredFor.type) }}) • <kbd
+									class="font-medium text-zinc-900 dark:text-white">{{ filteredFor.text }}</span>"
+								({{ titleForType(filteredFor.type) }}) • <kbd
 									class="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-xs">Alt+Enter</kbd> to open top
 								suggestion</div>
 						</div>
@@ -80,10 +81,15 @@
 							</button>
 						</div>
 
-						<ul class="divide-y divide-zinc-100 dark:divide-zinc-800">
+						<div class="mb-3 px-3 text-sm text-zinc-500">Showing <span
+								class="font-medium text-zinc-900 dark:text-white">{{ results.length }}</span> of {{ total }} results
+						</div>
+
+						<ul
+							class="divide-y divide-zinc-100 dark:divide-zinc-800 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 max-h-[70vh] overflow-y-auto">
 							<!-- If preview results are provided (mixed mode), render those first as top results -->
 							<li
-								v-for="(r, idx) in (props.previewResults && props.previewResults.length ? props.previewResults : props.results)"
+								v-for="(r, idx) in (mode === 'mixed' && previewResults && previewResults.length ? previewResults : results)"
 								:key="r.type + '-' + r.id" :ref="el => setItemRef(el, idx)"
 								:class="['p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer', selectedIndex === idx ? 'bg-zinc-100 dark:bg-zinc-800' : '']"
 								@click="$emit('select-result', r)">
@@ -100,14 +106,15 @@
 									<div class="flex-1">
 										<div class="flex items-center justify-between gap-4">
 											<div>
-												<div class="font-semibold text-zinc-900 dark:text-white">
+												<div class="font-semibold text-zinc-900 dark:text-white text-sm md:text-base lg:text-lg">
 													<span v-html="r.highlightedTitle || sanitize(r.title)"></span>
 												</div>
-												<div class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2">
+												<div class="text-xs md:text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1">
 													<span v-html="r.highlightedExcerpt || sanitize(r.excerpt)"></span>
 												</div>
 											</div>
-											<div class="text-xs text-zinc-400 dark:text-zinc-500">{{ r.type }}</div>
+											<div class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">
+												{{ titleForType(r.type) }}</div>
 										</div>
 									</div>
 								</div>
@@ -122,32 +129,50 @@
 
 <script setup lang="ts">
 	import SearchSkeleton from '@/components/ui/SearchSkeleton.vue';
-	import type { Category, SearchResult } from '@/types';
 	import { DocumentTextIcon, FolderIcon, TagIcon, UserIcon } from '@heroicons/vue/24/outline';
 	import DOMPurify from 'dompurify';
-	import { watch } from 'vue';
+	import { toRefs, watch } from 'vue';
 
-	const props = defineProps<{
-		// full results
-		results: (SearchResult & { highlightedTitle?: string; highlightedExcerpt?: string })[]
-		// server-side suggestions
-		suggestions: (SearchResult & { highlightedTitle?: string; highlightedExcerpt?: string })[]
-		// preview results shown while suggestions are visible
-		previewResults: (SearchResult & { highlightedTitle?: string; highlightedExcerpt?: string })[]
+	type ResultItem = {
+		id?: number | string
+		title?: string
+		type?: string
+		slug?: string
+		url?: string
+		excerpt?: string
+		highlightedTitle?: string
+		highlightedExcerpt?: string
+		image?: { url?: string } | string | null
+		thumbnail?: { url?: string } | string | null
+		published_at?: string | number | Date
+		created_at?: string | number | Date
+		views?: number
+		popularity?: number
+	}
+
+	type CategoryItem = { id?: number | string; name?: string; slug?: string }
+
+	interface PropsType {
+		results: ResultItem[]
+		suggestions: ResultItem[]
+		previewResults: ResultItem[]
 		loading: boolean
 		query: string
 		selectedIndex: number
 		total: number
-		recentSearches: string[]
-		popularCategories: Category[]
+		popularCategories?: CategoryItem[]
 		groups?: { type: string; start: number; count: number }[]
 		mode?: 'idle' | 'suggest' | 'results' | 'mixed'
 		filteredFor?: { text: string; type: string } | null
-	}>()
+	}
+
+	const props = defineProps<PropsType>()
+	// Use toRefs so each prop remains reactive when passed from parent
+	const { results, suggestions, previewResults, loading, query, selectedIndex, total, popularCategories, groups, filteredFor } = toRefs(props)
 
 	const emit = defineEmits(['select-result', 'view-all', 'select-suggestion', 'jump-to'])
 
-	const iconForType = (type: string) => {
+	const iconForType = (type?: string) => {
 		if (type === 'post') return DocumentTextIcon
 		if (type === 'author') return UserIcon
 		if (type === 'category') return FolderIcon
@@ -175,7 +200,7 @@
 
 	// Watch selectedIndex to scroll into view
 	watch(
-		() => props.selectedIndex,
+		selectedIndex,
 		(newIndex: number | undefined) => {
 			if (typeof newIndex !== 'number') return
 			const el = itemRefs[newIndex]
@@ -185,7 +210,7 @@
 		},
 	)
 
-	const titleForType = (type: string) => {
+	const titleForType = (type?: string) => {
 		if (type === 'post') return 'Posts'
 		if (type === 'author') return 'Authors'
 		if (type === 'category') return 'Categories'

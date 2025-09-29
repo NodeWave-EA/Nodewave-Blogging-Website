@@ -1,79 +1,63 @@
 <template>
-  <!-- Inline dropdown (no overlay/backdrop) -->
-  <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 translate-y-1"
-    enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-150 ease-in"
-    leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-1">
-    <div v-if="isOpen" ref="rootRef"
-      class="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 z-50 w-full max-w-2xl overflow-hidden text-left bg-white dark:bg-zinc-900 shadow-xl rounded-2xl border border-zinc-200 dark:border-zinc-700"
-      @click.stop>
-      <!-- Header -->
-      <div class="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-700">
-        <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Search</h3>
-        <button @click="close"
-          class="p-2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          aria-label="Close search">
-          <XMarkIcon class="w-5 h-5" />
-        </button>
-      </div>
+  <!-- Full-screen overlay modal (centered card on larger screens) -->
+  <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 scale-95"
+    enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+    <Teleport to="body">
+      <div v-if="isOpen" class="fixed inset-0 z-50 px-4 py-6 md:py-12">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true"></div>
 
-      <!-- Search Input (modular) -->
-      <div class="p-4 border-b border-zinc-200 dark:border-zinc-700">
-        <SearchInput ref="searchInput" v-model="searchQuery" placeholder="Search for posts, authors, categories..."
-          @enter="performSearchImmediate" @clear="() => (searchQuery = '')" />
+        <!-- Card (teleported to body so it's always positioned relative to viewport) -->
+        <!-- Centered card on all screen sizes with a small margin to viewport edges -->
+        <div ref="rootRef" role="dialog" aria-modal="true" :aria-labelledby="isOpen ? 'search-modal-title' : undefined"
+          class="fixed left-1/2 top-1/2 z-10 w-full max-w-[calc(100%_-_2rem)] md:max-w-5xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden transform -translate-x-1/2 -translate-y-1/2 flex flex-col max-h-[calc(100vh-2rem)]">
 
-        <!-- Quick Actions -->
-        <div class="flex flex-wrap gap-2 mt-3">
-          <button v-for="filter in quickFilters" :key="filter.key" @click="applyQuickFilter(filter)"
-            class="px-3 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors">
-            {{ filter.label }}
-          </button>
+          <!-- Main column: header + input + results -->
+          <div class="w-full flex flex-col">
+            <!-- Input area (full-width top with small horizontal margins) -->
+            <div class="px-0 py-3 border-b border-zinc-100 dark:border-zinc-800">
+              <div class="mx-3 md:mx-4">
+                <div class="relative">
+                  <SearchInput ref="searchInput" v-model="searchQuery"
+                    placeholder="Search posts, authors, categories and tags" @enter="performSearchImmediate"
+                    @clear="() => (searchQuery = '')" class="w-full" />
+                  <!-- (close button moved to modal footer) -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Results area -->
+            <div class="p-4 md:p-6 flex-1 overflow-y-auto custom-scroll">
+              <SearchResults :results="searchResults" :suggestions="suggestionItems" :previewResults="previewResults"
+                :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex" :total="totalResults"
+                :mode="mode" :filteredFor="filteredFor" :groups="computedGroups" @select-result="onSelectResult"
+                @view-all="onViewAll" @select-suggestion="onSelectSuggestion" @jump-to="(i) => (selectedIndex = i)" />
+            </div>
+          </div>
+
+          <!-- Footer: centered Close button -->
+          <div class="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800">
+            <div class="mx-3 md:mx-4 flex justify-center">
+              <button @click="close" aria-label="Close search"
+                class="px-4 py-2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-900 dark:text-white hover:bg-zinc-200">
+                Close
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
-
-      <!-- Results Scrollable (modular) -->
-      <div class="max-h-96 overflow-y-auto custom-scroll">
-        <SearchResults :results="searchResults" :suggestions="suggestionItems" :previewResults="previewResults"
-          :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex" :total="totalResults"
-          :recentSearches="recentSearches" :popularCategories="popularCategories" :mode="mode"
-          :filteredFor="filteredFor" :groups="computedGroups" @select-result="onSelectResult" @view-all="onViewAll"
-          @select-suggestion="onSelectSuggestion" @select-category="onSelectCategory"
-          @jump-to="(i) => (selectedIndex = i)" />
-      </div>
-
-      <!-- Footer -->
-      <div
-        class="px-4 py-3 bg-zinc-50 dark:bg-zinc-800 text-xs text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <span class="flex items-center space-x-1">
-            <kbd
-              class="px-1.5 py-0.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded">
-              ↵
-            </kbd>
-            <span>to select</span>
-          </span>
-          <span class="flex items-center space-x-1">
-            <kbd
-              class="px-1.5 py-0.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded">
-              esc
-            </kbd>
-            <span>to close</span>
-          </span>
-        </div>
-        <div v-if="searchResults.length > 0">
-          {{ searchResults.length }} of {{ totalResults }} results
-        </div>
-      </div>
-    </div>
+    </Teleport>
   </Transition>
 </template>
 
 <script setup lang="ts">
-  import { apiService, searchService } from '@/services';
-  import type { Category, SearchResult, SearchResults as SearchResultsType } from '@/types';
+  import { searchService } from '@/services';
+  import type { SearchResult, SearchResults as SearchResultsType } from '@/types';
   import { debounce } from '@/utils/debounce';
   import { dbg } from '@/utils/debug';
   import { highlightText } from '@/utils/highlight';
-  import { XMarkIcon } from '@heroicons/vue/24/outline';
   import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
   import { useRouter } from 'vue-router';
   import SearchInput from './SearchInput.vue';
@@ -103,29 +87,26 @@
   const suggestionItems = ref<SearchResult[]>([])
   const previewResults = ref<SearchResult[]>([])
   const searchResults = ref<SearchResult[]>([])
-  const filteredFor = ref<{ text: string; type: string } | null>(null)
   const mode = ref<'idle' | 'suggest' | 'results' | 'mixed'>('idle')
+  const filteredFor = ref<{ text: string; type: string } | null>(null)
+  // Abort controllers to cancel in-flight requests and avoid quota consumption
+  const suggestController = ref<AbortController | null>(null)
+  const quickController = ref<AbortController | null>(null)
+  const fullSearchController = ref<AbortController | null>(null)
+  const MIN_QUERY_LENGTH = 3
   const loading = ref(false)
   const selectedIndex = ref(0)
-  const recentSearches = ref<string[]>([])
-  const popularCategories = ref<Category[]>([])
-  const totalResults = ref(0)
-
+  // Total number of results returned by the last full search or current suggestions/preview
+  const totalResults = ref<number>(0)
+  // recent searches removed
 
   // Computed
   const isOpen = computed(() => props.modelValue)
 
-  // Quick filters
-  const quickFilters = [
-    { key: 'recent', label: 'Recent Posts', filter: 'recent' },
-    { key: 'popular', label: 'Popular', filter: 'popular' },
-    { key: 'featured', label: 'Featured', filter: 'featured' },
-  ]
-
   // Type helpers
 
   // Search functionality
-  const performSearchImmediate = async () => {
+  const performSearchImmediate = async (signal?: AbortSignal) => {
     if (!searchQuery.value.trim()) {
       searchResults.value = []
       totalResults.value = 0
@@ -138,7 +119,14 @@
     selectedIndex.value = 0
 
     try {
-      const response: SearchResultsType = await searchService.search(searchQuery.value, 20)
+      // cancel previous full search if one is running
+      if (fullSearchController.value) {
+        try {
+          fullSearchController.value.abort()
+        } catch (e) { }
+      }
+      fullSearchController.value = new AbortController()
+      const response: SearchResultsType = await searchService.search(searchQuery.value, 20, signal || fullSearchController.value.signal)
 
       dbg('SearchModal.vue', 'performSearchImmediate response', response)
 
@@ -150,14 +138,18 @@
       }))
 
       searchResults.value = results as any
+      // Clear preview results when showing full search results so that sorting applies to full results
+      previewResults.value = []
+
       totalResults.value = response.total || results.length
 
-      // Add to recent searches
-      addToRecentSearches(searchQuery.value)
-    } catch (error) {
-      console.error('Search error:', error)
-      searchResults.value = []
-      totalResults.value = 0
+      // recent searches removed
+    } catch (err: any) {
+      if (err?.name !== 'AbortError' && err?.code !== 'ERR_CANCELED') {
+        console.error('Search error:', err)
+        searchResults.value = []
+        totalResults.value = 0
+      }
     } finally {
       loading.value = false
     }
@@ -165,10 +157,22 @@
 
   // Debounced suggestions (typeahead) — uses lightweight suggest endpoint
   const performSuggest = debounce(async () => {
-    if (!searchQuery.value.trim()) return
+    if (!searchQuery.value.trim() || searchQuery.value.length < MIN_QUERY_LENGTH) {
+      suggestionItems.value = []
+      previewResults.value = []
+      mode.value = 'idle'
+      return
+    }
+    // cancel any previously running suggest request
+    try {
+      suggestController.value?.abort()
+    } catch (_) { }
+    suggestController.value = new AbortController()
+    const signal = suggestController.value.signal
+
     try {
       loading.value = true
-      const resp: any = await searchService.suggest(searchQuery.value, 8)
+      const resp: any = await searchService.suggest(searchQuery.value, 8, signal)
 
       dbg('SearchModal.vue', 'performSuggest response', resp)
 
@@ -203,7 +207,14 @@
       selectedIndex.value = 0
       // While typing, also request a few preview results (top matches) to show beneath suggestions
       try {
-        const qResp: any = await searchService.quick(searchQuery.value, undefined, 4)
+        // abort previous quick request if any
+        quickController.value?.abort()
+      } catch (_) { }
+      quickController.value = new AbortController()
+      const qSignal = quickController.value.signal
+
+      try {
+        const qResp: any = await searchService.quick(searchQuery.value, undefined, 4, qSignal)
         const rows: any[] = qResp?.data || []
         previewResults.value = rows.map((r: any) => ({
           type: (r.type as any) || (r.title ? 'post' : 'post'),
@@ -216,81 +227,36 @@
           highlightedExcerpt: highlightText((r.excerpt || r.description || r.bio || ''), searchQuery.value),
         }))
       } catch (e) {
+        // ignore aborts and other errors for preview
         previewResults.value = []
       }
 
       // show mixed mode (suggestions + preview results)
       mode.value = 'mixed'
-    } catch (e) {
-      console.error('Suggest error', e)
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') {
+        // request was cancelled — normal behaviour
+        return
+      }
+      console.error('Suggest error', err)
     } finally {
       loading.value = false
     }
-  }, 250)
+  }, 300)
 
   // When user stops typing, perform the full search automatically
   const performAutoSearch = debounce(async () => {
     if (!searchQuery.value.trim()) return
+    // simply trigger the full search; performSearchImmediate handles aborting the previous full search
     await performSearchImmediate()
   }, 600)
 
   // For compatibility, keep a performSearch wrapper that calls the immediate full search
 
-  // Recent searches management
-  const addToRecentSearches = (query: string) => {
-    const searches = recentSearches.value.filter((s) => s !== query)
-    searches.unshift(query)
-    recentSearches.value = searches.slice(0, 5)
-    localStorage.setItem('recentSearches', JSON.stringify(recentSearches.value))
-  }
-
-  const loadRecentSearches = () => {
-    try {
-      const stored = localStorage.getItem('recentSearches')
-      if (stored) {
-        recentSearches.value = JSON.parse(stored)
-      }
-    } catch (error) {
-      recentSearches.value = []
-    }
-  }
-
-  // Categories
-  const loadPopularCategories = async () => {
-    try {
-      const response: { data: Category[] } = await apiService.get('/categories', {
-        params: {
-          sort: 'post_count:desc',
-          pagination: { limit: 6 },
-          populate: 'blog_posts',
-        },
-      })
-      popularCategories.value = response.data || []
-    } catch (error) {
-      console.error('Error loading categories:', error)
-    }
-  }
-
-  // Quick filter actions
-  const applyQuickFilter = (filter: any) => {
-    switch (filter.filter) {
-      case 'recent':
-        router.push('/blog?sort=newest')
-        break
-      case 'popular':
-        router.push('/blog?sort=popular')
-        break
-      case 'featured':
-        router.push('/blog?featured=true')
-        break
-    }
-    close()
-  }
-
-  // Result selection
+  // Result selection (navigates but does not close modal)
   const selectResult = (result: SearchResult) => {
     router.push(result.url)
-    close()
+    // intentionally do not close the modal; user requested modal stays open until X button
   }
 
   // Suggestions selection
@@ -310,7 +276,11 @@
     try {
       // Prefer the quick endpoint when a type is provided for more focused results
       if (payload.type) {
-        const resp: any = await searchService.quick(payload.text, payload.type, 20)
+        // cancel previous quick request
+        try { quickController.value?.abort() } catch (_) { }
+        quickController.value = new AbortController()
+        const qSignal = quickController.value.signal
+        const resp: any = await searchService.quick(payload.text, payload.type, 20, qSignal)
         // quick endpoint returns { data: [...] }
         const rows: any[] = resp?.data || []
         if (rows.length > 0) {
@@ -372,7 +342,7 @@
           totalResults.value = mapped.length
           // set filteredFor banner context so user knows this is a filtered view
           filteredFor.value = { text: payload.text, type: payload.type }
-          addToRecentSearches(searchQuery.value)
+          // recent searches removed
           return
         }
       }
@@ -428,7 +398,7 @@
 
     switch (event.key) {
       case 'Escape':
-        close()
+        // Escape key no longer closes the modal — closing only via X button per user request
         break
       case 'ArrowDown':
         event.preventDefault()
@@ -445,7 +415,7 @@
           const top = suggestionItems.value[0]
           if (top && top.url) {
             router.push(top.url)
-            close()
+            // do not close
             return
           }
         }
@@ -520,11 +490,32 @@
     }
   })
 
+  // Lock body scroll while modal is open to prevent background scrolling on mobile
+  watch(isOpen, (open) => {
+    try {
+      if (open) {
+        document.body.style.overflow = 'hidden'
+        document.documentElement.style.touchAction = 'none'
+      } else {
+        document.body.style.overflow = ''
+        document.documentElement.style.touchAction = ''
+      }
+    } catch (e) {
+      // ignore in non-browser environments
+    }
+  })
+
+  // Restore scroll on unmount just in case
+  onUnmounted(() => {
+    try {
+      document.body.style.overflow = ''
+      document.documentElement.style.touchAction = ''
+    } catch (e) { }
+  })
+
   // Lifecycle
   onMounted(() => {
     document.addEventListener('keydown', handleKeydown)
-    loadRecentSearches()
-    loadPopularCategories()
 
     // Focus input on mount if open
     nextTick(() => {
@@ -535,48 +526,24 @@
         } catch (e) { }
       }
     })
-
-    // Close when clicking outside the panel
-    const onDocClick = (e: MouseEvent) => {
-      if (!isOpen.value) return
-      const target = e.target as Node
-      if (rootRef.value && rootRef.value.contains(target)) return
-      close()
-    }
-    document.addEventListener('click', onDocClick)
-
-    onUnmounted(() => {
-      document.removeEventListener('click', onDocClick)
-    })
   })
 
   onUnmounted(() => {
     document.removeEventListener('keydown', handleKeydown)
+    // abort any outstanding requests
+    try { suggestController.value?.abort() } catch (_) { }
+    try { quickController.value?.abort() } catch (_) { }
+    try { fullSearchController.value?.abort() } catch (_) { }
   })
 
   // Handlers for child component events
   const onSelectSuggestion = (payload: any) => selectSuggestion(payload)
   // categories emit using select-suggestion now, so onSelectCategory not needed
-  const onSelectCategory = (payload: string | { text?: string; type?: string; slug?: string }) => {
-    if (typeof payload === 'string') {
-      // convert to full suggestion payload and handle via selectSuggestion
-      selectSuggestion({ text: payload, type: 'category', slug: payload })
-      return
-    }
-
-    // Ensure we pass a fully-formed suggestion object (text required)
-    const full = {
-      text: payload.text || payload.slug || '',
-      type: payload.type || 'category',
-      slug: payload.slug,
-    }
-    selectSuggestion(full as any)
-  }
   const onSelectResult = (r: SearchResult) => selectResult(r)
   const onViewAll = () => {
     // open blog page with query param
     router.push(`/blog?search=${encodeURIComponent(searchQuery.value)}`)
-    close()
+    // close() removed per user request — modal should stay open
   }
 </script>
 

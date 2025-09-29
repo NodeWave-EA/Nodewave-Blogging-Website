@@ -43,19 +43,8 @@ const { fetchCategories } = useBlogData()
 
 const currentYear = new Date().getFullYear()
 
-// Current logo based on theme
-
-// Top categories (limit to 5)
-
 // RSS feed URL
 const rssUrl = computed(() => {
   return `${import.meta.env.VITE_API_URL}/rss`
-})
-
-// Get social media icon component
-
-onMounted(async () => {
-  // Fetch categories for footer
-  await fetchCategories()
 })
 </script>
