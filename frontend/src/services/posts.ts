@@ -259,13 +259,14 @@ export const blogPostsApi = {
       params['sort[0]'] = 'publishedAt:desc'
     }
 
-    if (options.featured !== undefined) {
-      params['filters[featured][$eq]'] = options.featured
-    }
+    // if (options.featured !== undefined) {
+    //   params['filters[featured][$eq]'] = options.featured
+    // }
 
     const queryString = buildStrapiQuery(params)
+    dbg('services/posts.ts', 'getByCategory', { categoryId, queryString })
     const resp = await apiService.get<ApiResponse<BlogPost[]>>(`/blog-posts?${queryString}`)
-    dbg('posts.ts', 'getByCategory -> response length', { len: resp?.data?.length })
+    dbg('services/posts.ts', 'getByCategory', { categoryId, resp })
     return resp
   },
 

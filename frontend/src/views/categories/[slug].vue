@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-transparent">
     <!-- Loading State: show full-page skeleton while initial API request is pending -->
-      <CategoryPageSkeleton v-if="loading" />
+    <CategoryPageSkeleton v-if="loading" />
 
     <!-- Error State -->
     <div v-else-if="error" class="py-16">
@@ -126,6 +126,7 @@
 
 <script setup lang="ts">
   import PageHeader from '@/components/ui/PageHeader.vue';
+  import { dbg } from '@/utils/debug';
   import {
     ArrowLeftIcon,
     CalendarIcon,
@@ -197,6 +198,8 @@
 
       // Fetch category
       const categoryResponse = await categoriesApi.getBySlug(slug)
+
+      dbg('category/[slug].vue', 'fetchCategoryAndPosts', { slug, categoryResponse })
       category.value = categoryResponse.data
 
       if (!category.value) {
@@ -212,6 +215,7 @@
         sortBy: 'publishedAt',
         sortOrder: 'desc',
       })
+      dbg('category/[slug].vue', 'fetchCategoryAndPosts.postsInCategory', { slug, postsResponse })
 
       if (sortBy.value === 'featured' && (!postsResponse.data || postsResponse.data.length === 0)) {
         usingFeaturedFallback.value = true
