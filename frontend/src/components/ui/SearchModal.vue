@@ -11,7 +11,7 @@
         <!-- Card (teleported to body so it's always positioned relative to viewport) -->
         <!-- Centered card on all screen sizes with a small margin to viewport edges -->
         <div ref="rootRef" role="dialog" aria-modal="true" :aria-labelledby="isOpen ? 'search-modal-title' : undefined"
-          class="fixed left-1/2 top-1/2 z-10 w-full max-w-[calc(100%_-_2rem)] md:max-w-5xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden transform -translate-x-1/2 -translate-y-1/2 flex flex-col max-h-[calc(100vh-2rem)]">
+          class="fixed inset-0 z-10 w-full h-full bg-transparent flex flex-col md:inset-auto md:left-1/2 md:top-1/2 md:w-full md:max-w-4xl md:h-auto md:rounded-2xl md:shadow-2xl md:border md:border-zinc-200/20 dark:md:border-zinc-700/30 md:transform md:-translate-x-1/2 md:-translate-y-1/2 max-h-[calc(100vh-2rem)] min-h-0">
 
           <!-- Main column: header + input + results -->
           <div class="w-full flex flex-col">
@@ -28,11 +28,15 @@
             </div>
 
             <!-- Results area -->
-            <div class="p-4 md:p-6 flex-1 overflow-y-auto custom-scroll">
-              <SearchResults :results="searchResults" :suggestions="suggestionItems" :previewResults="previewResults"
-                :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex" :total="totalResults"
-                :mode="mode" :filteredFor="filteredFor" :groups="computedGroups" @select-result="onSelectResult"
-                @view-all="onViewAll" @select-suggestion="onSelectSuggestion" @jump-to="(i) => (selectedIndex = i)" />
+            <div class="p-4 md:p-6 flex-1 min-h-0 custom-scroll bg-transparent backdrop-blur-sm md:backdrop-blur-md">
+              <!-- allow touch scrolling within the modal and prevent overscroll propagation -->
+              <div ref="resultsWrapperRef" class="p-0 flex-1 overflow-y-auto custom-scroll min-h-0"
+                style="overscroll-behavior: contain; -webkit-overflow-scrolling: touch;">
+                <SearchResults :results="searchResults" :suggestions="suggestionItems" :previewResults="previewResults"
+                  :loading="loading" :query="searchQuery" :selectedIndex="selectedIndex" :total="totalResults"
+                  :mode="mode" :filteredFor="filteredFor" :groups="computedGroups" @select-result="onSelectResult"
+                  @view-all="onViewAll" @select-suggestion="onSelectSuggestion" @jump-to="(i) => (selectedIndex = i)" />
+              </div>
             </div>
           </div>
 
@@ -98,6 +102,9 @@
   const selectedIndex = ref(0)
   // Total number of results returned by the last full search or current suggestions/preview
   const totalResults = ref<number>(0)
+  // Ref to the scrollable results container so we can intercept wheel/touch to prevent background scroll
+  const resultsWrapperRef = ref<HTMLElement | null>(null)
+  let _lastTouchY = 0
   // recent searches removed
 
   // Computed
@@ -253,10 +260,40 @@
 
   // For compatibility, keep a performSearch wrapper that calls the immediate full search
 
-  // Result selection (navigates but does not close modal)
-  const selectResult = (result: SearchResult) => {
-    router.push(result.url)
-    // intentionally do not close the modal; user requested modal stays open until X button
+  // Result selection: navigate to the item's URL and then close the modal
+  const selectResult = async (result: SearchResult) => {
+    if (!result) return
+    // Compute a fallback URL if one wasn't provided by the result object
+    let target = result.url
+    if (!target) {
+      switch (result.type) {
+        case 'post':
+          target = result.slug ? `/blog/${result.slug}` : '/blog'
+          break
+        case 'author':
+          target = result.slug ? `/authors/${result.slug}` : '/authors'
+          break
+        case 'category':
+          target = result.slug ? `/categories/${result.slug}` : '/categories'
+          break
+        case 'tag':
+          target = result.slug ? `/tags/${result.slug}` : '/tags'
+          break
+        default:
+          target = result.slug ? `/${result.slug}` : '/'
+      }
+    }
+
+    try {
+      // Await navigation to ensure router state updates before closing the modal.
+      await router.push(target as string)
+    } catch (e) {
+      // Ignore navigation errors but still close the modal — log for debugging
+      console.error('Navigation error in search select:', e)
+    } finally {
+      // Close the modal after navigation (or after the navigation attempt)
+      close()
+    }
   }
 
   // Suggestions selection
@@ -421,10 +458,29 @@
         }
 
         event.preventDefault()
-        if (searchResults.value[selectedIndex.value]) {
-          selectResult(searchResults.value[selectedIndex.value])
+        // Determine which source is active and pick the selected item accordingly.
+        let selected: SearchResult | undefined
+        if (mode.value === 'mixed') {
+          // In mixed mode we show previewResults (top matches) alongside suggestions.
+          selected = previewResults.value[selectedIndex.value] || suggestionItems.value[selectedIndex.value] || searchResults.value[selectedIndex.value]
+        } else if (mode.value === 'suggest') {
+          // In suggest mode, treat selected index as a suggestion selection
+          const sugg = suggestionItems.value[selectedIndex.value]
+          if (sugg) {
+            // Trigger suggestion selection flow (may show filtered results instead of navigating)
+            selectSuggestion({ text: sugg.title || '', type: sugg.type || '', url: sugg.url, slug: sugg.slug })
+            return
+          }
         } else {
-          // If there is no selected result, run an immediate search but keep the overlay open
+          // results mode
+          selected = searchResults.value[selectedIndex.value]
+        }
+
+        if (selected) {
+          // Navigate to the selected item and close modal
+          selectResult(selected)
+        } else {
+          // If there is no selected item, run an immediate search but keep the overlay open
           performSearchImmediate()
         }
         break
@@ -490,15 +546,24 @@
     }
   })
 
-  // Lock body scroll while modal is open to prevent background scrolling on mobile
+  // Lock body scroll while modal is open to prevent background scrolling on mobile.
+  // Instead of writing inline styles (which created typing issues in some toolchains),
+  // toggle a class on <body> and inject a tiny stylesheet to lock scroll and contain overscroll.
+  const SCROLL_LOCK_STYLE_ID = 'search-modal-scroll-lock'
   watch(isOpen, (open) => {
     try {
       if (open) {
-        document.body.style.overflow = 'hidden'
-        document.documentElement.style.touchAction = 'none'
+        document.body.classList.add('search-modal-open')
+        if (!document.getElementById(SCROLL_LOCK_STYLE_ID)) {
+          const s = document.createElement('style')
+          s.id = SCROLL_LOCK_STYLE_ID
+          s.textContent = 'body.search-modal-open { overflow: hidden !important; overscroll-behavior: contain !important; }'
+          document.head.appendChild(s)
+        }
       } else {
-        document.body.style.overflow = ''
-        document.documentElement.style.touchAction = ''
+        document.body.classList.remove('search-modal-open')
+        const existing = document.getElementById(SCROLL_LOCK_STYLE_ID)
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing)
       }
     } catch (e) {
       // ignore in non-browser environments
@@ -508,8 +573,9 @@
   // Restore scroll on unmount just in case
   onUnmounted(() => {
     try {
-      document.body.style.overflow = ''
-      document.documentElement.style.touchAction = ''
+      document.body.classList.remove('search-modal-open')
+      const existing = document.getElementById(SCROLL_LOCK_STYLE_ID)
+      if (existing && existing.parentNode) existing.parentNode.removeChild(existing)
     } catch (e) { }
   })
 
@@ -526,6 +592,73 @@
         } catch (e) { }
       }
     })
+
+    // Attach wheel/touch handlers to the results wrapper to prevent scroll chaining to the page behind
+    nextTick(() => {
+      const el = resultsWrapperRef.value
+      if (!el) return
+
+      // Find the nearest scrollable ancestor between the event target and the provided root
+      const findScrollableAncestor = (start: HTMLElement | null, root: HTMLElement | null) => {
+        let node: HTMLElement | null = start
+        while (node && node !== root && node !== document.body) {
+          const hasScrollable = node.scrollHeight > node.clientHeight
+          const style = window.getComputedStyle(node)
+          const overflowY = style.overflowY
+          if (hasScrollable && (overflowY === 'auto' || overflowY === 'scroll')) return node
+          node = node.parentElement
+        }
+        return root
+      }
+
+      // Wheel handler: determine the actual scroller under the cursor and only preventDefault when
+      // attempting to scroll past its bounds so the page behind doesn't scroll.
+      const onWheel = (ev: WheelEvent) => {
+        const startEl = ev.target as HTMLElement | null
+        const scroller = findScrollableAncestor(startEl, el) as HTMLElement
+        if (!scroller) return
+        const delta = ev.deltaY
+        const atTop = scroller.scrollTop === 0
+        const atBottom = Math.ceil(scroller.scrollTop + scroller.clientHeight) >= scroller.scrollHeight
+        if ((delta < 0 && atTop) || (delta > 0 && atBottom)) {
+          ev.preventDefault()
+        }
+      }
+
+      let _activeTouchScroller: HTMLElement | null = null
+      const onTouchStart = (ev: TouchEvent) => {
+        _lastTouchY = ev.touches && ev.touches.length ? ev.touches[0].clientY : 0
+        // determine the active scroller at touch start so we check bounds against it
+        _activeTouchScroller = findScrollableAncestor(ev.target as HTMLElement, el)
+      }
+
+      const onTouchMove = (ev: TouchEvent) => {
+        const scroller = _activeTouchScroller || findScrollableAncestor(ev.target as HTMLElement, el)
+        if (!scroller) return
+        const touchY = ev.touches && ev.touches.length ? ev.touches[0].clientY : 0
+        const delta = _lastTouchY - touchY
+        const atTop = scroller.scrollTop === 0
+        const atBottom = Math.ceil(scroller.scrollTop + scroller.clientHeight) >= scroller.scrollHeight
+        if ((delta < 0 && atTop) || (delta > 0 && atBottom)) {
+          // Scrolling past bounds — prevent the page behind from scrolling
+          ev.preventDefault()
+        }
+        // Otherwise let the browser handle the scroll of the scroller
+        _lastTouchY = touchY
+      }
+
+      // Use non-passive listeners where we call preventDefault
+      el.addEventListener('wheel', onWheel, { passive: false })
+      el.addEventListener('touchstart', onTouchStart, { passive: true })
+      el.addEventListener('touchmove', onTouchMove, { passive: false })
+
+        // Store cleanup on the element for unmount cleanup
+        ; (el as any).__searchModalCleanup = () => {
+          try { el.removeEventListener('wheel', onWheel) } catch (_) { }
+          try { el.removeEventListener('touchstart', onTouchStart) } catch (_) { }
+          try { el.removeEventListener('touchmove', onTouchMove) } catch (_) { }
+        }
+    })
   })
 
   onUnmounted(() => {
@@ -534,6 +667,11 @@
     try { suggestController.value?.abort() } catch (_) { }
     try { quickController.value?.abort() } catch (_) { }
     try { fullSearchController.value?.abort() } catch (_) { }
+    // remove any attached wheel/touch listeners on the results wrapper
+    try {
+      const el = resultsWrapperRef.value
+      if (el && (el as any).__searchModalCleanup) (el as any).__searchModalCleanup()
+    } catch (e) { }
   })
 
   // Handlers for child component events
@@ -551,7 +689,7 @@
 
   /* Scoped styles for scrollbar */
   .custom-scroll::-webkit-scrollbar {
-    width: 6px;
+    width: 0.15rem;
   }
 
   .custom-scroll::-webkit-scrollbar-track {
