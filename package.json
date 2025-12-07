@@ -17,12 +17,17 @@
   "author": "Gideon-Yebei",
   "type": "module",
   "scripts": {
+    "prepare": "husky",
     "lint": "eslint . --fix",
-    "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,vue,md,yml,webmanifest,html,mts}'"
+    "lint:check": "eslint .",
+    "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,vue,md,yml,webmanifest,html,mts}'",
+    "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,scss,vue,md,yml,webmanifest,html,mts}'"
   },
   "devDependencies": {
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.6.2"
   }
 }
