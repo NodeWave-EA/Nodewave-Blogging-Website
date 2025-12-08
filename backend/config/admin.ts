@@ -32,6 +32,7 @@ export default ({ env }: { env: EnvFunction }) => ({
   registration: {
     enabled: env.bool('ADMIN_REGISTRATION_ENABLED', true),
   },
+  url: env('STRAPI_ADMIN_URL', 'http://vps-e5e8d3b4.vps.ovh.net:1337/admin'),
   autoOpen: false,
   watchIgnoreFiles: [
     '**/node_modules/**',

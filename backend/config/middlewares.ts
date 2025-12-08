@@ -4,10 +4,12 @@ export default [
   {
     name: 'strapi::security',
     config: {
+      allowedHosts: ['localhost', '127.0.0.1', 'vps-e5e8d3b4.vps.ovh.net'],
+
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          'connect-src': ["'self'", 'https:'],
+          'connect-src': ["'self'", 'https:', 'http://vps-e5e8d3b4.vps.ovh.net:1337'],
           'img-src': [
             "'self'",
             'data:',

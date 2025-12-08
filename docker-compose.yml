@@ -1,0 +1,101 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: nodewave-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nodewave_blog
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi_dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - nodewave-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U strapi -d nodewave_blog']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Strapi Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nodewave-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 1337
+      STRAPI_API_URL: http://vps-e5e8d3b4.vps.ovh.net:1337
+      STRAPI_ADMIN_URL: http://vps-e5e8d3b4.vps.ovh.net:1337/admin
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: nodewave_blog
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: strapi_dev_password
+      DATABASE_SSL: false
+      APP_KEYS: ${APP_KEYS:-development_key_1,development_key_2}
+      API_TOKEN_SALT: ${API_TOKEN_SALT:-development_api_token_salt}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-development_admin_jwt_secret}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT:-development_transfer_token_salt}
+      JWT_SECRET: ${JWT_SECRET:-development_jwt_secret}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-development_encryption_key}
+      ADMIN_REGISTRATION_ENABLED: true
+      ALLOW_REGISTER: true
+      EMAIL_CONFIRMATION: false
+      UNIQUE_EMAIL: true
+      BLOG_URL: http://localhost:1337
+      FRONTEND_URL: http://localhost:5173
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - backend_uploads:/app/public/uploads
+    ports:
+      - '1337:1337'
+    networks:
+      - nodewave-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Vue Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nodewave-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      # Base API URL for Strapi backend
+      VITE_API_URL: http://localhost:1337/api
+      VITE_API_TOKEN: d672a6fa77325bbe9c78dd9f3a156f9c3f5924d801d84166f3ab677a859cea26fae33c85c642575026ed4ea8c29cfe6b86be615e1c49ddffd0bf2437622646300ab392353cae9a6b14305c75e42fc1891d3fc6b19b0444718b643b8eb503d645e6c29557292ece653a3542d277900e8496f7cad7e5a355af339b034f2087f911
+      # Site URL
+      VITE_SITE_URL: http://localhost:5173
+      # Theme
+      VITE_DEFAULT_THEME: system
+      # Analytics
+      VITE_GOOGLE_ANALYTICS_ID: ''
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - '5173:5173'
+    networks:
+      - nodewave-network
+    depends_on:
+      - backend
+
+networks:
+  nodewave-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  backend_uploads:

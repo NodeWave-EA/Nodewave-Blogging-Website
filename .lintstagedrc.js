@@ -12,5 +12,4 @@ export default {
 
   // Docker files
   'docker-compose.yml': ['prettier --write'],
-  '**/Dockerfile': ['prettier --write'],
 }
