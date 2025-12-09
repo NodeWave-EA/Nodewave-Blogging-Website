@@ -31,15 +31,11 @@
 </template>
 
 <script setup lang="ts">
-import { useBlogData } from '@/composables/useBlogData'
 import { useCompanyInfo } from '@/composables/useCompanyInfo'
-import { useTheme } from '@/composables/useTheme'
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const { companyName } = useCompanyInfo()
-const { _actualTheme } = useTheme()
-const { _fetchCategories } = useBlogData()
 
 const currentYear = new Date().getFullYear()
 

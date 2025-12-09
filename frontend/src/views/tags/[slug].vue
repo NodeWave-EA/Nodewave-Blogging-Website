@@ -393,7 +393,7 @@ const getTagWeight = (postCount: number | undefined): string => {
 // Watch for route changes
 watch(
   () => route.params.slug,
-  (newSlug: string) => {
+  (newSlug) => {
     if (newSlug && typeof newSlug === 'string') {
       fetchTagAndPosts(newSlug)
     }
