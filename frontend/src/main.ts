@@ -13,6 +13,9 @@ import '@/assets/main.css'
 import 'aos/dist/aos.css'
 import 'nprogress/nprogress.css'
 
+// Import Prism theme for code syntax highlighting
+import 'prismjs/themes/prism-tomorrow.css'
+
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'
 

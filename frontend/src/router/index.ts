@@ -12,6 +12,7 @@ const Author = () => import('@/views/authors/[slug].vue')
 const TagsIndex = () => import('@/views/tags/index.vue')
 const Tag = () => import('@/views/tags/[slug].vue')
 const Contact = () => import('@/views/Contact.vue')
+const RichTextTest = () => import('@/components/RichTextTest.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 
 const routes = [
@@ -99,6 +100,15 @@ const routes = [
     meta: {
       title: 'Contact',
       description: 'Get in touch with us',
+    },
+  },
+  {
+    path: '/richtext-test',
+    name: 'RichTextTest',
+    component: RichTextTest,
+    meta: {
+      title: 'Rich Text Test',
+      description: 'Test page for rich text renderer features',
     },
   },
   {

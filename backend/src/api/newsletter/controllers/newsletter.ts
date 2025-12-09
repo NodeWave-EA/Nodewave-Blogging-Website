@@ -19,6 +19,7 @@ export default factories.createCoreController('api::newsletter.newsletter', ({ s
       }
     } catch (e) {
       // ignore if publish fails; entry will remain draft
+      strapi.log.error('Failed to publish newsletter entry:', e)
     }
 
     // If email present, generate a confirmation token and send confirmation email

@@ -34,12 +34,12 @@
 import { useBlogData } from '@/composables/useBlogData'
 import { useCompanyInfo } from '@/composables/useCompanyInfo'
 import { useTheme } from '@/composables/useTheme'
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
-const { logo, logoDark, companyName } = useCompanyInfo()
-const { actualTheme } = useTheme()
-const { fetchCategories } = useBlogData()
+const { companyName } = useCompanyInfo()
+const { _actualTheme } = useTheme()
+const { _fetchCategories } = useBlogData()
 
 const currentYear = new Date().getFullYear()
 

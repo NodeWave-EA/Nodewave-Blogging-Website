@@ -193,7 +193,6 @@
 </template>
 
 <script lang="ts" setup>
-import { usePostMetricsStore } from '@/stores/postMetrics'
 import type { BlogPost } from '@/types'
 import { formatDate, getPostDateISO } from '@/utils/format'
 import { getStrapiImageAltText, getStrapiImageUrl } from '@/utils/strapi'
@@ -222,7 +221,7 @@ const lowRes = computed(() => {
     (i.formats && (i.formats.small?.url || i.formats.thumbnail?.url)) || i.previewUrl || i.url
   if (!candidate) return null
   if (candidate.startsWith('/')) {
-    return (import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337') + candidate
+    return import.meta.env.VITE_STRAPI_BASE_URL + candidate
   }
   return candidate
 })
@@ -233,8 +232,6 @@ const imageAuthUrl = computed(() => {
   const url = getStrapiImageUrl(a)
   return url
 })
-
-const metricsStore = usePostMetricsStore()
 
 const cardRootClass = computed(() => {
   if (variant === 'hero' || variant === 'fullwidth') {

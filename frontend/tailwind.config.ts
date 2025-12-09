@@ -168,11 +168,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    typography,
-    forms,
-    aspectRatio,
-  ],
+  plugins: [typography, forms, aspectRatio],
 }
 
 export default config

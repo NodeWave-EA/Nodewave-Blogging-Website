@@ -4,10 +4,10 @@
 import type { BlogPost, BlogSetting, Category } from '@/types'
 import { getStrapiImageUrl } from './strapi'
 
-const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337'
+const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL
 const placeholderImageUrl =
   strapiBaseUrl + import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
-const siteUrl = import.meta.env.VITE_SITE_URL || 'http://localhost:5173'
+const siteUrl = import.meta.env.VITE_SITE_URL
 
 export interface SEOData {
   title?: string

@@ -65,7 +65,7 @@ const buildStructuredData = async (post: any, ctx: any) => {
       (process.env.VITE_STRAPI_BASE_URL as string) ||
       ''
     const reqOrigin = ctx?.request?.origin ?? ''
-    const baseUrl = envBase || reqOrigin || 'http://localhost:1337'
+    const baseUrl = envBase || reqOrigin
 
     // Normalize canonical values. Use the Strapi base (baseUrl) for media links, but prefer a FRONTEND site URL
     // for the page identity (mainEntityOfPage.@id). The frontend site URL can be provided via
@@ -223,6 +223,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
             p.seo.structured_data = await buildStructuredData(p, ctx)
           } catch (e) {
             // ignore per-post structured data errors
+            strapi.log.error('structuredData generation failed for post id=' + p.id, e)
           }
         })
       )
@@ -328,7 +329,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
           try {
             p.seo.structured_data = await buildStructuredData(p, ctx)
           } catch (e) {
-            // ignore
+            strapi.log.error('structuredData generation failed for post id=' + p.id, e)
           }
         })
       )
@@ -369,7 +370,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
         try {
           p.seo.structured_data = await buildStructuredData(p, ctx)
         } catch (e) {
-          // ignore
+          strapi.log.error('structuredData generation failed for post id=' + p.id, e)
         }
       })
     )
@@ -408,7 +409,7 @@ export default factories.createCoreController('api::blog-post.blog-post', ({ str
         try {
           p.seo.structured_data = await buildStructuredData(p, ctx)
         } catch (e) {
-          // ignore
+          strapi.log.error('structuredData generation failed for post id=' + p.id, e)
         }
       })
     )

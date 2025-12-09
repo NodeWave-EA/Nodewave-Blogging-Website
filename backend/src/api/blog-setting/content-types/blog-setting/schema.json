@@ -43,17 +43,13 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "site_favicon": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": [
-        "images"
-      ]
+      "allowedTypes": ["images"]
     },
     "default_author": {
       "type": "relation",
@@ -132,11 +128,7 @@
     },
     "theme": {
       "type": "enumeration",
-      "enum": [
-        "light",
-        "dark",
-        "auto"
-      ],
+      "enum": ["light", "dark", "auto"],
       "default": "light"
     },
     "timezone": {

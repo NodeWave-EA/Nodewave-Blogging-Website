@@ -29,6 +29,7 @@ export function useTheme() {
       stored = localStorage.getItem('theme') as ThemeMode | null
     } catch (err) {
       // localStorage may be unavailable in some environments — ignore
+      console.error('Failed to access localStorage for theme:', err)
       stored = null
     }
 
@@ -40,7 +41,7 @@ export function useTheme() {
       try {
         localStorage.setItem('theme', 'dark')
       } catch (err) {
-        // ignore write errors
+        console.error('Failed to save theme to localStorage:', err)
       }
     }
 

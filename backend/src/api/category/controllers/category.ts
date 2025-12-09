@@ -25,6 +25,7 @@ export default factories.createCoreController('api::category.category', ({ strap
               cat.post_count = count
             } catch (e) {
               // ignore
+              strapi.log.error('Failed to compute post_count for category id=' + cat.id, e)
             }
           }
         })
@@ -50,7 +51,7 @@ export default factories.createCoreController('api::category.category', ({ strap
         })
         category.post_count = count
       } catch (e) {
-        // ignore
+        strapi.log.error('Failed to compute post_count for category id=' + category.id, e)
       }
     }
 

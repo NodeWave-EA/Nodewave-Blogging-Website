@@ -1,4 +1,4 @@
-import type { BlogPost } from "./blogPost"
+import type { BlogPost } from './blogPost'
 
 export interface Tag {
   id: number

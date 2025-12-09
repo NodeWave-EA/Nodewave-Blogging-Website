@@ -35,7 +35,7 @@ export default () => ({
       },
       servers: [
         {
-          url: process.env.STRAPI_API_URL ?? 'http://localhost:1337',
+          url: process.env.STRAPI_API_URL,
           description: 'Development server',
         },
       ],
@@ -82,11 +82,17 @@ export default () => ({
         medium: 1000,
         large: 1920,
       },
+      actionOptions: {
+        upload: {},
+        uploadStream: {},
+        delete: {},
+      },
     },
   },
 
   email: {
-    enabled: true,
+    // Only enable email if SMTP credentials are provided
+    enabled: !!(process.env.SMTP_USERNAME && process.env.SMTP_PASSWORD),
     config: {
       provider: 'nodemailer',
       providerOptions: {

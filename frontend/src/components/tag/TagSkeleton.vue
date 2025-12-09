@@ -16,5 +16,5 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(defineProps<{ count?: number }>(), { count: 20 })
+const _props = withDefaults(defineProps<{ count?: number }>(), { count: 20 })
 </script>

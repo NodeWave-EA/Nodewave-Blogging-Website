@@ -47,6 +47,10 @@ export default [
         'http://127.0.0.1:5173',
         'http://127.0.0.1:4173',
 
+        // VPS origins
+        'http://vps-e5e8d3b4.vps.ovh.net:5173',
+        'http://vps-e5e8d3b4.vps.ovh.net:1337',
+
         // Production origins
         'https://nodewave-blogs.vercel.app',
 

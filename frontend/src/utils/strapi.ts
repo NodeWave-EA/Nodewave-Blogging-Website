@@ -6,7 +6,7 @@ import { usePlaceholderStore } from '@/stores/placeholder'
 import type { Category, StrapiImage } from '@/types'
 import { dbg, moduleLoaded } from './debug'
 
-const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL || 'http://localhost:1337'
+const strapiBaseUrl = import.meta.env.VITE_STRAPI_BASE_URL
 const _placeholderPath =
   import.meta.env.VITE_PLACEHOLDER_IMAGE_PATH || '/uploads/placeholder-image.jpg'
 const placeholderImageUrl = `${strapiBaseUrl.replace(/\/$/, '')}${_placeholderPath.startsWith('/') ? '' : '/'}${_placeholderPath}`

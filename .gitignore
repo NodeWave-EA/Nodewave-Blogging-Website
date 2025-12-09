@@ -170,3 +170,5 @@ build
 ./*.sh
 LOCAL.md
 tests/
+test/
+docs/

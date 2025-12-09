@@ -284,8 +284,7 @@ export function getImageUrl(imageUrl: string, baseUrl?: string): string {
   }
 
   // Use provided base URL or default from env
-  const base =
-    baseUrl || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:1337'
+  const base = baseUrl || import.meta.env.VITE_API_URL?.replace('/api', '')
   return `${base}${imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`}`
 }
 
@@ -441,7 +440,6 @@ function resolveToDate(input: unknown): Date | null {
   }
 
   if (typeof input === 'object' && input !== null) {
-    // @ts-ignore - dynamic access for robustness
     const obj = input as Record<string, unknown>
 
     // Unwrap common Strapi shapes

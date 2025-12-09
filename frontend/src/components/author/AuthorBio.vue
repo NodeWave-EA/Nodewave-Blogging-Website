@@ -1,22 +1,19 @@
 <template>
-	<div class="prose prose-lg max-w-none text-black dark:text-white">
-		<div v-if="processed" v-html="processed"></div>
-		<div v-else class="text-sm text-zinc-500">No biography available.</div>
-	</div>
+  <div v-if="content" class="text-black dark:text-white">
+    <RichText
+      :content="content"
+      class="prose prose-lg max-w-none"
+      :lazy-images="true"
+      aria-label="Author biography"
+    />
+  </div>
+  <div v-else class="text-sm text-zinc-500">No biography available.</div>
 </template>
 
 <script setup lang="ts">
-	import { processContent } from '@/utils/contentRenderer';
-	import { computed } from 'vue';
+import RichText from '@/components/RichText.vue'
 
-	const props = withDefaults(defineProps<{ content?: string | null }>(), { content: '' })
-
-	const processed = computed(() => {
-		if (!props.content) return ''
-		return processContent(props.content, { renderMarkdown: true, makeResponsive: true, processLinks: true, sanitize: true })
-	})
-
-	// Optional: expose reading time if useful in the UI in future
+const _props = withDefaults(defineProps<{ content?: string | null }>(), { content: '' })
 </script>
 
 <style scoped></style>

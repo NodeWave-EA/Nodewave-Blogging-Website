@@ -50,8 +50,8 @@ services:
       ALLOW_REGISTER: true
       EMAIL_CONFIRMATION: false
       UNIQUE_EMAIL: true
-      BLOG_URL: http://localhost:1337
-      FRONTEND_URL: http://localhost:5173
+      BLOG_URL: http://vps-e5e8d3b4.vps.ovh.net:1337
+      FRONTEND_URL: http://vps-e5e8d3b4.vps.ovh.net:5173
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -74,10 +74,11 @@ services:
     environment:
       NODE_ENV: development
       # Base API URL for Strapi backend
-      VITE_API_URL: http://localhost:1337/api
-      VITE_API_TOKEN: d672a6fa77325bbe9c78dd9f3a156f9c3f5924d801d84166f3ab677a859cea26fae33c85c642575026ed4ea8c29cfe6b86be615e1c49ddffd0bf2437622646300ab392353cae9a6b14305c75e42fc1891d3fc6b19b0444718b643b8eb503d645e6c29557292ece653a3542d277900e8496f7cad7e5a355af339b034f2087f911
+      VITE_API_URL: http://vps-e5e8d3b4.vps.ovh.net:1337/api
+      VITE_STRAPI_BASE_URL: http://vps-e5e8d3b4.vps.ovh.net:1337
+      VITE_API_TOKEN: 6d0b5c446d8ea9c1036aeff5c99f745809049cf3f53ebfbaf7a85216804083516d4e3b6b2bfe63bf71487fb225d113c284f6a2eddab6ec2af852eefaf5a5cada8de12f9ddc9eb0f15a047b2094f14e49033021923a9a42e5510b4e149dc5a35c824778585b19d47f23fe5f6b82cc2a0b9cb35449d2a049ca0e71090759d7986f
       # Site URL
-      VITE_SITE_URL: http://localhost:5173
+      VITE_SITE_URL: http://vps-e5e8d3b4.vps.ovh.net:5173
       # Theme
       VITE_DEFAULT_THEME: system
       # Analytics

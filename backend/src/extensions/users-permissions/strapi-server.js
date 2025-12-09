@@ -153,7 +153,7 @@ module.exports = plugin => {
     })
 
     // Redirect to a success page or login page with success message
-    const redirectUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const redirectUrl = process.env.FRONTEND_URL
 
     ctx.send({
       jwt,

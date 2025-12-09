@@ -10,6 +10,7 @@ export function isDebug(): boolean {
     const env = process && (process.env as Record<string, string | undefined>)
     return String(env.DEBUG || env.VITE_DEBUG || '').toLowerCase() === 'true'
   } catch (e) {
+    console.error('Error checking debug environment variables', e)
     return false
   }
 }

@@ -57,7 +57,7 @@ class EmailService {
    * Send newsletter confirmation email
    */
   async sendNewsletterConfirmation(email: string, confirmationToken: string): Promise<boolean> {
-    const confirmationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/newsletter/confirm?token=${confirmationToken}`
+    const confirmationUrl = `${process.env.FRONTEND_URL}/newsletter/confirm?token=${confirmationToken}`
 
     const html = `
       <!DOCTYPE html>
