@@ -1,0 +1,116 @@
+{
+  "name": "Nodewave Blogging Website",
+  "short_name": "Nodewave Blogs",
+  "description": "Official Nodewave Blogging Website. Read the latest articles and insights from Nodewave's blog.",
+  "version": "1.0.0",
+  "icons": [
+    {
+      "src": "/favicon-96x96.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": [
+    "smart-home",
+    "iot",
+    "automation",
+    "technology",
+    "home-automation"
+  ],
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "fullscreen"
+  ],
+  "orientation": "natural",
+  "theme_color": "#00a599",
+  "background_color": "#F5F5F5",
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": [
+      "focus-existing",
+      "navigate-existing"
+    ]
+  },
+  "shortcuts": [
+    {
+      "name": "Main Nodewave Website",
+      "short_name": "Nodewave",
+      "description": "Visit the main Nodewave website for more information about our products and services.",
+      "url": "https://nodewave.net",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Nodewave Blogs",
+      "short_name": "Blogs",
+      "description": "Read the latest articles and insights from Nodewave's blog.",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Nodewave Authors",
+      "short_name": "Authors",
+      "description": "Meet the talented writers and contributors behind Nodewave's content.",
+      "url": "/authors",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Blog Categories",
+      "short_name": "Categories",
+      "description": "Browse articles by category and find content that interests you.",
+      "url": "/categories",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Blog Tags",
+      "short_name": "Tags",
+      "description": "Explore articles by tag and discover content on topics that matter to you.",
+      "url": "/tags",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

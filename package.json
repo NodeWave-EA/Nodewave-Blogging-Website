@@ -1,0 +1,57 @@
+{
+  "name": "Nodewave-Blogging-Website",
+  "type": "module",
+  "private": true,
+  "packageManager": "bun",
+  "author": {
+    "name": "Yebei-Gideon",
+    "email": "yebei@nodewave.net",
+    "url": "https://github.com/Yebei-Gideon"
+  },
+  "homepage": "https://nodewave-blogs.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NodeWave-EA/Nodewave-Blogging-Website.git",
+    "directory": "."
+  },
+  "bugs": {
+    "url": "https://github.com/NodeWave-EA/Nodewave-Blogging-Website/issues",
+    "email": "yebei@nodewave.net"
+  },
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint . --fix",
+    "typecheck": "nuxt typecheck",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.114",
+    "@iconify-json/simple-icons": "^1.2.87",
+    "@nuxt/ui": "^4.9.0",
+    "nuxt": "^4.4.8",
+    "tailwindcss": "^4.3.1"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^9.0.0",
+    "@iconify-json/line-md": "^1.2.16",
+    "@nuxt/eslint": "^1.16.0",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^26.0.0",
+    "eslint": "^10.5.0",
+    "eslint-plugin-format": "^2.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.5"
+  },
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "unrs-resolver"
+  ],
+  "lint-staged": {
+    "*": "bun lint"
+  }
+}

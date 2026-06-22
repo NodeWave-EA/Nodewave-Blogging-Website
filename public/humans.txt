@@ -1,0 +1,24 @@
+/* TEAM */
+    Developer: Gideon Maina
+    GitHub: @gideonmaina
+
+    Developer: Gideon Yebei
+    GitHub: @Yebei-Gideon
+
+/* THANKS */
+    Gideon Maina: Core development and architecture.
+    Gideon Yebei: Core development and implementation.
+
+/* TECHNOLOGY COLOPHON */
+    Project: NodeWave
+    URL: https://blog.nodewave.net
+    Package Manager: Bun (v1.3.13)
+    Framework: Nuxt (v4.4.2)
+    UI Library: Nuxt UI (v4.7.0)
+    Style: Tailwind CSS (v4.2.4)
+    Content Management: Nuxt Content (v)
+
+/* SITE */
+    Last update: 2026/04/26
+    Standards: HTML5, CSS3, TypeScript
+    Software: VS Code, WebStorm
