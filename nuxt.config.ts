@@ -26,6 +26,12 @@ export default defineNuxtConfig({
         { name: "apple-mobile-web-app-title", content: "NodeWave" },
       ],
       link: [
+        {
+          rel: "alternate",
+          type: "application/rss+xml",
+          title: "RSS Feed for Nodewave Blog",
+          href: `${process.env.NUXT_PUBLIC_SITE_URL}/rss.xml`,
+        },
         { rel: "alternate", hreflang: "en", href: `${process.env.NUXT_PUBLIC_SITE_URL}` },
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -123,6 +129,13 @@ export default defineNuxtConfig({
   experimental: {},
 
   compatibilityDate: "2025-01-15",
+
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ["/rss.xml"],
+    },
+  },
 
   comark: {},
 
