@@ -28,11 +28,27 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@akebifiky/remark-simple-plantuml": "^1.0.2",
+    "@comark/nuxt": "0.4.0",
     "@iconify-json/lucide": "^1.2.114",
     "@iconify-json/simple-icons": "^1.2.87",
+    "@nuxt/content": "3.14.0",
     "@nuxt/ui": "^4.9.0",
+    "@vueuse/nuxt": "14.3.0",
+    "better-sqlite3": "^12.11.1",
     "nuxt": "^4.4.8",
-    "tailwindcss": "^4.3.1"
+    "remark-cli": "^12.0.1",
+    "remark-emoji": "^5.0.2",
+    "remark-gfm": "^4.0.1",
+    "remark-git-contributors": "^5.1.0",
+    "remark-github": "^12.0.0",
+    "remark-github-blockquote-alert": "^2.1.0",
+    "remark-lint": "^10.0.1",
+    "remark-reading-time": "^2.1.0",
+    "remark-refer-plantuml": "^0.0.8",
+    "remark-toc": "^9.0.0",
+    "tailwindcss": "^4.3.1",
+    "vue": "^3.5.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.0.0",

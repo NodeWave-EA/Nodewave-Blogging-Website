@@ -1,5 +1,22 @@
 <script setup lang="ts">
 import { siteConfig } from "~/app.meta";
+
+const { getAllBlogs, getBlogByPath, getFeaturedBlogs, getSurroundingBlogs, getAllAuthors, getAllCategories, getAllTags } = useContent();
+const { data: _allBlogsData } = await getAllBlogs();
+const { data: _blogData } = await getBlogByPath("/blogs/powershell-bash");
+const { data: _featuredBlogsData } = await getFeaturedBlogs();
+const { data: _surroundingBlogsData } = await getSurroundingBlogs("/blogs/powershell-bash");
+const { data: _allAuthorsData } = await getAllAuthors();
+const { data: _allCategoriesData } = await getAllCategories();
+const { data: _allTagsData } = await getAllTags();
+
+// console.warn("Fetched blog data:", toValue(data));
+// console.warn("Fetched specific blog data:", toValue(blogData));
+// console.warn("Fetched featured blog data:", toValue(featuredBlogsData));
+// console.warn("Fetched surrounding blog data:", toValue(surroundingBlogsData));
+console.warn("Fetched all authors data:", toValue(_allAuthorsData));
+console.warn("Fetched all categories data:", toValue(_allCategoriesData));
+console.warn("Fetched all tags data:", toValue(_allTagsData));
 </script>
 
 <template>
@@ -70,6 +87,36 @@ import { siteConfig } from "~/app.meta";
           </div>
         </template>
       </UPageHeader>
+
+      <!-- featured posts -->
+      <UPageGrid>
+        <UBlogPost
+          v-for="(blog, index) in _featuredBlogsData"
+          :key="index"
+          variant="outline"
+          :title="blog.title"
+          :description="blog.description"
+          :image="blog.coverImage.src"
+          :date="blog.date"
+          :to="blog.path"
+          :badge="{
+            label: blog.featured ? 'Featured' : '',
+            color: 'primary',
+            variant: 'solid',
+          }"
+          :authors="[
+            {
+              name: blog.author.name,
+              description: blog.author.title,
+              avatar: {
+                alt: blog.author.avatar.alt,
+                src: blog.author.avatar.src,
+                loading: 'lazy',
+              },
+            },
+          ]"
+        />
+      </UPageGrid>
     </UPage>
   </UContainer>
 </template>

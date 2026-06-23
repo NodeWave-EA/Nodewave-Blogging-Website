@@ -1,0 +1,16 @@
+slug: gideon-yebei
+name: Gideon Yebei
+title: Software Engineer
+description: Gideon is a software engineer with a passion for building scalable web applications. With over 5 years of experience in the industry, he has worked on various projects ranging from startups to large enterprises. Gideon specializes in full-stack development and is proficient in technologies such as JavaScript, React, Node.js, and Python. In his free time, he enjoys contributing to open-source projects and exploring new technologies.
+avatar:
+  src: /blogs/authors/gideon-yebei/avatar.png
+  alt: Gideon Yebei's profile picture
+email: yebei@nodewave.net
+website: https://yebei-gideon.github.io
+socialLinks:
+  - platform: GitHub
+    url: https://github.com/Yebei-Gideon
+  - platform: Twitter
+    url: https://x.com/0x00_GK
+  - platform: LinkedIn
+    url: https://linkedin.com/in/gideon-yebei

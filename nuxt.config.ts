@@ -3,10 +3,7 @@ import { siteConfig } from "./app/app.meta";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    "@nuxt/eslint",
-    "@nuxt/ui",
-  ],
+  modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxt/content", "@comark/nuxt", "@vueuse/nuxt"],
 
   devtools: {
     enabled: true,
@@ -63,6 +60,53 @@ export default defineNuxtConfig({
   },
 
   css: ["~/assets/css/main.css"],
+  content: {
+    experimental: {
+      sqliteConnector: "native",
+    },
+    build: {
+      markdown: {
+        toc: {
+          depth: 5,
+          searchDepth: 5,
+        },
+        remarkPlugins: {
+          "remark-toc": {
+            options: {
+              heading: "Table of Contents",
+            },
+          },
+          "remark-reading-time": {},
+          "remark-emoji": {
+            options: { emoticon: true },
+          },
+          "remark-lint": {
+            options: {
+              "no-duplicate-headings": true,
+              "no-empty-url": true,
+              "no-file-name-articles": true,
+              "no-file-name-consecutive-dashes": true,
+              "no-file-name-mixed-case": true,
+              "no-file-name-snake-case": true,
+              "no-heading-punctuation": true,
+              "no-inline-padding": true,
+              "no-missing-blank-lines": true,
+              "no-multiple-toplevel-headings": true,
+              "no-reference-like-url": true,
+              "no-space-in-links": true,
+              "no-tabs-indentation": true,
+            },
+          },
+          "remark-github-blockquote-alert": {},
+          "remark-github": {},
+          "remark-gfm": {},
+          "remark-git-contributors": {},
+          "@akebifiky/remark-simple-plantuml": {},
+          // 'remark-refer-plantuml': {},
+        },
+      },
+    },
+  },
 
   runtimeConfig: {
     public: {
@@ -76,8 +120,11 @@ export default defineNuxtConfig({
   routeRules: {
     "/": { prerender: true },
   },
+  experimental: {},
 
   compatibilityDate: "2025-01-15",
+
+  comark: {},
 
   eslint: {
     config: {
