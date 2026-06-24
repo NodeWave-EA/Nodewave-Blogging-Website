@@ -1,14 +1,17 @@
+<script setup lang="ts">
+useAOS();
+</script>
+
 <template>
   <UApp>
     <UiAppHeader />
-
-    <BlogSearchModal />
 
     <UMain>
       <UContainer>
         <slot />
       </UContainer>
     </UMain>
+    <BlogSearchModal />
     <UiScrollToTop />
   </UApp>
 </template>

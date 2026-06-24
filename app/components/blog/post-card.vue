@@ -4,7 +4,7 @@ import { computed } from "vue";
 import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
 
 defineOptions({
-  name: "BasePostCard",
+  name: "BlogPostCard",
 });
 
 const props = withDefaults(
@@ -44,9 +44,12 @@ const {
   perspective: 1000,
 });
 
-const { x, y, isHovered } = useAnimatedBorder(cardRef);
+const { mouseX, mouseY, isHovered } = useAnimatedBorder(cardRef);
 
-const author = computed<BlogAuthor>(() => props.post.author as BlogAuthor);
+const author = computed<BlogAuthor | null>(() => {
+  return typeof props.post.author === "object" ? (props.post.author as BlogAuthor) : null;
+});
+
 const categories = computed<BlogCategory[]>(() => {
   if (!Array.isArray(props.post.categories))
     return [];
@@ -67,8 +70,7 @@ const primaryBadgeLabel = computed(() => {
   if (props.post.featured)
     return "Featured Pick";
   if (categories.value.length > 0) {
-    const first = categories.value[0];
-    return typeof first === "string" ? first : first?.name;
+    return categories.value[0]?.name;
   }
   return "Insight";
 });
@@ -94,8 +96,8 @@ function formatDate(dateString: string | Date) {
     :style="[
       transformStyles,
       {
-        '--mouse-x': `${x}px`,
-        '--mouse-y': `${y}px`,
+        '--mouse-x': `${mouseX}px`,
+        '--mouse-y': `${mouseY}px`,
         '--spotlight-opacity': isHovered ? '1' : '0',
       },
     ]"
@@ -118,7 +120,7 @@ function formatDate(dateString: string | Date) {
       ]"
     >
       <div
-        v-if="post.coverImage?.src"
+        v-if="post.coverImage"
         class="relative overflow-hidden bg-neutral-100 dark:bg-neutral-900/50 w-full aspect-video"
         :class="[
           meta.class === 'hero-grid-layout-variant'
@@ -127,9 +129,10 @@ function formatDate(dateString: string | Date) {
         ]"
       >
         <NuxtImg
+          v-if="post.coverImage"
           :src="post.coverImage.src"
-          :alt="post.coverImage.alt || post.title"
-          class="absolute inset-0 w-full h-full object-cover scale-100 transition-transform duration-500 ease-out"
+          :alt="post.title"
+          class="absolute inset-0 w-full h-full object-cover scale-100 transition-transform duration-500 ease-out group-hover:scale-[1.02]"
           loading="lazy"
         />
         <div class="absolute inset-0 pointer-events-none bg-linear-to-t from-neutral-950/10 via-transparent to-transparent" />
@@ -162,11 +165,6 @@ function formatDate(dateString: string | Date) {
             <span v-if="post.date" class="flex items-center gap-1">
               <time :datetime="String(post.date)">{{ formatDate(post.date) }}</time>
             </span>
-
-            <span v-if="post.meta?.readingTime" class="inline-flex items-center gap-1">
-              <span class="w-1 h-1 rounded-full bg-neutral-200 dark:bg-neutral-800" />
-              {{ post.meta.readingTime.text }}
-            </span>
           </div>
 
           <h3
@@ -175,14 +173,14 @@ function formatDate(dateString: string | Date) {
               meta.ui?.title ? meta.ui.title : 'text-xs sm:text-sm tracking-tight',
             ]"
           >
-            <NuxtLink :to="post.path" class="focus:outline-hidden">
+            <NuxtLink :to="post.path" class="focus:outline-none">
               <span class="absolute inset-0 z-20 rounded-xl" aria-hidden="true" />
               {{ post.title }}
             </NuxtLink>
           </h3>
 
           <p class="text-neutral-500 dark:text-neutral-400 leading-relaxed font-normal text-[11px] line-clamp-2">
-            {{ props.post.description }}
+            {{ post.description }}
           </p>
         </div>
 
@@ -190,23 +188,30 @@ function formatDate(dateString: string | Date) {
           <div v-if="categories.length > 0" class="flex flex-wrap items-center gap-1 relative z-30">
             <NuxtLink
               v-for="category in categories"
-              :key="category.stem"
-              :to="category.stem"
-              class="transition-transform"
+              :key="category.slug"
+              :to="`/${category.stem}`"
+              class="transition-transform hover:scale-[1.02]"
             >
-              <span class="inline-flex items-center px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-primary-500">
+              <span
+                class="inline-flex items-center px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-primary-500"
+                :style="{
+                  color: category.color,
+                }"
+              >
                 {{ category.name }}
               </span>
             </NuxtLink>
           </div>
 
           <div v-if="author" class="flex items-center justify-between gap-4 relative z-30 w-full text-xs">
-            <NuxtLink :to="author.stem" class="group/author flex items-center gap-1.5">
+            <NuxtLink :to="`/${author.stem}`" class="group/author flex items-center gap-1.5">
               <div class="flex items-center gap-1.5">
                 <UAvatar
-                  :src="author.avatar?.src"
-                  :alt="author.avatar?.alt || author.name"
+                  v-if="author.avatar"
+                  :src="author.avatar.src"
+                  :alt="author.avatar.alt || author.name"
                   size="3xs"
+                  :aria-label="`Read more posts by ${author.name}`"
                   class="ring-1 ring-neutral-200 dark:ring-neutral-800"
                 />
                 <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 group-hover/author:text-primary-500 transition-colors line-clamp-1">
@@ -218,9 +223,12 @@ function formatDate(dateString: string | Date) {
             <div v-if="tags.length > 0" class="hidden sm:flex items-center gap-1 max-w-[50%] overflow-hidden">
               <NuxtLink
                 v-for="tag in tags.slice(0, 1)"
-                :key="tag.stem"
-                :to="tag.stem"
+                :key="tag.slug"
+                :to="`/${tag.stem}`"
                 class="text-[8px] font-mono text-neutral-400 hover:text-primary-500 transition-colors"
+                :style="{
+                  color: tag.color,
+                }"
               >
                 #{{ tag.name }}
               </NuxtLink>

@@ -3,7 +3,23 @@ import { siteConfig } from "./app/app.meta";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxt/content", "@comark/nuxt", "@vueuse/nuxt"],
+  modules: [
+    "@nuxt/eslint",
+    "@nuxt/ui",
+    "@nuxt/content",
+    "@comark/nuxt",
+    "@vueuse/nuxt",
+    "@nuxt/image",
+    "@nuxtjs/seo",
+    "@nuxt/scripts",
+    "nuxt-aos",
+    "@nuxt/icon",
+    "@nuxt/fonts",
+    "@nuxt/hints",
+    "@nuxt/a11y",
+    "@nuxtjs/device",
+    "nuxt-ai-ready",
+  ],
 
   devtools: {
     enabled: true,

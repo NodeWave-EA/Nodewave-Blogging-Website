@@ -1,6 +1,21 @@
-export function useAnimatedBorder(targetElement: Ref<HTMLElement | null>) {
-  const { x, y, sourceType } = useMouse();
+import { onMounted, onUnmounted, ref } from "vue";
+
+import type { Ref } from "vue";
+
+export function useAnimatedBorder(targetRef: Ref<HTMLElement | null>) {
+  const mouseX = ref(0);
+  const mouseY = ref(0);
   const isHovered = ref(false);
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (!targetRef.value)
+      return;
+
+    const rect = targetRef.value.getBoundingClientRect();
+    // Calculate precise local coordinates inside the element bounds
+    mouseX.value = event.clientX - rect.left;
+    mouseY.value = event.clientY - rect.top;
+  };
 
   const handlePointerEnter = () => {
     isHovered.value = true;
@@ -10,30 +25,25 @@ export function useAnimatedBorder(targetElement: Ref<HTMLElement | null>) {
     isHovered.value = false;
   };
 
-  const handlePointerMove = (event: PointerEvent) => {
-    if (!targetElement.value)
-      return;
-
-    const rect = targetElement.value.getBoundingClientRect();
-    x.value = event.clientX - rect.left;
-    y.value = event.clientY - rect.top;
-  };
-
   onMounted(() => {
-    if (targetElement.value) {
-      targetElement.value.addEventListener("pointerenter", handlePointerEnter);
-      targetElement.value.addEventListener("pointerleave", handlePointerLeave);
-      targetElement.value.addEventListener("pointermove", handlePointerMove);
+    if (targetRef.value) {
+      targetRef.value.addEventListener("pointermove", handlePointerMove);
+      targetRef.value.addEventListener("pointerenter", handlePointerEnter);
+      targetRef.value.addEventListener("pointerleave", handlePointerLeave);
     }
   });
 
   onUnmounted(() => {
-    if (targetElement.value) {
-      targetElement.value.removeEventListener("pointerenter", handlePointerEnter);
-      targetElement.value.removeEventListener("pointerleave", handlePointerLeave);
-      targetElement.value.removeEventListener("pointermove", handlePointerMove);
+    if (targetRef.value) {
+      targetRef.value.removeEventListener("pointermove", handlePointerMove);
+      targetRef.value.removeEventListener("pointerenter", handlePointerEnter);
+      targetRef.value.removeEventListener("pointerleave", handlePointerLeave);
     }
   });
 
-  return { x, y, sourceType, isHovered };
+  return {
+    mouseX,
+    mouseY,
+    isHovered,
+  };
 }

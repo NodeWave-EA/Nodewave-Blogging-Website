@@ -3,6 +3,7 @@ title: Bash-ify Your PowerShell - The Ultimate Guide to Autosuggestions, Complet
 author: gideon-yebei
 categories:
   - terminal-and-shells
+  - devops
 coverImage:
   src: /blogs/posts/powershell-bash/cover.png
   alt: Stylized terminal window showing predictive text and interactive completion menus
@@ -15,6 +16,12 @@ gallery:
   - src: /blogs/posts/powershell-bash/psreadline-demo.png
     alt: Inline prediction highlighting history matching in the shell buffer
     caption: Inline predictions mimic the popular Fish shell experience.
+  - src: /blogs/posts/powershell-bash/carapace-menu.png
+    alt: Interactive grid showing git subcommand auto-completions via Carapace
+    caption: Rich multi-shell subcommand menus triggered natively with Ctrl+Space.
+  - src: /blogs/posts/powershell-bash/carapace-menu.png
+    alt: Interactive grid showing git subcommand auto-completions via Carapace
+    caption: Rich multi-shell subcommand menus triggered natively with Ctrl+Space.
   - src: /blogs/posts/powershell-bash/carapace-menu.png
     alt: Interactive grid showing git subcommand auto-completions via Carapace
     caption: Rich multi-shell subcommand menus triggered natively with Ctrl+Space.
@@ -38,8 +45,6 @@ tags:
   - devops
 updatedAt: 2026-06-16
 ---
-
-## Table of Contents
 
 Let’s be honest. If you are coming from a Linux or macOS background, opening up a raw PowerShell (`pwsh`) terminal can feel a bit like stepping into a parallel universe where everything is _almost_ familiar, but just clunky enough to drive you crazy.
 
@@ -211,87 +216,3 @@ function .. { Set-Location .. }
 Write-Host "🚀 PowerShell environment loaded with Bash-UX engine." -ForegroundColor Cyan
 
 ```
-
-> [!NOTE]
-> Useful information that users should know, even when skimming docs.
-
-> [!TIP]
-> Helpful advice for doing things better or more efficiently.
-
-> [!IMPORTANT]
-> Crucial information necessary for users to succeed and avoid errors.
-
-> [!WARNING]
-> Critical content demanding immediate user attention due to potential risks.
-
-# Remark Plugins Showcase
-
-## Table of Contents
-
-<!-- The remark-toc plugin will catch this heading and inject the list below it -->
-
-## 1. GFM and GitHub Alerts
-
-The `remark-gfm` and `remark-github-blockquote-alert` plugins handle markdown tables, strike-throughs, and modern callouts natively used on GitHub.
-
-~Strikethrough text works perfectly!~
-
-Here are the standard GitHub alert styles:
-
-> [!NOTE]
-> Useful information that users should know, even when skimming docs.
-
-> [!TIP]
-> Helpful advice for doing things better or more efficiently.
-
-> [!IMPORTANT]
-> Crucial information necessary for users to succeed and avoid errors.
-
-> [!WARNING]
-> Critical content demanding immediate user attention due to potential risks.
-
-## 2. Emoji and Emoticons
-
-Thanks to `remark-emoji` with `emoticon: true`, you can use both standard shortcodes and old-school keyboard text shortcuts.
-
-- **Shortcode Emojis:** :rocket: :pizza: :tada: :fire:
-- **Text Emoticons:** Typing `:)` becomes :) and `=>` becomes =>
-
-## 3. Simple PlantUML Diagrams
-
-The `@akebifiky/remark-simple-plantuml` plugin lets you embed text-based diagrams right inside your code fences. It transforms into an actual visual diagram on build.
-
-```plantuml
-@startuml
-actor User
-participant "Nuxt Content" as NC
-database "SQLite" as DB
-
-User -> NC : Requests page
-NC -> DB : Queries markdown via native connector
-DB --> NC : Returns AST
-NC --> User : Renders with Comark
-@endum
-```
-
-## 4. Git Metadata and Contributors
-
-The `remark-git-contributors` plugin dynamically injects a list of actual Git contributors at the end of the parsed data if the project is tracked in Git.
-
-_(Note: Depending on how your frontend displays the metadata, this will inject a list of committers based on your local `git log`.)_
-
-## 5. Reading Time Calculation
-
-The `remark-reading-time` plugin calculates how long it takes to read this document based on word count.
-
-If you configured the server plugin/Nitro hook we discussed, you can output this metadata in your Vue layout like this:
-
-```vue
-<template>
-  <div v-if="page.readingTime">
-    ⏱️ Reading time: {{ page.readingTime.text }} ({{ page.readingTime.words }} words)
-  </div>
-</template>
-```
-
-1. Hello, _Jupiter_ and _Neptune_!

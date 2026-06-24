@@ -3,6 +3,12 @@ export const siteConfig = {
   description: "Stay updated with the latest news and insights from the NodeWave team.",
   email: "info@nodewave.net",
   calendly: "https://calendly.com/nodewave-info/30min",
+  social: {
+    github: "https://github.com/NodeWave-EA",
+    twitter: "https://twitter.com/nodewave_ea",
+    linkedin: "https://linkedin.com/company/nodewave-ea",
+    tiktok: "https://tiktok.com/@nodewave_ea",
+  },
   contact: {
     email: "info@nodewave.net",
     phone: "+254 705 598 248",
