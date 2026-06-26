@@ -19,25 +19,22 @@ export async function enrichBlog(blog: BlogType): Promise<BlogType> {
   // Resolve Categories
   if (Array.isArray(blog.categories) && blog.categories.length > 0) {
     // Map existing slugs to query promises
-    const categoryPromises = blog.categories.map(async (slugOrObj: string | BlogCategory) => {
+    const categories = await Promise.all(blog.categories.map(async (slugOrObj: string | BlogCategory) => {
       // Guard case if it's already resolved somehow
       if (typeof slugOrObj !== "string")
         return slugOrObj;
       const categoryData = await queryCollection("categories")
         .where("slug", "=", slugOrObj)
         .first();
-
       return categoryData as unknown as BlogCategory;
-    });
+    }));
 
-    // Resolve all queries in parallel and filter out any null/undefined lookups
-    const resolvedCategories = await Promise.all(categoryPromises);
-    blog.categories = resolvedCategories.filter(Boolean);
+    blog.categories = categories.filter(Boolean);
   }
 
   // Resolve Tags
   if (Array.isArray(blog.tags) && blog.tags.length > 0) {
-    const tagPromises = blog.tags.map(async (slugOrObj: string | BlogTag) => {
+    const tags = await Promise.all(blog.tags.map(async (slugOrObj: string | BlogTag) => {
       if (typeof slugOrObj !== "string")
         return slugOrObj;
       const tagData = await queryCollection("tags")
@@ -45,10 +42,9 @@ export async function enrichBlog(blog: BlogType): Promise<BlogType> {
         .first();
 
       return tagData as unknown as BlogTag;
-    });
+    }));
 
-    const resolvedTags = await Promise.all(tagPromises);
-    blog.tags = resolvedTags.filter(Boolean);
+    blog.tags = tags.filter(Boolean);
   }
 
   return blog;

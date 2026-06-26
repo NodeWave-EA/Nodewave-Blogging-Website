@@ -11,23 +11,28 @@ export function useContent() {
   const getAllBlogs = (limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = limit ? `blog-all-${toValue(limit)}` : "blog-all-unlimited";
 
-    return useAsyncData<BlogType[]>(cacheKey, async () => {
-      let query = queryCollection("blogs")
-        .where("published", "=", true)
-        .where("draft", "=", false)
-        .order("date", "DESC");
+    return useAsyncData<BlogType[]>(
+      cacheKey,
+      async () => {
+        let query = queryCollection("blogs")
+          .where("published", "=", true)
+          .where("draft", "=", false)
+          .order("date", "DESC");
 
-      if (limit !== undefined) {
-        query = query.limit(toValue(limit));
-      }
+        if (limit !== undefined) {
+          query = query.limit(toValue(limit));
+        }
 
-      const blogs = await query.all() as BlogType[];
+        const blogs = await query.all() as BlogType[];
 
-      const enrichedBlogs = await Promise.all(blogs.map(enrichBlog));
-      return enrichedBlogs as BlogType[];
-    }, {
-      watch: limit ? [() => toValue(limit)] : [],
-    });
+        return await Promise.all(
+          blogs.map(blog => enrichBlog(blog)),
+        );
+      },
+      {
+        watch: limit ? [() => toValue(limit)] : [],
+      },
+    );
   };
 
   /**
@@ -37,28 +42,32 @@ export function useContent() {
    * @returns A promise that resolves to an enriched BlogType object.
    * @throws An error if the blog is not found for the given slug.
    */
-  const getBlogBySlug = async (slug: MaybeRefOrGetter<string>) => {
+  const getBlogBySlug = (slug: MaybeRefOrGetter<string>) => {
     logger.log(`Fetching blog by slug: ${toValue(slug)}`);
+
     const cacheKey = `blog-detail-${toValue(slug)}`;
 
-    return useAsyncData<BlogType>(cacheKey, async () => {
-      const blog = await queryCollection("blogs")
-        .where("slug", "LIKE", `${toValue(slug)}`)
-        .where("published", "=", true)
-        .where("draft", "=", false)
-        .first() as BlogType;
+    return useAsyncData<BlogType>(
+      cacheKey,
+      async () => {
+        const blog = await queryCollection("blogs")
+          .where("slug", "LIKE", toValue(slug))
+          .where("published", "=", true)
+          .where("draft", "=", false)
+          .first() as BlogType;
 
-      if (!blog) {
-        throw new Error(`Blog not found for slug: ${toValue(slug)}`);
-      }
+        if (!blog) {
+          throw new Error(`Blog not found for slug: ${toValue(slug)}`);
+        }
 
-      logger.log(`Blog found: ${blog.title} (slug: ${blog.slug})`);
+        logger.log("Blog Found:", blog);
 
-      const enrichedBlog = await enrichBlog(blog);
-      return enrichedBlog as BlogType; // Ensure the return type is BlogType
-    }, {
-      watch: [() => toValue(slug)],
-    });
+        return await enrichBlog(blog);
+      },
+      {
+        watch: [() => toValue(slug)],
+      },
+    );
   };
 
   /**
@@ -67,23 +76,30 @@ export function useContent() {
    * @param limit - The maximum number of featured blogs to fetch, which can be a number, a ref, or a getter function. Defaults to 5.
    * @returns A promise that resolves to an array of enriched BlogType objects that are marked as featured.
    */
-  const getFeaturedBlogs = async (limit: MaybeRefOrGetter<number> = 5) => {
+  const getFeaturedBlogs = (limit: MaybeRefOrGetter<number> = 8) => {
     const cacheKey = `blog-featured-${toValue(limit)}`;
 
-    return useAsyncData<BlogType[]>(cacheKey, async () => {
-      const blogs = await queryCollection("blogs")
-        .where("published", "=", true)
-        .where("draft", "=", false)
-        .where("featured", "=", true)
-        .order("date", "DESC")
-        .limit(toValue(limit))
-        .all() as BlogType[]; // Cast to BlogType[] for type safety
+    return useAsyncData<BlogType[]>(
+      cacheKey,
+      async () => {
+        const blogs = await queryCollection("blogs")
+          .where("published", "=", true)
+          .where("draft", "=", false)
+          .where("featured", "=", true)
+          .order("date", "DESC")
+          .limit(toValue(limit))
+          .all() as BlogType[];
 
-      const enrichedBlogs = await Promise.all(blogs.map(enrichBlog));
-      return enrichedBlogs as BlogType[]; // Ensure the return type is BlogType[]
-    }, {
-      watch: [() => toValue(limit)],
-    });
+        logger.log(`Fetched ${blogs.length} featured blogs from the collection.`);
+
+        return await Promise.all(
+          blogs.map(enrichBlog),
+        );
+      },
+      {
+        watch: [() => toValue(limit)],
+      },
+    );
   };
 
   /**
@@ -92,14 +108,14 @@ export function useContent() {
    * @param path - The path of the blog for which to fetch surrounding blogs.
    * @returns A promise that resolves to an array of surrounding BlogType objects.
    */
-  const getSurroundingBlogs = async (path: MaybeRefOrGetter<string>) => {
+  const getSurroundingBlogs = (path: MaybeRefOrGetter<string>) => {
     const cacheKey = `blog-surrounding-${toValue(path).split("/").filter(Boolean).pop()}`;
-    logger.log(`Fetching surrounding blogs for blog: ${cacheKey}`);
+
     return useAsyncData<ContentNavigationItem[]>(cacheKey, async () => {
-      const surroundingBlogs = await queryCollectionItemSurroundings("blogs", toValue(path), {
+      const surroundingBlogs = queryCollectionItemSurroundings("blogs", toValue(path), {
         fields: ["title", "description", "path", "stem"],
       });
-      return surroundingBlogs as ContentNavigationItem[];
+      return surroundingBlogs as unknown as ContentNavigationItem[];
     }, {
       watch: [() => toValue(path)],
     });
@@ -113,34 +129,40 @@ export function useContent() {
   const getAllAuthors = (limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = limit ? `authors-all-${toValue(limit)}` : "authors-all-unlimited";
 
-    return useAsyncData<Array<BlogAuthor & { count: number }>>(cacheKey, async () => {
-      let query = queryCollection("authors").order("name", "ASC");
+    logger.log(`Fetching all authors with limit: ${limit !== undefined ? toValue(limit) : "unlimited"}`);
 
-      if (limit !== undefined) {
-        query = query.limit(toValue(limit));
-      }
+    return useAsyncData<Array<BlogAuthor & { count: number }>>(
+      cacheKey,
+      async () => {
+        let query = queryCollection("authors").order("name", "ASC");
 
-      const authors = await query.all() as BlogAuthor[];
+        if (limit !== undefined) {
+          query = query.limit(toValue(limit));
+        }
 
-      const enrichedAuthors = await Promise.all(
-        authors.map(async (author) => {
-          const associatedBlogs = await queryCollection("blogs")
-            .where("author", "LIKE", `%${author.slug || author.id}%`)
-            .where("published", "=", true)
-            .where("draft", "=", false)
-            .all();
+        const authors = await query.all() as BlogAuthor[];
 
-          return {
-            ...author,
-            count: associatedBlogs.length,
-          };
-        }),
-      );
+        logger.log("Fetched authors:", { authors });
 
-      return enrichedAuthors;
-    }, {
-      watch: limit ? [() => toValue(limit)] : [],
-    });
+        return await Promise.all(
+          authors.map(async (author) => {
+            const associatedBlogs = await queryCollection("blogs")
+              .where("author", "=", author.slug)
+              .where("published", "=", true)
+              .where("draft", "=", false)
+              .all() as BlogType[];
+
+            return {
+              ...author,
+              count: associatedBlogs.length,
+            };
+          }),
+        );
+      },
+      {
+        watch: limit ? [() => toValue(limit)] : [],
+      },
+    );
   };
 
   /**
@@ -149,41 +171,52 @@ export function useContent() {
    * @param slug - The slug of the author to fetch, which can be a string, a ref, or a getter function.
    * @returns A promise that resolves to a BlogAuthor object.
    */
-  const getAuthorBySlug = async (slug: MaybeRefOrGetter<string>) => {
-    return useAsyncData<BlogAuthor>(`author-${toValue(slug)}`, async () => {
-      const author = await queryCollection("authors")
-        .where("slug", "LIKE", `${toValue(slug)}`)
-        .first() as BlogAuthor;
+  const getAuthorBySlug = (slug: MaybeRefOrGetter<string>) => {
+    return useAsyncData<BlogAuthor>(
+      `author-${toValue(slug)}`,
+      async () => {
+        const author = await queryCollection("authors")
+          .where("slug", "LIKE", toValue(slug))
+          .first() as BlogAuthor;
 
-      if (!author) {
-        throw new Error(`Author not found for slug: ${toValue(slug)}`);
-      }
+        if (!author) {
+          throw new Error(`Author not found for slug: ${toValue(slug)}`);
+        }
 
-      return author as BlogAuthor;
-    }, {
-      watch: [() => toValue(slug)],
-    });
+        return author;
+      },
+      {
+        watch: [() => toValue(slug)],
+      },
+    );
   };
 
   const getAuthorBlogs = (authorSlug: MaybeRefOrGetter<string>, limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = `author-blogs-${toValue(authorSlug)}-${limit ? toValue(limit) : "all"}`;
-    return useAsyncData<BlogType[]>(cacheKey, async () => {
-      let query = queryCollection("blogs")
-        .where("author", "LIKE", `%${toValue(authorSlug)}%`)
-        .where("published", "=", true)
-        .where("draft", "=", false)
-        .order("date", "DESC");
 
-      if (limit !== undefined) {
-        query = query.limit(toValue(limit));
-      }
+    return useAsyncData<BlogType[]>(
+      cacheKey,
+      async () => {
+        let query = queryCollection("blogs")
+          .where("author", "=", toValue(authorSlug))
+          .where("published", "=", true)
+          .where("draft", "=", false)
+          .order("date", "DESC");
 
-      const blogs = await query.all() as BlogType[];
-      const enrichedBlogs = await Promise.all(blogs.map(enrichBlog));
-      return enrichedBlogs as BlogType[];
-    }, {
-      watch: [() => toValue(authorSlug), ...(limit ? [() => toValue(limit)] : [])],
-    });
+        if (limit !== undefined) {
+          query = query.limit(toValue(limit));
+        }
+
+        const blogs = await query.all() as BlogType[];
+
+        return await Promise.all(
+          blogs.map(enrichBlog),
+        );
+      },
+      {
+        watch: [() => toValue(authorSlug), ...(limit ? [() => toValue(limit)] : [])],
+      },
+    );
   };
 
   /**
@@ -193,71 +226,84 @@ export function useContent() {
   const getAllCategories = (limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = limit ? `category-all-${toValue(limit)}` : "category-all-unlimited";
 
-    return useAsyncData<Array<BlogCategory & { count: number }>>(cacheKey, async () => {
-      let query = queryCollection("categories").order("name", "ASC");
+    return useAsyncData<Array<BlogCategory & { count: number }>>(
+      cacheKey,
+      async () => {
+        let query = queryCollection("categories").order("name", "ASC");
 
-      if (limit !== undefined) {
-        query = query.limit(toValue(limit));
-      }
+        if (limit !== undefined) {
+          query = query.limit(toValue(limit));
+        }
 
-      const categories = await query.all() as BlogCategory[];
+        const categories = await query.all() as BlogCategory[];
 
-      const enrichedCategories = await Promise.all(
-        categories.map(async (category) => {
-          const associatedBlogs = await queryCollection("blogs")
-            .where("categories", "LIKE", `%${category.slug}%`)
-            .where("published", "=", true)
-            .where("draft", "=", false)
-            .all();
+        return await Promise.all(
+          categories.map(async (category) => {
+            const associatedBlogs = await queryCollection("blogs")
+              .where("categories", "LIKE", `%${category.slug}%`)
+              .where("published", "=", true)
+              .where("draft", "=", false)
+              .all() as BlogType[];
 
-          return {
-            ...category,
-            count: associatedBlogs.length,
-          };
-        }),
-      );
-
-      return enrichedCategories;
-    }, {
-      watch: limit ? [() => toValue(limit)] : [],
-    });
+            return {
+              ...category,
+              count: associatedBlogs.length,
+            };
+          }),
+        );
+      },
+      {
+        watch: limit ? [() => toValue(limit)] : [],
+      },
+    );
   };
 
-  const getCategoryBySlug = async (slug: MaybeRefOrGetter<string>) => {
-    return useAsyncData<BlogCategory>(`category-${toValue(slug)}`, async () => {
-      const category = await queryCollection("categories")
-        .where("slug", "LIKE", `${toValue(slug)}`)
-        .first() as BlogCategory;
+  const getCategoryBySlug = (slug: MaybeRefOrGetter<string>) => {
+    return useAsyncData<BlogCategory>(
+      `category-${toValue(slug)}`,
+      async () => {
+        const category = await queryCollection("categories")
+          .where("slug", "LIKE", toValue(slug))
+          .first() as BlogCategory;
 
-      if (!category) {
-        throw new Error(`Category not found for slug: ${toValue(slug)}`);
-      }
+        if (!category) {
+          throw new Error(`Category not found for slug: ${toValue(slug)}`);
+        }
 
-      return category as BlogCategory;
-    }, {
-      watch: [() => toValue(slug)],
-    });
+        return category;
+      },
+      {
+        watch: [() => toValue(slug)],
+      },
+    );
   };
 
   const getCategoryBlogs = (slug: MaybeRefOrGetter<string>, limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = `category-blogs-${toValue(slug)}-${limit ? toValue(limit) : "all"}`;
-    return useAsyncData<BlogType[]>(cacheKey, async () => {
-      let query = queryCollection("blogs")
-        .where("categories", "LIKE", `%${toValue(slug)}%`)
-        .where("published", "=", true)
-        .where("draft", "=", false)
-        .order("date", "DESC");
 
-      if (limit !== undefined) {
-        query = query.limit(toValue(limit));
-      }
+    return useAsyncData<BlogType[]>(
+      cacheKey,
+      async () => {
+        let query = queryCollection("blogs")
+          .where("categories", "LIKE", `%${toValue(slug)}%`)
+          .where("published", "=", true)
+          .where("draft", "=", false)
+          .order("date", "DESC");
 
-      const blogs = await query.all() as BlogType[];
-      const enrichedBlogs = await Promise.all(blogs.map(enrichBlog));
-      return enrichedBlogs as BlogType[];
-    }, {
-      watch: [() => toValue(slug), ...(limit ? [() => toValue(limit)] : [])],
-    });
+        if (limit !== undefined) {
+          query = query.limit(toValue(limit));
+        }
+
+        const blogs = await query.all() as BlogType[];
+
+        return await Promise.all(
+          blogs.map(enrichBlog),
+        );
+      },
+      {
+        watch: [() => toValue(slug), ...(limit ? [() => toValue(limit)] : [])],
+      },
+    );
   };
 
   /**
@@ -267,71 +313,84 @@ export function useContent() {
   const getAllTags = (limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = limit ? `tags-all-${toValue(limit)}` : "tags-all-unlimited";
 
-    return useAsyncData<Array<BlogTag & { count: number }>>(cacheKey, async () => {
-      let query = queryCollection("tags").order("name", "ASC");
+    return useAsyncData<Array<BlogTag & { count: number }>>(
+      cacheKey,
+      async () => {
+        let query = queryCollection("tags").order("name", "ASC");
 
-      if (limit !== undefined) {
-        query = query.limit(toValue(limit));
-      }
+        if (limit !== undefined) {
+          query = query.limit(toValue(limit));
+        }
 
-      const tags = await query.all() as BlogTag[];
+        const tags = await query.all() as BlogTag[];
 
-      const enrichedTags = await Promise.all(
-        tags.map(async (tag) => {
-          const associatedBlogs = await queryCollection("blogs")
-            .where("tags", "LIKE", `%${tag.slug}%`)
-            .where("published", "=", true)
-            .where("draft", "=", false)
-            .all();
+        return await Promise.all(
+          tags.map(async (tag) => {
+            const associatedBlogs = await queryCollection("blogs")
+              .where("tags", "LIKE", `%${tag.slug}%`)
+              .where("published", "=", true)
+              .where("draft", "=", false)
+              .all() as BlogType[];
 
-          return {
-            ...tag,
-            count: associatedBlogs.length,
-          };
-        }),
-      );
-
-      return enrichedTags;
-    }, {
-      watch: limit ? [() => toValue(limit)] : [],
-    });
+            return {
+              ...tag,
+              count: associatedBlogs.length,
+            };
+          }),
+        );
+      },
+      {
+        watch: limit ? [() => toValue(limit)] : [],
+      },
+    );
   };
 
-  const getTagBySlug = async (slug: MaybeRefOrGetter<string>) => {
-    return useAsyncData<BlogTag>(`tag-${toValue(slug)}`, async () => {
-      const tag = await queryCollection("tags")
-        .where("slug", "LIKE", `${toValue(slug)}`)
-        .first() as BlogTag;
+  const getTagBySlug = (slug: MaybeRefOrGetter<string>) => {
+    return useAsyncData<BlogTag>(
+      `tag-${toValue(slug)}`,
+      async () => {
+        const tag = await queryCollection("tags")
+          .where("slug", "LIKE", toValue(slug))
+          .first() as BlogTag;
 
-      if (!tag) {
-        throw new Error(`Tag not found for slug: ${toValue(slug)}`);
-      }
+        if (!tag) {
+          throw new Error(`Tag not found for slug: ${toValue(slug)}`);
+        }
 
-      return tag as BlogTag;
-    }, {
-      watch: [() => toValue(slug)],
-    });
+        return tag;
+      },
+      {
+        watch: [() => toValue(slug)],
+      },
+    );
   };
 
   const getTagBlogs = (tagSlug: MaybeRefOrGetter<string>, limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = `tag-blogs-${toValue(tagSlug)}-${limit ? toValue(limit) : "all"}`;
-    return useAsyncData<BlogType[]>(cacheKey, async () => {
-      let query = queryCollection("blogs")
-        .where("tags", "LIKE", `%${toValue(tagSlug)}%`)
-        .where("published", "=", true)
-        .where("draft", "=", false)
-        .order("date", "DESC");
 
-      if (limit !== undefined) {
-        query = query.limit(toValue(limit));
-      }
+    return useAsyncData<BlogType[]>(
+      cacheKey,
+      async () => {
+        let query = queryCollection("blogs")
+          .where("tags", "LIKE", `%${toValue(tagSlug)}%`)
+          .where("published", "=", true)
+          .where("draft", "=", false)
+          .order("date", "DESC");
 
-      const blogs = await query.all() as BlogType[];
-      const enrichedBlogs = await Promise.all(blogs.map(enrichBlog));
-      return enrichedBlogs as BlogType[];
-    }, {
-      watch: [() => toValue(tagSlug), ...(limit ? [() => toValue(limit)] : [])],
-    });
+        if (limit !== undefined) {
+          query = query.limit(toValue(limit));
+        }
+
+        const blogs = await query.all() as BlogType[];
+
+        return await Promise.all(
+          blogs.map(enrichBlog),
+        );
+      },
+      {
+        watch: [() => toValue(tagSlug), ...(limit ? [() => toValue(limit)] : [])],
+      },
+    );
   };
 
   /**
@@ -339,16 +398,16 @@ export function useContent() {
    *
    * @returns A promise that resolves to the search sections data for the "blogs" collection.
    */
-  const getSearchSections = async () => {
+  const getSearchSections = () => {
     return useAsyncData<Searchable[]>("search-sections", async () => {
-      const data = await queryCollectionSearchSections("blogs");
+      const data = queryCollectionSearchSections("blogs");
       return data;
     });
   };
 
-  const getNavigation = async () => {
+  const getNavigation = () => {
     return useAsyncData<ContentNavigationItem[]>("navigation", async () => {
-      const navigation = await queryCollectionNavigation("blogs");
+      const navigation = queryCollectionNavigation("blogs");
       return navigation;
     });
   };

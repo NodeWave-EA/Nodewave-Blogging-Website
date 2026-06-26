@@ -9,10 +9,12 @@ const config = useRuntimeConfig();
 
 const { getFeaturedBlogs } = useContent();
 const numberOfFeaturedBlogs = 8;
+const { logger } = useLogger("pages/index.vue");
 
 const { data, pending: isLoading, error: fetchError } = await getFeaturedBlogs(numberOfFeaturedBlogs);
 
 const featuredBlogs = computed<BlogType[]>(() => (data.value || []) as BlogType[]);
+logger.log(`Fetched ${featuredBlogs.value.length} featured blogs for the homepage.`);
 
 definePageMeta({
   layout: "default",
