@@ -136,6 +136,7 @@ export default defineNuxtConfig({
       siteName: siteConfig.name,
       siteDescription: siteConfig.description,
       siteLogo: `${process.env.NUXT_PUBLIC_SITE_URL}/logo.png`,
+      logLevel: process.env.NUXT_PUBLIC_LOG_LEVEL || "log",
     },
   },
 
@@ -190,5 +191,9 @@ export default defineNuxtConfig({
     ],
 
     processCSSVariables: true,
+  },
+
+  linkChecker: {
+    enabled: false,
   },
 });

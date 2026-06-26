@@ -2,3 +2,4 @@ slug: powershell
 name: PowerShell
 description: PowerShell scripting, cmdlets, and automation for system administration and development.
 color: "#012456"
+icon: i-codicon-terminal-powershell

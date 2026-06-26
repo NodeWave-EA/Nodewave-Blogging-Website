@@ -23,6 +23,9 @@ export const blogSchema = z.object({
   description: z.string()
     .describe("type: text; Concise summary of the blog post content for SEO and social sharing")
     .default("Blog post description text"),
+  excerpt: z.string()
+    .describe("type: text; Short preview snippet of the blog post content for listings and teasers")
+    .default("Blog post excerpt text"),
   date: z.coerce.date()
     .describe("Original creation or publication release timeline timestamp")
     .or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")),
@@ -57,6 +60,7 @@ export type BlogPost = z.infer<typeof blogSchema>;
 const _exampleBlog = {
   id: "blogs/blogs/powershell-bash.md",
   title: "Bash-ify Your PowerShell - The Ultimate Guide to Autosuggestions, Completions, and Subcommands",
+  excerpt: "Learn how to make PowerShell look, feel, and behave exactly like a premium Bash/Zsh environment with autosuggestions, interactive subcommand completions, and fuzzy history search.",
   anchors: [],
   author: {
     id: "authors/authors/gideon-yebei.yml",

@@ -19,6 +19,9 @@ export const authorSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase and can include hyphens")
     .describe("Unique identifier for the author, used in URLs and references")
     .default("author-slug"),
+  color: z.string()
+    .default("#14b8a6")
+    .describe("Optional color representation for the author, used in UI theming"),
   title: z.string()
     .default("Author")
     .describe("Professional title, e.g., 'Senior Software Engineer'"),

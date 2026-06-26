@@ -7,6 +7,11 @@ import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
 defineOptions({
   name: "BlogDetailPage",
 });
+
+const config = useRuntimeConfig();
+
+const { logger } = useLogger({ context: "BlogDetailPage" });
+
 const carousel = useTemplateRef("carousel");
 const activeIndex = ref(0);
 
@@ -16,14 +21,14 @@ definePageMeta({
 
 const route = useRoute();
 const { scrollProgress } = useReadingProgress();
-const logger = new Logger("BlogSlugDetailPage component");
 
 const { getBlogBySlug, getSurroundingBlogs } = useContent();
 
-const slug = route.params.slug as string;
-logger.debug("Current route slug parameter identified:", { slug });
+const slug = computed(() => route.params.slug as string);
+logger.debug("Current route slug parameter identified:", { slug: toValue(slug) });
 
-const blogPath = computed(() => `/blogs/${slug}`);
+const blogPath = computed(() => route.path);
+logger.debug("Current route path identified:", { blogPath: toValue(blogPath) });
 
 const { data: blogQueryResult, pending: blogLoading, error: blogError } = await getBlogBySlug(slug);
 const { data: surroundQueryResult, pending: surroundLoading, error: surroundError } = await getSurroundingBlogs(blogPath);
@@ -57,6 +62,28 @@ function select(index: number) {
   activeIndex.value = index;
   carousel.value?.emblaApi?.scrollTo(index);
 }
+
+if (!currentBlog.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Blog not found",
+    message: `The blog with slug "${slug.value}" could not be found.`,
+  });
+}
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: `${config.public.siteUrl}${toValue(blogPath)}`,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
 </script>
 
 <template>
@@ -177,7 +204,7 @@ function select(index: number) {
                 size="xs"
                 class="rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
                 :aria-label="social.platform"
-                :icon="social.platform.toLowerCase() === 'github' ? 'i-simple-icons-github' : 'i-lucide-link'"
+                :icon="social.icon"
               />
             </div>
           </div>
@@ -185,22 +212,14 @@ function select(index: number) {
       </template>
 
       <template #right>
-        <div class="space-y-6 sticky top-24 lg:block">
-          <UContentToc
-            v-if="currentBlog.body?.toc?.links?.length"
-            :links="currentBlog.body.toc.links"
-            title="Table of Contents"
-            highlight
-            highlight-color="primary"
-            highlight-variant="circuit"
-          />
-
-          <UPageAnchors
-            v-if="currentBlog.anchors?.length"
-            title="External Anchors"
-            :links="currentBlog.anchors"
-          />
-        </div>
+        <UContentToc
+          v-if="currentBlog.body?.toc?.links?.length"
+          :links="currentBlog.body.toc.links"
+          title="Table of Contents"
+          highlight
+          highlight-color="primary"
+          highlight-variant="circuit"
+        />
       </template>
 
       <UPageBody>
@@ -232,17 +251,31 @@ function select(index: number) {
             </NuxtLink>
           </div>
           <div v-if="blogAuthor.socialLinks?.length" class="flex items-center gap-1">
-            <UButton
+            <UTooltip
               v-for="social in blogAuthor.socialLinks"
               :key="social.url"
-              :to="social.url"
-              target="_blank"
-              color="neutral"
-              variant="ghost"
-              size="xs"
-              class="rounded-lg text-neutral-400"
-              :icon="social.platform.toLowerCase() === 'github' ? 'i-simple-icons-github' : 'i-lucide-link'"
-            />
+              :text="social.platform"
+              placement="top"
+              :style="{
+                '--tooltip-bg-color': social.color || 'var(--ui-primary)',
+                '--tooltip-text-color': 'var(--neutral-50)',
+              }"
+            >
+              <UButton
+                :key="social.url"
+                :to="social.url"
+                target="_blank"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                :icon="social.icon"
+                :style="{
+                  '--hover-brand-color': social.color || 'var(--ui-primary)',
+                }"
+                class="rounded-lg text-neutral-400 hover:text-(--hover-brand-color) dark:hover:text-(--hover-brand-color)"
+                :aria-label="social.platform"
+              />
+            </UTooltip>
           </div>
         </div>
 
@@ -300,44 +333,80 @@ function select(index: number) {
         </div>
 
         <div class="mt-12 pt-6 border-t border-neutral-200/40 dark:border-neutral-800/60 flex flex-col sm:flex-row gap-8 sm:gap-16">
+          <!-- Categories Section -->
           <div v-if="blogCategories.length > 0" class="flex flex-col gap-2 min-w-35">
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none">
-              <UIcon name="i-lucide-folder" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
-              <span>Categories</span>
+              <UIcon name="i-lucide-folders" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
+              <NuxtLink
+                to="/categories"
+              >
+                <span
+                  class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text"
+                >
+                  Categories</span>
+              </NuxtLink>
             </div>
             <div class="flex flex-wrap gap-2">
               <UButton
                 v-for="category in blogCategories"
                 :key="category.stem"
-                :label="category.name"
-                color="neutral"
+                :to="`/${category.stem}`"
                 variant="subtle"
                 size="xs"
-                class="font-mono text-xs rounded-md border border-neutral-200/30 dark:border-neutral-800/50 hover:border-primary-500/40"
-                :to="`/${category.stem}`"
-              />
+                class="font-mono text-xs rounded-md border border-neutral-200/30 dark:border-neutral-800/50 hover:border-(--category-color)/40 text-neutral-900 dark:text-neutral-100 hover:text-(--category-color) transition-colors"
+                :style="{
+                  '--category-color': category.color || 'var(--ui-primary)',
+                }"
+              >
+                <UIcon
+                  :name="category.icon || 'i-lucide-folder'"
+                  class="size-3 text-(--category-color)"
+                />
+                {{ category.name }}
+              </UButton>
             </div>
           </div>
 
+          <!-- Tags Section -->
           <div v-if="blogTags.length > 0" class="flex flex-col gap-2">
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none">
-              <UIcon name="i-lucide-tag" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
-              <span>Tags Matrix</span>
+              <UIcon name="i-lucide-tags" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
+              <NuxtLink
+                to="/tags"
+              >
+                <span
+                  class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text"
+                >
+                  Tags
+                </span>
+              </NuxtLink>
             </div>
             <div class="flex flex-wrap gap-2">
               <UButton
                 v-for="tag in blogTags"
                 :key="tag.stem"
-                :label="`#${tag.name}`"
-                color="neutral"
+                :to="`/${tag.stem}`"
                 variant="subtle"
                 size="xs"
-                class="font-mono text-xs rounded-md border border-neutral-200/30 dark:border-neutral-800/50 hover:border-primary-500/40"
-                :to="`/${tag.stem}`"
-              />
+                class="font-mono text-xs rounded-md border border-neutral-200/30 dark:border-neutral-800/50 hover:border-(--tag-color)/40 text-neutral-900 dark:text-neutral-100 hover:text-(--tag-color) transition-colors"
+                :style="{
+                  '--tag-color': tag.color || 'var(--ui-primary)',
+                }"
+              >
+                <UIcon
+                  :name="tag.icon || 'i-lucide-hash'"
+                  class="size-3 text-(--tag-color)"
+                />
+                {{ tag.name }}
+              </UButton>
             </div>
           </div>
         </div>
+
+        <UPageAnchors
+          title="External Anchors"
+          :links="currentBlog.anchors"
+        />
 
         <USeparator class="my-8 border-neutral-200/40 dark:border-neutral-800/60" />
 

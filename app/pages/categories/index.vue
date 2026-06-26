@@ -15,9 +15,7 @@ const displayLimit = ref(itemsPerPage);
 
 const { data: rawCategories, pending: categoriesPending } = await getAllCategories(displayLimit);
 
-const enrichedCategories = computed(() => {
-  return rawCategories.value || [];
-});
+const enrichedCategories = computed(() => rawCategories.value || []);
 
 const hasMoreContent = computed(() => {
   if (!rawCategories.value)
@@ -32,23 +30,47 @@ useInfiniteScroll(
       displayLimit.value += itemsPerPage;
     }
   },
-  {
-    distance: 250,
-    canLoadMore: () => hasMoreContent.value,
-  },
+  { distance: 250, canLoadMore: () => hasMoreContent.value },
 );
+
+const { activeHoverText, startDecryption } = useMatrixDecrypt({
+  speed: 25,
+  revealStep: 0.35,
+});
+
+onMounted(() => {
+  startDecryption("Explore Categories", "categories-badge");
+});
 </script>
 
 <template>
   <UContainer>
-    <UPage>
-      <UPageHeader
-        title="Browse by Categories"
-        description="Explore our curated taxonomy of content categories, each representing a unique area of focus within our knowledge base."
-        class="mb-12 border-b border-neutral-100 dark:border-neutral-900 pb-8 mx-1"
-      />
+    <UPage class="py-10">
+      <UPageHeader class="mb-12 mx-2">
+        <template #headline>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <UIcon name="i-lucide-grid-3x3" class="h-3.5 w-3.5" />
+            <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+              {{ activeHoverText["categories-badge"] || "Explore Categories" }}
+            </span>
+          </div>
+        </template>
+
+        <template #title>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
+            Navigate by <span class="bg-linear-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">category</span> or subject area.
+          </h1>
+        </template>
+
+        <template #description>
+          <p class="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
+            Organized collections to help you find specific technical content faster. Explore domains ranging from architecture to core development.
+          </p>
+        </template>
+      </UPageHeader>
 
       <UPageBody>
+        <!-- Skeleton Loading State -->
         <div v-if="categoriesPending && displayLimit === itemsPerPage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-1">
           <div
             v-for="n in 6"
@@ -68,59 +90,18 @@ useInfiniteScroll(
         </div>
 
         <div v-else class="space-y-12 mx-1">
+          <!-- Populated Taxonomy Grid -->
           <div v-if="enrichedCategories.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-            <NuxtLink
+            <BaseTaxonomyCard
               v-for="category in enrichedCategories"
               :key="category.slug"
-              :to="`/${category.stem}`"
-              class="group relative p-6 rounded-2xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white dark:bg-neutral-950 hover:border-primary-500/40 hover:shadow-xs transition-all duration-300 flex flex-col justify-between gap-6 overflow-hidden"
-            >
-              <div
-                class="absolute -top-12 -right-12 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-15 transition-opacity duration-500"
-                :style="{ backgroundColor: category.color || 'var(--ui-primary)' }"
-              />
-
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <div
-                    class="w-10 h-10 rounded-xl flex items-center justify-center border transition-colors duration-300"
-                    :style="{
-                      backgroundColor: `${category.color}10` || 'rgba(var(--ui-primary-rgb), 0.05)',
-                      borderColor: `${category.color}30` || 'rgba(var(--ui-primary-rgb), 0.15)',
-                    }"
-                  >
-                    <UIcon
-                      name="i-lucide-folder-open"
-                      class="w-5 h-5"
-                      :style="{ color: category.color || 'var(--ui-primary)' }"
-                    />
-                  </div>
-
-                  <span class="px-2.5 py-1 rounded-md bg-neutral-50 dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 font-mono text-[10px] font-bold text-neutral-500 dark:text-neutral-400 group-hover:border-primary-500/20 group-hover:bg-primary-500/5 transition-all">
-                    {{ category.count || 0 }} {{ category.count === 1 ? 'Article' : 'Articles' }}
-                  </span>
-                </div>
-
-                <div class="space-y-1.5">
-                  <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-50 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors duration-200">
-                    {{ category.name }}
-                  </h3>
-                  <p v-if="category.description" class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-2">
-                    {{ category.description }}
-                  </p>
-                  <p v-else class="text-xs text-neutral-400 dark:text-neutral-600 italic">
-                    No description available for this category.
-                  </p>
-                </div>
-              </div>
-
-              <div class="pt-4 border-t border-neutral-100 dark:border-neutral-900/60 flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
-                <span>View Stream Matrix</span>
-                <UIcon name="i-lucide-arrow-right" class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </NuxtLink>
+              :item="category"
+              fallback-icon="i-lucide-folder-open"
+              type-label="category"
+            />
           </div>
 
+          <!-- Empty Fallback View -->
           <div v-else class="text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/20 dark:bg-neutral-900/10">
             <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4">
               <UIcon name="i-lucide-grid-2x2" class="w-6 h-6 text-neutral-400" />
@@ -133,10 +114,8 @@ useInfiniteScroll(
             </p>
           </div>
 
-          <div
-            v-if="categoriesPending"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800"
-          >
+          <!-- Appending Skeleton Loaders -->
+          <div v-if="categoriesPending" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800">
             <div
               v-for="n in 3"
               :key="`append-cat-${n}`"
@@ -144,10 +123,8 @@ useInfiniteScroll(
             />
           </div>
 
-          <div
-            v-if="!hasMoreContent && enrichedCategories.length > 0"
-            class="text-center pt-10 pb-6 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
-          >
+          <!-- Completion Signifier -->
+          <div v-if="!hasMoreContent && enrichedCategories.length > 0" class="text-center pt-10 pb-6 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60">
             You've reached the end of the category index.
           </div>
         </div>
@@ -158,12 +135,4 @@ useInfiniteScroll(
 
 <style scoped>
 @reference '~/assets/css/main.css';
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 </style>

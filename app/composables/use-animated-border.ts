@@ -2,17 +2,27 @@ import { onMounted, onUnmounted, ref } from "vue";
 
 import type { Ref } from "vue";
 
-export function useAnimatedBorder(targetRef: Ref<HTMLElement | null>) {
+export function useAnimatedBorder(targetRef: Ref<any>) {
   const mouseX = ref(0);
   const mouseY = ref(0);
   const isHovered = ref(false);
 
+  const getTargetElement = (target: any): HTMLElement | null => {
+    if (!target)
+      return null;
+    if (target instanceof HTMLElement)
+      return target;
+    if (target.$el instanceof HTMLElement)
+      return target.$el;
+    return null;
+  };
+
   const handlePointerMove = (event: PointerEvent) => {
-    if (!targetRef.value)
+    const el = getTargetElement(targetRef.value);
+    if (!el)
       return;
 
-    const rect = targetRef.value.getBoundingClientRect();
-    // Calculate precise local coordinates inside the element bounds
+    const rect = el.getBoundingClientRect();
     mouseX.value = event.clientX - rect.left;
     mouseY.value = event.clientY - rect.top;
   };
@@ -26,18 +36,20 @@ export function useAnimatedBorder(targetRef: Ref<HTMLElement | null>) {
   };
 
   onMounted(() => {
-    if (targetRef.value) {
-      targetRef.value.addEventListener("pointermove", handlePointerMove);
-      targetRef.value.addEventListener("pointerenter", handlePointerEnter);
-      targetRef.value.addEventListener("pointerleave", handlePointerLeave);
+    const el = getTargetElement(targetRef.value);
+    if (el && typeof el.addEventListener === "function") {
+      el.addEventListener("pointermove", handlePointerMove);
+      el.addEventListener("pointerenter", handlePointerEnter);
+      el.addEventListener("pointerleave", handlePointerLeave);
     }
   });
 
   onUnmounted(() => {
-    if (targetRef.value) {
-      targetRef.value.removeEventListener("pointermove", handlePointerMove);
-      targetRef.value.removeEventListener("pointerenter", handlePointerEnter);
-      targetRef.value.removeEventListener("pointerleave", handlePointerLeave);
+    const el = getTargetElement(targetRef.value);
+    if (el && typeof el.removeEventListener === "function") {
+      el.removeEventListener("pointermove", handlePointerMove);
+      el.removeEventListener("pointerenter", handlePointerEnter);
+      el.removeEventListener("pointerleave", handlePointerLeave);
     }
   });
 

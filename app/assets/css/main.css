@@ -4,6 +4,8 @@
 
 @import "./keyframes.css";
 
+@source "../../../content/**/*";
+
 @layer base {
   html {
     scroll-behavior: smooth;

@@ -10,14 +10,12 @@ definePageMeta({
 
 const { getAllTags } = useContent();
 
-const itemsPerPage = 24;
+const itemsPerPage = 12;
 const displayLimit = ref(itemsPerPage);
 
 const { data: rawTags, pending: tagsPending } = await getAllTags(displayLimit);
 
-const enrichedTags = computed(() => {
-  return rawTags.value || [];
-});
+const enrichedTags = computed(() => rawTags.value || []);
 
 const hasMoreContent = computed(() => {
   if (!rawTags.value)
@@ -32,79 +30,102 @@ useInfiniteScroll(
       displayLimit.value += itemsPerPage;
     }
   },
-  {
-    distance: 250,
-    canLoadMore: () => hasMoreContent.value,
-  },
+  { distance: 250, canLoadMore: () => hasMoreContent.value },
 );
+
+// Add micro-interaction text decryption for the archive badge
+const { activeHoverText, startDecryption } = useMatrixDecrypt({
+  speed: 25,
+  revealStep: 0.35,
+});
+
+onMounted(() => {
+  startDecryption("Explore Tags", "tags-badge");
+});
 </script>
 
 <template>
   <UContainer>
     <UPage class="py-10">
-      <UPageHeader
-        title="Browse by Tags"
-        description="Navigate deep into specific topics, micro-frameworks, and development tracks across our index."
-      />
+      <UPageHeader class="mb-12 mx-2">
+        <template #headline>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+            <UIcon name="i-lucide-hash" class="h-3.5 w-3.5" />
+            <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+              {{ activeHoverText["tags-badge"] || "Explore Tags" }}
+            </span>
+          </div>
+        </template>
+
+        <template #title>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
+            Filter insights by <span class="bg-linear-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">specific tags</span>.
+          </h1>
+        </template>
+
+        <template #description>
+          <p class="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
+            Quickly discover articles associated with unique keywords, technologies, and specific development challenges.
+          </p>
+        </template>
+      </UPageHeader>
 
       <UPageBody>
-        <div>
-          <div v-if="enrichedTags.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-12">
-            <NuxtLink
+        <!-- Skeleton Loading State -->
+        <div v-if="tagsPending && displayLimit === itemsPerPage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-1">
+          <div
+            v-for="n in 6"
+            :key="n"
+            class="h-44 rounded-2xl bg-neutral-50 dark:bg-neutral-900/40 p-5 border border-neutral-100 dark:border-neutral-900 flex flex-col justify-between animate-pulse"
+          >
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-xl bg-neutral-200 dark:bg-neutral-800" />
+                <div class="w-12 h-5 rounded-md bg-neutral-100 dark:bg-neutral-800" />
+              </div>
+              <div class="w-2/3 h-5 bg-neutral-200 dark:bg-neutral-800 rounded-md" />
+              <div class="w-full h-3 bg-neutral-100 dark:bg-neutral-800 rounded-md" />
+            </div>
+            <div class="w-24 h-3 bg-neutral-100 dark:bg-neutral-800 rounded-md" />
+          </div>
+        </div>
+
+        <div v-else class="space-y-12 mx-1">
+          <!-- Populated Taxonomy Grid -->
+          <div v-if="enrichedTags.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+            <BaseTaxonomyCard
               v-for="tag in enrichedTags"
               :key="tag.slug"
-              :to="`/${tag.stem}`"
-              class="group relative flex flex-col justify-between p-4 rounded-xl border border-neutral-200/60 dark:border-neutral-800/50 bg-white dark:bg-neutral-950 hover:border-primary-500/40 dark:hover:border-primary-400/30 hover:shadow-sm transition-all duration-200 select-none"
-            >
-              <div class="space-y-1.5">
-                <span
-                  class="font-mono text-xs font-semibold tracking-wide group-hover:scale-105 transition-transform inline-block"
-                  :style="{ color: tag.color || 'var(--color-primary-500)' }"
-                >
-                  #{{ tag.name }}
-                </span>
-                <p v-if="tag.meta?.description" class="text-[11px] text-neutral-500 dark:text-neutral-400 line-clamp-2 leading-normal">
-                  {{ tag.meta.description }}
-                </p>
-              </div>
-
-              <div class="pt-4 flex items-center justify-between border-t border-neutral-100/70 dark:border-neutral-900/40 mt-3">
-                <span class="text-[10px] font-mono uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                  Articles
-                </span>
-                <UBadge
-                  size="xs"
-                  variant="subtle"
-                  class="font-mono px-1.5 rounded text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-900 group-hover:bg-primary-50 dark:group-hover:bg-primary-950/40 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
-                >
-                  {{ tag.count }}
-                </UBadge>
-              </div>
-            </NuxtLink>
+              :item="tag"
+              fallback-icon="i-lucide-hash"
+              type-label="tag"
+            />
           </div>
 
-          <div v-else-if="!tagsPending" class="text-center py-20 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/30 dark:bg-neutral-900/10">
-            <UIcon name="i-lucide-hash" class="w-8 h-8 text-neutral-300 dark:text-neutral-700 mx-auto" />
-            <h3 class="text-sm font-bold mt-3 text-neutral-800 dark:text-neutral-200">
+          <!-- Empty Fallback View -->
+          <div v-else class="text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/20 dark:bg-neutral-900/10">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4">
+              <UIcon name="i-lucide-hash" class="w-6 h-6 text-neutral-400" />
+            </div>
+            <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
               No tags indexed
             </h3>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
               There are currently no tags indexed.
             </p>
           </div>
 
-          <div v-if="tagsPending" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800">
+          <!-- Appending Skeleton Loaders -->
+          <div v-if="tagsPending" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800">
             <div
-              v-for="n in 6"
-              :key="`loader-${n}`"
-              class="h-28 rounded-xl bg-neutral-50 dark:bg-neutral-900/30 p-4 animate-pulse border border-transparent"
+              v-for="n in 3"
+              :key="`append-tag-${n}`"
+              class="h-44 rounded-2xl bg-neutral-50 dark:bg-neutral-900/30 p-5 animate-pulse border border-transparent"
             />
           </div>
 
-          <div
-            v-if="!hasMoreContent && enrichedTags.length > 0"
-            class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[9px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
-          >
+          <!-- Completion Signifier -->
+          <div v-if="!hasMoreContent && enrichedTags.length > 0" class="text-center pt-10 pb-6 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60">
             You've reached the end of the tag index.
           </div>
         </div>

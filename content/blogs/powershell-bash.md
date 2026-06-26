@@ -19,12 +19,6 @@ gallery:
   - src: /blogs/posts/powershell-bash/carapace-menu.png
     alt: Interactive grid showing git subcommand auto-completions via Carapace
     caption: Rich multi-shell subcommand menus triggered natively with Ctrl+Space.
-  - src: /blogs/posts/powershell-bash/carapace-menu.png
-    alt: Interactive grid showing git subcommand auto-completions via Carapace
-    caption: Rich multi-shell subcommand menus triggered natively with Ctrl+Space.
-  - src: /blogs/posts/powershell-bash/carapace-menu.png
-    alt: Interactive grid showing git subcommand auto-completions via Carapace
-    caption: Rich multi-shell subcommand menus triggered natively with Ctrl+Space.
 published: true
 publishedAt: 2026-06-16
 seo:
@@ -45,6 +39,10 @@ tags:
   - devops
 updatedAt: 2026-06-16
 ---
+
+Learn how to make PowerShell look, feel, and behave exactly like a premium Bash/Zsh environment with autosuggestions, interactive subcommand completions, and fuzzy history search.
+
+<!--more-->
 
 Let’s be honest. If you are coming from a Linux or macOS background, opening up a raw PowerShell (`pwsh`) terminal can feel a bit like stepping into a parallel universe where everything is _almost_ familiar, but just clunky enough to drive you crazy.
 

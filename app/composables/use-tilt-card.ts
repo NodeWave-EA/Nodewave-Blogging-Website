@@ -1,3 +1,5 @@
+import { computed, ref } from "vue";
+
 type TiltOptions = {
   strengthX?: number;
   strengthY?: number;
@@ -8,6 +10,7 @@ type TiltOptions = {
   speed?: number;
   easing?: string;
 };
+
 export function useTiltCard(options?: TiltOptions) {
   const {
     strengthX = 15,
@@ -20,16 +23,27 @@ export function useTiltCard(options?: TiltOptions) {
     easing = "cubic-bezier(.03,.98,.52,.99)",
   } = options || {};
 
-  const elementRef = ref<HTMLElement | null>(null);
+  const elementRef = ref<any>(null);
   const rotateX = ref(resetX);
   const rotateY = ref(resetY);
   const isTracking = ref(false);
 
+  const getTargetElement = (target: any): HTMLElement | null => {
+    if (!target)
+      return null;
+    if (target instanceof HTMLElement)
+      return target;
+    if (target.$el instanceof HTMLElement)
+      return target.$el;
+    return null;
+  };
+
   const handlePointerMove = (event: PointerEvent) => {
-    if (!elementRef.value)
+    const el = getTargetElement(elementRef.value);
+    if (!el)
       return;
 
-    const rect = elementRef.value.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
     const offsetX = (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
     const offsetY = (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
 
@@ -50,7 +64,7 @@ export function useTiltCard(options?: TiltOptions) {
   const transformStyles = computed(() => {
     return {
       transform: `perspective(${perspective}px) rotateX(${rotateX.value}deg) rotateY(${rotateY.value}deg) scale(${isTracking.value ? scale : 1})`,
-      transition: isTracking.value ? `transform ${speed}ms ${easing}` : `transform ${speed}ms ${easing}`,
+      transition: `transform ${speed}ms ${easing}`,
       willChange: isTracking.value ? "transform" : "auto",
     };
   });

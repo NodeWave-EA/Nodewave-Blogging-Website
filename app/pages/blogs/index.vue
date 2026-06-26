@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from "@vueuse/core";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import { useContent } from "~/composables/content";
+import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
 definePageMeta({
-  title: "Browse by Blogs",
+  title: "Browse All Blogs",
+});
+
+useSeoMeta({
+  title: "Complete Archive — nodewave",
+  description: "Browse the entire collection of technical articles, architecture notes, and development logs.",
 });
 
 const { getAllBlogs } = useContent();
@@ -37,18 +43,73 @@ useInfiniteScroll(
     canLoadMore: () => hasMoreContent.value,
   },
 );
+
+const { activeHoverText, startDecryption } = useMatrixDecrypt({
+  speed: 25,
+  revealStep: 0.35,
+});
+
+onMounted(() => {
+  startDecryption("Complete Archive", "archive-badge");
+});
 </script>
 
 <template>
-  <UContainer>
+  <UContainer class="py-4 sm:py-6">
     <UPage>
+      <UPageHeader class="mb-12 mx-2">
+        <template #headline>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
+            <UIcon name="i-lucide-library" class="h-3.5 w-3.5" />
+            <span class="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">
+              {{ activeHoverText["archive-badge"] || "Complete Archive" }}
+            </span>
+          </div>
+        </template>
+
+        <template #title>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
+            Explore our <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent">complete collection</span> of technical articles, architecture notes, and development logs.
+          </h1>
+        </template>
+
+        <template #description>
+          <p class="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
+            A comprehensive archive of all technical articles, architecture notes, and development logs published on nodewave.
+          </p>
+        </template>
+
+        <template #default>
+          <div class="pt-4 flex flex-wrap items-center gap-3">
+            <!-- categories -->
+            <NuxtLink
+              to="/categories"
+              class="group inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-950 hover:bg-neutral-900 dark:bg-white dark:hover:bg-neutral-50 px-5 py-2.5 text-xs font-semibold tracking-wide text-white dark:text-neutral-950 shadow-xs transition-all hover:-translate-y-0.5"
+            >
+              Browse Categories
+              <UIcon name="i-line-md-arrow-right" class="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500 group-hover:translate-x-0.5 transition-transform" />
+            </NuxtLink>
+            <!-- tags -->
+            <NuxtLink
+              to="/tags"
+              class="group inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-950 hover:bg-neutral-900 dark:bg-white dark:hover:bg-neutral-50 px-5 py-2.5 text-xs font-semibold tracking-wide text-white dark:text-neutral-950 shadow-xs transition-all hover:-translate-y-0.5"
+            >
+              Browse Tags
+              <UIcon name="i-line-md-arrow-right" class="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500 group-hover:translate-x-0.5 transition-transform" />
+            </NuxtLink>
+          </div>
+        </template>
+      </UPageHeader>
+
       <UPageBody>
-        <div v-if="blogsPending && displayLimit === itemsPerPage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-1 py-6">
+        <!-- Initial Loading State -->
+        <div v-if="blogsPending && displayLimit === itemsPerPage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-1 py-2">
           <BlogPostCardSkeleton v-for="n in 6" :key="n" />
         </div>
 
-        <div v-else class="space-y-6 mx-1 py-6">
+        <div v-else class="space-y-6 mx-1 py-2">
           <div class="space-y-12">
+            <!-- Content Grid Layout -->
             <div v-if="blogs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               <BlogPostCard
                 v-for="blog in blogs"
@@ -58,25 +119,28 @@ useInfiniteScroll(
               />
             </div>
 
+            <!-- Empty Fallback State -->
             <div v-else class="text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/20 dark:bg-neutral-900/10">
-              <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4 shadow-3xs">
+              <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4 shadow-3xs transition-transform hover:scale-105">
                 <UIcon name="i-lucide-folder-open" class="w-6 h-6 text-neutral-400" />
               </div>
               <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
                 No Articles Found
               </h3>
               <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
-                We couldn't locate any published articles or documentation fragments in the system at this time. Please check back later or explore other sections of the site.
+                We couldn't locate any published articles or documentation fragments in the system at this time.
               </p>
             </div>
 
+            <!-- Infinite Scroll Appending Skeletons -->
             <div
               v-if="blogsPending"
-              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800/60"
             >
               <BlogPostCardSkeleton v-for="n in 3" :key="`append-${n}`" />
             </div>
 
+            <!-- Content Boundary / End of List Indicator -->
             <div
               v-if="!hasMoreContent && blogs.length > 0"
               class="text-center pt-10 pb-6 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
@@ -92,4 +156,9 @@ useInfiniteScroll(
 
 <style scoped>
 @reference '~/assets/css/main.css';
+.social-network-pill:hover {
+  background-color: var(--brand-bg-opacity) !important;
+  color: var(--brand-hover-color) !important;
+  transform: translateY(-1px);
+}
 </style>

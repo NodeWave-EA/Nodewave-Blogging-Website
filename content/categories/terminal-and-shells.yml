@@ -2,3 +2,4 @@ slug: terminal-and-shells
 name: Terminal and Shells
 description: Deep dives into shell configurations, command-line utilities, and productivity workflows.
 color: "#FF5733"
+icon: i-codicon-terminal

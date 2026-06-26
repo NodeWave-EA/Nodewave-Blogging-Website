@@ -29,18 +29,27 @@ useSeoMeta({
   title: "Curated Posts & Insights",
   description: "Explore the latest curated posts and insights from nodewave and stay ahead in the world of technology and development.",
 });
+
+const { activeHoverText, startDecryption } = useMatrixDecrypt({
+  speed: 25,
+  revealStep: 0.35,
+});
+
+onMounted(() => {
+  startDecryption("Curated Posts & Insights", "home-badge");
+});
 </script>
 
 <template>
   <UContainer class="py-4 sm:py-8">
     <UPage>
       <!-- Hero Header Section -->
-      <UPageHeader class="mx-2 mb-12">
+      <UPageHeader>
         <template #headline>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
             <UIcon name="i-lucide-sparkle" class="h-3.5 w-3.5 animate-pulse" />
             <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-              Curated Posts & Insights
+              {{ activeHoverText["home-badge"] || "Curated Posts & Insights" }}
             </span>
           </div>
         </template>
@@ -90,7 +99,7 @@ useSeoMeta({
             </NuxtLink>
 
             <NuxtLink
-              to="/blogs/categories"
+              to="/categories"
               class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-5 py-2.5 text-xs font-medium tracking-wide text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-850 dark:hover:text-black transition-all shadow-2xs"
             >
               <UIcon name="i-line-md-grid-3-filled" class="h-3.5 w-3.5 text-neutral-400" />

@@ -1,0 +1,5 @@
+slug: git
+name: Git
+description: Git is a distributed version control system that allows developers to track changes in source code during software development. It enables collaboration, branching, and merging of code, making it an essential tool for modern software development workflows.
+color: "#F05032"
+icon: i-codicon-git-branch

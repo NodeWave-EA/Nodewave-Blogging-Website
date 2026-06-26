@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from "@vueuse/core";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 import { useContent } from "~/composables/content";
+import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
+
+definePageMeta({
+  title: "Contributor Profile",
+});
 
 const route = useRoute();
 const slug = route.params.slug as string;
@@ -23,9 +28,7 @@ useSeoMeta({
   description: () => author.value?.description || "Browse technical articles and engineering entries contributed by this team member.",
 });
 
-const blogs = computed(() => {
-  return rawBlogs.value || [];
-});
+const blogs = computed(() => rawBlogs.value || []);
 
 const hasMoreContent = computed(() => {
   if (!rawBlogs.value || rawBlogs.value.length === 0)
@@ -45,6 +48,43 @@ useInfiniteScroll(
     canLoadMore: () => hasMoreContent.value,
   },
 );
+
+const { activeHoverText, startDecryption } = useMatrixDecrypt({
+  speed: 25,
+  revealStep: 0.35,
+});
+
+onMounted(() => {
+  if (author.value?.title) {
+    startDecryption(author.value.title, "author-title");
+  }
+});
+
+function getSocialPlatformMeta(platform: string) {
+  const platforms: Record<string, { icon: string; style: Record<string, string> }> = {
+    github: {
+      icon: "i-simple-icons-github",
+      style: { "--social-hover-color": "#24292e", "--social-bg": "rgba(36, 41, 46, 0.1)" },
+    },
+    twitter: {
+      icon: "i-simple-icons-x",
+      style: { "--social-hover-color": "#1da1f2", "--social-bg": "rgba(29, 161, 242, 0.1)" },
+    },
+    x: {
+      icon: "i-simple-icons-x",
+      style: { "--social-hover-color": "#000000", "--social-bg": "rgba(0, 0, 0, 0.1)" },
+    },
+    linkedin: {
+      icon: "i-simple-icons-linkedin",
+      style: { "--social-hover-color": "#0077b5", "--social-bg": "rgba(0, 119, 181, 0.1)" },
+    },
+  };
+
+  return platforms[platform.toLowerCase()] || {
+    icon: "i-lucide-link",
+    style: { "--social-hover-color": "var(--ui-primary)", "--social-bg": "rgba(var(--color-primary-500-rgb), 0.1)" },
+  };
+}
 </script>
 
 <template>
@@ -66,52 +106,69 @@ useInfiniteScroll(
         </NuxtLink>
       </div>
 
-      <header class="mb-12 pb-8 border-b border-neutral-100 dark:border-neutral-900">
-        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-          <UAvatar
-            v-if="author.avatar?.src"
-            :src="author.avatar.src"
-            :alt="author.avatar.alt || author.name"
-            size="xl"
-            class="w-20 h-20 rounded-full object-cover border-2 border-neutral-200 dark:border-neutral-800 ring-4 ring-neutral-50 dark:ring-neutral-900/50"
-          />
-          <div class="flex-1 space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h1 class="text-3xl font-extrabold text-neutral-900 dark:text-neutral-100 tracking-tight">
-                {{ author.name }}
-              </h1>
-              <UBadge
-                v-if="author.role"
-                color="neutral"
-                variant="subtle"
-                size="sm"
-                class="font-mono uppercase text-[10px] tracking-wider rounded-md"
-              >
-                {{ author.role }}
-              </UBadge>
+      <header class="relative mb-12 p-6 md:p-8 rounded-3xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white/50 dark:bg-neutral-950/40 backdrop-blur-md overflow-hidden shadow-xs">
+        <div
+          class="pointer-events-none absolute -right-24 -top-24 w-72 h-72 rounded-full blur-3xl opacity-10 dark:opacity-20 bg-primary-500"
+        />
+        <div
+          class="pointer-events-none absolute -left-24 -bottom-24 w-72 h-72 rounded-full blur-3xl opacity-5 dark:opacity-10 bg-emerald-500"
+        />
+
+        <div class="relative z-10 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-8">
+          <div class="relative group">
+            <div class="absolute inset-0 rounded-full bg-linear-to-tr from-primary-500 via-neutral-200 to-emerald-500 dark:to-neutral-800 opacity-40 blur-xs group-hover:opacity-70 transition-opacity duration-500" />
+            <UAvatar
+              v-if="author.avatar?.src"
+              :src="author.avatar.src"
+              :alt="author.avatar.alt || author.name"
+              size="xl"
+              class="relative w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white dark:border-neutral-950 shadow-md"
+            />
+          </div>
+
+          <div class="flex-1 space-y-3 w-full">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center justify-center md:justify-flex-start gap-2.5">
+                  <h1 class="text-3xl font-black text-neutral-900 dark:text-neutral-50 tracking-tight">
+                    {{ author.name }}
+                  </h1>
+                  <UBadge
+                    v-if="author.role"
+                    variant="subtle"
+                    size="sm"
+                    class="font-mono uppercase text-[9px] tracking-widest rounded-md bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-500/20"
+                  >
+                    {{ author.role }}
+                  </UBadge>
+                </div>
+
+                <p v-if="author.title" class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 font-mono min-h-5">
+                  {{ activeHoverText['author-title'] || author.title }}
+                  <span v-if="author.company" class="text-neutral-400 dark:text-neutral-500 font-normal">
+                    @ {{ author.company }}
+                  </span>
+                </p>
+              </div>
+
+              <div v-if="author.socialLinks && author.socialLinks.length > 0" class="flex items-center justify-center gap-2">
+                <UButton
+                  v-for="link in author.socialLinks"
+                  :key="link.url"
+                  :to="link.url"
+                  target="_blank"
+                  variant="ghost"
+                  size="md"
+                  class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
+                  :style="getSocialPlatformMeta(link.platform).style"
+                  :icon="getSocialPlatformMeta(link.platform).icon"
+                />
+              </div>
             </div>
 
-            <p v-if="author.title" class="text-sm font-medium text-primary-600 dark:text-primary-400 font-mono">
-              {{ author.title }} <span v-if="author.company" class="text-neutral-400 dark:text-neutral-500">@ {{ author.company }}</span>
-            </p>
-
-            <p v-if="author.description" class="text-sm text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
+            <p v-if="author.description" class="text-sm text-neutral-600 dark:text-neutral-400 max-w-4xl leading-relaxed">
               {{ author.description }}
             </p>
-
-            <div v-if="author.socialLinks?.length > 0" class="flex items-center gap-3 pt-2">
-              <UButton
-                v-for="link in author.socialLinks"
-                :key="link.url"
-                :to="link.url"
-                target="_blank"
-                variant="ghost"
-                color="neutral"
-                size="sm"
-                class="rounded-lg"
-                :icon="link.platform === 'github' ? 'i-simple-icons-github' : link.platform === 'twitter' ? 'i-simple-icons-x' : link.platform === 'linkedin' ? 'i-simple-icons-linkedin' : 'i-lucide-link'"
-              />
-            </div>
           </div>
         </div>
       </header>
@@ -146,10 +203,7 @@ useInfiniteScroll(
             </p>
           </div>
 
-          <div
-            v-if="blogsPending"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4"
-          >
+          <div v-if="blogsPending" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
             <BlogPostCardSkeleton v-for="n in 3" :key="`append-auth-blog-${n}`" />
           </div>
 
@@ -184,4 +238,11 @@ useInfiniteScroll(
 
 <style scoped>
 @reference '~/assets/css/main.css';
+
+.social-brand-btn:hover {
+  background-color: var(--social-bg) !important;
+  color: var(--social-hover-color) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -2px var(--social-bg);
+}
 </style>

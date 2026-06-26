@@ -66,11 +66,15 @@ const tags = computed<BlogTag[]>(() => {
   );
 });
 
+const primaryCategory = computed<BlogCategory | null>(() => {
+  return categories.value[0] || null;
+});
+
 const primaryBadgeLabel = computed(() => {
   if (props.post.featured)
     return "Featured Pick";
-  if (categories.value.length > 0) {
-    return categories.value[0]?.name;
+  if (primaryCategory.value) {
+    return primaryCategory.value.name;
   }
   return "Insight";
 });
@@ -157,9 +161,24 @@ function formatDate(dateString: string | Date) {
               variant="subtle"
               :color="post.featured ? 'primary' : 'neutral'"
               size="xs"
-              class="font-mono text-[8px] font-semibold uppercase tracking-wider rounded-md px-1.5 py-0"
+              class="font-mono text-[8px] font-semibold uppercase tracking-wider rounded-md px-1.5 py-0 flex items-center gap-1"
+              :style="(!post.featured && primaryCategory?.color) ? {
+                color: primaryCategory.color,
+                backgroundColor: `${primaryCategory.color}15`,
+                borderColor: `${primaryCategory.color}25`,
+              } : {}"
             >
-              {{ primaryBadgeLabel }}
+              <UIcon
+                v-if="!post.featured && primaryCategory?.icon"
+                :name="primaryCategory.icon"
+                class="w-2.5 h-2.5"
+              />
+              <UIcon
+                v-else-if="!post.featured && primaryCategory"
+                name="i-lucide-folder-open"
+                class="w-2.5 h-2.5"
+              />
+              <span>{{ primaryBadgeLabel }}</span>
             </UBadge>
 
             <span v-if="post.date" class="flex items-center gap-1">
@@ -193,11 +212,14 @@ function formatDate(dateString: string | Date) {
               class="transition-transform hover:scale-[1.02]"
             >
               <span
-                class="inline-flex items-center px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-primary-500"
+                class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
                 :style="{
-                  color: category.color,
+                  color: category.color || '',
+                  backgroundColor: category.color ? `${category.color}10` : '',
+                  borderColor: category.color ? `${category.color}25` : '',
                 }"
               >
+                <UIcon :name="category.icon || 'i-lucide-folder-open'" class="w-2.5 h-2.5 shrink-0" />
                 {{ category.name }}
               </span>
             </NuxtLink>
@@ -225,12 +247,19 @@ function formatDate(dateString: string | Date) {
                 v-for="tag in tags.slice(0, 1)"
                 :key="tag.slug"
                 :to="`/${tag.stem}`"
-                class="text-[8px] font-mono text-neutral-400 hover:text-primary-500 transition-colors"
-                :style="{
-                  color: tag.color,
-                }"
+                class="transition-transform hover:scale-[1.02]"
               >
-                #{{ tag.name }}
+                <span
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 text-neutral-400 hover:text-primary-500 transition-all duration-200"
+                  :style="{
+                    color: tag.color || '',
+                    backgroundColor: tag.color ? `${tag.color}10` : '',
+                    borderColor: tag.color ? `${tag.color}25` : '',
+                  }"
+                >
+                  <UIcon :name="tag.icon || 'i-lucide-hash'" class="w-2.5 h-2.5 shrink-0" />
+                  {{ tag.name }}
+                </span>
               </NuxtLink>
             </div>
           </div>
