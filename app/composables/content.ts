@@ -257,7 +257,7 @@ export function useContent() {
       `category-${toValue(slug)}`,
       async () => {
         const category = await queryCollection("categories")
-          .where("slug", "LIKE", toValue(slug))
+          .where("slug", "=", toValue(slug))
           .first() as BlogCategory;
 
         if (!category) {
@@ -344,7 +344,7 @@ export function useContent() {
       `tag-${toValue(slug)}`,
       async () => {
         const tag = await queryCollection("tags")
-          .where("slug", "LIKE", toValue(slug))
+          .where("slug", "=", toValue(slug))
           .first() as BlogTag;
 
         if (!tag) {
@@ -426,32 +426,6 @@ export function useContent() {
     return { authors, categories, tags };
   };
 
-  /**
-   * Fetches raw blog data by slug without useAsyncData wrapper.
-   */
-  const fetchBlogBySlug = async (slug: string): Promise<BlogType> => {
-    const blog = await queryCollection("blogs")
-      .where("slug", "LIKE", slug)
-      .where("published", "=", true)
-      .where("draft", "=", false)
-      .first() as BlogType;
-
-    if (!blog) {
-      throw new Error(`Blog not found for slug: ${slug}`);
-    }
-
-    return await enrichBlog(blog);
-  };
-
-  /**
-   * Fetches raw surrounding blog data without useAsyncData wrapper.
-   */
-  const fetchSurroundingBlogs = async (path: string): Promise<ContentNavigationItem[]> => {
-    return await queryCollectionItemSurroundings("blogs", path, {
-      fields: ["title", "description", "path", "stem"],
-    }) as unknown as ContentNavigationItem[];
-  };
-
   return {
     getAllBlogs,
     getBlogBySlug,
@@ -469,7 +443,5 @@ export function useContent() {
     getSearchSections,
     getNavigation,
     searchMetadataCollections,
-    fetchBlogBySlug,
-    fetchSurroundingBlogs,
   };
 }
