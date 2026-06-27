@@ -1,0 +1,5 @@
+slug: esp-idf
+name: ESP-IDF
+description: Advanced development using the official native framework and FreeRTOS extensions.
+color: "#2563EB"
+icon: i-codicon-terminal

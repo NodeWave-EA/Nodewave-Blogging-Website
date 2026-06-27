@@ -3,7 +3,7 @@ import z from "zod";
 export const mediaSchema = z.object({
   src: z.string()
     .describe("Target URL or repository path map for public visibility loading routing assets")
-    .default("/preview.png"),
+    .default("/images/placeholder.png"),
   alt: z.string()
     .default("Article informational descriptive illustration")
     .describe("Accessibility alternative placeholder text representing layout graphic context to screen readers"),

@@ -1,0 +1,5 @@
+slug: esp32
+name: ESP32
+description: Industrial SoC solutions using the Espressif system-on-chip ecosystem.
+color: "#E05A47"
+icon: i-simple-icons-espressif

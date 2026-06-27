@@ -15,10 +15,6 @@ const { logger } = useLogger({ context: "BlogDetailPage" });
 const carousel = useTemplateRef("carousel");
 const activeIndex = ref(0);
 
-definePageMeta({
-  layout: "reading",
-});
-
 const route = useRoute();
 const { scrollProgress } = useReadingProgress();
 
@@ -123,14 +119,15 @@ useHead({
     </div>
 
     <UPage v-else-if="currentBlog">
-      <UPageHeader class="relative overflow-hidden bg-neutral-900 border border-neutral-200/20 dark:border-neutral-800/40 rounded-2xl py-12 px-6 md:px-12">
+      <UPageHeader
+        class="relative overflow-hidden bg-neutral-900 border border-neutral-200/20 dark:border-neutral-800/40 rounded-2xl py-12 px-6 md:px-12"
+      >
         <div v-if="currentBlog.coverImage?.src" class="absolute inset-0 z-0">
           <NuxtImg
             :src="currentBlog.coverImage.src"
             alt="currentBlog.coverImage?.alt || 'Blog cover image'"
-            class="w-full h-full object-cover scale-105 filter blur-xs opacity-25 dark:opacity-20"
+            class="w-full h-full object-cover scale-105 filter blur-xs opacity-80 dark:opacity-80"
           />
-          <div class="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-900/80 to-neutral-950/40" />
         </div>
 
         <div class="relative z-10 text-white select-none flex flex-col gap-4">
@@ -145,7 +142,9 @@ useHead({
             <USeparator orientation="vertical" class="h-3 border-neutral-700 mx-1" />
           </div>
 
-          <h1 class="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-white filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] max-w-4xl">
+          <h1
+            class="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-white filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] max-w-4xl"
+          >
             {{ currentBlog.title }}
           </h1>
 
@@ -171,41 +170,63 @@ useHead({
       </UPageHeader>
 
       <template #left>
-        <div class="hidden lg:block sticky space-y-6">
-          <div v-if="blogAuthor" class="p-4 rounded-xl border border-neutral-200/50 dark:border-neutral-800/60 bg-neutral-50/50 dark:bg-neutral-900/30">
-            <NuxtLink :to="`/${blogAuthor.stem}`" class="block group mb-3 w-fit">
+        <div
+          class="hidden lg:block sticky space-y-6 self-start w-64"
+          :style="{ top: 'calc(var(--ui-header-height) + 1.5rem)' }"
+        >
+          <div v-if="blogAuthor" class="flex flex-col gap-3 ">
+            <!-- Profile Link -->
+            <NuxtLink :to="`/${blogAuthor.stem}`" class="group flex items-center gap-3">
               <UAvatar
                 :src="blogAuthor.avatar?.src"
                 :alt="blogAuthor.avatar?.alt || blogAuthor.name"
-                size="lg"
-                :aria-label="`View profile of ${blogAuthor.name}`"
-                class="rounded-full border border-neutral-200 dark:border-neutral-800 group-hover:border-primary-500/60 transition-colors duration-200"
+                size="md"
+                class="ring-2 ring-transparent group-hover:ring-primary-500/20 transition-all duration-300"
               />
+              <div>
+                <h4 class="text-sm font-bold text-neutral-900 dark:text-white group-hover:text-primary-500 transition-colors">
+                  {{ blogAuthor.name }}
+                </h4>
+                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+                  {{ blogAuthor.title }}
+                </p>
+              </div>
             </NuxtLink>
 
-            <NuxtLink :to="`/${blogAuthor.stem}`" class="inline-block group">
-              <h4 class="text-sm font-bold text-neutral-900 dark:text-neutral-100 leading-snug group-hover:text-primary-500 transition-colors duration-200">
-                {{ blogAuthor.name }}
-              </h4>
-            </NuxtLink>
+            <!-- Company & Social Links -->
+            <div class="flex items-center gap-1 -ml-1.5">
+              <!-- Company Link -->
+              <UTooltip v-if="blogAuthor.company" :text="blogAuthor.company.name">
+                <NuxtLink
+                  :to="blogAuthor.company.website"
+                  target="_blank"
+                  class="flex items-center p-1.5 rounded-lg text-neutral-400 hover:text-primary-500 transition-colors"
+                >
+                  <NuxtImg
+                    v-if="blogAuthor.company.icon?.startsWith('http')"
+                    :src="blogAuthor.company.icon"
+                    class="w-4 h-4 rounded-xs shrink-0"
+                  />
+                  <UIcon
+                    v-else
+                    :name="blogAuthor.company.icon || 'i-lucide-globe-check'"
+                    class="w-4 h-4 shrink-0"
+                  />
+                </NuxtLink>
+              </UTooltip>
 
-            <p v-if="blogAuthor.title" class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 mb-3 leading-tight">
-              {{ blogAuthor.title }} <span v-if="blogAuthor.company" class="block text-neutral-400 text-[11px]">@ {{ blogAuthor.company }}</span>
-            </p>
+              <span v-if="blogAuthor.socialLinks?.length" class="h-4 w-px bg-neutral-200 dark:bg-neutral-800 mx-1" />
 
-            <div v-if="blogAuthor.socialLinks?.length" class="flex items-center gap-1">
-              <UButton
+              <!-- Socials -->
+              <NuxtLink
                 v-for="social in blogAuthor.socialLinks"
                 :key="social.url"
                 :to="social.url"
                 target="_blank"
-                color="neutral"
-                variant="ghost"
-                size="xs"
-                class="rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-                :aria-label="social.platform"
-                :icon="social.icon"
-              />
+                class="p-1.5 rounded-lg text-neutral-400 hover:text-primary-500 transition-colors"
+              >
+                <UIcon :name="social.icon" class="w-4 h-4" />
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -223,7 +244,10 @@ useHead({
       </template>
 
       <UPageBody>
-        <div v-if="blogAuthor" class="lg:hidden flex items-center gap-3 mb-8 p-3 rounded-xl border border-neutral-200/40 dark:border-neutral-800/50 bg-neutral-50/50 dark:bg-neutral-900/20">
+        <div
+          v-if="blogAuthor"
+          class="lg:hidden flex items-center gap-3 mb-8 p-3 rounded-xl border border-neutral-200/40 dark:border-neutral-800/50 bg-neutral-50/50 dark:bg-neutral-900/20"
+        >
           <NuxtLink
             :to="`/${blogAuthor.stem}`"
             class="block shrink-0"
@@ -245,7 +269,9 @@ useHead({
               class="inline-block max-w-full"
               :aria-label="`View profile of ${blogAuthor.name}`"
             >
-              <h4 class="text-sm font-bold text-neutral-900 dark:text-neutral-100 truncate hover:text-primary-500 transition-colors">
+              <h4
+                class="text-sm font-bold text-neutral-900 dark:text-neutral-100 truncate hover:text-primary-500 transition-colors"
+              >
                 {{ blogAuthor.name }}
               </h4>
             </NuxtLink>
@@ -283,7 +309,10 @@ useHead({
           <ContentRenderer :value="currentBlog" />
         </article>
 
-        <div v-if="currentBlog.gallery?.length" class="mt-12 pt-8 border-t border-neutral-200/40 dark:border-neutral-800/60">
+        <div
+          v-if="currentBlog.gallery?.length"
+          class="mt-12 pt-8 border-t border-neutral-200/40 dark:border-neutral-800/60"
+        >
           <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none mb-4">
             <UIcon name="i-lucide-images" class="size-4 text-neutral-400" />
             <span>Project Media Gallery</span>
@@ -304,7 +333,9 @@ useHead({
             @select="onSelect"
           >
             <div class="p-2 w-full">
-              <div class="group overflow-hidden rounded-xl border border-neutral-200/40 dark:border-neutral-800/60 bg-neutral-50 dark:bg-neutral-900">
+              <div
+                class="group overflow-hidden rounded-xl border border-neutral-200/40 dark:border-neutral-800/60 bg-neutral-50 dark:bg-neutral-900"
+              >
                 <NuxtImg
                   :src="item.src"
                   :alt="item.alt || 'Gallery image'"
@@ -332,17 +363,15 @@ useHead({
           </div>
         </div>
 
-        <div class="mt-12 pt-6 border-t border-neutral-200/40 dark:border-neutral-800/60 flex flex-col sm:flex-row gap-8 sm:gap-16">
+        <div
+          class="mt-12 pt-6 border-t border-neutral-200/40 dark:border-neutral-800/60 flex flex-col sm:flex-row gap-8 sm:gap-16"
+        >
           <!-- Categories Section -->
           <div v-if="blogCategories.length > 0" class="flex flex-col gap-2 min-w-35">
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none">
               <UIcon name="i-lucide-folders" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
-              <NuxtLink
-                to="/categories"
-              >
-                <span
-                  class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text"
-                >
+              <NuxtLink to="/categories">
+                <span class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text">
                   Categories</span>
               </NuxtLink>
             </div>
@@ -358,10 +387,7 @@ useHead({
                   '--category-color': category.color || 'var(--ui-primary)',
                 }"
               >
-                <UIcon
-                  :name="category.icon || 'i-lucide-folder'"
-                  class="size-3 text-(--category-color)"
-                />
+                <UIcon :name="category.icon || 'i-lucide-folder'" class="size-3 text-(--category-color)" />
                 {{ category.name }}
               </UButton>
             </div>
@@ -371,12 +397,8 @@ useHead({
           <div v-if="blogTags.length > 0" class="flex flex-col gap-2">
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none">
               <UIcon name="i-lucide-tags" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
-              <NuxtLink
-                to="/tags"
-              >
-                <span
-                  class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text"
-                >
+              <NuxtLink to="/tags">
+                <span class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text">
                   Tags
                 </span>
               </NuxtLink>
@@ -393,20 +415,14 @@ useHead({
                   '--tag-color': tag.color || 'var(--ui-primary)',
                 }"
               >
-                <UIcon
-                  :name="tag.icon || 'i-lucide-hash'"
-                  class="size-3 text-(--tag-color)"
-                />
+                <UIcon :name="tag.icon || 'i-lucide-hash'" class="size-3 text-(--tag-color)" />
                 {{ tag.name }}
               </UButton>
             </div>
           </div>
         </div>
 
-        <UPageAnchors
-          title="External Anchors"
-          :links="currentBlog.anchors"
-        />
+        <UPageAnchors title="External Anchors" :links="currentBlog.anchors" />
 
         <USeparator class="my-8 border-neutral-200/40 dark:border-neutral-800/60" />
 
@@ -426,9 +442,11 @@ useHead({
 :deep(.markdown-body p) {
   @apply leading-relaxed text-sm text-neutral-600 dark:text-neutral-300 font-normal mb-5;
 }
+
 :deep(.markdown-body h2) {
   @apply text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight mt-10 mb-4 pb-2 border-b border-neutral-100 dark:border-neutral-900;
 }
+
 :deep(.markdown-body h3) {
   @apply text-base font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight mt-6 mb-3;
 }

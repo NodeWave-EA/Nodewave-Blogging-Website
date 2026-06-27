@@ -1,22 +1,26 @@
 <script setup lang="ts">
+import { nextTick, onMounted } from "vue";
+
 import { navLinks } from "~/constants";
 
-const { activeHoverText, clearDecryption, startDecryption } = useMatrixDecrypt({
-  revealStep: 2,
-  speed: 20,
-});
-const getDisplayText = (label: string) => activeHoverText.value[`desktop-${label}`] || label;
+const { $refreshAos } = useNuxtApp();
 
-useAOS();
+onMounted(async () => {
+  await nextTick();
+  $refreshAos();
+});
 </script>
 
 <template>
-  <div class="flex h-full w-full select-none flex-col justify-between pt-4">
-    <nav aria-label="Mobile Navigation" class="w-full">
-      <ul class="m-0 w-full list-none space-y-2 p-0">
+  <div class="w-full h-full flex flex-col justify-between pt-4 select-none">
+    <nav
+      aria-label="Mobile viewport navigation menu"
+      class="w-full"
+    >
+      <ul class="space-y-2 w-full p-0 m-0 list-none">
         <li
           v-for="(link, idx) in navLinks"
-          :key="link.label"
+          :key="idx"
           class="w-full"
           data-aos="fade-right"
           :data-aos-delay="idx * 50"
@@ -25,21 +29,17 @@ useAOS();
         >
           <NuxtLink
             :to="link.to"
-            class="group flex w-full items-center gap-3 border-l-4 border-transparent rounded-xl px-5 py-3.5 text-base font-semibold tracking-wide text-current transition-[colors,background-color] duration-200 hover:bg-primary-50/70 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            active-class="!border-primary !text-primary-700 bg-primary-50/80 rounded-l-none !font-bold dark:bg-primary-950/25"
-            @mouseover="startDecryption(`${link.label}`, `desktop-${link.label}`)"
-            @mouseleave="clearDecryption(`desktop-${link.label}`)"
+            class="group flex w-full items-center gap-3 px-5 py-3.5 rounded-xl font-semibold text-base tracking-wide transition-all duration-200 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-900/60 focus-visible:ring-2 focus-visible:ring-primary"
+            active-class="!text-primary bg-primary-50/50 dark:bg-primary-950/20 font-bold border-l-4 border-primary rounded-l-none"
           >
             <UIcon
               v-if="link.icon"
               :name="link.icon"
-              class="h-5 w-5 shrink-0 text-current transition-[colors,transform] duration-200 group-hover:scale-110 group-hover:text-primary-600"
-              aria-hidden="true"
+              class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-primary transition-transform duration-200 group-hover:scale-110"
             />
 
             <span class="whitespace-nowrap">
-              {{
-                getDisplayText(`${link.label}`) }}
+              {{ link.label }}
             </span>
           </NuxtLink>
         </li>

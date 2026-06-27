@@ -2,11 +2,15 @@
   <div class="layout-wrapper">
     <UApp>
       <UiAppHeader />
-      <BlogSearchModal />
+
       <UMain>
         <slot />
       </UMain>
+
+      <BlogSearchModal />
       <UiScrollToTop />
+
+      <UiAppFooter />
     </UApp>
   </div>
 </template>

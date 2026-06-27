@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "NodeWave Blogging Website",
+  name: "NodeWave",
   description: "Stay updated with the latest news and insights from the NodeWave team.",
   email: "info@nodewave.net",
   calendly: "https://calendly.com/nodewave-info/30min",

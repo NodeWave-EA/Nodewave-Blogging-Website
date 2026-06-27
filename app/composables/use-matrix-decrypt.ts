@@ -3,7 +3,7 @@ import { onUnmounted, ref } from "vue";
 export type MatrixDecryptOptions = {
   /** The duration multiplier for the decryption speed. Lower is faster. Defaults to 25. */
   speed?: number;
-  /** The number of characters decoded per frame. Defaults to 0.34. */
+  /** The number of characters decoded per frame. Defaults to 0.34. Lower values result in a slower reveal, while higher values result in a faster reveal. */
   revealStep?: number;
 };
 

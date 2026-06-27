@@ -11,22 +11,22 @@ export const navLinks: Link[] = [
   {
     label: "blogs",
     to: "/blogs",
-    icon: "i-line-md-document-list",
+    icon: "i-lucide-files",
   },
   {
     label: "authors",
     to: "/authors",
-    icon: "i-line-md-account",
+    icon: "i-lucide-users",
   },
   {
     label: "categories",
     to: "/categories",
-    icon: "i-line-md-grid-3-filled",
+    icon: "i-lucide-folder-tree",
   },
   {
     label: "tags",
     to: "/tags",
-    icon: "i-lucide-tag",
+    icon: "i-lucide-tags",
   },
   {
     label: "search",

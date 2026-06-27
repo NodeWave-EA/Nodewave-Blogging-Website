@@ -14,17 +14,12 @@ const description = "Smart IoT Solutions";
       tabindex="0"
       class="inline-flex items-center gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded-lg p-1"
       :aria-label="`${name} - ${description}`"
-      data-aos="fade-left"
-      data-aos-duration="500"
-      data-aos-easing="ease-out-quad"
       @click="navigate"
       @keydown.enter.prevent="() => navigate()"
       @keydown.space.prevent="() => navigate()"
     >
       <div
         class="flex size-9 shrink-0 items-center justify-center transition-transform duration-300 group-hover:scale-105"
-        data-aos="zoom-in"
-        data-aos-delay="50"
       >
         <NuxtImg
           src="/logo.png"
@@ -37,8 +32,6 @@ const description = "Smart IoT Solutions";
 
       <div
         class="flex flex-col font-mono tracking-wide"
-        data-aos="fade-left"
-        data-aos-delay="100"
       >
         <span
           class="font-bold tracking-tight whitespace-nowrap text-gray-900 dark:text-gray-100"

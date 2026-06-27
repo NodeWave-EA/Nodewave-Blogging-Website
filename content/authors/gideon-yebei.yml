@@ -1,6 +1,11 @@
 slug: gideon-yebei
 name: Gideon Yebei
 title: Software Engineer
+company:
+  name: Nodewave
+  website: https://nodewave.net
+  icon: https://nodewave.net/favicon.png
+  role: Full-Stack Developer
 color: "#facc15"
 description: Gideon is a software engineer with a passion for building scalable web applications. With over 5 years of experience in the industry, he has worked on various projects ranging from startups to large enterprises. Gideon specializes in full-stack development and is proficient in technologies such as JavaScript, React, Node.js, and Python. In his free time, he enjoys contributing to open-source projects and exploring new technologies.
 avatar:

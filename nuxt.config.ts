@@ -235,16 +235,16 @@ export default defineNuxtConfig({
   },
 
   linkChecker: {
-    enabled: false,
+    enabled: true,
   },
 
   studio: {
     route: "/editor",
-    // repository: {
-    //   provider: "github",
-    //   owner: "Gideon-Yebei",
-    //   repo: "Nodewave-Blogging-Website",
-    //   branch: "main",
-    // },
+    repository: {
+      provider: "github",
+      owner: "Nodewave-EA",
+      repo: "Nodewave-Blogging-Website",
+      branch: "main",
+    },
   },
 });

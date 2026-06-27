@@ -96,79 +96,161 @@ function getSocialPlatformMeta(platform: string) {
     </div>
 
     <UPage v-else-if="author && !authorError" class="py-10">
-      <div class="mb-6">
+      <div class="flex items-center gap-2">
         <NuxtLink
           to="/authors"
-          class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 items-center gap-1 transition-colors group inline-flex"
+          class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
         >
           <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          Editorial Roster
+          Back to Authors
         </NuxtLink>
+        <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
+
+        <!-- use icon or  -->
+        <UBadge
+          size="sm"
+          class="rounded-full shrink-0"
+          variant="subtle"
+        >
+          <template #leading>
+            <UIcon
+              v-if="author.icon"
+              :name="author.icon || 'i-lucide-user'"
+              class="w-3 h-3 inline-block mr-1 align-text-top"
+            />
+            <UAvatar
+              v-else-if="author.avatar?.src"
+              :src="author.avatar.src"
+              :alt="`Avatar of ${author.name}`"
+              class="w-3 h-3 inline-block mr-1 align-text-top rounded-full object-cover"
+            />
+          </template>
+          <span
+            class="text-xs font-mono font-bold uppercase tracking-wider"
+            :style="{ color: author.color || 'var(--ui-primary)' }"
+          >
+            {{ author.name }}
+          </span>
+        </UBadge>
       </div>
 
-      <header class="relative mb-12 p-6 md:p-8 rounded-3xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white/50 dark:bg-neutral-950/40 backdrop-blur-md overflow-hidden shadow-xs">
-        <div
-          class="pointer-events-none absolute -right-24 -top-24 w-72 h-72 rounded-full blur-3xl opacity-10 dark:opacity-20 bg-primary-500"
-        />
-        <div
-          class="pointer-events-none absolute -left-24 -bottom-24 w-72 h-72 rounded-full blur-3xl opacity-5 dark:opacity-10 bg-emerald-500"
-        />
-
-        <div class="relative z-10 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-8">
-          <div class="relative group">
-            <div class="absolute inset-0 rounded-full bg-linear-to-tr from-primary-500 via-neutral-200 to-emerald-500 dark:to-neutral-800 opacity-40 blur-xs group-hover:opacity-70 transition-opacity duration-500" />
-            <UAvatar
-              v-if="author.avatar?.src"
-              :src="author.avatar.src"
-              :alt="author.avatar.alt || author.name"
-              size="xl"
-              class="relative w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white dark:border-neutral-950 shadow-md"
-            />
+      <header class="mb-16 pt-8 pb-10 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-8">
+        <!-- Avatar -->
+        <div class="shrink-0">
+          <NuxtImg
+            v-if="author.avatar?.src"
+            :src="author.avatar.src"
+            :alt="`Avatar of ${author.name}`"
+            class="w-32 h-32 rounded-full object-cover border border-neutral-200 dark:border-neutral-800"
+          />
+          <div v-else class="w-32 h-32 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 dark:text-neutral-500">
+            <UIcon name="i-lucide-user" class="w-12 h-12" />
           </div>
+        </div>
 
-          <div class="flex-1 space-y-3 w-full">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div class="space-y-1">
-                <div class="flex flex-wrap items-center justify-center md:justify-flex-start gap-2.5">
-                  <h1 class="text-3xl font-black text-neutral-900 dark:text-neutral-50 tracking-tight">
-                    {{ author.name }}
-                  </h1>
-                  <UBadge
-                    v-if="author.role"
-                    variant="subtle"
-                    size="sm"
-                    class="font-mono uppercase text-[9px] tracking-widest rounded-md bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-500/20"
+        <!-- Info -->
+        <div class="flex-1 space-y-4 max-w-2xl">
+          <div>
+            <h1 class="text-4xl font-extrabold text-neutral-950 dark:text-white tracking-tight mb-2 text-center md:text-left">
+              {{ author.name }}
+            </h1>
+
+            <!-- Wrapped Title and Company link for better flow -->
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-2 text-lg font-medium text-neutral-600 dark:text-neutral-400 font-mono">
+              <span>{{ activeHoverText['author-title'] || author.title }}</span>
+
+              <template v-if="author.company">
+                <span class="text-neutral-300 dark:text-neutral-700 hidden md:inline">|</span>
+
+                <div
+                  class="inline-flex items-center gap-1.5 hover:text-primary-500 transition-colors"
+                >
+                  <NuxtImg
+                    v-if="author.company.icon?.startsWith('http')"
+                    :src="author.company.icon"
+                    class="w-4 h-4 rounded-xs shrink-0"
+                  />
+                  <UIcon
+                    v-else
+                    :name="author.company.icon || 'i-lucide-globe-check'"
+                    class="w-4 h-4 shrink-0"
+                  />
+                  <NuxtLink
+                    :to="author.company.website"
+                    target="_blank"
+                    class="truncate"
                   >
-                    {{ author.role }}
-                  </UBadge>
+                    {{ author.company.name }}
+                  </NuxtLink>
                 </div>
 
-                <p v-if="author.title" class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 font-mono min-h-5">
-                  {{ activeHoverText['author-title'] || author.title }}
-                  <span v-if="author.company" class="text-neutral-400 dark:text-neutral-500 font-normal">
-                    @ {{ author.company }}
-                  </span>
-                </p>
-              </div>
-
-              <div v-if="author.socialLinks && author.socialLinks.length > 0" class="flex items-center justify-center gap-2">
-                <UButton
-                  v-for="link in author.socialLinks"
-                  :key="link.url"
-                  :to="link.url"
-                  target="_blank"
-                  variant="ghost"
-                  size="md"
-                  class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
-                  :style="getSocialPlatformMeta(link.platform).style"
-                  :icon="getSocialPlatformMeta(link.platform).icon"
-                />
-              </div>
+                <!-- Role Badge -->
+                <UBadge
+                  v-if="author.company.role"
+                  :avatar="{
+                    src: author.avatar?.src || author.company.icon,
+                    loading: 'lazy',
+                  }"
+                  size="sm"
+                  class="rounded-full shrink-0"
+                  variant="subtle"
+                >
+                  {{ author.company.role }}
+                </UBadge>
+              </template>
             </div>
+          </div>
 
-            <p v-if="author.description" class="text-sm text-neutral-600 dark:text-neutral-400 max-w-4xl leading-relaxed">
-              {{ author.description }}
-            </p>
+          <p v-if="author.description" class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed text-center md:text-left">
+            {{ author.description }}
+          </p>
+
+          <!-- Social Links -->
+          <div v-if="author.socialLinks && author.socialLinks.length > 0" class="flex items-center justify-center md:justify-start gap-4">
+            <UTooltip
+              v-for="link in author.socialLinks"
+              :key="link.url"
+              :text="`Visit ${author.name}'s ${link.platform} profile`"
+              placement="top"
+            >
+              <UButton
+                :to="link.url"
+                target="_blank"
+                variant="ghost"
+                size="md"
+                class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
+                :style="getSocialPlatformMeta(link.platform).style"
+                :icon="getSocialPlatformMeta(link.platform).icon"
+              />
+            </UTooltip>
+
+            <!-- company link -->
+            <UTooltip
+              v-if="author.company.website"
+              :text="`Visit ${author.company.name}'s website`"
+              placement="top"
+            >
+              <UButton
+                :to="author.company.website"
+                target="_blank"
+                variant="ghost"
+                size="md"
+
+                class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
+              >
+                <!-- use image or icon -->
+                <NuxtImg
+                  v-if="author.company.icon?.startsWith('http')"
+                  :src="author.company.icon"
+                  class="w-5 h-5 rounded-xs shrink-0"
+                />
+                <UIcon
+                  v-else
+                  :name="author.company.icon || 'i-lucide-globe-check'"
+                  class="w-5 h-5 shrink-0"
+                />
+              </UButton>
+            </UTooltip>
           </div>
         </div>
       </header>

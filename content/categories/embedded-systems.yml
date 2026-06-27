@@ -1,0 +1,5 @@
+slug: embedded-systems
+name: Embedded Systems
+description: Bare-metal development, real-time operating systems, and microcontroller architecture deep dives.
+color: "#10B981"
+icon: i-lucide-cpu

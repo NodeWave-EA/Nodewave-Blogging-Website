@@ -1,0 +1,5 @@
+slug: platformio
+name: PlatformIO
+description: Cross-platform build environments, dependency management, and IDE tools for embedded developers.
+color: "#F5A623"
+icon: i-simple-icons-platformio

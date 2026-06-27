@@ -3,10 +3,26 @@ import z from "zod";
 import { socialLinkSchema } from "./social-links";
 
 const avatarSchema = z.object({
-  src: z.string().describe("Absolute path starting with '/' or valid URL for the profile picture"),
+  src: z.string()
+    .describe("Absolute path starting with '/' or valid URL for the profile picture"),
   alt: z.string()
     .default("Author profile picture")
     .describe("Accessibility descriptive alternative text"),
+});
+
+const companySchema = z.object({
+  name: z.string()
+    .min(2, "Company name must be at least 2 characters long")
+    .describe("The official name of the company or organization"),
+  website: z.string()
+    .url("Provide a valid absolute web address starting with http/https")
+    .describe("Official website URL of the company or organization"),
+  role: z.string()
+    .min(2, "Role description must be at least 2 characters long")
+    .describe("The position or title held by the author within the company"),
+  icon: z.string()
+    .describe("Optional icon representation for the company, used in UI theming")
+    .default("i-lucide-globe-check"),
 });
 
 export const authorSchema = z.object({
@@ -25,12 +41,7 @@ export const authorSchema = z.object({
   title: z.string()
     .default("Author")
     .describe("Professional title, e.g., 'Senior Software Engineer'"),
-  company: z.string()
-    .default("")
-    .describe("Current organization or employer name"),
-  role: z.enum(["admin", "editor", "author", "guest"])
-    .default("author")
-    .describe("Operational permission tier within the application lifecycle"),
+  company: z.array(companySchema).default([]),
   avatar: avatarSchema,
   description: z.string()
     .default("")
