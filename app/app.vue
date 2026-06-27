@@ -7,16 +7,10 @@ logger.log(`Navigated to ${route.path}`);
 
 <template>
   <div class="app-root-container">
-    <ConfigProvider>
-      <TooltipProvider>
-        <ToastProvider>
-          <NuxtLayout>
-            <NuxtRouteAnnouncer />
-            <NuxtLoadingIndicator />
-            <NuxtPage />
-          </NuxtLayout>
-        </ToastProvider>
-      </TooltipProvider>
-    </ConfigProvider>
+    <NuxtLayout>
+      <NuxtRouteAnnouncer />
+      <NuxtLoadingIndicator />
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>

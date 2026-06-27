@@ -1,6 +1,8 @@
 import type { ContentNavigationItem } from "@nuxt/content";
 import type { BlogAuthor, BlogCategory, BlogTag, BlogType, Searchable } from "~/types";
 
+const { logger } = useLogger({ context: "useContent Composable" });
+
 export function useContent() {
   /**
    * Fetches all blogs from the collection, filters for published and non-draft entries, orders them by date in descending order, and enriches each blog with additional data.
@@ -132,14 +134,17 @@ export function useContent() {
         }
 
         const authors = await query.all() as BlogAuthor[];
+        logger.log("Fetched authors data:", { authors });
 
         return await Promise.all(
           authors.map(async (author) => {
             const associatedBlogs = await queryCollection("blogs")
-              .where("author", "=", author.slug)
+              .where("author", "LIKE", `%${author.slug}%`)
               .where("published", "=", true)
               .where("draft", "=", false)
               .all() as BlogType[];
+
+            logger.log(`Author: ${author.name}, Associated Blogs Count: ${associatedBlogs.length}`);
 
             return {
               ...author,
@@ -187,7 +192,7 @@ export function useContent() {
       cacheKey,
       async () => {
         let query = queryCollection("blogs")
-          .where("author", "=", toValue(authorSlug))
+          .where("author", "LIKE", `%${toValue(authorSlug)}%`)
           .where("published", "=", true)
           .where("draft", "=", false)
           .order("date", "DESC");

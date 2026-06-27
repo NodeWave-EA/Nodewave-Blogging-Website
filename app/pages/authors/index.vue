@@ -16,6 +16,9 @@ const displayLimit = ref(itemsPerPage);
 
 const { data: rawAuthors, pending: authorsPending } = await getAllAuthors(displayLimit);
 
+const { logger } = useLogger({ context: "Authors Page" });
+logger.log("Fetched authors data:", { rawAuthors: rawAuthors.value, authorsPending: authorsPending.value });
+
 const enrichedAuthors = computed(() => {
   return rawAuthors.value || [];
 });
