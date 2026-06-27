@@ -141,8 +141,29 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    // Fully pre-rendered static assets
     "/": { prerender: true },
+
+    // Client-Side Only (Bypass server caching for dynamic on-page searching)
+    "/search": { ssr: false },
+
+    // Stale-While-Revalidate (SWR) for Content & Feeds (Instant speeds like SSG)
+    "/blogs": { swr: 3600 },       // Blog Index Page
+    "/blogs/**": { swr: 3600 },    // Individual Blog Post Slugs ([slug].vue)
+    
+    "/authors": { swr: 3600 },    // Authors Index Page
+    "/authors/**": { swr: 3600 },  // Author Profile Slugs
+
+    "/tags": { swr: 3600 },       // Tags Index Page
+    "/tags/**": { swr: 3600 },     // Tag Filtering Slugs
+
+    "/categories": { swr: 3600 },  // Categories Index Page
+    "/categories/**": { swr: 3600 },// Category Filtering Slugs
+
+    // Studio Module Engine (No server caching)
+    // "/_studio/**": { ssr: false },
   },
+  
   experimental: {},
 
   compatibilityDate: "2025-01-15",
