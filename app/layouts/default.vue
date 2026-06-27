@@ -1,14 +1,12 @@
 <template>
-  <UApp>
-    <UiAppHeader />
-
-    <BlogSearchModal />
-
-    <UMain>
-      <UContainer>
+  <div class="layout-wrapper">
+    <UApp>
+      <UiAppHeader />
+      <BlogSearchModal />
+      <UMain>
         <slot />
-      </UContainer>
-    </UMain>
-    <UiScrollToTop />
-  </UApp>
+      </UMain>
+      <UiScrollToTop />
+    </UApp>
+  </div>
 </template>

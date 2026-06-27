@@ -1,7 +1,6 @@
 import type { ContentNavigationItem } from "@nuxt/content";
 import type { BlogAuthor, BlogCategory, BlogTag, BlogType, Searchable } from "~/types";
 
-const { logger } = useLogger({ context: "Content Composable" });
 export function useContent() {
   /**
    * Fetches all blogs from the collection, filters for published and non-draft entries, orders them by date in descending order, and enriches each blog with additional data.
@@ -43,8 +42,6 @@ export function useContent() {
    * @throws An error if the blog is not found for the given slug.
    */
   const getBlogBySlug = (slug: MaybeRefOrGetter<string>) => {
-    logger.log(`Fetching blog by slug: ${toValue(slug)}`);
-
     const cacheKey = `blog-detail-${toValue(slug)}`;
 
     return useAsyncData<BlogType>(
@@ -59,8 +56,6 @@ export function useContent() {
         if (!blog) {
           throw new Error(`Blog not found for slug: ${toValue(slug)}`);
         }
-
-        logger.log("Blog Found:", blog);
 
         return await enrichBlog(blog);
       },
@@ -89,8 +84,6 @@ export function useContent() {
           .order("date", "DESC")
           .limit(toValue(limit))
           .all() as BlogType[];
-
-        logger.log(`Fetched ${blogs.length} featured blogs from the collection.`);
 
         return await Promise.all(
           blogs.map(enrichBlog),
@@ -129,8 +122,6 @@ export function useContent() {
   const getAllAuthors = (limit?: MaybeRefOrGetter<number>) => {
     const cacheKey = limit ? `authors-all-${toValue(limit)}` : "authors-all-unlimited";
 
-    logger.log(`Fetching all authors with limit: ${limit !== undefined ? toValue(limit) : "unlimited"}`);
-
     return useAsyncData<Array<BlogAuthor & { count: number }>>(
       cacheKey,
       async () => {
@@ -141,8 +132,6 @@ export function useContent() {
         }
 
         const authors = await query.all() as BlogAuthor[];
-
-        logger.log("Fetched authors:", { authors });
 
         return await Promise.all(
           authors.map(async (author) => {
@@ -432,6 +421,32 @@ export function useContent() {
     return { authors, categories, tags };
   };
 
+  /**
+   * Fetches raw blog data by slug without useAsyncData wrapper.
+   */
+  const fetchBlogBySlug = async (slug: string): Promise<BlogType> => {
+    const blog = await queryCollection("blogs")
+      .where("slug", "LIKE", slug)
+      .where("published", "=", true)
+      .where("draft", "=", false)
+      .first() as BlogType;
+
+    if (!blog) {
+      throw new Error(`Blog not found for slug: ${slug}`);
+    }
+
+    return await enrichBlog(blog);
+  };
+
+  /**
+   * Fetches raw surrounding blog data without useAsyncData wrapper.
+   */
+  const fetchSurroundingBlogs = async (path: string): Promise<ContentNavigationItem[]> => {
+    return await queryCollectionItemSurroundings("blogs", path, {
+      fields: ["title", "description", "path", "stem"],
+    }) as unknown as ContentNavigationItem[];
+  };
+
   return {
     getAllBlogs,
     getBlogBySlug,
@@ -449,5 +464,7 @@ export function useContent() {
     getSearchSections,
     getNavigation,
     searchMetadataCollections,
+    fetchBlogBySlug,
+    fetchSurroundingBlogs,
   };
 }

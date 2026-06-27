@@ -56,7 +56,7 @@
       "name": "Main Nodewave Website",
       "short_name": "Nodewave",
       "description": "Visit the main Nodewave website for more information about our products and services.",
-      "url": "https://nodewave.net",
+      "url": "/?main=https://nodewave.net",
       "icons": [
         {
           "src": "/web-app-manifest-192x192.png",

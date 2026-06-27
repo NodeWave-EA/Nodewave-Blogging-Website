@@ -52,7 +52,7 @@ function getRoleColor(role: string): "error" | "warning" | "neutral" | "primary"
   }
 }
 
-const { activeHoverText, startDecryption } = useMatrixDecrypt({
+const { activeHoverText, startDecryption, clearDecryption } = useMatrixDecrypt({
   speed: 25,
   revealStep: 0.35,
 });
@@ -69,16 +69,23 @@ onMounted(() => {
         <template #headline>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
             <UIcon name="i-lucide-users" class="h-3.5 w-3.5 animate-pulse" />
-            <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-              {{ activeHoverText["authors-badge"] || "Editorial Roster" }}
-            </span>
+            <ClientOnly>
+              <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                {{ activeHoverText["authors-badge"] || "Editorial Roster" }}
+              </span>
+              <template #fallback>
+                <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                  Editorial Roster
+                </span>
+              </template>
+            </ClientOnly>
           </div>
         </template>
 
         <template #title>
-          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
+          <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
             Meet the <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent">core contributors</span> and architects driving <span class="bg-linear-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent">nodewave</span>.
-          </h1>
+          </div>
         </template>
 
         <template #description>

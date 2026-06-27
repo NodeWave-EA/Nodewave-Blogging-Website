@@ -7,9 +7,7 @@ useAOS();
     <UiAppHeader />
 
     <UMain>
-      <UContainer>
-        <slot />
-      </UContainer>
+      <slot />
     </UMain>
     <BlogSearchModal />
     <UiScrollToTop />

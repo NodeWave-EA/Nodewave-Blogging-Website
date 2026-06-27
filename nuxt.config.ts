@@ -19,7 +19,10 @@ export default defineNuxtConfig({
     "@nuxt/a11y",
     "@nuxtjs/device",
     "nuxt-ai-ready",
+    "nuxt-studio",
   ],
+
+  ssr: false,
 
   devtools: {
     enabled: true,
@@ -83,9 +86,6 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
   content: {
-    experimental: {
-      sqliteConnector: "native",
-    },
     build: {
       markdown: {
         toc: {
@@ -93,37 +93,37 @@ export default defineNuxtConfig({
           searchDepth: 5,
         },
         remarkPlugins: {
-          "remark-toc": {
-            options: {
-              heading: "Table of Contents",
-            },
-          },
           "remark-reading-time": {},
-          "remark-emoji": {
-            options: { emoticon: true },
-          },
-          "remark-lint": {
-            options: {
-              "no-duplicate-headings": true,
-              "no-empty-url": true,
-              "no-file-name-articles": true,
-              "no-file-name-consecutive-dashes": true,
-              "no-file-name-mixed-case": true,
-              "no-file-name-snake-case": true,
-              "no-heading-punctuation": true,
-              "no-inline-padding": true,
-              "no-missing-blank-lines": true,
-              "no-multiple-toplevel-headings": true,
-              "no-reference-like-url": true,
-              "no-space-in-links": true,
-              "no-tabs-indentation": true,
-            },
-          },
-          "remark-github-blockquote-alert": {},
-          "remark-github": {},
-          "remark-gfm": {},
-          "remark-git-contributors": {},
-          "@akebifiky/remark-simple-plantuml": {},
+          // "remark-toc": {
+          //   options: {
+          //     heading: "Table of Contents",
+          //   },
+          // },
+          // "remark-emoji": {
+          //   options: { emoticon: true },
+          // },
+          // "remark-lint": {
+          //   options: {
+          //     "no-duplicate-headings": true,
+          //     "no-empty-url": true,
+          //     "no-file-name-articles": true,
+          //     "no-file-name-consecutive-dashes": true,
+          //     "no-file-name-mixed-case": true,
+          //     "no-file-name-snake-case": true,
+          //     "no-heading-punctuation": true,
+          //     "no-inline-padding": true,
+          //     "no-missing-blank-lines": true,
+          //     "no-multiple-toplevel-headings": true,
+          //     "no-reference-like-url": true,
+          //     "no-space-in-links": true,
+          //     "no-tabs-indentation": true,
+          //   },
+          // },
+          // "remark-github-blockquote-alert": {},
+          // "remark-github": {},
+          // "remark-gfm": {},
+          // "remark-git-contributors": {},
+          // "@akebifiky/remark-simple-plantuml": {},
           // 'remark-refer-plantuml': {},
         },
       },
@@ -140,6 +140,11 @@ export default defineNuxtConfig({
     },
   },
 
+  build: {
+    // This forces Nuxt/Vite to correctly transpile the ESM module
+    transpile: ["unist-util-visit", "unist-util-is"],
+  },
+
   routeRules: {
     // Fully pre-rendered static assets
     "/": { prerender: true },
@@ -148,30 +153,45 @@ export default defineNuxtConfig({
     "/search": { ssr: false },
 
     // Stale-While-Revalidate (SWR) for Content & Feeds (Instant speeds like SSG)
-    "/blogs": { swr: 3600 },       // Blog Index Page
-    "/blogs/**": { swr: 3600 },    // Individual Blog Post Slugs ([slug].vue)
-    
-    "/authors": { swr: 3600 },    // Authors Index Page
-    "/authors/**": { swr: 3600 },  // Author Profile Slugs
+    "/blogs": { swr: 3600 }, // Blog Index Page
+    "/blogs/**": { swr: 3600 }, // Individual Blog Post Slugs ([slug].vue)
 
-    "/tags": { swr: 3600 },       // Tags Index Page
-    "/tags/**": { swr: 3600 },     // Tag Filtering Slugs
+    "/authors": { swr: 3600 }, // Authors Index Page
+    "/authors/**": { swr: 3600 }, // Author Profile Slugs
 
-    "/categories": { swr: 3600 },  // Categories Index Page
-    "/categories/**": { swr: 3600 },// Category Filtering Slugs
+    "/tags": { swr: 3600 }, // Tags Index Page
+    "/tags/**": { swr: 3600 }, // Tag Filtering Slugs
+
+    "/categories": { swr: 3600 }, // Categories Index Page
+    "/categories/**": { swr: 3600 }, // Category Filtering Slugs
 
     // Studio Module Engine (No server caching)
     // "/_studio/**": { ssr: false },
+    "/editor/**": { ssr: false },
   },
-  
-  experimental: {},
+
+  experimental: {
+    emitRouteChunkError: "automatic-immediate",
+  },
 
   compatibilityDate: "2025-01-15",
 
   nitro: {
     prerender: {
       crawlLinks: true,
-      routes: ["/rss.xml"],
+      // Include your main entry points for the crawler
+      routes: [
+        "/", // The crawler will start here and find all internal links
+        "/rss.xml", // Pre-renders your RSS feed statically
+      ],
+      // OPTIONAL: Protect your build by ignoring purely dynamic or broken routes
+      ignore: [],
+    },
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: ["unist-util-visit"],
     },
   },
 
@@ -216,5 +236,15 @@ export default defineNuxtConfig({
 
   linkChecker: {
     enabled: false,
+  },
+
+  studio: {
+    route: "/editor",
+    // repository: {
+    //   provider: "github",
+    //   owner: "Gideon-Yebei",
+    //   repo: "Nodewave-Blogging-Website",
+    //   branch: "main",
+    // },
   },
 });

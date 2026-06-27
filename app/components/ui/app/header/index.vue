@@ -32,7 +32,7 @@ useAOS();
 
     <!-- Mobile Navigation Panel -->
     <template #body>
-      <UiAppHeaderMobile />
+      <LazyUiAppHeaderMobile />
     </template>
   </UHeader>
 </template>

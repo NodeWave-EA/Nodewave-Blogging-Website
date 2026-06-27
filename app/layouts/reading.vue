@@ -3,15 +3,15 @@ useAOS();
 </script>
 
 <template>
-  <UApp>
-    <UiAppHeader />
+  <div class="layout-wrapper">
+    <UApp>
+      <UiAppHeader />
 
-    <UMain>
-      <UContainer>
+      <UMain>
         <slot />
-      </UContainer>
-    </UMain>
-    <BlogSearchModal />
-    <UiScrollToTop />
-  </UApp>
+      </UMain>
+      <BlogSearchModal />
+      <UiScrollToTop />
+    </UApp>
+  </div>
 </template>

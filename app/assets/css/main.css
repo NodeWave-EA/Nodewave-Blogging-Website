@@ -240,6 +240,10 @@
   background-clip: text;
 }
 
+.text-gradient {
+  @apply bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent;
+}
+
 .gradient-text-warm {
   background: linear-gradient(135deg, var(--color-amber-400), var(--color-orange-500), var(--color-red-500));
   -webkit-background-clip: text;

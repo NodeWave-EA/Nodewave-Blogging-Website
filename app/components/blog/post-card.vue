@@ -79,14 +79,14 @@ const primaryBadgeLabel = computed(() => {
   return "Insight";
 });
 
-function formatDate(dateString: string | Date) {
-  if (!dateString)
-    return "";
-  return new Date(dateString).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+const formatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+function formatDate(date: string | Date) {
+  return formatter.format(new Date(date));
 }
 </script>
 

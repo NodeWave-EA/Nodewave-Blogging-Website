@@ -5,16 +5,14 @@ const { activeHoverText, clearDecryption, startDecryption } = useMatrixDecrypt({
   revealStep: 2,
   speed: 20,
 });
+const getDisplayText = (label: string) => activeHoverText.value[`desktop-${label}`] || label;
 
 useAOS();
 </script>
 
 <template>
   <div class="flex h-full w-full select-none flex-col justify-between pt-4">
-    <nav
-      aria-label="Mobile viewport navigation menu"
-      class="w-full"
-    >
+    <nav aria-label="Mobile Navigation" class="w-full">
       <ul class="m-0 w-full list-none space-y-2 p-0">
         <li
           v-for="(link, idx) in navLinks"
@@ -41,8 +39,7 @@ useAOS();
 
             <span class="whitespace-nowrap">
               {{
-                activeHoverText[`desktop-${link.label}`]?.toUpperCase()
-                  || link.label?.toUpperCase() }}
+                getDisplayText(`${link.label}`) }}
             </span>
           </NuxtLink>
         </li>

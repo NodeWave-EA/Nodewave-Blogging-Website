@@ -24,10 +24,10 @@ const { scrollProgress } = useReadingProgress();
 
 const { getBlogBySlug, getSurroundingBlogs } = useContent();
 
-const slug = route.params.slug as string;
+const slug = computed(() => route.params.slug as string);
 logger.debug("Current route slug parameter identified:", { slug: toValue(slug) });
 
-const blogPath = route.path;
+const blogPath = computed(() => route.path);
 logger.debug("Current route path identified:", { blogPath: toValue(blogPath) });
 
 const { data: blogQueryResult, pending: blogLoading, error: blogError } = await getBlogBySlug(slug);
@@ -61,6 +61,14 @@ function onSelect(index: number) {
 function select(index: number) {
   activeIndex.value = index;
   carousel.value?.emblaApi?.scrollTo(index);
+}
+
+if (!currentBlog.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Blog not found",
+    message: `The blog with slug "${slug.value}" could not be found.`,
+  });
 }
 
 useHead({

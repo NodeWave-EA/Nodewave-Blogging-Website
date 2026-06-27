@@ -9,7 +9,7 @@ const config = useRuntimeConfig();
 
 const { getFeaturedBlogs } = useContent();
 const numberOfFeaturedBlogs = 8;
-const { logger } = useLogger("pages/index.vue");
+const { logger } = useLogger({ context: "pages/index.vue" });
 
 const { data, pending: isLoading, error: fetchError } = await getFeaturedBlogs(numberOfFeaturedBlogs);
 
@@ -50,16 +50,23 @@ onMounted(() => {
         <template #headline>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
             <UIcon name="i-lucide-sparkle" class="h-3.5 w-3.5 animate-pulse" />
-            <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-              {{ activeHoverText["home-badge"] || "Curated Posts & Insights" }}
-            </span>
+            <ClientOnly>
+              <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                {{ activeHoverText["home-badge"] || "Curated Posts & Insights" }}
+              </span>
+              <template #fallback>
+                <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                  Curated Posts & Insights
+                </span>
+              </template>
+            </ClientOnly>
           </div>
         </template>
 
         <template #title>
-          <h1 id="featured-heading" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
+          <div id="featured-heading" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
             Explore the <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent">latest curated posts</span> and insights from <span class="bg-linear-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent">nodewave</span>.
-          </h1>
+          </div>
         </template>
 
         <template #description>
@@ -115,7 +122,7 @@ onMounted(() => {
       <UPageBody>
         <!-- Loading State -->
         <div v-if="isLoading" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 my-6">
-          <BlogPostCardSkeleton
+          <LazyBlogPostCardSkeleton
             v-for="n in numberOfFeaturedBlogs"
             :key="n"
           />
