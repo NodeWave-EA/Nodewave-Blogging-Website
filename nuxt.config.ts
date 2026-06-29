@@ -22,8 +22,6 @@ export default defineNuxtConfig({
     "nuxt-studio",
   ],
 
-  ssr: false,
-
   devtools: {
     enabled: true,
   },

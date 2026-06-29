@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { onMounted, onUnmounted, ref } from "vue";
+
 const { logger } = useLogger({ context: "app.vue" });
 const route = useRoute();
 
@@ -13,10 +15,20 @@ const variants = [
 
 // change variant every day
 const variant = ref(variants[0]);
-setInterval(() => {
-  const currentIndex = variants.indexOf(variant.value);
-  variant.value = variants[(currentIndex + 1) % variants.length];
-}, 86400000); // 24 hours in milliseconds
+let intervalId: ReturnType<typeof setInterval> | null = null;
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    const currentIndex = variants.indexOf(variant.value);
+    variant.value = variants[(currentIndex + 1) % variants.length];
+  }, 86400000); // 24 hours in milliseconds
+});
+
+// Clean up the timer if the root component unmounts
+onUnmounted(() => {
+  if (intervalId)
+    clearInterval(intervalId);
+});
 </script>
 
 <template>
