@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { useDateFormat } from "@vueuse/core";
 
+import { siteConfig } from "~/app.meta";
+
 import type { ContentSurroundLink } from "@nuxt/ui";
 import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
 

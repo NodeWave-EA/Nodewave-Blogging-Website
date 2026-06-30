@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import { siteConfig } from "~/app.meta";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
