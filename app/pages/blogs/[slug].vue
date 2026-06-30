@@ -80,6 +80,50 @@ useHead({
     },
   ],
 });
+
+// SEO
+
+const site = useSiteConfig();
+const BLOG_TITLE = currentBlog.value?.seo?.title || currentBlog.value?.title || "Article Detail";
+const BLOG_DESCRIPTION = currentBlog.value?.seo?.description || currentBlog.value?.description || "";
+const BLOG_CANONICAL_URL = `${site.siteUrl}${toValue(blogPath)}`;
+
+useSeoMeta({
+  title: BLOG_TITLE,
+  description: BLOG_DESCRIPTION,
+  canonical: BLOG_CANONICAL_URL,
+  ogTitle: BLOG_TITLE,
+  ogDescription: BLOG_DESCRIPTION,
+  ogType: "article",
+  twitterCard: "summary_large_image",
+  twitterTitle: BLOG_TITLE,
+  twitterDescription: BLOG_DESCRIPTION,
+  robots: currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow",
+  keywords: currentBlog.value?.seo?.keywords?.join(", ") || "",
+});
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: BLOG_CANONICAL_URL,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
+
+defineOgImage("NuxtSeo.takumi", {
+  title: BLOG_TITLE,
+  description: BLOG_DESCRIPTION,
+  brand: siteConfig.name,
+  bgImage: currentBlog.value?.coverImage?.src || null,
+  colorMode: "dark",
+  isPro: true,
+});
 </script>
 
 <template>

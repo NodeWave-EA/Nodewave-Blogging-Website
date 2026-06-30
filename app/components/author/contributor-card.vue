@@ -98,27 +98,44 @@ function onPointerLeave() {
           <span class="text-xs font-medium text-neutral-600 dark:text-neutral-400">
             {{ author.title || 'Contributor' }}
           </span>
-          <span v-if="author.company" class="text-[11px] font-mono text-neutral-400 dark:text-neutral-500">
-            @ {{ author.company }}
+          <!-- vertical separator -->
+          <USeparator v-if="author.company?.name" class="w-px h-3 bg-neutral-300 dark:bg-neutral-700" />
+          <!-- company { name, website, role, icon } -->
+          <span v-if="author.company?.name" class="gradient-text text-xs font-medium hover:text-(--author-accent) transition-colors">
+            <NuxtLink
+              v-if="author.company?.website"
+              :to="author.company.website"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <!-- icon or use the image -->
+              <UIcon
+                v-if="author.company?.icon.startsWith('i-')"
+                :name="author.company.icon"
+                class="w-3.5 h-3.5 inline-block mr-1"
+              />
+              <!-- start with http -->
+              <NuxtImg
+                v-else-if="author.company?.icon.startsWith('http')"
+                :src="author.company.icon"
+                width="14"
+                height="14"
+                class="inline-block mr-1 rounded-sm object-cover"
+              />
+              {{ author.company.name }}
+            </NuxtLink>
+            <span v-else>
+              {{ author.company.name }}
+            </span>
           </span>
         </div>
-
-        <UBadge
-          v-if="author.role && author.role !== 'author'"
-          size="xs"
-          variant="subtle"
-          :color="emit('getRoleColor', author.role)"
-          class="font-mono uppercase tracking-wider text-[9px] mt-2 px-1.5 py-0"
-        >
-          {{ author.role }}
-        </UBadge>
 
         <p v-if="author.description" class="text-xs text-neutral-500 dark:text-neutral-400 mt-4 line-clamp-3 leading-relaxed">
           {{ author.description }}
         </p>
 
         <div v-if="author.socialLinks?.length" class="flex items-center justify-center gap-3 mt-4 relative z-30">
-          <a
+          <NuxtLink
             v-for="(link, lIdx) in author.socialLinks"
             :key="`sl-${lIdx}`"
             :href="link.url"
@@ -133,7 +150,7 @@ function onPointerLeave() {
             onmouseleave="this.style.borderColor = ''"
           >
             <UIcon :name="link.icon" class="w-4 h-4 block" />
-          </a>
+          </NuxtLink>
         </div>
       </div>
 

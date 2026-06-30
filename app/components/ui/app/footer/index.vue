@@ -22,7 +22,7 @@ function scrollToTop() {
 </script>
 
 <template>
-  <UiFooter
+  <UFooter
     class="relative w-full border-t border-neutral-200/40  mt-24 transition-all duration-300 select-none"
     aria-label="Main Footer"
   >
@@ -110,5 +110,5 @@ function scrollToTop() {
         </div>
       </div>
     </div>
-  </UiFooter>
+  </UFooter>
 </template>

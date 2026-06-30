@@ -52,6 +52,49 @@ const { activeHoverText, startDecryption } = useMatrixDecrypt({
 onMounted(() => {
   startDecryption("Complete Archive", "archive-badge");
 });
+
+// SEO Meta Tags for the Blogs Page
+
+const site = useSiteConfig();
+const BLOGS_TITLE = "Complete Archive — nodewave";
+const BLOGS_DESCRIPTION = "Browse the entire collection of technical articles, architecture notes, and development logs.";
+const BLOGS_CANONICAL_URL = `${site.siteUrl}/blogs`;
+
+useSeoMeta({
+  title: BLOGS_TITLE,
+  description: BLOGS_DESCRIPTION,
+  canonical: BLOGS_CANONICAL_URL,
+  ogTitle: BLOGS_TITLE,
+  ogDescription: BLOGS_DESCRIPTION,
+  ogType: "website",
+  twitterCard: "summary_large_image",
+  twitterTitle: BLOGS_TITLE,
+  twitterDescription: BLOGS_DESCRIPTION,
+  robots: "index, follow",
+  keywords: "nodewave, complete archive, technical articles, architecture notes, development logs, blog, articles, tutorials",
+});
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: BLOGS_CANONICAL_URL,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
+
+defineOgImage("NuxtSeo.takumi", {
+  title: BLOGS_TITLE,
+  description: BLOGS_DESCRIPTION,
+  brand: siteConfig.name,
+  colorMode: "dark",
+  isPro: true,
+});
 </script>
 
 <template>

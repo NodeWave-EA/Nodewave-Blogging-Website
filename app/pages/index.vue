@@ -40,6 +40,65 @@ const { activeHoverText, startDecryption } = useMatrixDecrypt({
 onMounted(() => {
   startDecryption("Curated Posts & Insights", "home-badge");
 });
+
+// SEO Meta Tags for the Homepage
+
+const site = useSiteConfig();
+const HOME_TITLE = "Curated Posts & Insights";
+const HOME_DESCRIPTION = "Explore the latest curated posts and insights from nodewave and stay ahead in the world of technology and development.";
+const HOME_CANONICAL_URL = `${site.siteUrl}`;
+
+useSeoMeta({
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  canonical: HOME_CANONICAL_URL,
+  ogTitle: HOME_TITLE,
+  ogDescription: HOME_DESCRIPTION,
+  ogType: "website",
+  twitterCard: "summary_large_image",
+  twitterTitle: HOME_TITLE,
+  twitterDescription: HOME_DESCRIPTION,
+  robots: "index, follow",
+  keywords: "nodewave, curated posts, insights, technology, development, blog, articles, tutorials",
+});
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: HOME_CANONICAL_URL,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
+
+defineOgImage("NuxtSeo.takumi", {
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  brand: siteConfig.name,
+  colorMode: "dark",
+  isPro: true,
+});
+
+useSchemaOrg({
+  type: "WebPage",
+  name: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  url: HOME_CANONICAL_URL,
+  publisher: {
+    "@type": "Organization",
+    "name": siteConfig.name,
+    "url": siteConfig.siteUrl,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteConfig.siteUrl}/logo.png`,
+    },
+  },
+});
 </script>
 
 <template>

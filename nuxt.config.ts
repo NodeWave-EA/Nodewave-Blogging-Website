@@ -83,6 +83,17 @@ export default defineNuxtConfig({
   },
 
   css: ["~/assets/css/main.css"],
+
+  router: {
+    options: { scrollBehaviorType: "smooth" },
+  },
+
+  site: {
+    name: siteConfig.name,
+    url: process.env.NUXT_PUBLIC_SITE_URL,
+    defaultLocale: "en",
+    trailingSlash: false,
+  },
   content: {
     build: {
       markdown: {
@@ -185,12 +196,50 @@ export default defineNuxtConfig({
       // OPTIONAL: Protect your build by ignoring purely dynamic or broken routes
       ignore: [],
     },
+    experimental: {
+      wasm: true,
+    },
+    routeRules: {
+      "/_og/**": {
+        ssr: true,
+        cache: false,
+        headers: {
+          "cache-control": "no-store",
+          "x-forwarded-host": "true",
+        },
+      },
+    },
+    vercel: {
+      config: {
+        images: {
+          sizes: [320, 640, 768, 1024, 1280, 1536],
+        },
+      },
+    },
   },
 
   vite: {
     optimizeDeps: {
       include: ["unist-util-visit"],
     },
+  },
+
+  aos: {
+    disable: false,
+    startEvent: "DOMContentLoaded",
+    initClassName: "aos-init",
+    animatedClassName: "aos-animate",
+    useClassNames: false,
+    disableMutationObserver: false,
+    debounceDelay: 50,
+    throttleDelay: 99,
+    offset: 120,
+    delay: 0,
+    duration: 450, // Balanced snappy entry velocity timing
+    easing: "ease-out-cubic", // Fluid velocity transition curves
+    once: false,
+    mirror: false,
+    anchorPlacement: "top-bottom",
   },
 
   comark: {},
@@ -232,8 +281,81 @@ export default defineNuxtConfig({
     processCSSVariables: true,
   },
 
+  icon: {
+    size: "1.2em",
+    class: "icon",
+    serverBundle: "local",
+    fetchTimeout: 4000,
+    clientBundle: {
+      scan: true,
+    },
+  },
+
+  // High performance visual resolution transformation targets configuration
+  image: {
+    quality: 80,
+    format: ["webp", "avif"],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
+    },
+  },
+
   linkChecker: {
     enabled: true,
+    failOnError: true,
+    fetchRemoteUrls: true,
+    strictNuxtContentPaths: true,
+    showLiveInspections: true,
+    debug: true,
+    runOnBuild: true,
+    fetchTimeout: 10000,
+    report: {
+      publish: true,
+      html: true,
+    },
+  },
+
+  ogImage: {
+    enabled: true,
+    componentDirs: ["components/OgImage"],
+    security: {
+      secret: process.env.NUXT_OG_IMAGE_SECRET,
+    },
+    debug: true,
+  },
+
+  robots: {
+    enabled: true,
+    groups: [
+      {
+        userAgent: "*",
+        allow: "/",
+        contentUsage: {
+          "bots": "y",
+          "train-ai": "y",
+          "ai-output": "y",
+          "search": "y",
+        },
+        contentSignal: {
+          "search": "yes",
+          "ai-input": "yes",
+          "ai-train": "yes",
+        },
+      },
+    ],
+  },
+
+  sitemap: {
+    autoI18n: true,
+    zeroRuntime: true,
+    discoverImages: true,
+    exclude: ["/app/**", "/api/**", "/_nuxt/**", "/__nuxt_content/**"],
+    debug: false,
   },
 
   studio: {
