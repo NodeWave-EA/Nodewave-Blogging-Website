@@ -31,6 +31,9 @@ export const authorSchema = z.object({
     .min(2, "Name must be at least 2 characters long")
     .describe("The full identity or display name of the author")
     .default("Author Name"),
+  gender: z.enum(["male", "female", "non-binary", "prefer-not-to-say"])
+    .default("prefer-not-to-say")
+    .describe("The gender identity of the author, used for personalization and inclusivity"),
   slug: z.string()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase and can include hyphens")
     .describe("Unique identifier for the author, used in URLs and references")
@@ -41,7 +44,8 @@ export const authorSchema = z.object({
   title: z.string()
     .default("Author")
     .describe("Professional title, e.g., 'Senior Software Engineer'"),
-  company: z.array(companySchema).default([]),
+  company: companySchema.optional()
+    .describe("Optional company affiliation details for the author"),
   avatar: avatarSchema,
   description: z.string()
     .default("")

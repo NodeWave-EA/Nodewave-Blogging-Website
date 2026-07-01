@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const FEED_URL = `${BASE_URL}/rss.xml`;
 
   const feed = new Feed({
-    title: "My Nuxt 4 Blog",
+    title: "NodeWave Blogging Platform",
     description: "Latest insights, tutorials, and updates.",
     id: FEED_URL,
     link: `${BASE_URL}/`,

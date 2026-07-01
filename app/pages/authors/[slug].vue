@@ -23,11 +23,6 @@ const authorSlug = computed(() => slug);
 const { data: author, pending: authorPending, error: authorError } = await getAuthorBySlug(authorSlug);
 const { data: rawBlogs, pending: blogsPending } = await getAuthorBlogs(authorSlug, displayLimit);
 
-useSeoMeta({
-  title: () => author.value?.name ? `${author.value.name} — Author Profile` : "Contributor Profile",
-  description: () => author.value?.description || "Browse technical articles and engineering entries contributed by this team member.",
-});
-
 const blogs = computed(() => rawBlogs.value || []);
 
 const hasMoreContent = computed(() => {
@@ -85,6 +80,55 @@ function getSocialPlatformMeta(platform: string) {
     style: { "--social-hover-color": "var(--ui-primary)", "--social-bg": "rgba(var(--color-primary-500-rgb), 0.1)" },
   };
 }
+
+// SEO
+const config = useRuntimeConfig().public;
+
+const PAGE_TITLE = computed(() => `${author.value?.name || "Author"} Profile`);
+const PAGE_DESCRIPTION = computed(() => author.value?.description || `Explore the profile of ${author.value?.name || "this author"} and discover their contributions to our platform.`);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.value?.slug}`);
+
+useSeoMeta({
+  title: toValue(PAGE_TITLE),
+  description: toValue(PAGE_DESCRIPTION),
+  ogType: "profile",
+  ogTitle: toValue(PAGE_TITLE),
+  ogDescription: toValue(PAGE_DESCRIPTION),
+  twitterCard: "summary_large_image",
+  twitterTitle: toValue(PAGE_TITLE),
+  twitterDescription: toValue(PAGE_DESCRIPTION),
+  robots: "index, follow",
+  keywords: `nodewave, author profile, ${author.value?.name || ""}, contributions, articles, tutorials`,
+  author: author.value?.name || "",
+  twitterSite: author.value?.socialLinks?.find(link => link.platform.toLowerCase() === "twitter")?.url || "",
+  twitterCreator: author.value?.socialLinks?.find(link => link.platform.toLowerCase() === "twitter")?.url || "",
+
+  profileFirstName: author.value?.name?.split(" ")[0] || "",
+  profileLastName: author.value?.name?.split(" ").slice(1).join(" ") || "",
+  profileUsername: author.value?.slug || "",
+  profileGender: author.value?.gender || "unknown",
+});
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: toValue(PAGE_CANONICAL_URL),
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
+
+defineOgImage("Author.takumi", {
+  name: author.value?.name,
+  role: author.value?.title,
+  avatar: author.value?.avatar?.src,
+  articleCount: blogs.value.length,
+});
 </script>
 
 <template>
@@ -113,13 +157,8 @@ function getSocialPlatformMeta(platform: string) {
           variant="subtle"
         >
           <template #leading>
-            <UIcon
-              v-if="author.icon"
-              :name="author.icon || 'i-lucide-user'"
-              class="w-3 h-3 inline-block mr-1 align-text-top"
-            />
             <UAvatar
-              v-else-if="author.avatar?.src"
+              v-if="author.avatar?.src"
               :src="author.avatar.src"
               :alt="`Avatar of ${author.name}`"
               class="w-3 h-3 inline-block mr-1 align-text-top rounded-full object-cover"
@@ -161,7 +200,6 @@ function getSocialPlatformMeta(platform: string) {
 
               <template v-if="author.company">
                 <span class="text-neutral-300 dark:text-neutral-700 hidden md:inline">|</span>
-
                 <div
                   class="inline-flex items-center gap-1.5 hover:text-primary-500 transition-colors"
                 >
@@ -226,7 +264,7 @@ function getSocialPlatformMeta(platform: string) {
 
             <!-- company link -->
             <UTooltip
-              v-if="author.company.website"
+              v-if="author.company && author.company.website"
               :text="`Visit ${author.company.name}'s website`"
               placement="top"
             >

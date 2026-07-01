@@ -1,16 +1,12 @@
 <script lang="ts" setup>
 import { useDateFormat } from "@vueuse/core";
 
-import { siteConfig } from "~/app.meta";
-
 import type { ContentSurroundLink } from "@nuxt/ui";
 import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
 
 defineOptions({
   name: "BlogDetailPage",
 });
-
-const config = useRuntimeConfig();
 
 const { logger } = useLogger({ context: "BlogDetailPage" });
 
@@ -40,18 +36,6 @@ const blogAuthor = computed(() => currentBlog.value?.author as unknown as BlogAu
 const blogCategories = computed(() => (currentBlog.value?.categories || []) as unknown as BlogCategory[]);
 const blogTags = computed(() => (currentBlog.value?.tags || []) as unknown as BlogTag[]);
 
-useSeoMeta({
-  title: () => currentBlog.value?.seo?.title || currentBlog.value?.title || "Article Detail",
-  description: () => currentBlog.value?.seo?.description || currentBlog.value?.description,
-  keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || "",
-  ogTitle: () => currentBlog.value?.seo?.ogTitle || currentBlog.value?.title,
-  ogDescription: () => currentBlog.value?.seo?.ogDescription || currentBlog.value?.description,
-  ogImage: () => currentBlog.value?.seo?.ogImage || currentBlog.value?.coverImage?.src || "/preview.png",
-  twitterTitle: () => currentBlog.value?.seo?.twitterTitle || currentBlog.value?.title,
-  twitterDescription: () => currentBlog.value?.seo?.twitterDescription || currentBlog.value?.description,
-  robots: () => currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow",
-});
-
 function onSelect(index: number) {
   activeIndex.value = index;
 }
@@ -69,39 +53,32 @@ if (!currentBlog.value) {
   });
 }
 
-useHead({
-  link: [
-    {
-      rel: "canonical",
-      href: `${config.public.siteUrl}${toValue(blogPath)}`,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/favicon.png",
-    },
-  ],
-});
-
 // SEO
 
-const site = useSiteConfig();
+const runtimeConfig = useRuntimeConfig().public;
 const BLOG_TITLE = currentBlog.value?.seo?.title || currentBlog.value?.title || "Article Detail";
 const BLOG_DESCRIPTION = currentBlog.value?.seo?.description || currentBlog.value?.description || "";
-const BLOG_CANONICAL_URL = `${site.siteUrl}${toValue(blogPath)}`;
+const BLOG_CANONICAL_URL = `${runtimeConfig.siteUrl}${toValue(blogPath)}`;
 
 useSeoMeta({
-  title: BLOG_TITLE,
-  description: BLOG_DESCRIPTION,
-  canonical: BLOG_CANONICAL_URL,
-  ogTitle: BLOG_TITLE,
-  ogDescription: BLOG_DESCRIPTION,
+  title: () => BLOG_TITLE,
+  description: () => BLOG_DESCRIPTION,
+  keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || "",
   ogType: "article",
+  ogTitle: () => currentBlog.value?.seo?.ogTitle || currentBlog.value?.title,
+  ogDescription: () => currentBlog.value?.seo?.ogDescription || currentBlog.value?.description,
   twitterCard: "summary_large_image",
-  twitterTitle: BLOG_TITLE,
-  twitterDescription: BLOG_DESCRIPTION,
-  robots: currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow",
-  keywords: currentBlog.value?.seo?.keywords?.join(", ") || "",
+  twitterTitle: () => currentBlog.value?.seo?.twitterTitle || currentBlog.value?.title,
+  twitterDescription: () => currentBlog.value?.seo?.twitterDescription || currentBlog.value?.description,
+  robots: () => currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow",
+
+  articleAuthor: () => [blogAuthor.value.name || "Nodewave"],
+  articlePublishedTime: () => currentBlog.value?.date instanceof Date ? currentBlog.value.date.toISOString() : "",
+  articleModifiedTime: () => currentBlog.value?.updatedAt instanceof Date ? currentBlog.value.updatedAt.toISOString() : "",
+  articleSection: () => blogCategories.value?.[0]?.name || "",
+  articleTag: () => blogTags.value?.map(tag => tag.name) ?? [],
+  author: () => blogAuthor.value.name || "Nodewave",
+  publisher: () => runtimeConfig.siteName || "Nodewave",
 });
 
 useHead({
@@ -118,14 +95,20 @@ useHead({
   ],
 });
 
-defineOgImage("NuxtSeo.takumi", {
-  title: BLOG_TITLE,
-  description: BLOG_DESCRIPTION,
-  brand: siteConfig.name,
-  bgImage: currentBlog.value?.coverImage?.src || null,
+defineOgImage("BlogPost.takumi", {
   colorMode: "dark",
-  isPro: true,
+  title: BLOG_TITLE,
+  author: blogAuthor.value.name,
+  date: currentBlog.value.date instanceof Date
+    ? currentBlog.value.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : String(currentBlog.value.date || ""),
+  category: blogCategories.value?.[0]?.name || "General",
+  avatar: blogAuthor.value?.avatar?.src,
+  backgroundImage: currentBlog.value?.coverImage?.src,
+  readingTime: currentBlog.value?.meta?.readingTime?.text,
 });
+
+logger.log("All tags:", { blogTags: blogTags.value });
 </script>
 
 <template>

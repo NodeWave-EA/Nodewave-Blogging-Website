@@ -5,8 +5,6 @@ import { siteConfig } from "~/app.meta";
 
 import type { BlogType } from "~/types";
 
-const config = useRuntimeConfig();
-
 const { getFeaturedBlogs } = useContent();
 const numberOfFeaturedBlogs = 8;
 const { logger } = useLogger({ context: "pages/index.vue" });
@@ -20,18 +18,6 @@ definePageMeta({
   layout: "default",
 });
 
-useHead({
-  title: "Curated Posts & Insights",
-  link: [
-    { rel: "canonical", href: `${config.public.siteUrl}/blogs` },
-  ],
-});
-
-useSeoMeta({
-  title: "Curated Posts & Insights",
-  description: "Explore the latest curated posts and insights from nodewave and stay ahead in the world of technology and development.",
-});
-
 const { activeHoverText, startDecryption } = useMatrixDecrypt({
   speed: 25,
   revealStep: 0.35,
@@ -42,16 +28,15 @@ onMounted(() => {
 });
 
 // SEO Meta Tags for the Homepage
+const config = useRuntimeConfig().public;
 
-const site = useSiteConfig();
-const HOME_TITLE = "Curated Posts & Insights";
+const HOME_TITLE = "Curated Posts and Insights";
 const HOME_DESCRIPTION = "Explore the latest curated posts and insights from nodewave and stay ahead in the world of technology and development.";
-const HOME_CANONICAL_URL = `${site.siteUrl}`;
+const HOME_CANONICAL_URL = `${config.siteUrl}`;
 
 useSeoMeta({
   title: HOME_TITLE,
   description: HOME_DESCRIPTION,
-  canonical: HOME_CANONICAL_URL,
   ogTitle: HOME_TITLE,
   ogDescription: HOME_DESCRIPTION,
   ogType: "website",
@@ -79,7 +64,7 @@ useHead({
 defineOgImage("NuxtSeo.takumi", {
   title: HOME_TITLE,
   description: HOME_DESCRIPTION,
-  brand: siteConfig.name,
+  brand: config.siteName,
   colorMode: "dark",
   isPro: true,
 });
@@ -91,11 +76,11 @@ useSchemaOrg({
   url: HOME_CANONICAL_URL,
   publisher: {
     "@type": "Organization",
-    "name": siteConfig.name,
-    "url": siteConfig.siteUrl,
+    "name": config.siteName,
+    "url": config.siteUrl,
     "logo": {
       "@type": "ImageObject",
-      "url": `${siteConfig.siteUrl}/logo.png`,
+      "url": `${config.siteLogo}`,
     },
   },
 });

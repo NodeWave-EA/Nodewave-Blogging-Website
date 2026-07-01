@@ -27,20 +27,26 @@ export default defineNuxtConfig({
   },
 
   app: {
+    buildAssetsDir: "/_nuxt/",
     head: {
       htmlAttrs: { lang: "en" },
-      titleTemplate: "%s | NodeWave",
+      titleTemplate: "%s | NodeWave Blog",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "theme-color", content: "#14b8a6" },
         { name: "msapplication-TileColor", content: "#14b8a6" },
-        {
-          name: "msapplication-TileImage",
-          content: "/web-app-manifest-192x192.png",
-        },
+        { name: "publisher", content: "Nodewave" },
+        { name: "creator", content: "Nodewave" },
         { name: "application-name", content: "NodeWave" },
         { name: "apple-mobile-web-app-title", content: "NodeWave" },
+        { "http-equiv": "X-UA-Compatible", "content": "IE=edge" },
+        { name: "msapplication-TileImage", content: "/web-app-manifest-192x192.png" },
+        { name: "msapplication-config", content: "/browserconfig.xml" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+        { name: "apple-mobile-web-app-title", content: "Nodewave Blogging Website" },
+        { name: "application-name", content: "Nodewave Blogging Website" },
       ],
       link: [
         {
@@ -150,33 +156,23 @@ export default defineNuxtConfig({
   },
 
   build: {
-    // This forces Nuxt/Vite to correctly transpile the ESM module
     transpile: ["unist-util-visit", "unist-util-is"],
   },
 
   routeRules: {
-    // Fully pre-rendered static assets
     "/": { prerender: true },
-
-    // Client-Side Only (Bypass server caching for dynamic on-page searching)
     "/search": { ssr: false },
-
-    // Stale-While-Revalidate (SWR) for Content & Feeds (Instant speeds like SSG)
     "/blogs": { swr: 3600 }, // Blog Index Page
     "/blogs/**": { swr: 3600 }, // Individual Blog Post Slugs ([slug].vue)
-
     "/authors": { swr: 3600 }, // Authors Index Page
     "/authors/**": { swr: 3600 }, // Author Profile Slugs
-
     "/tags": { swr: 3600 }, // Tags Index Page
     "/tags/**": { swr: 3600 }, // Tag Filtering Slugs
-
     "/categories": { swr: 3600 }, // Categories Index Page
     "/categories/**": { swr: 3600 }, // Category Filtering Slugs
-
-    // Studio Module Engine (No server caching)
-    // "/_studio/**": { ssr: false },
     "/editor/**": { ssr: false },
+
+    "/_nuxt/**": { headers: { "Cache-Control": "public, max-age=31536000, immutable" } },
   },
 
   experimental: {
@@ -188,18 +184,17 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      // Include your main entry points for the crawler
       routes: [
-        "/", // The crawler will start here and find all internal links
-        "/rss.xml", // Pre-renders your RSS feed statically
+        "/",
+        "/rss.xml",
       ],
-      // OPTIONAL: Protect your build by ignoring purely dynamic or broken routes
       ignore: [],
     },
     experimental: {
       wasm: true,
     },
     routeRules: {
+      "/_nuxt/**": { cache: { maxAge: 31536000 } },
       "/_og/**": {
         ssr: true,
         cache: false,
@@ -224,6 +219,17 @@ export default defineNuxtConfig({
     },
   },
 
+  aiReady: {
+    autoI18n: true,
+    cron: true,
+    indexNow: true,
+    runtimeSync: {
+      ttl: 3600,
+      batchSize: 20,
+      pruneTtl: 0,
+    },
+  },
+
   aos: {
     disable: false,
     startEvent: "DOMContentLoaded",
@@ -235,8 +241,8 @@ export default defineNuxtConfig({
     throttleDelay: 99,
     offset: 120,
     delay: 0,
-    duration: 450, // Balanced snappy entry velocity timing
-    easing: "ease-out-cubic", // Fluid velocity transition curves
+    duration: 450,
+    easing: "ease-out-cubic",
     once: false,
     mirror: false,
     anchorPlacement: "top-bottom",
@@ -291,7 +297,6 @@ export default defineNuxtConfig({
     },
   },
 
-  // High performance visual resolution transformation targets configuration
   image: {
     quality: 80,
     format: ["webp", "avif"],
@@ -324,6 +329,7 @@ export default defineNuxtConfig({
     enabled: true,
     componentDirs: ["components/OgImage"],
     security: {
+      strict: true,
       secret: process.env.NUXT_OG_IMAGE_SECRET,
     },
     debug: true,

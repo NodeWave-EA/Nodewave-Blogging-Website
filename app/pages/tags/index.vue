@@ -42,6 +42,46 @@ const { activeHoverText, startDecryption } = useMatrixDecrypt({
 onMounted(() => {
   startDecryption("Explore Tags", "tags-badge");
 });
+
+// SEO
+const config = useRuntimeConfig().public;
+
+const PAGE_TITLE = "Browse by Tags";
+const PAGE_DESCRIPTION = "Explore all articles, tutorials, and news organized by tags and subject areas.";
+const PAGE_CANONICAL_URL = `${config.siteUrl}/tags`;
+
+useSeoMeta({
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  ogType: "website",
+  ogTitle: PAGE_TITLE,
+  ogDescription: PAGE_DESCRIPTION,
+  twitterCard: "summary_large_image",
+  twitterTitle: PAGE_TITLE,
+  twitterDescription: PAGE_DESCRIPTION,
+});
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: PAGE_CANONICAL_URL,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
+
+defineOgImage("NuxtSeo.takumi", {
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  brand: config.siteName,
+  colorMode: "dark",
+  isPro: true,
+});
 </script>
 
 <template>

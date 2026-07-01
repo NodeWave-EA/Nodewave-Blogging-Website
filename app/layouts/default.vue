@@ -4,7 +4,9 @@
       <UiAppHeader />
 
       <UMain>
-        <slot />
+        <SiteOpenGraph>
+          <slot />
+        </SiteOpenGraph>
       </UMain>
 
       <BlogSearchModal />

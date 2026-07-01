@@ -18,11 +18,6 @@ const categorySlug = computed(() => slug);
 const { data: category, pending: categoryPending, error: categoryError } = await getCategoryBySlug(categorySlug);
 const { data: rawBlogs, pending: blogsPending } = await getCategoryBlogs(categorySlug, displayLimit);
 
-useSeoMeta({
-  title: () => category.value?.name ? `${category.value.name} — Archive` : "Category Archive",
-  description: () => category.value?.meta?.description || category.value?.description || "Browse engineering entries categorized within this taxonomy.",
-});
-
 const blogs = computed(() => {
   return rawBlogs.value || [];
 });
@@ -45,6 +40,44 @@ useInfiniteScroll(
     canLoadMore: () => hasMoreContent.value,
   },
 );
+
+// SEO
+const config = useRuntimeConfig().public;
+const PAGE_TITLE = computed(() => `Browse ${category.value?.name} category articles`);
+const PAGE_DESCRIPTION = computed(() => category.value?.description || category.value?.meta?.description || `Explore articles under the ${category.value?.name} classification.`);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories/${category.value?.slug}`);
+
+useSeoMeta({
+  title: toValue(PAGE_TITLE),
+  description: toValue(PAGE_DESCRIPTION),
+  ogType: "website",
+  ogTitle: toValue(PAGE_TITLE),
+  ogDescription: toValue(PAGE_DESCRIPTION),
+  twitterCard: "summary_large_image",
+  twitterTitle: toValue(PAGE_TITLE),
+  twitterDescription: toValue(PAGE_DESCRIPTION),
+});
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: toValue(PAGE_CANONICAL_URL),
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
+
+defineOgImage("Taxonomy.takumi", {
+  title: toValue(PAGE_TITLE),
+  description: toValue(PAGE_DESCRIPTION),
+  type: "Category",
+  articleCount: blogs.value.length,
+});
 </script>
 
 <template>

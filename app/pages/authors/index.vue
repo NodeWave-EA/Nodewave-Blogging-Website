@@ -63,6 +63,47 @@ const { activeHoverText, startDecryption, clearDecryption } = useMatrixDecrypt({
 onMounted(() => {
   startDecryption("Editorial Roster", "authors-badge");
 });
+
+// SEO
+const config = useRuntimeConfig().public;
+const PAGE_TITLE = "Meet Our Contributors";
+const PAGE_DESCRIPTION = "Discover the dedicated developers, tech enthusiasts, and systems architects building our knowledge database. Explore their profiles and dive into their engineering insights.";
+const PAGE_CANONICAL_URL = `${config.siteUrl}/authors`;
+
+useSeoMeta({
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  ogType: "website",
+  ogTitle: PAGE_TITLE,
+  ogDescription: PAGE_DESCRIPTION,
+  twitterCard: "summary_large_image",
+  twitterTitle: PAGE_TITLE,
+  twitterDescription: PAGE_DESCRIPTION,
+  robots: "index, follow",
+  keywords: "authors, contributors, developers, tech enthusiasts, systems architects, profiles, insights",
+});
+
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: PAGE_CANONICAL_URL,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+  ],
+});
+
+defineOgImage("NuxtSeo.takumi", {
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  brand: config.siteName,
+  colorMode: "dark",
+  isPro: true,
+});
 </script>
 
 <template>

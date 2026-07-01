@@ -2,17 +2,11 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
-import { siteConfig } from "~/app.meta";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
 definePageMeta({
   title: "Browse All Blogs",
-});
-
-useSeoMeta({
-  title: "Complete Archive — nodewave",
-  description: "Browse the entire collection of technical articles, architecture notes, and development logs.",
 });
 
 const { getAllBlogs } = useContent();
@@ -55,16 +49,15 @@ onMounted(() => {
 });
 
 // SEO Meta Tags for the Blogs Page
+const config = useRuntimeConfig().public;
 
-const site = useSiteConfig();
-const BLOGS_TITLE = "Complete Archive — nodewave";
+const BLOGS_TITLE = "Browse All Blogs";
 const BLOGS_DESCRIPTION = "Browse the entire collection of technical articles, architecture notes, and development logs.";
-const BLOGS_CANONICAL_URL = `${site.siteUrl}/blogs`;
+const BLOGS_CANONICAL_URL = `${config.siteUrl}/blogs`;
 
 useSeoMeta({
   title: BLOGS_TITLE,
   description: BLOGS_DESCRIPTION,
-  canonical: BLOGS_CANONICAL_URL,
   ogTitle: BLOGS_TITLE,
   ogDescription: BLOGS_DESCRIPTION,
   ogType: "website",
@@ -92,7 +85,7 @@ useHead({
 defineOgImage("NuxtSeo.takumi", {
   title: BLOGS_TITLE,
   description: BLOGS_DESCRIPTION,
-  brand: siteConfig.name,
+  brand: config.siteName,
   colorMode: "dark",
   isPro: true,
 });
