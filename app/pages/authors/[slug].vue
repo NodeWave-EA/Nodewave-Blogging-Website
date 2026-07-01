@@ -262,6 +262,27 @@ defineOgImage("Author.takumi", {
               />
             </UTooltip>
 
+            <!-- author website -->
+            <UTooltip
+              v-if="author.website"
+              :text="`Visit ${author.name}'s website`"
+              placement="top"
+            >
+              <UButton
+                :to="author.website"
+                target="_blank"
+                variant="ghost"
+                size="md"
+                class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
+              >
+                <UAvatar
+                  v-if="author.avatar?.src"
+                  :src="author.avatar.src"
+                  class="rounded-full shrink-0"
+                />
+              </UButton>
+            </UTooltip>
+
             <!-- company link -->
             <UTooltip
               v-if="author.company && author.company.website"
