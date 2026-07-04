@@ -42,6 +42,26 @@ const shareLinks = computed(() => {
       href: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`,
       icon: "i-simple-icons-linkedin",
     },
+    {
+      label: "Telegram",
+      href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
+      icon: "i-simple-icons-telegram",
+    },
+    {
+      label: "Reddit",
+      href: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`,
+      icon: "i-simple-icons-reddit",
+    },
+    {
+      label: "Email",
+      href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
+      icon: "i-lucide-mail",
+    },
+    {
+      label: "BlueSky",
+      href: `https://bsky.app/intent/compose?text=${encodedTitle}%20${encodedUrl}`,
+      icon: "i-simple-icons-bluesky",
+    },
   ];
 });
 
@@ -63,15 +83,8 @@ async function copyToClipboard() {
 
 <template>
   <UPopover
-    :popper="{
-      placement: 'bottom-end',
-    }"
-    :content="{
-      align: 'center',
-      side: 'bottom',
-      sideOffset: 8,
-    }"
     arrow
+    modal
   >
     <UButton
       icon="i-lucide-share-2"
@@ -101,13 +114,17 @@ async function copyToClipboard() {
           variant="ghost"
           color="neutral"
           size="sm"
+          trailing-icon="i-lucide-external-link"
           class="w-full justify-start font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
           :icon="link.icon"
+          :ui="{
+            trailingIcon: 'absolute right-3 text-neutral-500 dark:text-neutral-400',
+          }"
         >
           {{ link.label }}
         </UButton>
 
-        <UDivider class="my-1 border-neutral-200 dark:border-neutral-800" />
+        <USeparator class="my-1 border-neutral-200 dark:border-neutral-800" />
 
         <!-- Copy URL Button -->
         <UButton
