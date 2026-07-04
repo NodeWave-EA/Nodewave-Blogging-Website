@@ -194,6 +194,9 @@ logger.log("All tags:", { blogTags: blogTags.value });
               <UIcon name="i-lucide-clock" class="size-4 text-primary-400" />
               <span>{{ currentBlog.meta.readingTime.text }}</span>
             </div>
+
+            <!-- post share buttons -->
+            <BlogPostShare :title="currentBlog.title" />
           </div>
         </div>
       </UPageHeader>
