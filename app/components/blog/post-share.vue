@@ -1,4 +1,7 @@
-<script setup>
+<script setup lang="ts">
+import { useRoute, useRuntimeConfig } from "#imports";
+import { computed, ref } from "vue";
+
 const props = defineProps({
   title: { type: String, required: true },
 });
@@ -6,92 +9,117 @@ const props = defineProps({
 const route = useRoute();
 const runtimeConfig = useRuntimeConfig();
 
-// Get absolute current URL
-const siteUrl = runtimeConfig.public.siteUrl || "https://yourwebsite.com";
-const currentUrl = `${siteUrl}${route.path}`;
-const encodedUrl = encodeURIComponent(currentUrl);
-const encodedTitle = encodeURIComponent(props.title);
+const currentUrl = computed(() => {
+  const siteUrl = runtimeConfig.public.siteUrl || "https://yourwebsite.com";
+  // Strip trailing slash from siteUrl to prevent double slashes
+  const baseUrl = siteUrl.replace(/\/$/, "");
+  return `${baseUrl}${route.path}`;
+});
 
-// Share Links
-const shareLinks = {
-  x: `https://x.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
-  whatsapp: `https://whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
-  facebook: `https://facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-  linkedin: `https://linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`,
-};
+// Generate share links
+const shareLinks = computed(() => {
+  const encodedUrl = encodeURIComponent(currentUrl.value);
+  const encodedTitle = encodeURIComponent(props.title);
 
-// Copy URL State
+  return [
+    {
+      label: "X (Twitter)",
+      href: `https://x.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+      icon: "i-simple-icons-x",
+    },
+    {
+      label: "WhatsApp",
+      href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
+      icon: "i-simple-icons-whatsapp",
+    },
+    {
+      label: "Facebook",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      icon: "i-simple-icons-facebook",
+    },
+    {
+      label: "LinkedIn",
+      href: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`,
+      icon: "i-simple-icons-linkedin",
+    },
+  ];
+});
+
 const isCopied = ref(false);
 
 async function copyToClipboard() {
   try {
-    await navigator.clipboard.writeText(currentUrl);
+    await navigator.clipboard.writeText(currentUrl.value);
     isCopied.value = true;
-    setTimeout(() => (isCopied.value = false), 2000); // Reset after 2 seconds
+    setTimeout(() => {
+      isCopied.value = false;
+    }, 2000);
   }
   catch (err) {
-    console.error("Failed to copy: ", err);
+    console.error("Failed to copy URL: ", err);
   }
 }
 </script>
 
 <template>
-  <UPopover modal arrow>
+  <UPopover
+    :popper="{
+      placement: 'bottom-end',
+    }"
+    :content="{
+      align: 'center',
+      side: 'bottom',
+      sideOffset: 8,
+    }"
+    arrow
+  >
     <UButton
-      leading-icon="i-lucide-share"
-      label="Share Blog"
-      variant="outline"
-      size="sm"
+      icon="i-lucide-share-2"
+      label="Share"
+      variant="soft"
       color="neutral"
-      :ui="{
-        base: 'cursor-pointer',
-        leadingIcon: 'text-primary',
-      }"
+      size="sm"
+      class="font-medium rounded-lg transition-colors hover:text-primary-500 dark:hover:text-primary-400"
     />
 
     <template #content>
-      <div class="flex flex-col gap-2 p-4">
-        <UPageAnchors
-          :links="[
-            {
-              label: 'X (Twitter)',
-              href: shareLinks.x,
-              icon: 'i-codicon-twitter',
-              target: '_blank',
-            },
-            {
-              label: 'WhatsApp',
-              href: shareLinks.whatsapp,
-              icon: 'i-simple-icons-whatsapp',
-              target: '_blank',
-            },
-            {
-              label: 'Facebook',
-              href: shareLinks.facebook,
-              icon: 'i-lucide-facebook',
-              target: '_blank',
-            },
-            {
-              label: 'LinkedIn',
-              href: shareLinks.linkedin,
-              icon: 'i-lucide-linkedin',
-              target: '_blank',
-            },
-          ]"
-        />
+      <div class="p-2 w-56 flex flex-col gap-1">
+        <!-- Header -->
+        <div class="px-3 pt-2 pb-1.5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+            Share this post
+          </h3>
+        </div>
 
+        <!-- Social Links -->
         <UButton
-          variant="outline"
-          size="sm"
+          v-for="link in shareLinks"
+          :key="link.label"
+          :to="link.href"
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="ghost"
           color="neutral"
-          :ui="{
-            base: 'cursor-pointer',
-            leadingIcon: 'text-primary',
-          }"
-          :leading-icon="isCopied ? 'i-lucide-copy-check' : 'i-lucide-copy'"
-          :label="isCopied ? 'Copied!' : 'Copy URL'"
+          size="sm"
+          class="w-full justify-start font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          :icon="link.icon"
+        >
+          {{ link.label }}
+        </UButton>
+
+        <UDivider class="my-1 border-neutral-200 dark:border-neutral-800" />
+
+        <!-- Copy URL Button -->
+        <UButton
+          variant="ghost"
+          size="sm"
+          class="w-full justify-start font-medium transition-all duration-200"
+          :color="isCopied ? 'success' : 'neutral'"
+          :icon="isCopied ? 'i-lucide-copy-check' : 'i-lucide-copy'"
           @click="copyToClipboard"
-        />
+        >
+          {{ isCopied ? 'Link Copied!' : 'Copy Link' }}
+        </UButton>
       </div>
     </template>
   </UPopover>
