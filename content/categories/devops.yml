@@ -1,0 +1,5 @@
+slug: devops
+name: DevOps
+description: Continuous integration, continuous delivery, and infrastructure as code.
+color: "#F59E0B"
+icon: i-lucide-server
