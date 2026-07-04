@@ -347,7 +347,9 @@ logger.log("All tags:", { blogTags: blogTags.value });
         >
           <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none mb-4">
             <UIcon name="i-lucide-images" class="size-4 text-neutral-400" />
-            <span>Project Media Gallery</span>
+            <span>
+              Gallery
+            </span>
           </div>
 
           <UCarousel
@@ -396,6 +398,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
         </div>
 
         <div
+          v-if="blogCategories.length > 0 || blogTags.length > 0"
           class="mt-12 pt-6 border-t border-neutral-200/40 dark:border-neutral-800/60 flex flex-col sm:flex-row gap-8 sm:gap-16"
         >
           <!-- Categories Section -->
@@ -455,8 +458,6 @@ logger.log("All tags:", { blogTags: blogTags.value });
         </div>
 
         <UPageAnchors title="External Anchors" :links="currentBlog.anchors" />
-
-        <USeparator class="my-8 border-neutral-200/40 dark:border-neutral-800/60" />
 
         <UContentSurround
           v-if="surroundingBlog && surroundingBlog.length > 0"
