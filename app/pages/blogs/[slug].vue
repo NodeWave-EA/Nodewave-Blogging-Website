@@ -268,9 +268,9 @@ logger.log("All tags:", { blogTags: blogTags.value });
         <UContentToc
           v-if="currentBlog.body?.toc?.links?.length"
           :links="currentBlog.body.toc.links"
-          title="Table of Contents"
+          title="On this page"
           highlight
-          highlight-color="primary"
+          highlight-color="secondary"
           highlight-variant="circuit"
         />
       </template>
