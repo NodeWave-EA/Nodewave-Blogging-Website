@@ -162,14 +162,14 @@ export default defineNuxtConfig({
   routeRules: {
     "/": { prerender: true },
     "/search": { ssr: false },
-    "/blogs": { swr: 3600 }, // Blog Index Page
-    "/blogs/**": { swr: 3600 }, // Individual Blog Post Slugs ([slug].vue)
-    "/authors": { swr: 3600 }, // Authors Index Page
-    "/authors/**": { swr: 3600 }, // Author Profile Slugs
-    "/tags": { swr: 3600 }, // Tags Index Page
-    "/tags/**": { swr: 3600 }, // Tag Filtering Slugs
-    "/categories": { swr: 3600 }, // Categories Index Page
-    "/categories/**": { swr: 3600 }, // Category Filtering Slugs
+    "/blogs": { prerender: true },
+    "/blogs/**": { prerender: true },
+    "/authors": { prerender: true },
+    "/authors/**": { prerender: true },
+    "/tags": { prerender: true },
+    "/tags/**": { prerender: true },
+    "/categories": { prerender: true },
+    "/categories/**": { prerender: true },
     "/editor/**": { ssr: false },
 
     "/_nuxt/**": { headers: { "Cache-Control": "public, max-age=31536000, immutable" } },
@@ -177,11 +177,15 @@ export default defineNuxtConfig({
 
   experimental: {
     emitRouteChunkError: "automatic-immediate",
+    appManifest: true,
   },
 
   compatibilityDate: "2025-01-15",
 
   nitro: {
+    future: {
+      nativeSWR: true,
+    },
     prerender: {
       crawlLinks: true,
       routes: [
@@ -215,7 +219,7 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ["unist-util-visit", "@unhead/schema-org/vue", "@vue/devtools-core", "@vue/devtools-kit", "unist-util-visit"],
+      include: ["unist-util-visit", "@unhead/schema-org/vue", "@vue/devtools-core", "@vue/devtools-kit", "unist-util-visit", "@comark/vue"],
     },
   },
 
