@@ -215,7 +215,7 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ["unist-util-visit"],
+      include: ["unist-util-visit", "@unhead/schema-org/vue", "@vue/devtools-core", "@vue/devtools-kit", "unist-util-visit"],
     },
   },
 
