@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 export type LanguageOption = {
   code: string;
@@ -120,6 +120,7 @@ export const DEFAULT_LANGUAGES: LanguageOption[] = [
 ];
 
 const supportedLanguages = ref<LanguageOption[]>(DEFAULT_LANGUAGES);
+const activeLang = ref<string>("en");
 
 export function useTranslation() {
   const userLang = useCookie<string>("user-locale", {
@@ -130,6 +131,16 @@ export function useTranslation() {
   const googTransCookie = useCookie<string>("googtrans", {
     path: "/",
   });
+
+  const parseGoogTransCookie = (): string | undefined => {
+    if (!import.meta.client)
+      return undefined;
+    const match = document.cookie.match(/(?:^|; )googtrans=([^;]+)/);
+    if (!match || !match[1])
+      return undefined;
+    const parts = decodeURIComponent(match[1]).split("/").filter(Boolean);
+    return parts.length > 0 ? parts[parts.length - 1] : undefined;
+  };
 
   const updateGoogTransCookie = (lang: string) => {
     if (!import.meta.client)
@@ -143,7 +154,28 @@ export function useTranslation() {
     }
   };
 
-  // Dynamic sync to read options if Google loads any new options
+  const syncActiveLanguage = () => {
+    if (!import.meta.client)
+      return;
+
+    // Check Google Translate select dropdown element
+    const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+    if (selectEl && selectEl.value) {
+      if (activeLang.value !== selectEl.value) {
+        activeLang.value = selectEl.value;
+        userLang.value = selectEl.value;
+      }
+      return;
+    }
+
+    // Check googtrans cookie
+    const cookieLang = parseGoogTransCookie();
+    if (cookieLang && cookieLang !== activeLang.value) {
+      activeLang.value = cookieLang;
+      userLang.value = cookieLang;
+    }
+  };
+
   const syncWithGoogleDOM = () => {
     if (!import.meta.client)
       return;
@@ -167,11 +199,22 @@ export function useTranslation() {
     if (parsedLangs.length > 10) {
       supportedLanguages.value = parsedLangs;
     }
+
+    syncActiveLanguage();
   };
 
   if (import.meta.client) {
-    if (userLang.value && userLang.value !== "en" && !googTransCookie.value) {
-      updateGoogTransCookie(userLang.value);
+    // Initial sync from cookie
+    const cookieLang = parseGoogTransCookie();
+    if (cookieLang) {
+      activeLang.value = cookieLang;
+      userLang.value = cookieLang;
+    }
+    else if (userLang.value) {
+      activeLang.value = userLang.value;
+      if (userLang.value !== "en") {
+        updateGoogTransCookie(userLang.value);
+      }
     }
 
     window.googleTranslateElementInit = () => {
@@ -186,8 +229,8 @@ export function useTranslation() {
           "google_translate_element",
         );
 
-        // Periodically check in case Google populates options late
-        setTimeout(syncWithGoogleDOM, 1000);
+        setTimeout(syncWithGoogleDOM, 500);
+        setTimeout(syncWithGoogleDOM, 1500);
         setTimeout(syncWithGoogleDOM, 3000);
       }
     };
@@ -206,8 +249,33 @@ export function useTranslation() {
     },
   );
 
+  let intervalId: any = null;
+
+  onMounted(() => {
+    if (!import.meta.client)
+      return;
+
+    syncActiveLanguage();
+
+    const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+    if (selectEl) {
+      selectEl.addEventListener("change", syncActiveLanguage);
+    }
+
+    // Interval watcher to guarantee alignment with external Google Translate state
+    intervalId = setInterval(() => {
+      syncActiveLanguage();
+    }, 1000);
+  });
+
+  onUnmounted(() => {
+    if (intervalId)
+      clearInterval(intervalId);
+  });
+
   const setLanguage = (lang: string) => {
     userLang.value = lang;
+    activeLang.value = lang;
 
     if (import.meta.client) {
       updateGoogTransCookie(lang);
@@ -224,9 +292,10 @@ export function useTranslation() {
   };
 
   return {
-    currentLang: userLang,
+    currentLang: activeLang,
     supportedLanguages,
     status,
     setLanguage,
+    syncActiveLanguage,
   };
 }

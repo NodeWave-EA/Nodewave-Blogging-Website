@@ -5,23 +5,27 @@ import { useTranslation } from "~/composables/use-translation";
 
 import type { LanguageOption } from "~/composables/use-translation";
 
-const { currentLang, supportedLanguages, status, setLanguage } = useTranslation();
+const { currentLang, supportedLanguages, status, setLanguage, syncActiveLanguage } = useTranslation();
 
 // State to track full page load
 const isReady = ref(false);
 
 onMounted(() => {
+  syncActiveLanguage();
+
   if (document.readyState === "complete") {
     isReady.value = true;
   }
   else {
     window.addEventListener("load", () => {
       isReady.value = true;
+      syncActiveLanguage();
     }, { once: true });
 
     // Fallback safeguard
     setTimeout(() => {
       isReady.value = true;
+      syncActiveLanguage();
     }, 600);
   }
 });
@@ -56,7 +60,8 @@ const tooltipText = computed(
   >
     <div
       v-if="isReady"
-      class="fixed bottom-0 left-0 z-50 flex items-center"
+      class="fixed bottom-0 left-0 z-50 flex items-center notranslate"
+      translate="no"
     >
       <USelectMenu
         v-model="selectedLanguage"
@@ -71,7 +76,7 @@ const tooltipText = computed(
         aria-label="Select preferred language"
         :popper="{ placement: 'top-start', offsetDistance: 12 }"
         :ui="{
-          base: 'flex items-center !p-0 text-left cursor-pointer text-xs rounded-lg !p-0 overflow-x-hidden border-0 ring-0 z-50 max-h-[85vh] !w-80 sm:!w-96',
+          base: 'bg-transparent shadow-none ring-0 border-0 !w-auto p-0',
           content: 'overflow-x-hidden ring-1 ring-gray-200 dark:ring-gray-800 shadow-2xl rounded-2xl bg-white dark:bg-gray-900 !w-80 sm:!w-96',
           viewport: 'max-h-[85vh] overflow-x-hidden overflow-y-auto p-1 space-y-0.5',
         }"
@@ -117,10 +122,14 @@ const tooltipText = computed(
         <template #item="{ item }">
           <div class="flex items-center gap-2.5 p-1 text-xs w-full text-left">
             <UIcon
-              :name="item.icon"
-              class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0"
+              :name="item.code === selectedLanguage.code ? 'i-heroicons-check-20-solid' : item.icon"
+              class="w-4 h-4 shrink-0 transition-colors"
+              :class="item.code === selectedLanguage.code ? 'text-primary font-bold' : 'text-gray-400 dark:text-gray-500'"
             />
-            <span class="font-medium text-gray-800 dark:text-gray-200 whitespace-nowrap text-left flex-1 p-0">
+            <span
+              class="whitespace-nowrap text-left flex-1 p-0 transition-colors"
+              :class="item.code === selectedLanguage.code ? 'font-bold text-primary dark:text-primary-400' : 'font-medium text-gray-800 dark:text-gray-200'"
+            >
               {{ item.label }}
             </span>
           </div>
