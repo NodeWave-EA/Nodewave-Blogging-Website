@@ -36,6 +36,7 @@ const description = "Smart IoT Solutions";
         <span
           class="font-bold tracking-tight whitespace-nowrap text-gray-900 dark:text-gray-100"
           aria-hidden="true"
+          translate="no"
         >
           {{ name }}
         </span>
