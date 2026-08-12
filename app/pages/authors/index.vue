@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from "@vueuse/core";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
@@ -64,30 +64,42 @@ onMounted(() => {
   startDecryption("Editorial Roster", "authors-badge");
 });
 
-// SEO
 const config = useRuntimeConfig().public;
-const PAGE_TITLE = "Meet Our Contributors";
-const PAGE_DESCRIPTION = "Discover the dedicated developers, tech enthusiasts, and systems architects building our knowledge database. Explore their profiles and dive into their engineering insights.";
-const PAGE_CANONICAL_URL = `${config.siteUrl}/authors`;
+const PAGE_TITLE = computed(() => `Meet Our Contributors — Editorial Roster & Engineering Team`);
+const PAGE_DESCRIPTION = computed(
+  () => "Discover the dedicated developers, tech enthusiasts, and systems architects building our knowledge database. Explore their profiles and dive into their engineering insights.",
+);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors`);
+const PAGE_OG_IMAGE = computed(() => `${config.siteUrl}/og-banner.png`);
 
+// Meta & Social Sharing Tags
 useSeoMeta({
-  title: PAGE_TITLE,
-  description: PAGE_DESCRIPTION,
+  title: () => PAGE_TITLE.value,
+  description: () => PAGE_DESCRIPTION.value,
+  keywords: "nodewave, authors, contributors, developers, tech enthusiasts, systems architects, profiles, insights, engineering team",
+  robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+
+  // Open Graph / Facebook
   ogType: "website",
-  ogTitle: PAGE_TITLE,
-  ogDescription: PAGE_DESCRIPTION,
+  ogTitle: () => PAGE_TITLE.value,
+  ogDescription: () => PAGE_DESCRIPTION.value,
+  ogUrl: () => PAGE_CANONICAL_URL.value,
+  ogImage: () => PAGE_OG_IMAGE.value,
+  ogImageAlt: () => `${config.siteName || "Nodewave"} Contributors & Authors`,
+  ogSiteName: () => config.siteName || "Nodewave",
+
+  // Twitter
   twitterCard: "summary_large_image",
-  twitterTitle: PAGE_TITLE,
-  twitterDescription: PAGE_DESCRIPTION,
-  robots: "index, follow",
-  keywords: "authors, contributors, developers, tech enthusiasts, systems architects, profiles, insights",
+  twitterTitle: () => PAGE_TITLE.value,
+  twitterDescription: () => PAGE_DESCRIPTION.value,
+  twitterImage: () => PAGE_OG_IMAGE.value,
 });
 
 useHead({
   link: [
     {
       rel: "canonical",
-      href: PAGE_CANONICAL_URL,
+      href: () => PAGE_CANONICAL_URL.value,
     },
     {
       rel: "icon",
@@ -98,12 +110,32 @@ useHead({
 });
 
 defineOgImage("NuxtSeo.takumi", {
-  title: PAGE_TITLE,
-  description: PAGE_DESCRIPTION,
+  title: PAGE_TITLE.value,
+  description: PAGE_DESCRIPTION.value,
   brand: config.siteName,
   colorMode: "dark",
   isPro: true,
 });
+
+// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+useSchemaOrg([
+  // Google Search Breadcrumb Hierarchy
+  defineBreadcrumb({
+    itemListElement: [
+      { name: "Home", item: "/" },
+      { name: "Authors", item: PAGE_CANONICAL_URL.value },
+    ],
+  }),
+
+  // CollectionPage Schema for Authors Index
+  {
+    "@type": "CollectionPage",
+    "@id": `${PAGE_CANONICAL_URL.value}/#collectionpage`,
+    "url": PAGE_CANONICAL_URL.value,
+    "name": PAGE_TITLE.value,
+    "description": PAGE_DESCRIPTION.value,
+  },
+]);
 </script>
 
 <template>
@@ -112,7 +144,7 @@ defineOgImage("NuxtSeo.takumi", {
       <UPageHeader class="mb-12 mx-2">
         <template #headline>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
-            <UIcon name="i-lucide-users" class="h-3.5 w-3.5 animate-pulse" />
+            <UIcon name="i-lucide-users" class="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
             <ClientOnly>
               <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
                 {{ activeHoverText["authors-badge"] || "Editorial Roster" }}
@@ -127,9 +159,9 @@ defineOgImage("NuxtSeo.takumi", {
         </template>
 
         <template #title>
-          <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
             Meet the <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent">core contributors</span> and architects driving <span class="bg-linear-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent">nodewave</span>.
-          </div>
+          </h1>
         </template>
 
         <template #description>
@@ -143,19 +175,22 @@ defineOgImage("NuxtSeo.takumi", {
             <NuxtLink
               to="/blogs"
               class="group inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-950 hover:bg-neutral-900 dark:bg-white dark:hover:bg-neutral-50 px-5 py-2.5 text-xs font-semibold tracking-wide text-white dark:text-neutral-950 shadow-xs transition-all hover:-translate-y-0.5"
+              aria-label="Read articles by our authors"
             >
               Read Their Articles
               <UIcon
                 name="i-line-md-arrow-right"
                 class="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500 group-hover:translate-x-0.5 transition-transform"
+                aria-hidden="true"
               />
             </NuxtLink>
 
             <NuxtLink
               to="/categories"
               class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-5 py-2.5 text-xs font-medium tracking-wide text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-850 dark:hover:text-black transition-all shadow-2xs"
+              aria-label="Explore content categories"
             >
-              <UIcon name="i-line-md-grid-3-filled" class="h-3.5 w-3.5 text-neutral-400" />
+              <UIcon name="i-line-md-grid-3-filled" class="h-3.5 w-3.5 text-neutral-400" aria-hidden="true" />
               Explore Topics
             </NuxtLink>
           </div>
@@ -177,10 +212,10 @@ defineOgImage("NuxtSeo.takumi", {
           </div>
 
           <div v-else-if="!authorsPending" class="text-center py-20 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/30 dark:bg-neutral-900/10">
-            <UIcon name="i-lucide-users" class="w-10 h-10 text-neutral-300 dark:text-neutral-700 mx-auto" />
-            <h3 class="text-sm font-bold mt-3 text-neutral-800 dark:text-neutral-200">
+            <UIcon name="i-lucide-users" class="w-10 h-10 text-neutral-300 dark:text-neutral-700 mx-auto" aria-hidden="true" />
+            <h2 class="text-sm font-bold mt-3 text-neutral-800 dark:text-neutral-200">
               No Authors Available
-            </h3>
+            </h2>
             <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto">
               We couldn't locate any contributor profiles or editorial entries in the system at this time. Please check back later or explore other sections of the site.
             </p>
