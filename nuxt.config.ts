@@ -47,6 +47,10 @@ export default defineNuxtConfig({
         { name: "apple-mobile-web-app-status-bar-style", content: "default" },
         { name: "apple-mobile-web-app-title", content: "Nodewave Blogging Website" },
         { name: "application-name", content: "Nodewave Blogging Website" },
+        {
+          name: 'google-site-verification',
+          content: '5OvApnB9CWkAPirNZDUuxZVEmi9r2xTH4GrP8Om-mz0'
+        },
       ],
       link: [
         {
