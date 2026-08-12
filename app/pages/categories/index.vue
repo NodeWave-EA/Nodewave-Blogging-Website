@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from "@vueuse/core";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import { useContent } from "~/composables/content";
+import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
 definePageMeta({
   title: "Browse by Categories",
@@ -42,29 +43,43 @@ onMounted(() => {
   startDecryption("Explore Categories", "categories-badge");
 });
 
-// SEO
 const config = useRuntimeConfig().public;
 
-const PAGE_TITLE = "Browse by Categories";
-const PAGE_DESCRIPTION = "Explore all articles, tutorials, and news organized by categories and subject areas.";
-const PAGE_CANONICAL_URL = `${config.siteUrl}/categories`;
+const PAGE_TITLE = computed(() => `Browse by Categories — Technical Topics & Domains`);
+const PAGE_DESCRIPTION = computed(
+  () => "Explore all technical articles, architecture notes, and software development guides organized by category and subject area on Nodewave.",
+);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories`);
+const PAGE_OG_IMAGE = computed(() => `${config.siteUrl}/og-banner.png`);
 
+// Meta & Social Sharing Tags
 useSeoMeta({
-  title: PAGE_TITLE,
-  description: PAGE_DESCRIPTION,
+  title: () => PAGE_TITLE.value,
+  description: () => PAGE_DESCRIPTION.value,
+  keywords: "nodewave, categories, topics, taxonomy, software engineering, architecture, web development, articles, tutorials",
+  robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+
+  // Open Graph / Facebook
   ogType: "website",
-  ogTitle: PAGE_TITLE,
-  ogDescription: PAGE_DESCRIPTION,
+  ogTitle: () => PAGE_TITLE.value,
+  ogDescription: () => PAGE_DESCRIPTION.value,
+  ogUrl: () => PAGE_CANONICAL_URL.value,
+  ogImage: () => PAGE_OG_IMAGE.value,
+  ogImageAlt: () => `${config.siteName || "Nodewave"} Categories Archive`,
+  ogSiteName: () => config.siteName || "Nodewave",
+
+  // Twitter
   twitterCard: "summary_large_image",
-  twitterTitle: PAGE_TITLE,
-  twitterDescription: PAGE_DESCRIPTION,
+  twitterTitle: () => PAGE_TITLE.value,
+  twitterDescription: () => PAGE_DESCRIPTION.value,
+  twitterImage: () => PAGE_OG_IMAGE.value,
 });
 
 useHead({
   link: [
     {
       rel: "canonical",
-      href: PAGE_CANONICAL_URL,
+      href: () => PAGE_CANONICAL_URL.value,
     },
     {
       rel: "icon",
@@ -75,12 +90,32 @@ useHead({
 });
 
 defineOgImage("NuxtSeo.takumi", {
-  title: PAGE_TITLE,
-  description: PAGE_DESCRIPTION,
+  title: PAGE_TITLE.value,
+  description: PAGE_DESCRIPTION.value,
   brand: config.siteName,
   colorMode: "dark",
   isPro: true,
 });
+
+// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+useSchemaOrg([
+  // Google Search Breadcrumb Hierarchy
+  defineBreadcrumb({
+    itemListElement: [
+      { name: "Home", item: "/" },
+      { name: "Categories", item: PAGE_CANONICAL_URL.value },
+    ],
+  }),
+
+  // CollectionPage Schema for Categories Index
+  {
+    "@type": "CollectionPage",
+    "@id": `${PAGE_CANONICAL_URL.value}/#collectionpage`,
+    "url": PAGE_CANONICAL_URL.value,
+    "name": PAGE_TITLE.value,
+    "description": PAGE_DESCRIPTION.value,
+  },
+]);
 </script>
 
 <template>
@@ -89,7 +124,7 @@ defineOgImage("NuxtSeo.takumi", {
       <UPageHeader class="mb-12 mx-2">
         <template #headline>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <UIcon name="i-lucide-grid-3x3" class="h-3.5 w-3.5" />
+            <UIcon name="i-lucide-grid-3x3" class="h-3.5 w-3.5" aria-hidden="true" />
             <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
               {{ activeHoverText["categories-badge"] || "Explore Categories" }}
             </span>
@@ -114,7 +149,7 @@ defineOgImage("NuxtSeo.takumi", {
         <div v-if="categoriesPending && displayLimit === itemsPerPage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-1">
           <div
             v-for="n in 6"
-            :key="n"
+            :key="`cat-skeleton-${n}`"
             class="h-44 rounded-2xl bg-neutral-50 dark:bg-neutral-900/40 p-5 border border-neutral-100 dark:border-neutral-900 flex flex-col justify-between animate-pulse"
           >
             <div class="space-y-3">
@@ -144,11 +179,11 @@ defineOgImage("NuxtSeo.takumi", {
           <!-- Empty Fallback View -->
           <div v-else class="text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/20 dark:bg-neutral-900/10">
             <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4">
-              <UIcon name="i-lucide-grid-2x2" class="w-6 h-6 text-neutral-400" />
+              <UIcon name="i-lucide-grid-2x2" class="w-6 h-6 text-neutral-400" aria-hidden="true" />
             </div>
-            <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+            <h2 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
               No categories indexed
-            </h3>
+            </h2>
             <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
               There are currently no structured content categories available for browsing. Please check back later or explore other sections of the site.
             </p>
