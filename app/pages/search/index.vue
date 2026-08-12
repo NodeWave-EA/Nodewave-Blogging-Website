@@ -11,6 +11,8 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
+const config = useRuntimeConfig();
+const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
 
 const { searchMetadataCollections } = useContent();
 
@@ -39,7 +41,53 @@ const activeTabIndex = ref(0);
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 let lastSearchRequestId = 0;
 
+const searchPageTitle = computed(() => {
+  const query = searchQuery.value.trim();
+  return query ? `Search results for "${query}" | NodeWave` : "Search Articles, Authors & Topics | NodeWave";
+});
+
+const searchPageDescription = computed(() => {
+  const query = searchQuery.value.trim();
+  return query
+    ? `Explore technical documentation, posts, authors, and tags matching "${query}" on NodeWave.`
+    : "Search across all engineering logs, articles, author rosters, categories, and technical topics on NodeWave.";
+});
+
+// Set noindex, follow to protect crawl budget & avoid duplicate content penalties
+// Set dynamic title and description for browser UX and sharing
+useSeoMeta({
+  title: searchPageTitle,
+  ogTitle: searchPageTitle,
+  twitterTitle: searchPageTitle,
+  description: searchPageDescription,
+  ogDescription: searchPageDescription,
+  twitterDescription: searchPageDescription,
+  robots: "noindex, follow", // Standard Google Search rule for internal search pages
+});
+
+// Ensure Canonical tag stays fixed at /search without query string pollution
+useHead({
+  link: [
+    {
+      rel: "canonical",
+      href: `${siteUrl}/search`,
+    },
+  ],
+});
+
+// Explicitly declare this page as a SearchResultsPage in Schema.org
+useSchemaOrg([
+  defineWebPage({
+    "@type": "SearchResultsPage",
+    "name": searchPageTitle.value,
+    "description": searchPageDescription.value,
+    "url": `${siteUrl}/search`,
+  }),
+]);
+
+// -------------------------------------------------------------
 // Core search handler
+// -------------------------------------------------------------
 async function executeSearch(query: string) {
   const cleanQuery = query.trim();
 
