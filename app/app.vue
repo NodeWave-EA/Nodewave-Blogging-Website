@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 import LangSwitcher from "~/components/ui/lang-switcher.vue";
 
@@ -10,12 +10,28 @@ const route = useRoute();
 
 logger.log(`Navigated to ${route.path}`);
 
-// Handle PWA shortcut redirect to main website (?main=https://nodewave.net)
-const mainTarget = route.query.main;
-if (typeof mainTarget === "string" && mainTarget) {
-  logger.log(`Redirecting to main site: ${mainTarget}`);
-  navigateTo(mainTarget, { external: true });
-}
+// Watch global route queries for dynamic parameter handling
+watch(
+  () => route.query,
+  (query) => {
+    // Handle PWA shortcut redirect to main website (?main=https://nodewave.net)
+    if (typeof query.main === "string" && query.main) {
+      logger.log(`Redirecting to main site: ${query.main}`);
+      navigateTo(query.main, { external: true });
+      return;
+    }
+
+    // Global search interceptor: auto-redirect ?q= from root or other pages (e.g. /?q=vuejs) to /search?q=vuejs
+    if (typeof query.q === "string" && query.q.trim() && route.path !== "/search") {
+      logger.log(`Global search query detected. Forwarding to search page: ${query.q}`);
+      navigateTo({
+        path: "/search",
+        query: { q: query.q },
+      });
+    }
+  },
+  { immediate: true },
+);
 
 const variants: BackgroundVariant[] = [
   "parallax-stars",
