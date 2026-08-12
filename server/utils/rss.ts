@@ -11,13 +11,25 @@ export interface RelatedFeedLink {
 }
 
 /**
+ * Safely escapes special XML characters.
+ */
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/**
  * Injects Atom namespace and relational <atom:link> elements into generated RSS XML.
  */
 function injectAtomLinks(rssXml: string, selfUrl: string, relatedFeeds: RelatedFeedLink[] = []): string {
-  let atomLinks = `  <atom:link href="${selfUrl}" rel="self" type="application/rss+xml" />`;
+  let atomLinks = `  <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />`;
 
   for (const feed of relatedFeeds) {
-    atomLinks += `\n        <atom:link href="${feed.href}" rel="${feed.rel}" type="application/rss+xml" title="${feed.title}" />`;
+    atomLinks += `\n        <atom:link href="${escapeXml(feed.href)}" rel="${feed.rel}" type="application/rss+xml" title="${escapeXml(feed.title)}" />`;
   }
 
   let xml = rssXml;
@@ -27,6 +39,7 @@ function injectAtomLinks(rssXml: string, selfUrl: string, relatedFeeds: RelatedF
 
   return xml.replace("<channel>", `<channel>\n        ${atomLinks}`);
 }
+
 
 /**
  * Builds standard blog post RSS feed with embedded entity relationships.
