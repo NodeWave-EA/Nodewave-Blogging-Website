@@ -178,8 +178,7 @@ export default defineNuxtConfig({
     "/authors/rss.xml": { prerender: true },
     "/categories/rss.xml": { prerender: true },
     "/tags/rss.xml": { prerender: true },
-    
-    
+
     "/_nuxt/**": { headers: { "Cache-Control": "public, max-age=31536000, immutable" } },
   },
 
@@ -203,7 +202,7 @@ export default defineNuxtConfig({
         "/authors/rss.xml",
         "/categories/rss.xml",
         "/tags/rss.xml",
-    ],
+      ],
       ignore: [],
     },
     experimental: {

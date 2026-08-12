@@ -91,17 +91,21 @@ const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.va
 
 const authorAvatarUrl = computed(() => {
   const src = author.value?.avatar?.src;
-  if (!src) return `${config.siteUrl}/og-banner.png`;
+  if (!src)
+    return `${config.siteUrl}/avatar.png`;
   return src.startsWith("http") ? src : `${config.siteUrl}${src}`;
 });
 
 const socialUrls = computed(() => {
   const urls: string[] = [];
-  if (author.value?.website) urls.push(author.value.website);
-  if (author.value?.company?.website) urls.push(author.value.company.website);
+  if (author.value?.website)
+    urls.push(author.value.website);
+  if (author.value?.company?.website)
+    urls.push(author.value.company.website);
   if (author.value?.socialLinks) {
     author.value.socialLinks.forEach((link) => {
-      if (link.url) urls.push(link.url);
+      if (link.url)
+        urls.push(link.url);
     });
   }
   return urls;

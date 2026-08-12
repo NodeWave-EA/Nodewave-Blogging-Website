@@ -79,7 +79,8 @@ async function executeSearch(query: string) {
     ]);
 
     // Guard against out-of-order race conditions
-    if (requestId !== lastSearchRequestId) return;
+    if (requestId !== lastSearchRequestId)
+      return;
 
     blogResults.value = blogs || [];
     metaResults.value = (data as typeof metaResults.value) || {
@@ -107,7 +108,8 @@ async function executeSearch(query: string) {
 watch(
   [searchQuery, blogSearchStatus],
   ([newQuery, newStatus], [_, oldStatus]) => {
-    if (searchTimer) clearTimeout(searchTimer);
+    if (searchTimer)
+      clearTimeout(searchTimer);
 
     if (!newQuery.trim()) {
       executeSearch("");

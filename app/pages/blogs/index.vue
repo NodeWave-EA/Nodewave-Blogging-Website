@@ -55,7 +55,6 @@ const BLOGS_DESCRIPTION = computed(
   () => "Browse the complete archive of technical articles, software architecture notes, and development logs published on Nodewave.",
 );
 const BLOGS_CANONICAL_URL = computed(() => `${config.siteUrl}/blogs`);
-const BLOGS_OG_IMAGE = computed(() => `${config.siteUrl}/og-banner.png`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -129,7 +128,11 @@ useSchemaOrg([
           <div
             class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20"
           >
-            <UIcon name="i-lucide-library" class="h-3.5 w-3.5" aria-hidden="true" />
+            <UIcon
+              name="i-lucide-library"
+              class="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
             <ClientOnly>
               <span class="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">
                 {{ activeHoverText["archive-badge"] || "Complete Archive" }}
@@ -222,7 +225,11 @@ useSchemaOrg([
               <div
                 class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4 shadow-3xs transition-transform hover:scale-105"
               >
-                <UIcon name="i-lucide-folder-open" class="w-6 h-6 text-neutral-400" aria-hidden="true" />
+                <UIcon
+                  name="i-lucide-folder-open"
+                  class="w-6 h-6 text-neutral-400"
+                  aria-hidden="true"
+                />
               </div>
               <h2 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
                 No Articles Found

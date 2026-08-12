@@ -47,7 +47,6 @@ const PAGE_DESCRIPTION = computed(
   () => category.value?.description || category.value?.meta?.description || `Explore articles and tutorials classified under the ${category.value?.name || "category"} topic.`,
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories/${category.value?.slug || slug}`);
-const categoryOgImageUrl = computed(() => `${config.siteUrl}/og-banner.png`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({

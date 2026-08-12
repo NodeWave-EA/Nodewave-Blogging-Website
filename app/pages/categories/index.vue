@@ -50,7 +50,6 @@ const PAGE_DESCRIPTION = computed(
   () => "Explore all technical articles, architecture notes, and software development guides organized by category and subject area on Nodewave.",
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories`);
-const PAGE_OG_IMAGE = computed(() => `${config.siteUrl}/og-banner.png`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -122,7 +121,11 @@ useSchemaOrg([
       <UPageHeader class="mb-12 mx-2">
         <template #headline>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <UIcon name="i-lucide-grid-3x3" class="h-3.5 w-3.5" aria-hidden="true" />
+            <UIcon
+              name="i-lucide-grid-3x3"
+              class="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
             <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
               {{ activeHoverText["categories-badge"] || "Explore Categories" }}
             </span>
@@ -177,7 +180,11 @@ useSchemaOrg([
           <!-- Empty Fallback View -->
           <div v-else class="text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/20 dark:bg-neutral-900/10">
             <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4">
-              <UIcon name="i-lucide-grid-2x2" class="w-6 h-6 text-neutral-400" aria-hidden="true" />
+              <UIcon
+                name="i-lucide-grid-2x2"
+                class="w-6 h-6 text-neutral-400"
+                aria-hidden="true"
+              />
             </div>
             <h2 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
               No categories indexed

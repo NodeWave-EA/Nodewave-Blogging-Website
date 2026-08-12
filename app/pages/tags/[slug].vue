@@ -47,7 +47,6 @@ const PAGE_DESCRIPTION = computed(
   () => tag.value?.description || tag.value?.meta?.description || `Explore articles and technical publications tagged under #${tag.value?.name || "topics"}.`,
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug || slug}`);
-const tagOgImageUrl = computed(() => `${config.siteUrl}/og-banner.png`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({

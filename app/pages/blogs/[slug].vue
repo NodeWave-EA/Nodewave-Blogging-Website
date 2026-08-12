@@ -60,7 +60,8 @@ const BLOG_CANONICAL_URL = `${runtimeConfig.siteUrl}${toValue(blogPath)}`;
 
 const coverImageUrl = computed(() => {
   const src = currentBlog.value?.coverImage?.src;
-  if (!src) return `${runtimeConfig.siteUrl}/og-banner.png`;
+  if (!src)
+    return `${runtimeConfig.siteUrl}/preview.png`;
   return src.startsWith("http") ? src : `${runtimeConfig.siteUrl}${src}`;
 });
 

@@ -34,7 +34,6 @@ const HOME_DESCRIPTION = computed(
   () => "Explore the latest curated posts, technical articles, and engineering insights from nodewave. Stay ahead in web development, software architecture, and modern technology.",
 );
 const HOME_CANONICAL_URL = computed(() => `${config.siteUrl}`);
-const HOME_OG_IMAGE = computed(() => `${config.siteUrl}/og-banner.png`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -127,7 +126,11 @@ useSchemaOrg([
       <UPageHeader>
         <template #headline>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
-            <UIcon name="i-lucide-sparkle" class="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
+            <UIcon
+              name="i-lucide-sparkle"
+              class="h-3.5 w-3.5 animate-pulse"
+              aria-hidden="true"
+            />
             <ClientOnly>
               <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
                 {{ activeHoverText["home-badge"] || "Curated Posts & Insights" }}
@@ -167,7 +170,11 @@ useSchemaOrg([
               class="flex items-center gap-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800"
               :aria-label="`Visit Nodewave on ${socialLink.platform}`"
             >
-              <UIcon :name="socialLink.icon" class="h-4 w-4 text-neutral-500" aria-hidden="true" />
+              <UIcon
+                :name="socialLink.icon"
+                class="h-4 w-4 text-neutral-500"
+                aria-hidden="true"
+              />
               {{ socialLink.platform.charAt(0).toUpperCase() + socialLink.platform.slice(1) }}
             </UButton>
           </div>
@@ -193,7 +200,11 @@ useSchemaOrg([
               class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-5 py-2.5 text-xs font-medium tracking-wide text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-850 dark:hover:text-black transition-all shadow-2xs"
               aria-label="Explore blog article categories"
             >
-              <UIcon name="i-line-md-grid-3-filled" class="h-3.5 w-3.5 text-neutral-400" aria-hidden="true" />
+              <UIcon
+                name="i-line-md-grid-3-filled"
+                class="h-3.5 w-3.5 text-neutral-400"
+                aria-hidden="true"
+              />
               Explore Categories
             </NuxtLink>
           </div>
@@ -211,8 +222,16 @@ useSchemaOrg([
         </div>
 
         <!-- Error State -->
-        <div v-else-if="fetchError" class="text-center py-16 text-red-500 flex flex-col items-center gap-2" role="alert">
-          <UIcon name="i-lucide-alert-circle" class="w-8 h-8" aria-hidden="true" />
+        <div
+          v-else-if="fetchError"
+          class="text-center py-16 text-red-500 flex flex-col items-center gap-2"
+          role="alert"
+        >
+          <UIcon
+            name="i-lucide-alert-circle"
+            class="w-8 h-8"
+            aria-hidden="true"
+          />
           <p class="font-medium">
             Failed to retrieve posts. Please check your connection or refresh the page.
           </p>
@@ -220,12 +239,20 @@ useSchemaOrg([
 
         <!-- Empty State -->
         <div v-else-if="featuredBlogs.length === 0" class="text-center py-16 text-neutral-500 dark:text-neutral-400">
-          <UIcon name="i-lucide-book-open" class="w-8 h-8 mx-auto mb-2 opacity-40" aria-hidden="true" />
+          <UIcon
+            name="i-lucide-book-open"
+            class="w-8 h-8 mx-auto mb-2 opacity-40"
+            aria-hidden="true"
+          />
           <p>No curated insights available right now.</p>
         </div>
 
         <!-- Loaded Content States -->
-        <section v-else class="my-6" aria-labelledby="featured-posts-heading">
+        <section
+          v-else
+          class="my-6"
+          aria-labelledby="featured-posts-heading"
+        >
           <h2 id="featured-posts-heading" class="sr-only">
             Featured Articles and Insights
           </h2>

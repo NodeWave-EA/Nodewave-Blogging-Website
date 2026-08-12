@@ -1,14 +1,15 @@
 import { renderHTML } from "@comark/html";
 import { Feed } from "feed";
-import type { H3Event } from "h3";
-import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
 import { getAllAuthors, getAllBlogs, getAllCategories, getAllTags } from "~~/server/utils/content";
 
-export interface RelatedFeedLink {
+import type { H3Event } from "h3";
+import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
+
+export type RelatedFeedLink = {
   rel: "self" | "related" | "up" | "alternate";
   href: string;
   title: string;
-}
+};
 
 /**
  * Safely escapes special XML characters.
@@ -17,7 +18,7 @@ function escapeXml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/\>/g, "&gt;")
+    .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 }
@@ -27,15 +28,16 @@ function escapeXml(str: string): string {
  * internal AST attributes, and fixing malformed Shiki code block attributes.
  */
 function cleanRssHtml(html: string): string {
-  if (!html) return "";
+  if (!html)
+    return "";
   return html
     // Remove inline <style>...</style> blocks (e.g., Shiki syntax themes)
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
     // Escape JSON array class attributes: class="[\"language-text\"]" -> class="language-text"
-    .replace(/class="\[\\?&quot;(.*?)\\?&quot;\]"/g, 'class="$1"')
-    .replace(/class="\["(.*?)"\]"/g, 'class="$1"')
+    .replace(/class="\[\\?&quot;(.*?)\\?&quot;\]"/g, "class=\"$1\"")
+    .replace(/class="\["(.*?)"\]"/g, "class=\"$1\"")
     // leaked code title metadata in class strings (e.g. class="..."@commitlint...")
-    .replace(/class="([^"]*?)"@[^"]*"/g, 'class="$1"')
+    .replace(/class="([^"]*)"@[^"]*"/g, "class=\"$1\"")
     // Strip internal AST flags and attributes
     .replace(/\s*__ignoreMap(=("[^"]*"|'[^']*'))?/g, "")
     .trim();
@@ -53,7 +55,7 @@ function injectAtomLinks(rssXml: string, selfUrl: string, relatedFeeds: RelatedF
 
   let xml = rssXml;
   if (!xml.includes("xmlns:atom")) {
-    xml = xml.replace('<rss version="2.0"', '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"');
+    xml = xml.replace("<rss version=\"2.0\"", "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\"");
   }
 
   return xml.replace("<channel>", `<channel>\n        ${atomLinks}`);
@@ -101,7 +103,7 @@ export async function generateBlogRssFeed(
     // Extract resolved relationships from enrichBlog
     const authorObj = typeof post.author === "object" ? (post.author as BlogAuthor) : null;
     const authorName = authorObj?.name || (typeof post.author === "string" ? post.author : "NodeWave Team");
-    const authorEmail = authorObj?.email || 'info@nodewave.net'
+    const authorEmail = authorObj?.email || "info@nodewave.net";
 
     const categories = Array.isArray(post.categories) ? (post.categories as BlogCategory[]) : [];
     const tags = Array.isArray(post.tags) ? (post.tags as BlogTag[]) : [];
