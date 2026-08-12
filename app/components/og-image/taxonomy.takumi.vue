@@ -21,8 +21,8 @@ const themeColor = "99, 102, 241";
         inset: '0',
         opacity: isDark ? 0.03 : 0.05,
         backgroundImage: isDark
-          ? 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)'
-          : 'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)',
+          ? 'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)'
+          : 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)',
         backgroundSize: '40px 40px',
       }"
     />
