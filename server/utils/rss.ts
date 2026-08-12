@@ -328,4 +328,4 @@ export async function generateTagsRssFeed(event: H3Event): Promise<string> {
   return injectAtomLinks(feed.rss2(), feedUrl, [
     { rel: "up", href: `${siteUrl}/rss.xml`, title: "Root RSS Feed" },
   ]);
-                                                                    
+}
