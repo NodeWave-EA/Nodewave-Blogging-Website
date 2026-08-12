@@ -26,11 +26,11 @@ export function useTheme() {
   type ThemeEvent = MouseEvent | TouchEvent | KeyboardEvent;
 
   const newTheme = computed(() =>
-    colorMode.preference === "dark" ? "light" : "dark",
+    colorMode.value === "dark" ? "light" : "dark",
   );
 
   const currentIcon = computed(() =>
-    colorMode.preference === "dark"
+    colorMode.value === "dark"
       ? "i-line-md-sunny-filled-loop"
       : "i-line-md-moon-filled-loop",
   );
