@@ -54,9 +54,9 @@ if (!currentBlog.value) {
 }
 
 const runtimeConfig = useRuntimeConfig().public;
-const BLOG_TITLE = currentBlog.value?.seo?.title || currentBlog.value?.title || "Article Detail";
-const BLOG_DESCRIPTION = currentBlog.value?.seo?.description || currentBlog.value?.description || "";
-const BLOG_CANONICAL_URL = `${runtimeConfig.siteUrl}${toValue(blogPath)}`;
+const BLOG_TITLE = computed(() => currentBlog.value?.seo?.title || currentBlog.value?.title || "Article Detail");
+const BLOG_DESCRIPTION = computed(() => currentBlog.value?.seo?.description || currentBlog.value?.description || "");
+const BLOG_CANONICAL_URL = computed(() => `${runtimeConfig.siteUrl}${toValue(blogPath)}`);
 
 const coverImageUrl = computed(() => {
   const src = currentBlog.value?.coverImage?.src;
@@ -83,22 +83,22 @@ const modifiedIsoDate = computed(() => {
 
 // Meta & Social Sharing Tags
 useSeoMeta({
-  title: () => BLOG_TITLE,
-  description: () => BLOG_DESCRIPTION,
+  title: () => BLOG_TITLE.vaue,
+  description: () => BLOG_DESCRIPTION.value,
   keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || blogTags.value?.map(t => t.name).join(", ") || "",
 
   // Open Graph / Facebook
   ogType: "article",
-  ogTitle: () => currentBlog.value?.seo?.ogTitle || BLOG_TITLE,
-  ogDescription: () => currentBlog.value?.seo?.ogDescription || BLOG_DESCRIPTION,
-  ogUrl: BLOG_CANONICAL_URL,
-  ogImageAlt: currentBlog.value?.coverImage?.alt || BLOG_TITLE,
+  ogTitle: () => currentBlog.value?.seo?.ogTitle || BLOG_TITLE.value,
+  ogDescription: () => currentBlog.value?.seo?.ogDescription || BLOG_DESCRIPTION.value,
+  ogUrl: () => BLOG_CANONICAL_URL.value,
+  ogImageAlt: currentBlog.value?.coverImage?.alt || BLOG_TITLE.value,
   ogSiteName: runtimeConfig.siteName || "Nodewave",
 
   // Twitter
   twitterCard: "summary_large_image",
-  twitterTitle: () => currentBlog.value?.seo?.twitterTitle || BLOG_TITLE,
-  twitterDescription: () => currentBlog.value?.seo?.twitterDescription || BLOG_DESCRIPTION,
+  twitterTitle: () => currentBlog.value?.seo?.twitterTitle || BLOG_TITLE.value,
+  twitterDescription: () => currentBlog.value?.seo?.twitterDescription || BLOG_DESCRIPTION.value,
 
   // Indexing directives
   robots: () => (currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"),
@@ -115,7 +115,7 @@ useSeoMeta({
 
 useHead({
   link: [
-    { rel: "canonical", href: BLOG_CANONICAL_URL },
+    { rel: "canonical", href: () => BLOG_CANONICAL_URL.value },
     { rel: "icon", type: "image/png", href: "/favicon.png" },
   ],
 });
@@ -130,19 +130,19 @@ useSchemaOrg([
       ...(blogCategories.value?.[0]
         ? [{ name: blogCategories.value[0].name, item: `/${blogCategories.value[0].stem}` }]
         : []),
-      { name: BLOG_TITLE, item: BLOG_CANONICAL_URL },
+      { name: () => BLOG_TITLE.value, item: () => BLOG_CANONICAL_URL.value },
     ],
   }),
 
   // BlogPosting Article Schema
   defineArticle({
     "@type": "BlogPosting",
-    "headline": BLOG_TITLE,
-    "description": BLOG_DESCRIPTION,
+    "headline": () => BLOG_TITLE.value,
+    "description": () => BLOG_DESCRIPTION.value,
     "image": coverImageUrl.value,
     "datePublished": publishedIsoDate.value,
     "dateModified": modifiedIsoDate.value,
-    "mainEntityOfPage": BLOG_CANONICAL_URL,
+    "mainEntityOfPage": () => BLOG_CANONICAL_URL.value,
     "inLanguage": "en-US",
     "keywords": blogTags.value?.map(t => t.name) ?? [],
     "articleSection": blogCategories.value?.[0]?.name || "General",
@@ -166,7 +166,7 @@ useSchemaOrg([
 
 defineOgImage("BlogPost.takumi", {
   colorMode: "dark",
-  title: BLOG_TITLE,
+  title: () => BLOG_TITLE.value,
   author: blogAuthor.value?.name,
   date: currentBlog.value.date instanceof Date
     ? currentBlog.value.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
