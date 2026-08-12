@@ -17,9 +17,28 @@ function escapeXml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
+    .replace(/\>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
+}
+
+/**
+ * Sanitizes HTML content for RSS consumption by stripping style blocks,
+ * internal AST attributes, and fixing malformed Shiki code block attributes.
+ */
+function cleanRssHtml(html: string): string {
+  if (!html) return "";
+  return html
+    // Remove inline <style>...</style> blocks (e.g., Shiki syntax themes)
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    // Escape JSON array class attributes: class="[\"language-text\"]" -> class="language-text"
+    .replace(/class="\[\\?&quot;(.*?)\\?&quot;\]"/g, 'class="$1"')
+    .replace(/class="\["(.*?)"\]"/g, 'class="$1"')
+    // leaked code title metadata in class strings (e.g. class="..."@commitlint...")
+    .replace(/class="([^"]*?)"@[^"]*"/g, 'class="$1"')
+    // Strip internal AST flags and attributes
+    .replace(/\s*__ignoreMap(=("[^"]*"|'[^']*'))?/g, "")
+    .trim();
 }
 
 /**
@@ -39,7 +58,6 @@ function injectAtomLinks(rssXml: string, selfUrl: string, relatedFeeds: RelatedF
 
   return xml.replace("<channel>", `<channel>\n        ${atomLinks}`);
 }
-
 
 /**
  * Builds standard blog post RSS feed with embedded entity relationships.
@@ -83,8 +101,6 @@ export async function generateBlogRssFeed(
     // Extract resolved relationships from enrichBlog
     const authorObj = typeof post.author === "object" ? (post.author as BlogAuthor) : null;
     const authorName = authorObj?.name || (typeof post.author === "string" ? post.author : "NodeWave Team");
-    const authorSlug = authorObj?.slug || "";
-    const authorUrl = authorSlug ? `${siteUrl}/authors/${authorSlug}` : `${siteUrl}/authors`;
 
     const categories = Array.isArray(post.categories) ? (post.categories as BlogCategory[]) : [];
     const tags = Array.isArray(post.tags) ? (post.tags as BlogTag[]) : [];
@@ -102,31 +118,12 @@ export async function generateBlogRssFeed(
         rawHtml = rawHtml.replace(/href="\/([^"]+)"/g, `href="${siteUrl}/$1"`);
         rawHtml = rawHtml.replace(/src="\/([^"]+)"/g, `src="${siteUrl}/$1"`);
 
-        bodyHtml = rawHtml;
+        bodyHtml = cleanRssHtml(rawHtml);
       }
       catch (e) {
         console.warn(`[RSS Builder] Error rendering HTML for ${post.title}`, e);
       }
     }
-
-    // Build relational metadata footer for XML content readers
-    let footerHtml = `<hr /><div style="margin-top: 16px; font-size: 13px; color: #555;">`;
-    footerHtml += `<p><strong>Author:</strong> <a href="${authorUrl}">${authorName}</a></p>`;
-
-    if (categories.length > 0) {
-      const categoryLinks = categories
-        .map(c => `<a href="${siteUrl}/categories/${c.slug}">${c.name}</a>`)
-        .join(", ");
-      footerHtml += `<p><strong>Categories:</strong> ${categoryLinks}</p>`;
-    }
-
-    if (tags.length > 0) {
-      const tagLinks = tags.map(t => `<a href="${siteUrl}/tags/${t.slug}">#${t.name}</a>`).join(" ");
-      footerHtml += `<p><strong>Tags:</strong> ${tagLinks}</p>`;
-    }
-    footerHtml += `</div>`;
-
-    const fullContentHtml = `${bodyHtml}\n${footerHtml}`;
 
     // Map Category XML nodes with domain attributes
     const xmlCategories = [
@@ -146,11 +143,12 @@ export async function generateBlogRssFeed(
       id: postUrl,
       link: postUrl,
       description: post.description || "",
-      content: fullContentHtml,
+      content: bodyHtml,
       date: post.date ? new Date(post.date) : new Date(),
       category: xmlCategories,
       image: imageUrl,
-      author: [{ name: authorName, email: `no-reply@nodewave.net (${authorName})` }],
+      // Passing raw email prevents the 'email (Author Name) (Author Name)' duplication bug
+      author: [{ name: authorName, email: "info@nodewave.net" }],
     });
   }
 
@@ -208,7 +206,7 @@ export async function generateAuthorsRssFeed(event: H3Event): Promise<string> {
       id: authorUrl,
       link: authorUrl,
       description: author.bio || `Author profile for ${author.name}`,
-      content: html,
+      content: cleanRssHtml(html),
       date: new Date(),
     });
   }
@@ -268,7 +266,7 @@ export async function generateCategoriesRssFeed(event: H3Event): Promise<string>
       id: categoryUrl,
       link: categoryUrl,
       description: category.description || `Category overview for ${category.name}`,
-      content: html,
+      content: cleanRssHtml(html),
       date: new Date(),
     });
   }
@@ -328,7 +326,7 @@ export async function generateTagsRssFeed(event: H3Event): Promise<string> {
       id: tagUrl,
       link: tagUrl,
       description: `Articles tagged under #${tag.name}`,
-      content: html,
+      content: cleanRssHtml(html),
       date: new Date(),
     });
   }
