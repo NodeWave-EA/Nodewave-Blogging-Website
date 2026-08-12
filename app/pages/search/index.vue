@@ -39,11 +39,9 @@ const activeTabIndex = ref(0);
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 let lastSearchRequestId = 0;
 
-// Watch search input and trigger debounced execution & URL update
-watch(searchQuery, (newQuery) => {
-  if (searchTimer) clearTimeout(searchTimer);
-
-  const cleanQuery = newQuery.trim();
+// Core search handler
+async function executeSearch(query: string) {
+  const cleanQuery = query.trim();
 
   // Sync state to URL query parameter (?q=...) without creating duplicate history entries
   const currentUrlQuery = typeof route.query.q === "string" ? route.query.q : "";
@@ -68,39 +66,64 @@ watch(searchQuery, (newQuery) => {
     return;
   }
 
-  // Debounce API calls by 250ms
-  searchTimer = setTimeout(async () => {
-    const requestId = ++lastSearchRequestId;
-    isSearchingMeta.value = true;
+  const requestId = ++lastSearchRequestId;
+  isSearchingMeta.value = true;
 
-    try {
-      const [blogs, data] = await Promise.all([
-        searchBlogs(cleanQuery, {
-          limit: 12,
-          snippet: { columns: ["content", "title"], around: 25, tag: "mark" },
-        }),
-        searchMetadataCollections(cleanQuery),
-      ]);
+  try {
+    const [blogs, data] = await Promise.all([
+      searchBlogs(cleanQuery, {
+        limit: 12,
+        snippet: { columns: ["content", "title"], around: 25, tag: "mark" },
+      }),
+      searchMetadataCollections(cleanQuery),
+    ]);
 
-      // Guard against out-of-order race conditions
-      if (requestId !== lastSearchRequestId) return;
+    // Guard against out-of-order race conditions
+    if (requestId !== lastSearchRequestId) return;
 
-      blogResults.value = blogs;
-      metaResults.value = data as typeof metaResults.value;
-      activeTabIndex.value = 0; // Reset tab selection on fresh results
+    blogResults.value = blogs || [];
+    metaResults.value = (data as typeof metaResults.value) || {
+      authors: [],
+      categories: [],
+      tags: [],
+    };
+    activeTabIndex.value = 0; // Reset tab selection on fresh results
+  }
+  catch (err) {
+    if (requestId === lastSearchRequestId) {
+      console.error("Search failure:", err);
     }
-    catch (err) {
-      if (requestId === lastSearchRequestId) {
-        console.error("Search failure:", err);
-      }
+  }
+  finally {
+    if (requestId === lastSearchRequestId) {
+      isSearchingMeta.value = false;
     }
-    finally {
-      if (requestId === lastSearchRequestId) {
-        isSearchingMeta.value = false;
-      }
+  }
+}
+
+// Watch BOTH searchQuery AND blogSearchStatus.
+// This guarantees that if the FTS search index finishes loading in the background,
+// the search automatically re-executes with the full index ready.
+watch(
+  [searchQuery, blogSearchStatus],
+  ([newQuery, newStatus], [_, oldStatus]) => {
+    if (searchTimer) clearTimeout(searchTimer);
+
+    if (!newQuery.trim()) {
+      executeSearch("");
+      return;
     }
-  }, 250);
-}, { immediate: true });
+
+    // Run immediately if status just transitioned to ready, otherwise debounce user typing by 250ms
+    const isStatusReadyTransition = oldStatus !== newStatus && newStatus !== "loading";
+    const delay = isStatusReadyTransition ? 0 : 250;
+
+    searchTimer = setTimeout(() => {
+      executeSearch(newQuery);
+    }, delay);
+  },
+  { immediate: true },
+);
 
 // Listen for external URL changes (e.g., Browser Back/Forward buttons)
 watch(
@@ -235,6 +258,15 @@ function clearSearch() {
             <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-sm mx-auto leading-relaxed">
               Enter keywords, author names, tags, or categories to search across all indexed content collections. Use the tabs to filter results by type.
             </p>
+          </div>
+
+          <div v-else-if="!hasResults && (isSearchingMeta || blogSearchStatus === 'loading')" class="text-center py-20">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4 animate-pulse">
+              <UIcon name="i-lucide-loader" class="w-6 h-6 text-primary-500 animate-spin" />
+            </div>
+            <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+              Searching Content Index...
+            </h3>
           </div>
 
           <div v-else-if="!hasResults && !isSearchingMeta" class="text-center py-20">
