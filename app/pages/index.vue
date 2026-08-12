@@ -48,7 +48,6 @@ useSeoMeta({
   ogTitle: () => HOME_TITLE.value,
   ogDescription: () => HOME_DESCRIPTION.value,
   ogUrl: () => HOME_CANONICAL_URL.value,
-  ogImage: () => HOME_OG_IMAGE.value,
   ogImageAlt: () => `${config.siteName || "Nodewave Blogs"} Homepage`,
   ogSiteName: () => config.siteName || "Nodewave",
 
@@ -56,7 +55,6 @@ useSeoMeta({
   twitterCard: "summary_large_image",
   twitterTitle: () => HOME_TITLE.value,
   twitterDescription: () => HOME_DESCRIPTION.value,
-  twitterImage: () => HOME_OG_IMAGE.value,
 });
 
 useHead({

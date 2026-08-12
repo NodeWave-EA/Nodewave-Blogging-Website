@@ -69,7 +69,6 @@ useSeoMeta({
   ogTitle: () => BLOGS_TITLE.value,
   ogDescription: () => BLOGS_DESCRIPTION.value,
   ogUrl: () => BLOGS_CANONICAL_URL.value,
-  ogImage: () => BLOGS_OG_IMAGE.value,
   ogImageAlt: () => `${config.siteName || "Nodewave"} Blog Archive`,
   ogSiteName: () => config.siteName || "Nodewave",
 
@@ -77,7 +76,6 @@ useSeoMeta({
   twitterCard: "summary_large_image",
   twitterTitle: () => BLOGS_TITLE.value,
   twitterDescription: () => BLOGS_DESCRIPTION.value,
-  twitterImage: () => BLOGS_OG_IMAGE.value,
 });
 
 useHead({

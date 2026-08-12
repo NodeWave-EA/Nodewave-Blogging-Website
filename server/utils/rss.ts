@@ -83,9 +83,9 @@ export async function generateBlogRssFeed(
     link: `${siteUrl}/`,
     language: "en",
     favicon: `${siteUrl}/favicon.ico`,
-    image: `${siteUrl}/og-banner.png`,
+    image: `${siteUrl}/logo.png`,
     copyright: `Copyright © ${new Date().getFullYear()} NodeWave. All rights reserved.`,
-    generator: "Nuxt Content v3 Relational RSS Engine",
+    generator: "Nodewave RSS Engine",
     feedLinks: { rss2: feedUrl },
   });
 
@@ -101,6 +101,7 @@ export async function generateBlogRssFeed(
     // Extract resolved relationships from enrichBlog
     const authorObj = typeof post.author === "object" ? (post.author as BlogAuthor) : null;
     const authorName = authorObj?.name || (typeof post.author === "string" ? post.author : "NodeWave Team");
+    const authorEmail = authorObj?.email || 'info@nodewave.net'
 
     const categories = Array.isArray(post.categories) ? (post.categories as BlogCategory[]) : [];
     const tags = Array.isArray(post.tags) ? (post.tags as BlogTag[]) : [];
@@ -131,7 +132,7 @@ export async function generateBlogRssFeed(
       ...tags.map(t => ({ name: t.name, domain: `${siteUrl}/tags/${t.slug}` })),
     ];
 
-    const coverImage = post.image || post.cover || post.ogImage;
+    const coverImage = post.coverImage.src;
     const imageUrl = coverImage
       ? coverImage.startsWith("http")
         ? coverImage
@@ -148,7 +149,7 @@ export async function generateBlogRssFeed(
       category: xmlCategories,
       image: imageUrl,
       // Passing raw email prevents the 'email (Author Name) (Author Name)' duplication bug
-      author: [{ name: authorName, email: "info@nodewave.net" }],
+      author: [{ name: authorName, email: authorEmail }],
     });
   }
 
@@ -175,7 +176,7 @@ export async function generateAuthorsRssFeed(event: H3Event): Promise<string> {
     id: feedUrl,
     link: `${siteUrl}/authors`,
     language: "en",
-    generator: "Nuxt Content v3 Relational RSS Engine",
+    generator: "Nodewave RSS Engine",
     feedLinks: { rss2: feedUrl },
   });
 
@@ -235,7 +236,7 @@ export async function generateCategoriesRssFeed(event: H3Event): Promise<string>
     id: feedUrl,
     link: `${siteUrl}/categories`,
     language: "en",
-    generator: "Nuxt Content v3 Relational RSS Engine",
+    generator: "Nodewave RSS Engine",
     feedLinks: { rss2: feedUrl },
   });
 
@@ -295,7 +296,7 @@ export async function generateTagsRssFeed(event: H3Event): Promise<string> {
     id: feedUrl,
     link: `${siteUrl}/tags`,
     language: "en",
-    generator: "Nuxt Content v3 Relational RSS Engine",
+    generator: "Nodewave RSS Engine",
     feedLinks: { rss2: feedUrl },
   });
 

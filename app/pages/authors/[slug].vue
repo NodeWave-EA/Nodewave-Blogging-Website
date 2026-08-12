@@ -119,7 +119,6 @@ useSeoMeta({
   ogTitle: () => PAGE_TITLE.value,
   ogDescription: () => PAGE_DESCRIPTION.value,
   ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImage: () => authorAvatarUrl.value,
   ogImageAlt: () => author.value?.name || "Author Avatar",
   ogSiteName: () => config.siteName || "Nodewave",
 
@@ -132,10 +131,9 @@ useSeoMeta({
   twitterCard: "summary_large_image",
   twitterTitle: () => PAGE_TITLE.value,
   twitterDescription: () => PAGE_DESCRIPTION.value,
-  twitterImage: () => authorAvatarUrl.value,
   twitterSite: () => author.value?.socialLinks?.find(l => l.platform.toLowerCase() === "twitter" || l.platform.toLowerCase() === "x")?.url || "",
   twitterCreator: () => author.value?.socialLinks?.find(l => l.platform.toLowerCase() === "twitter" || l.platform.toLowerCase() === "x")?.url || "",
-  
+
   author: () => author.value?.name || "",
 });
 

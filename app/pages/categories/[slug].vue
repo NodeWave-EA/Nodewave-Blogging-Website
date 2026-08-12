@@ -61,7 +61,6 @@ useSeoMeta({
   ogTitle: () => PAGE_TITLE.value,
   ogDescription: () => PAGE_DESCRIPTION.value,
   ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImage: () => categoryOgImageUrl.value,
   ogImageAlt: () => category.value?.name || "Category Archive",
   ogSiteName: () => config.siteName || "Nodewave",
 
@@ -69,7 +68,6 @@ useSeoMeta({
   twitterCard: "summary_large_image",
   twitterTitle: () => PAGE_TITLE.value,
   twitterDescription: () => PAGE_DESCRIPTION.value,
-  twitterImage: () => categoryOgImageUrl.value,
 });
 
 useHead({

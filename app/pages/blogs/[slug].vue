@@ -85,13 +85,12 @@ useSeoMeta({
   title: () => BLOG_TITLE,
   description: () => BLOG_DESCRIPTION,
   keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || blogTags.value?.map(t => t.name).join(", ") || "",
-  
+
   // Open Graph / Facebook
   ogType: "article",
   ogTitle: () => currentBlog.value?.seo?.ogTitle || BLOG_TITLE,
   ogDescription: () => currentBlog.value?.seo?.ogDescription || BLOG_DESCRIPTION,
   ogUrl: BLOG_CANONICAL_URL,
-  ogImage: coverImageUrl.value,
   ogImageAlt: currentBlog.value?.coverImage?.alt || BLOG_TITLE,
   ogSiteName: runtimeConfig.siteName || "Nodewave",
 
@@ -99,7 +98,6 @@ useSeoMeta({
   twitterCard: "summary_large_image",
   twitterTitle: () => currentBlog.value?.seo?.twitterTitle || BLOG_TITLE,
   twitterDescription: () => currentBlog.value?.seo?.twitterDescription || BLOG_DESCRIPTION,
-  twitterImage: coverImageUrl.value,
 
   // Indexing directives
   robots: () => (currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"),
