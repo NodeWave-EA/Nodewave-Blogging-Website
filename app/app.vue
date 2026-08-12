@@ -10,6 +10,13 @@ const route = useRoute();
 
 logger.log(`Navigated to ${route.path}`);
 
+// Handle PWA shortcut redirect to main website (?main=https://nodewave.net)
+const mainTarget = route.query.main;
+if (typeof mainTarget === "string" && mainTarget) {
+  logger.log(`Redirecting to main site: ${mainTarget}`);
+  navigateTo(mainTarget, { external: true });
+}
+
 const variants: BackgroundVariant[] = [
   "parallax-stars",
   "iot-nodes",
