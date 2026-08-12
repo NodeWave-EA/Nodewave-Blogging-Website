@@ -1,7 +1,24 @@
 <script setup lang="ts">
+import { navLinks } from "~/constants";
+
 const { headerClass, containerClass } = useFloatingHeader();
 
 useAOS();
+
+const config = useRuntimeConfig();
+const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+
+// Dynamically generate SiteNavigationElement Schema from navLinks
+useSchemaOrg([
+  defineItemList({
+    "@type": "SiteNavigationElement",
+    name: "Main Navigation",
+    itemListElement: navLinks.map(link => ({
+      name: link.label.charAt(0).toUpperCase() + link.label.slice(1),
+      url: `${siteUrl}${link.to}`,
+    })),
+  }),
+]);
 </script>
 
 <template>
@@ -38,3 +55,4 @@ useAOS();
     </template>
   </UHeader>
 </template>
+  
