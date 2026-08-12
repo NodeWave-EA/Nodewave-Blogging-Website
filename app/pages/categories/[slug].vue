@@ -41,28 +41,42 @@ useInfiniteScroll(
   },
 );
 
-// SEO
 const config = useRuntimeConfig().public;
-const PAGE_TITLE = computed(() => `Browse ${category.value?.name} category articles`);
-const PAGE_DESCRIPTION = computed(() => category.value?.description || category.value?.meta?.description || `Explore articles under the ${category.value?.name} classification.`);
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories/${category.value?.slug}`);
+const PAGE_TITLE = computed(() => `Browse ${category.value?.name || "Category"} Articles`);
+const PAGE_DESCRIPTION = computed(
+  () => category.value?.description || category.value?.meta?.description || `Explore articles and tutorials classified under the ${category.value?.name || "category"} topic.`,
+);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories/${category.value?.slug || slug}`);
+const categoryOgImageUrl = computed(() => `${config.siteUrl}/og-banner.png`);
 
+// Meta & Social Sharing Tags
 useSeoMeta({
-  title: toValue(PAGE_TITLE),
-  description: toValue(PAGE_DESCRIPTION),
+  title: () => PAGE_TITLE.value,
+  description: () => PAGE_DESCRIPTION.value,
+  keywords: () => `nodewave, category, ${category.value?.name || ""}, articles, tutorials, documentation`,
+  robots: "index, follow, max-image-preview:large",
+
+  // Open Graph / Facebook
   ogType: "website",
-  ogTitle: toValue(PAGE_TITLE),
-  ogDescription: toValue(PAGE_DESCRIPTION),
+  ogTitle: () => PAGE_TITLE.value,
+  ogDescription: () => PAGE_DESCRIPTION.value,
+  ogUrl: () => PAGE_CANONICAL_URL.value,
+  ogImage: () => categoryOgImageUrl.value,
+  ogImageAlt: () => category.value?.name || "Category Archive",
+  ogSiteName: () => config.siteName || "Nodewave",
+
+  // Twitter
   twitterCard: "summary_large_image",
-  twitterTitle: toValue(PAGE_TITLE),
-  twitterDescription: toValue(PAGE_DESCRIPTION),
+  twitterTitle: () => PAGE_TITLE.value,
+  twitterDescription: () => PAGE_DESCRIPTION.value,
+  twitterImage: () => categoryOgImageUrl.value,
 });
 
 useHead({
   link: [
     {
       rel: "canonical",
-      href: toValue(PAGE_CANONICAL_URL),
+      href: () => PAGE_CANONICAL_URL.value,
     },
     {
       rel: "icon",
@@ -71,6 +85,32 @@ useHead({
     },
   ],
 });
+
+// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+useSchemaOrg([
+  // Google Search Breadcrumb
+  defineBreadcrumb({
+    itemListElement: [
+      { name: "Home", item: "/" },
+      { name: "Categories", item: "/categories" },
+      { name: category.value?.name || "Category Archive", item: PAGE_CANONICAL_URL.value },
+    ],
+  }),
+
+  // CollectionPage Schema for Topic Category
+  {
+    "@type": "CollectionPage",
+    "@id": `${PAGE_CANONICAL_URL.value}/#collectionpage`,
+    "url": PAGE_CANONICAL_URL.value,
+    "name": PAGE_TITLE.value,
+    "description": PAGE_DESCRIPTION.value,
+    "about": {
+      "@type": "Thing",
+      "name": category.value?.name,
+      "description": category.value?.description,
+    },
+  },
+]);
 
 defineOgImage("Taxonomy.takumi", {
   title: toValue(PAGE_TITLE),
@@ -96,6 +136,7 @@ defineOgImage("Taxonomy.takumi", {
               <NuxtLink
                 to="/categories"
                 class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
+                aria-label="Return to all categories"
               >
                 <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                 Back to Categories
