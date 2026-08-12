@@ -62,16 +62,33 @@ export async function enrichBlog(event: H3Event, blog: BlogType): Promise<BlogTy
  * orders them by date in descending order, and enriches each blog with additional data.
  */
 export async function getAllBlogs(event: H3Event): Promise<BlogType[]> {
-  const blogs = await queryCollection(event, "blogs")
+  const blogs = (await queryCollection(event, "blogs")
     .where("published", "=", true)
     .where("draft", "=", false)
     .order("date", "DESC")
-    .all() as BlogType[];
+    .all()) as BlogType[];
 
-  // Map and enrich all blogs in parallel, passing along the event context
-  const enrichedBlogs = await Promise.all(
-    blogs.map(blog => enrichBlog(event, blog)),
-  );
+  // Map and enrich all blogs in parallel
+  return Promise.all(blogs.map(blog => enrichBlog(event, blog)));
+}
 
-  return enrichedBlogs;
+/**
+ * Fetches all indexed authors.
+ */
+export async function getAllAuthors(event: H3Event): Promise<BlogAuthor[]> {
+  return (await queryCollection(event, "authors").all()) as BlogAuthor[];
+}
+
+/**
+ * Fetches all indexed categories.
+ */
+export async function getAllCategories(event: H3Event): Promise<BlogCategory[]> {
+  return (await queryCollection(event, "categories").all()) as BlogCategory[];
+}
+
+/**
+ * Fetches all indexed tags.
+ */
+export async function getAllTags(event: H3Event): Promise<BlogTag[]> {
+  return (await queryCollection(event, "tags").all()) as BlogTag[];
 }
