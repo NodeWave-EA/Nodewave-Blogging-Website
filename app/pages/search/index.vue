@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { useContent } from "~/composables/content";
 
@@ -9,12 +9,17 @@ definePageMeta({
   title: "Global Hub Search",
 });
 
+const route = useRoute();
+const router = useRouter();
+
 const { searchMetadataCollections } = useContent();
 
 // Initialize the SQLite FTS5 index for pages
 const { status: blogSearchStatus, search: searchBlogs } = useSearchCollection("blogs");
 
-const searchQuery = ref("");
+// Initialize search query directly from URL parameter ?q=...
+const searchQuery = ref(typeof route.query.q === "string" ? route.query.q : "");
+const searchInputRef = ref<any>(null);
 const blogResults = ref<any[]>([]);
 
 const metaResults = ref<{
@@ -28,46 +33,105 @@ const metaResults = ref<{
 });
 
 const isSearchingMeta = ref(false);
+const activeTabIndex = ref(0);
 
-// Handle queries concurrently
-watch(searchQuery, async (newQuery) => {
+// Debouncing & Race-Condition Prevention
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+let lastSearchRequestId = 0;
+
+// Watch search input and trigger debounced execution & URL update
+watch(searchQuery, (newQuery) => {
+  if (searchTimer) clearTimeout(searchTimer);
+
   const cleanQuery = newQuery.trim();
+
+  // Sync state to URL query parameter (?q=...) without creating duplicate history entries
+  const currentUrlQuery = typeof route.query.q === "string" ? route.query.q : "";
+  if (cleanQuery !== currentUrlQuery) {
+    router.replace({
+      query: {
+        ...route.query,
+        q: cleanQuery || undefined, // Remove 'q' parameter if string is empty
+      },
+    });
+  }
+
   if (!cleanQuery) {
     blogResults.value = [];
     metaResults.value = {
-      authors: [] as BlogAuthor[],
-      categories: [] as BlogCategory[],
-      tags: [] as BlogTag[],
+      authors: [],
+      categories: [],
+      tags: [],
     };
+    isSearchingMeta.value = false;
+    activeTabIndex.value = 0;
     return;
   }
 
-  isSearchingMeta.value = true;
+  // Debounce API calls by 250ms
+  searchTimer = setTimeout(async () => {
+    const requestId = ++lastSearchRequestId;
+    isSearchingMeta.value = true;
 
-  try {
-    const [blogs, data] = await Promise.all([
-      searchBlogs(cleanQuery, {
-        limit: 12,
-        snippet: { columns: ["content", "title"], around: 25, tag: "mark" },
-      }),
-      searchMetadataCollections(cleanQuery),
-    ]);
+    try {
+      const [blogs, data] = await Promise.all([
+        searchBlogs(cleanQuery, {
+          limit: 12,
+          snippet: { columns: ["content", "title"], around: 25, tag: "mark" },
+        }),
+        searchMetadataCollections(cleanQuery),
+      ]);
 
-    const metadata = data as {
-      authors: BlogAuthor[];
-      categories: BlogCategory[];
-      tags: BlogTag[];
-    };
+      // Guard against out-of-order race conditions
+      if (requestId !== lastSearchRequestId) return;
 
-    blogResults.value = blogs;
-    metaResults.value = metadata;
+      blogResults.value = blogs;
+      metaResults.value = data as typeof metaResults.value;
+      activeTabIndex.value = 0; // Reset tab selection on fresh results
+    }
+    catch (err) {
+      if (requestId === lastSearchRequestId) {
+        console.error("Search failure:", err);
+      }
+    }
+    finally {
+      if (requestId === lastSearchRequestId) {
+        isSearchingMeta.value = false;
+      }
+    }
+  }, 250);
+}, { immediate: true });
+
+// Listen for external URL changes (e.g., Browser Back/Forward buttons)
+watch(
+  () => route.query.q,
+  (newUrlQuery) => {
+    const queryStr = typeof newUrlQuery === "string" ? newUrlQuery : "";
+    if (queryStr !== searchQuery.value) {
+      searchQuery.value = queryStr;
+    }
+  },
+);
+
+// Shortcut handler for the '/' key
+function handleGlobalKeyDown(event: KeyboardEvent) {
+  if (
+    event.key === "/"
+    && document.activeElement?.tagName !== "INPUT"
+    && document.activeElement?.tagName !== "TEXTAREA"
+  ) {
+    event.preventDefault();
+    const inputEl = searchInputRef.value?.$el?.querySelector("input") || searchInputRef.value?.input;
+    inputEl?.focus();
   }
-  catch (err) {
-    console.error("Search failure:", err);
-  }
-  finally {
-    isSearchingMeta.value = false;
-  }
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", handleGlobalKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleGlobalKeyDown);
 });
 
 // Structural computes for conditional status display
@@ -89,8 +153,6 @@ const totalResultsCount = computed(() => {
   );
 });
 
-const activeTabIndex = ref(0);
-
 const tabs = computed(() => [
   { slot: "all", label: "All Results", icon: "i-lucide-layers" },
   { slot: "blogs", label: `Articles (${blogResults.value.length})`, icon: "i-lucide-book-open" },
@@ -103,6 +165,7 @@ const currentTabSlot = computed(() => tabs.value[activeTabIndex.value]?.slot || 
 
 function clearSearch() {
   searchQuery.value = "";
+  activeTabIndex.value = 0;
 }
 </script>
 
@@ -113,6 +176,7 @@ function clearSearch() {
         <div class="sticky top-(--ui-header-height,3.5rem) z-40 -mx-4 px-4 py-3 backdrop-blur-xs border-b border-neutral-200/50 dark:border-neutral-800/60 shadow-xs space-y-4">
           <div class="max-w-5xl mx-auto w-full">
             <UInput
+              ref="searchInputRef"
               v-model="searchQuery"
               icon="i-lucide-search"
               size="xl"
@@ -313,7 +377,7 @@ function clearSearch() {
 <style>
 @reference "~/assets/css/main.css";
 
-/* Utility class to hide ugly native horizontal scrollbars on multi-tab sliders */
+/* Utility class to hide native horizontal scrollbars on multi-tab sliders */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
