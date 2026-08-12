@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineOrganization, defineWebSite, useSchemaOrg } from "#imports";
+import { defineOrganization, defineSearchAction, defineWebSite, useSchemaOrg } from "#imports";
 
 import { siteConfig } from "~/app.meta";
 
@@ -21,6 +21,12 @@ useSchemaOrg([
     "description": siteConfig.description,
     "publisher": { "@id": ORG_ID },
     "inLanguage": "en-US",
+    // Configures Google Sitelinks Search Box
+    "potentialAction": [
+      defineSearchAction({
+        target: `${ROOT_URL}/search?q={search_term_string}`,
+      }),
+    ],
   }),
 
   defineOrganization({
@@ -88,35 +94,6 @@ useSchemaOrg([
       "longitude": "36.8172",
     },
     "aggregateRating": {
-      "author": {
-        "@type": "Organization",
-        "name": siteName,
-        "url": ROOT_URL,
-        "logo": siteLogo,
-        "email": siteConfig.contact.email,
-        "telephone": siteConfig.contact.phone,
-        "sameAs": [
-          siteConfig.social?.github,
-          siteConfig.social?.tiktok,
-        ].filter(Boolean),
-        "description": siteConfig.description,
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "Customer Support",
-          "email": siteConfig.contact.email,
-          "telephone": siteConfig.contact.phone,
-          "areaServed": "EA",
-          "availableLanguage": ["English"],
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": siteConfig.postAddress?.streetAddress || "",
-          "addressLocality": siteConfig.postAddress?.locality || "",
-          "addressRegion": siteConfig.postAddress?.addressRegion || "",
-          "postalCode": siteConfig.postAddress?.postalCode || "",
-          "addressCountry": siteConfig.postAddress?.addressCountry || "KE",
-        },
-      },
       "@type": "AggregateRating",
       "itemReviewed": {
         "@id": LOCAL_BIZ_ID,
