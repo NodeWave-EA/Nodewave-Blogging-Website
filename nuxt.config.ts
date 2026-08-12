@@ -172,6 +172,14 @@ export default defineNuxtConfig({
     "/categories/**": { prerender: true },
     "/editor/**": { ssr: false },
 
+    // RSS Feed Prerender Rules
+    "/rss.xml": { prerender: true },
+    "/blogs/rss.xml": { prerender: true },
+    "/authors/rss.xml": { prerender: true },
+    "/categories/rss.xml": { prerender: true },
+    "/tags/rss.xml": { prerender: true },
+    
+    
     "/_nuxt/**": { headers: { "Cache-Control": "public, max-age=31536000, immutable" } },
   },
 
@@ -191,7 +199,11 @@ export default defineNuxtConfig({
       routes: [
         "/",
         "/rss.xml",
-      ],
+        "/blogs/rss.xml",
+        "/authors/rss.xml",
+        "/categories/rss.xml",
+        "/tags/rss.xml",
+    ],
       ignore: [],
     },
     experimental: {
