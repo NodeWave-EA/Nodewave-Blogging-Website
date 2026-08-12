@@ -81,39 +81,69 @@ function getSocialPlatformMeta(platform: string) {
   };
 }
 
-// SEO
 const config = useRuntimeConfig().public;
 
 const PAGE_TITLE = computed(() => `${author.value?.name || "Author"} Profile`);
-const PAGE_DESCRIPTION = computed(() => author.value?.description || `Explore the profile of ${author.value?.name || "this author"} and discover their contributions to our platform.`);
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.value?.slug}`);
+const PAGE_DESCRIPTION = computed(
+  () => author.value?.description || `Explore the profile of ${author.value?.name || "this author"} and discover their contributions to our platform.`,
+);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.value?.slug || slug}`);
 
+const authorAvatarUrl = computed(() => {
+  const src = author.value?.avatar?.src;
+  if (!src) return `${config.siteUrl}/og-banner.png`;
+  return src.startsWith("http") ? src : `${config.siteUrl}${src}`;
+});
+
+const socialUrls = computed(() => {
+  const urls: string[] = [];
+  if (author.value?.website) urls.push(author.value.website);
+  if (author.value?.company?.website) urls.push(author.value.company.website);
+  if (author.value?.socialLinks) {
+    author.value.socialLinks.forEach((link) => {
+      if (link.url) urls.push(link.url);
+    });
+  }
+  return urls;
+});
+
+// Meta & Social Sharing Tags
 useSeoMeta({
-  title: toValue(PAGE_TITLE),
-  description: toValue(PAGE_DESCRIPTION),
-  ogType: "profile",
-  ogTitle: toValue(PAGE_TITLE),
-  ogDescription: toValue(PAGE_DESCRIPTION),
-  twitterCard: "summary_large_image",
-  twitterTitle: toValue(PAGE_TITLE),
-  twitterDescription: toValue(PAGE_DESCRIPTION),
-  robots: "index, follow",
-  keywords: `nodewave, author profile, ${author.value?.name || ""}, contributions, articles, tutorials`,
-  author: author.value?.name || "",
-  twitterSite: author.value?.socialLinks?.find(link => link.platform.toLowerCase() === "twitter")?.url || "",
-  twitterCreator: author.value?.socialLinks?.find(link => link.platform.toLowerCase() === "twitter")?.url || "",
+  title: () => PAGE_TITLE.value,
+  description: () => PAGE_DESCRIPTION.value,
+  keywords: () => `nodewave, author profile, ${author.value?.name || ""}, contributions, articles, tutorials`,
+  robots: "index, follow, max-image-preview:large",
 
-  profileFirstName: author.value?.name?.split(" ")[0] || "",
-  profileLastName: author.value?.name?.split(" ").slice(1).join(" ") || "",
-  profileUsername: author.value?.slug || "",
-  profileGender: author.value?.gender || "unknown",
+  // Open Graph / Facebook
+  ogType: "profile",
+  ogTitle: () => PAGE_TITLE.value,
+  ogDescription: () => PAGE_DESCRIPTION.value,
+  ogUrl: () => PAGE_CANONICAL_URL.value,
+  ogImage: () => authorAvatarUrl.value,
+  ogImageAlt: () => author.value?.name || "Author Avatar",
+  ogSiteName: () => config.siteName || "Nodewave",
+
+  // Profile Specific Meta
+  profileFirstName: () => author.value?.name?.split(" ")[0] || "",
+  profileLastName: () => author.value?.name?.split(" ").slice(1).join(" ") || "",
+  profileUsername: () => author.value?.slug || slug,
+
+  // Twitter
+  twitterCard: "summary_large_image",
+  twitterTitle: () => PAGE_TITLE.value,
+  twitterDescription: () => PAGE_DESCRIPTION.value,
+  twitterImage: () => authorAvatarUrl.value,
+  twitterSite: () => author.value?.socialLinks?.find(l => l.platform.toLowerCase() === "twitter" || l.platform.toLowerCase() === "x")?.url || "",
+  twitterCreator: () => author.value?.socialLinks?.find(l => l.platform.toLowerCase() === "twitter" || l.platform.toLowerCase() === "x")?.url || "",
+  
+  author: () => author.value?.name || "",
 });
 
 useHead({
   link: [
     {
       rel: "canonical",
-      href: toValue(PAGE_CANONICAL_URL),
+      href: () => PAGE_CANONICAL_URL.value,
     },
     {
       rel: "icon",
@@ -122,6 +152,46 @@ useHead({
     },
   ],
 });
+
+// Nuxt Schema.org Structured Data (Author Person & ProfilePage)
+useSchemaOrg([
+  // Google Search Breadcrumb
+  defineBreadcrumb({
+    itemListElement: [
+      { name: "Home", item: "/" },
+      { name: "Authors", item: "/authors" },
+      { name: author.value?.name || "Author Profile", item: PAGE_CANONICAL_URL.value },
+    ],
+  }),
+
+  // Profile Page Document Entity
+  {
+    "@type": "ProfilePage",
+    "@id": `${PAGE_CANONICAL_URL.value}/#profilepage`,
+    "url": PAGE_CANONICAL_URL.value,
+    "name": PAGE_TITLE.value,
+    "description": PAGE_DESCRIPTION.value,
+    "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#author` },
+  },
+
+  // Person / Author Entity
+  definePerson({
+    "@id": `${PAGE_CANONICAL_URL.value}/#author`,
+    "name": author.value?.name || "Contributor",
+    "jobTitle": author.value?.title,
+    "description": author.value?.description,
+    "image": authorAvatarUrl.value,
+    "url": PAGE_CANONICAL_URL.value,
+    "sameAs": socialUrls.value,
+    "worksFor": author.value?.company
+      ? {
+          "@type": "Organization",
+          "name": author.value.company.name,
+          "url": author.value.company.website,
+        }
+      : undefined,
+  }),
+]);
 
 defineOgImage("Author.takumi", {
   name: author.value?.name,
@@ -150,7 +220,6 @@ defineOgImage("Author.takumi", {
         </NuxtLink>
         <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
 
-        <!-- use icon or  -->
         <UBadge
           size="sm"
           class="rounded-full shrink-0"
@@ -206,6 +275,7 @@ defineOgImage("Author.takumi", {
                   <NuxtImg
                     v-if="author.company.icon?.startsWith('http')"
                     :src="author.company.icon"
+                    :alt="author.company.name"
                     class="w-4 h-4 rounded-xs shrink-0"
                   />
                   <UIcon
@@ -259,6 +329,7 @@ defineOgImage("Author.takumi", {
                 class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
                 :style="getSocialPlatformMeta(link.platform).style"
                 :icon="getSocialPlatformMeta(link.platform).icon"
+                :aria-label="`Visit ${author.name}'s ${link.platform} profile`"
               />
             </UTooltip>
 
@@ -274,6 +345,7 @@ defineOgImage("Author.takumi", {
                 variant="ghost"
                 size="md"
                 class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
+                :aria-label="`Visit ${author.name}'s personal website`"
               >
                 <UAvatar
                   v-if="author.avatar?.src"
@@ -294,13 +366,13 @@ defineOgImage("Author.takumi", {
                 target="_blank"
                 variant="ghost"
                 size="md"
-
                 class="social-brand-btn rounded-xl p-2.5 transition-all duration-300 border border-neutral-100 dark:border-neutral-900 hover:border-transparent bg-neutral-50/50 dark:bg-neutral-900/30 text-neutral-500 dark:text-neutral-400"
+                :aria-label="`Visit ${author.company.name}'s company website`"
               >
-                <!-- use image or icon -->
                 <NuxtImg
                   v-if="author.company.icon?.startsWith('http')"
                   :src="author.company.icon"
+                  :alt="author.company.name"
                   class="w-5 h-5 rounded-xs shrink-0"
                 />
                 <UIcon

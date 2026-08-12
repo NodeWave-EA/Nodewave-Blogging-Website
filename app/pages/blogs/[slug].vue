@@ -53,52 +53,122 @@ if (!currentBlog.value) {
   });
 }
 
-// SEO
-
 const runtimeConfig = useRuntimeConfig().public;
 const BLOG_TITLE = currentBlog.value?.seo?.title || currentBlog.value?.title || "Article Detail";
 const BLOG_DESCRIPTION = currentBlog.value?.seo?.description || currentBlog.value?.description || "";
 const BLOG_CANONICAL_URL = `${runtimeConfig.siteUrl}${toValue(blogPath)}`;
 
+const coverImageUrl = computed(() => {
+  const src = currentBlog.value?.coverImage?.src;
+  if (!src) return `${runtimeConfig.siteUrl}/og-banner.png`;
+  return src.startsWith("http") ? src : `${runtimeConfig.siteUrl}${src}`;
+});
+
+const publishedIsoDate = computed(() => {
+  if (currentBlog.value?.date instanceof Date) {
+    return currentBlog.value.date.toISOString();
+  }
+  return currentBlog.value?.date ? new Date(currentBlog.value.date).toISOString() : "";
+});
+
+const modifiedIsoDate = computed(() => {
+  if (currentBlog.value?.updatedAt instanceof Date) {
+    return currentBlog.value.updatedAt.toISOString();
+  }
+  return currentBlog.value?.updatedAt
+    ? new Date(currentBlog.value.updatedAt).toISOString()
+    : publishedIsoDate.value;
+});
+
+// Meta & Social Sharing Tags
 useSeoMeta({
   title: () => BLOG_TITLE,
   description: () => BLOG_DESCRIPTION,
-  keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || "",
+  keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || blogTags.value?.map(t => t.name).join(", ") || "",
+  
+  // Open Graph / Facebook
   ogType: "article",
-  ogTitle: () => currentBlog.value?.seo?.ogTitle || currentBlog.value?.title,
-  ogDescription: () => currentBlog.value?.seo?.ogDescription || currentBlog.value?.description,
-  twitterCard: "summary_large_image",
-  twitterTitle: () => currentBlog.value?.seo?.twitterTitle || currentBlog.value?.title,
-  twitterDescription: () => currentBlog.value?.seo?.twitterDescription || currentBlog.value?.description,
-  robots: () => currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow",
+  ogTitle: () => currentBlog.value?.seo?.ogTitle || BLOG_TITLE,
+  ogDescription: () => currentBlog.value?.seo?.ogDescription || BLOG_DESCRIPTION,
+  ogUrl: BLOG_CANONICAL_URL,
+  ogImage: coverImageUrl.value,
+  ogImageAlt: currentBlog.value?.coverImage?.alt || BLOG_TITLE,
+  ogSiteName: runtimeConfig.siteName || "Nodewave",
 
-  articleAuthor: () => [blogAuthor.value.name || "Nodewave"],
-  articlePublishedTime: () => currentBlog.value?.date instanceof Date ? currentBlog.value.date.toISOString() : "",
-  articleModifiedTime: () => currentBlog.value?.updatedAt instanceof Date ? currentBlog.value.updatedAt.toISOString() : "",
-  articleSection: () => blogCategories.value?.[0]?.name || "",
+  // Twitter
+  twitterCard: "summary_large_image",
+  twitterTitle: () => currentBlog.value?.seo?.twitterTitle || BLOG_TITLE,
+  twitterDescription: () => currentBlog.value?.seo?.twitterDescription || BLOG_DESCRIPTION,
+  twitterImage: coverImageUrl.value,
+
+  // Indexing directives
+  robots: () => (currentBlog.value?.seo?.noIndex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"),
+
+  // Article Metadata
+  articleAuthor: () => [blogAuthor.value?.name || runtimeConfig.siteName || "Nodewave"],
+  articlePublishedTime: publishedIsoDate.value,
+  articleModifiedTime: modifiedIsoDate.value,
+  articleSection: () => blogCategories.value?.[0]?.name || "General",
   articleTag: () => blogTags.value?.map(tag => tag.name) ?? [],
-  author: () => blogAuthor.value.name || "Nodewave",
+  author: () => blogAuthor.value?.name || runtimeConfig.siteName || "Nodewave",
   publisher: () => runtimeConfig.siteName || "Nodewave",
 });
 
 useHead({
   link: [
-    {
-      rel: "canonical",
-      href: BLOG_CANONICAL_URL,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/favicon.png",
-    },
+    { rel: "canonical", href: BLOG_CANONICAL_URL },
+    { rel: "icon", type: "image/png", href: "/favicon.png" },
   ],
 });
+
+// Nuxt Schema.org Structured Data (Google Rich Article Snippets & Breadcrumbs)
+useSchemaOrg([
+  // Breadcrumbs Schema (Home > Blogs > Category > Article)
+  defineBreadcrumb({
+    itemListElement: [
+      { name: "Home", item: "/" },
+      { name: "Blogs", item: "/blogs" },
+      ...(blogCategories.value?.[0]
+        ? [{ name: blogCategories.value[0].name, item: `/${blogCategories.value[0].stem}` }]
+        : []),
+      { name: BLOG_TITLE, item: BLOG_CANONICAL_URL },
+    ],
+  }),
+
+  // BlogPosting Article Schema
+  defineArticle({
+    "@type": "BlogPosting",
+    "headline": BLOG_TITLE,
+    "description": BLOG_DESCRIPTION,
+    "image": coverImageUrl.value,
+    "datePublished": publishedIsoDate.value,
+    "dateModified": modifiedIsoDate.value,
+    "mainEntityOfPage": BLOG_CANONICAL_URL,
+    "inLanguage": "en-US",
+    "keywords": blogTags.value?.map(t => t.name) ?? [],
+    "articleSection": blogCategories.value?.[0]?.name || "General",
+    "wordCount": currentBlog.value?.meta?.readingTime?.words,
+    "author": blogAuthor.value
+      ? definePerson({
+          name: blogAuthor.value.name,
+          url: blogAuthor.value.stem ? `${runtimeConfig.siteUrl}/${blogAuthor.value.stem}` : undefined,
+          image: blogAuthor.value.avatar?.src,
+          jobTitle: blogAuthor.value.title,
+        })
+      : undefined,
+    "publisher": {
+      "@type": "Organization",
+      "name": runtimeConfig.siteName || "Nodewave",
+      "logo": runtimeConfig.siteLogo || undefined,
+      "url": runtimeConfig.siteUrl,
+    },
+  }),
+]);
 
 defineOgImage("BlogPost.takumi", {
   colorMode: "dark",
   title: BLOG_TITLE,
-  author: blogAuthor.value.name,
+  author: blogAuthor.value?.name,
   date: currentBlog.value.date instanceof Date
     ? currentBlog.value.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : String(currentBlog.value.date || ""),
@@ -154,7 +224,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
         <div v-if="currentBlog.coverImage?.src" class="absolute inset-0 z-0">
           <NuxtImg
             :src="currentBlog.coverImage.src"
-            alt="currentBlog.coverImage?.alt || 'Blog cover image'"
+            :alt="currentBlog.coverImage?.alt || currentBlog.title"
             class="w-full h-full object-cover scale-105 filter blur-xs opacity-80 dark:opacity-80"
           />
         </div>
@@ -184,7 +254,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
           <div class="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs font-mono text-neutral-400 mt-1">
             <div class="flex items-center gap-1.5">
               <UIcon name="i-lucide-calendar" class="size-4 text-primary-400" />
-              <time v-if="currentBlog.date" :datetime="String(currentBlog.date)">
+              <time v-if="currentBlog.date" :datetime="publishedIsoDate">
                 {{ useDateFormat(currentBlog.date, 'MMMM DD, YYYY').value }}
               </time>
             </div>
@@ -237,6 +307,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
                   <NuxtImg
                     v-if="blogAuthor.company.icon?.startsWith('http')"
                     :src="blogAuthor.company.icon"
+                    :alt="blogAuthor.company.name"
                     class="w-4 h-4 rounded-xs shrink-0"
                   />
                   <UIcon
@@ -373,7 +444,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
                 <NuxtImg
                   :src="item.src"
                   :alt="item.alt || 'Gallery image'"
-                  class="w-full h-64 object-cover"
+                  class="w-full h-full object-cover"
                 />
               </div>
             </div>

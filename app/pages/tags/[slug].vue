@@ -41,29 +41,42 @@ useInfiniteScroll(
   },
 );
 
-// SEO
 const config = useRuntimeConfig().public;
+const PAGE_TITLE = computed(() => `Browse ${tag.value?.name || "Tag"} Articles`);
+const PAGE_DESCRIPTION = computed(
+  () => tag.value?.description || tag.value?.meta?.description || `Explore articles and technical publications tagged under #${tag.value?.name || "topics"}.`,
+);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug || slug}`);
+const tagOgImageUrl = computed(() => `${config.siteUrl}/og-banner.png`);
 
-const PAGE_TITLE = computed(() => `Browse ${tag.value?.name} tag articles`);
-const PAGE_DESCRIPTION = computed(() => tag.value?.description || tag.value?.meta?.description || `Explore articles under the ${tag.value?.name} classification.`);
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug}`);
-
+// Meta & Social Sharing Tags
 useSeoMeta({
-  title: toValue(PAGE_TITLE),
-  description: toValue(PAGE_DESCRIPTION),
+  title: () => PAGE_TITLE.value,
+  description: () => PAGE_DESCRIPTION.value,
+  keywords: () => `nodewave, tag, ${tag.value?.name || ""}, articles, tutorials, technical topics`,
+  robots: "index, follow, max-image-preview:large",
+
+  // Open Graph / Facebook
   ogType: "website",
-  ogTitle: toValue(PAGE_TITLE),
-  ogDescription: toValue(PAGE_DESCRIPTION),
+  ogTitle: () => PAGE_TITLE.value,
+  ogDescription: () => PAGE_DESCRIPTION.value,
+  ogUrl: () => PAGE_CANONICAL_URL.value,
+  ogImage: () => tagOgImageUrl.value,
+  ogImageAlt: () => tag.value?.name ? `#${tag.value.name} Tag Archive` : "Tag Archive",
+  ogSiteName: () => config.siteName || "Nodewave",
+
+  // Twitter
   twitterCard: "summary_large_image",
-  twitterTitle: toValue(PAGE_TITLE),
-  twitterDescription: toValue(PAGE_DESCRIPTION),
+  twitterTitle: () => PAGE_TITLE.value,
+  twitterDescription: () => PAGE_DESCRIPTION.value,
+  twitterImage: () => tagOgImageUrl.value,
 });
 
 useHead({
   link: [
     {
       rel: "canonical",
-      href: toValue(PAGE_CANONICAL_URL),
+      href: () => PAGE_CANONICAL_URL.value,
     },
     {
       rel: "icon",
@@ -72,6 +85,32 @@ useHead({
     },
   ],
 });
+
+// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+useSchemaOrg([
+  // Google Search Breadcrumb
+  defineBreadcrumb({
+    itemListElement: [
+      { name: "Home", item: "/" },
+      { name: "Tags", item: "/tags" },
+      { name: tag.value?.name ? `#${tag.value.name}` : "Tag Archive", item: PAGE_CANONICAL_URL.value },
+    ],
+  }),
+
+  // CollectionPage Schema for Tag Topic
+  {
+    "@type": "CollectionPage",
+    "@id": `${PAGE_CANONICAL_URL.value}/#collectionpage`,
+    "url": PAGE_CANONICAL_URL.value,
+    "name": PAGE_TITLE.value,
+    "description": PAGE_DESCRIPTION.value,
+    "about": {
+      "@type": "Thing",
+      "name": tag.value?.name,
+      "description": tag.value?.description,
+    },
+  },
+]);
 
 defineOgImage("Taxonomy.takumi", {
   title: toValue(PAGE_TITLE),
@@ -97,6 +136,7 @@ defineOgImage("Taxonomy.takumi", {
               <NuxtLink
                 to="/tags"
                 class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
+                aria-label="Return to all tags"
               >
                 <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                 Back to Tags
