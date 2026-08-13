@@ -14,15 +14,15 @@ const themeColor = "59, 130, 246";
 </script>
 
 <template>
-  <div class="relative w-full h-full flex flex-col p-12 md:p-16 justify-center items-center bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-white overflow-hidden text-center">
+  <div class="relative w-full h-full flex flex-col justify-center items-center bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-white overflow-hidden text-center">
     <div
       :style="{
         position: 'absolute',
         inset: '0',
         opacity: isDark ? 0.03 : 0.05,
         backgroundImage: isDark
-          ? 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)'
-          : 'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)',
+          ? 'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)'
+          : 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)',
         backgroundSize: '40px 40px',
       }"
     />
