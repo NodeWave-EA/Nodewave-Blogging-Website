@@ -110,6 +110,7 @@ useSchemaOrg([
 ]);
 
 defineOgImage("Taxonomy.takumi", {
+  colorMode: "light",
   title: toValue(PAGE_TITLE),
   description: toValue(PAGE_DESCRIPTION),
   type: "Category",
