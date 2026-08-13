@@ -49,7 +49,7 @@ export default defineNuxtConfig({
         { name: "application-name", content: "Nodewave Blogging Website" },
         {
           name: 'google-site-verification',
-          content: '5OvApnB9CWkAPirNZDUuxZVEmi9r2xTH4GrP8Om-mz0'
+          content: 't6vr4ggRR6NugIbSptn2fk_buwy-wHhEvrWAgX6sJ_I'
         },
         {
           name: 'msvalidate.01',
