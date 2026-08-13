@@ -12,8 +12,8 @@ const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").r
 useSchemaOrg([
   defineItemList({
     "@type": "SiteNavigationElement",
-    name: "Main Navigation",
-    itemListElement: navLinks.map(link => ({
+    "name": "Main Navigation",
+    "itemListElement": navLinks.map(link => ({
       name: link.label.charAt(0).toUpperCase() + link.label.slice(1),
       url: `${siteUrl}${link.to}`,
     })),
@@ -55,4 +55,3 @@ useSchemaOrg([
     </template>
   </UHeader>
 </template>
-  

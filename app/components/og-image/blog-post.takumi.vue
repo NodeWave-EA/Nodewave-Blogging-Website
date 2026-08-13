@@ -1,6 +1,6 @@
 <script setup>
 defineProps({
-  title: { type: String, required: true, default: "How to Pull and Update All Local Git Branches Safely" },
+  title: { type: String, required: true },
   description: { type: String, required: false },
   category: { type: String, required: false, default: "Terminal and Shells" },
   author: { type: String, required: false, default: "Gideon Yebei" },
@@ -16,14 +16,13 @@ defineProps({
 <template>
   <!-- Fixed 1200x630 OG Canvas -->
   <div class="relative w-[1200px] h-[630px] flex flex-col justify-between p-12 bg-neutral-950 text-white font-sans overflow-hidden">
-    
     <!-- 1. Background Image + Contrast Protection Overlay -->
     <template v-if="backgroundImage">
       <img
         :src="backgroundImage"
         class="absolute inset-0 w-full h-full object-cover filter blur-[3px] scale-105"
         alt="Background"
-      />
+      >
       <!-- Gradient overlay ensures white text is always readable -->
       <div class="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/85 to-neutral-950/50" />
     </template>
@@ -49,7 +48,12 @@ defineProps({
 
       <!-- Site Brand Name & Logo -->
       <div v-if="siteName" class="flex items-center gap-3 text-neutral-300 font-semibold text-xl tracking-wide">
-        <img v-if="siteLogo" :src="siteLogo" class="w-7 h-7 rounded" alt="Logo" />
+        <img
+          v-if="siteLogo"
+          :src="siteLogo"
+          class="w-7 h-7 rounded"
+          alt="Logo"
+        >
         <span>{{ siteName }}</span>
       </div>
     </div>
@@ -72,7 +76,7 @@ defineProps({
           :src="avatar"
           alt="Avatar"
           class="w-16 h-16 rounded-full border-2 border-blue-500/60 object-cover shadow-md"
-        />
+        >
         <div class="flex flex-col gap-1">
           <span class="text-2xl font-bold text-white tracking-tight">
             {{ author }}
@@ -85,6 +89,5 @@ defineProps({
         </div>
       </div>
     </div>
-
   </div>
 </template>
