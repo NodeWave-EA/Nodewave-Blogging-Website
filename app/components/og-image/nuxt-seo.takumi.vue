@@ -39,7 +39,6 @@ const logo = "https://nodewave.net/preview.png";
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      padding: '64px',
       overflow: 'hidden',
       fontFamily: 'sans-serif',
       position: 'relative',
@@ -84,8 +83,8 @@ const logo = "https://nodewave.net/preview.png";
           inset: '0',
           opacity: 0.03,
           backgroundImage: isDark
-            ? 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)'
-            : 'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)',
+           ? 'linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)'
+           : 'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)',
           backgroundSize: '40px 40px',
         }"
       />
