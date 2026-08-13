@@ -14,7 +14,7 @@ const themeColor = "99, 102, 241";
 </script>
 
 <template>
-  <div class="relative w-full h-full flex flex-col p-12 md:p-16 justify-between bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-white overflow-hidden">
+  <div class="relative w-full h-full flex flex-col justify-between bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-white overflow-hidden">
     <div
       :style="{
         position: 'absolute',
