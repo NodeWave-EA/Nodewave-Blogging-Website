@@ -83,7 +83,7 @@ const modifiedIsoDate = computed(() => {
 
 // Meta & Social Sharing Tags
 useSeoMeta({
-  title: () => BLOG_TITLE.vaue,
+  title: () => BLOG_TITLE.value,
   description: () => BLOG_DESCRIPTION.value,
   keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || blogTags.value?.map(t => t.name).join(", ") || "",
 
@@ -92,8 +92,8 @@ useSeoMeta({
   ogTitle: () => currentBlog.value?.seo?.ogTitle || BLOG_TITLE.value,
   ogDescription: () => currentBlog.value?.seo?.ogDescription || BLOG_DESCRIPTION.value,
   ogUrl: () => BLOG_CANONICAL_URL.value,
-  ogImageAlt: currentBlog.value?.coverImage?.alt || BLOG_TITLE.value,
-  ogSiteName: runtimeConfig.siteName || "Nodewave",
+  ogImageAlt: () => currentBlog.value?.coverImage?.alt || BLOG_TITLE.value,
+  ogSiteName: () => runtimeConfig.siteName || "Nodewave",
 
   // Twitter
   twitterCard: "summary_large_image",
@@ -120,9 +120,8 @@ useHead({
   ],
 });
 
-// Nuxt Schema.org Structured Data (Google Rich Article Snippets & Breadcrumbs)
+// Nuxt Schema.org Structured Data
 useSchemaOrg([
-  // Breadcrumbs Schema (Home > Blogs > Category > Article)
   defineBreadcrumb({
     itemListElement: [
       { name: "Home", item: "/" },
@@ -134,7 +133,6 @@ useSchemaOrg([
     ],
   }),
 
-  // BlogPosting Article Schema
   defineArticle({
     "@type": "BlogPosting",
     "headline": () => BLOG_TITLE.value,
@@ -164,17 +162,21 @@ useSchemaOrg([
   }),
 ]);
 
+// Dynamic OG Image Definition
 defineOgImage("BlogPost.takumi", {
-  colorMode: "dark",
   title: () => BLOG_TITLE.value,
-  author: blogAuthor.value?.name,
-  date: currentBlog.value.date instanceof Date
-    ? currentBlog.value.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    : String(currentBlog.value.date || ""),
-  category: blogCategories.value?.[0]?.name || "General",
-  avatar: blogAuthor.value?.avatar?.src,
-  backgroundImage: currentBlog.value?.coverImage?.src,
-  readingTime: currentBlog.value?.meta?.readingTime?.text,
+  description: () => BLOG_DESCRIPTION.value,
+  author: () => blogAuthor.value?.name || "Nodewave Team",
+  date: () =>
+    currentBlog.value?.date instanceof Date
+      ? currentBlog.value.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      : String(currentBlog.value?.date || ""),
+  category: () => blogCategories.value?.[0]?.name || "General",
+  avatar: () => blogAuthor.value?.avatar?.src,
+  backgroundImage: () => currentBlog.value?.coverImage?.src,
+  readingTime: () => currentBlog.value?.meta?.readingTime?.text,
+  siteName: () => runtimeConfig.siteName || "Nodewave",
+  siteLogo: () => runtimeConfig.siteLogo,
 });
 
 logger.log("All tags:", { blogTags: blogTags.value });
