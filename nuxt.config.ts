@@ -51,6 +51,10 @@ export default defineNuxtConfig({
           name: 'google-site-verification',
           content: '5OvApnB9CWkAPirNZDUuxZVEmi9r2xTH4GrP8Om-mz0'
         },
+        {
+          name: 'msvalidate.01',
+          content: '314E0232A9FA1A5018E58CF771C23959'
+        },
       ],
       link: [
         {
