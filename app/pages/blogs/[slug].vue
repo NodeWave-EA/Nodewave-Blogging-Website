@@ -165,7 +165,7 @@ useSchemaOrg([
 ]);
 
 defineOgImage("BlogPost.takumi", {
-  colorMode: "dark",
+  colorMode: "light",
   title: () => BLOG_TITLE.value,
   author: blogAuthor.value?.name,
   date: currentBlog.value.date instanceof Date
