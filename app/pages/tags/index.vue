@@ -91,7 +91,7 @@ defineOgImage("NuxtSeo.takumi", {
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
   brand: config.siteName,
-  colorMode: "dark",
+  colorMode: "light",
   isPro: true,
 });
 
