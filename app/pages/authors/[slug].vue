@@ -196,6 +196,7 @@ useSchemaOrg([
 ]);
 
 defineOgImage("Author.takumi", {
+  colorMode: "light",
   name: author.value?.name,
   role: author.value?.title,
   avatar: author.value?.avatar?.src,
