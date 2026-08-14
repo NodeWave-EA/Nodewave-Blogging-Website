@@ -326,11 +326,11 @@ Pre-commit hooks represent a paradigm shift from "fix it in CI" to "fix it befor
 
 Key Benefits:
 
-· ✅ Catch syntax errors before they reach CI
-· ✅ Prevent credential leaks automatically
-· ✅ Enforce consistent code style across your team
-· ✅ Reduce code review noise
-· ✅ Save hours of debugging time
+- ✅ Catch syntax errors before they reach CI
+- ✅ Prevent credential leaks automatically
+- ✅ Enforce consistent code style across your team
+- ✅ Reduce code review noise
+- ✅ Save hours of debugging time
 
 What's Next?
 
