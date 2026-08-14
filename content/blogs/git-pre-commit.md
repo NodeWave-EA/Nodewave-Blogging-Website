@@ -281,15 +281,15 @@ Step 6: Real-World Performance
 
 Before Pre-commit:
 
-· Average CI failures: 3-4 per week
-· Time wasted on failed pipelines: ~2 hours/week
-· Security incidents: 1 credential leak per quarter
+- Average CI failures: 3-4 per week
+- Time wasted on failed pipelines: ~2 hours/week
+- Security incidents: 1 credential leak per quarter
 
 After Pre-commit:
 
-· CI failures: ~1 per month
-· Time saved: ~1.5 hours/week
-· Credential leaks: 0 in 6 months
+- CI failures: ~1 per month
+- Time saved: ~1.5 hours/week
+- Credential leaks: 0 in 6 months
 
 Common Pitfalls & Solutions
 
