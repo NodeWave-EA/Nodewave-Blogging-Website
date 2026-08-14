@@ -2,8 +2,11 @@ export default defineEventHandler((event) => {
   const targetKey = '61644ca4e22c4bedb8467e07486b94ca'
   const paramKey = getRouterParam(event, 'key')
 
-  // If Bing asks for your specific key file, serve it directly
-  if (paramKey === targetKey) {
+  // Strip '.txt' if present in the request path
+  const key = paramKey?.replace(/\.txt$/, '')
+
+  // Match key
+  if (key === targetKey) {
     setResponseHeader(event, 'Content-Type', 'text/plain; charset=utf-8')
     return targetKey
   }
