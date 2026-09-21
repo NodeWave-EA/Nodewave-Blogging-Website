@@ -83,7 +83,7 @@ const modifiedIsoDate = computed(() => {
 
 // Meta & Social Sharing Tags
 useSeoMeta({
-  title: () => BLOG_TITLE.vaue,
+  title: () => BLOG_TITLE.value,
   description: () => BLOG_DESCRIPTION.value,
   keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || blogTags.value?.map(t => t.name).join(", ") || "",
 

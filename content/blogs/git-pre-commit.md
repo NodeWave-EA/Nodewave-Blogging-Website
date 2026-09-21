@@ -97,22 +97,22 @@ This file defines the hooks that will run before every commit. Here's a battle-t
 repos:
   # 1. Code Hygiene & Cleanup
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0  # Latest stable as of August 2026
+    rev: v4.6.0 # Latest stable as of August 2026
     hooks:
-      - id: trailing-whitespace      # Remove trailing spaces
-      - id: end-of-file-fixer        # Ensure newline at EOF
-      - id: check-yaml               # Validate YAML syntax
-      - id: check-added-large-files  # Prevent giant file commits
-      - id: check-json               # Validate JSON syntax
-      - id: check-toml               # Validate TOML syntax
-      - id: check-merge-conflict     # Block accidental merge conflicts
+      - id: trailing-whitespace # Remove trailing spaces
+      - id: end-of-file-fixer # Ensure newline at EOF
+      - id: check-yaml # Validate YAML syntax
+      - id: check-added-large-files # Prevent giant file commits
+      - id: check-json # Validate JSON syntax
+      - id: check-toml # Validate TOML syntax
+      - id: check-merge-conflict # Block accidental merge conflicts
 
   # 2. Secret Detection - Prevent Credential Leaks
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.2
     hooks:
       - id: gitleaks-system
-        args: ["--verbose"]  # Show detected secrets
+        args: [--verbose] # Show detected secrets
 
   # 3. Python Formatting (Black)
   - repo: https://github.com/psf/black
@@ -126,17 +126,16 @@ repos:
     rev: 5.13.2
     hooks:
       - id: isort
-        args: ["--profile", "black"]
+        args: [--profile, black]
 
   # 5. Python Linting (Flake8)
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.0
     hooks:
       - id: flake8
-        additional_dependencies: [
-          "flake8-bugbear",
-          "flake8-comprehensions",
-        ]
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-comprehensions
 
   # 6. Shell Script Linting
   - repo: https://github.com/shellcheck-py/shellcheck-py
@@ -146,7 +145,7 @@ repos:
 
   # 7. Commit Message Validation
   - repo: https://github.com/conventional-changelog/commitlint
-    rev: v19.3.0  # Updated August 2026
+    rev: v19.3.0 # Updated August 2026
     hooks:
       - id: commitlint
         stages: [commit-msg]
@@ -300,7 +299,7 @@ Solution: Use types or files to limit which files are checked:
 ```yaml
 - id: flake8
   types: [python]
-  files: ^src/  # Only check src/ directory
+  files: ^src/ # Only check src/ directory
 ```
 
 Pitfall 2: Hooks Not Running

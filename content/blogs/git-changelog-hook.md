@@ -57,10 +57,10 @@ The Pain of Manual Release Notes
 
 We've all been there. It's the end of a sprint, you're tired, and you need to compile release notes for stakeholders. You scroll through git logs, trying to decipher commit messages like:
 
-* "fixed stuff"
-* "update"
-* "WIP"
-* "bugfixes"
+- "fixed stuff"
+- "update"
+- "WIP"
+- "bugfixes"
 
 Your final release notes look like a vague apology: "Fixed bugs and updated files." Your product manager is confused. Your users don't know what's new. Your QA team can't verify what was actually fixed.
 
@@ -70,9 +70,9 @@ The Solution: Conventional Commits
 
 Conventional Commits provides a lightweight specification for structuring commit messages. When your commits follow this standard, every message becomes:
 
-* Machine-readable - Automated tools can parse and categorize changes
-* Human-readable - Team members instantly understand the change type
-* Searchable - Filter commits by feature, fix, or breaking change
+- Machine-readable - Automated tools can parse and categorize changes
+- Human-readable - Team members instantly understand the change type
+- Searchable - Filter commits by feature, fix, or breaking change
 
 The Anatomy of a Conventional Commit
 
@@ -85,14 +85,14 @@ The Anatomy of a Conventional Commit
 
 Common Types:
 
-* feat: - New feature for the user
-* fix: - Bug fix
-* docs: - Documentation changes
-* style: - Code style/formatting changes
-* refactor: - Code refactoring (no behavior change)
-* perf: - Performance improvements
-* test: - Adding or updating tests
-* chore: - Maintenance tasks
+- feat: - New feature for the user
+- fix: - Bug fix
+- docs: - Documentation changes
+- style: - Code style/formatting changes
+- refactor: - Code refactoring (no behavior change)
+- perf: - Performance improvements
+- test: - Adding or updating tests
+- chore: - Maintenance tasks
 
 Example:
 
@@ -119,9 +119,9 @@ Add the commitlint hook to your .pre-commit-config.yaml:
 ```yaml
 repos:
   # ... other hooks ...
-  
+
   - repo: https://github.com/conventional-changelog/commitlint
-    rev: v19.3.0  # Updated August 2026
+    rev: v19.3.0 # Updated August 2026
     hooks:
       - id: commitlint
         stages: [commit-msg]
@@ -392,16 +392,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          
+
       - name: Generate Changelog
         run: |
           npm install -g standard-version
           standard-version --skip.tag --skip.commit
-          
+
       - name: Commit Changelog
         run: |
           git config user.name "GitHub Actions"
@@ -421,7 +421,7 @@ Prevent stale changelogs with a pre-commit check:
   rev: v4.6.0
   hooks:
     - id: check-changelog
-      # Ensure CHANGELOG.md exists and is up to date
+    # Ensure CHANGELOG.md exists and is up to date
 ```
 
 Branch-Specific Generation

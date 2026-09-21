@@ -30,7 +30,8 @@ function escapeXml(str: string): string {
  * Formats a raw date value into a human-readable date string.
  */
 function formatDate(dateInput?: string | Date): string {
-  if (!dateInput) return "";
+  if (!dateInput)
+    return "";
   const d = new Date(dateInput);
   return Number.isNaN(d.getTime())
     ? ""
@@ -64,7 +65,8 @@ function getLatestBlogDate(blogs: BlogType[]): Date {
  * internal AST attributes, and fixing malformed Shiki code block attributes.
  */
 function cleanRssHtml(html: string): string {
-  if (!html) return "";
+  if (!html)
+    return "";
   return html
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
     .replace(/class="\[\\?&quot;(.*?)\\?&quot;\]"/g, "class=\"$1\"")
@@ -95,23 +97,23 @@ function finalizeXmlOutput(
   rawXml: string,
   selfUrl: string,
   relatedFeeds: RelatedFeedLink[] = [],
-  xslPath = "/feed.xsl"
+  xslPath = "/feed.xsl",
 ): string {
   let xml = rawXml;
 
   // 1. Inject XSLT processing instruction for styled browser view
   if (!xml.includes("xml-stylesheet")) {
     xml = xml.replace(
-      '<?xml version="1.0" encoding="utf-8"?>',
-      `<?xml version="1.0" encoding="utf-8"?>\n<?xml-stylesheet type="text/xsl" href="${escapeXml(xslPath)}"?>`
+      "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+      `<?xml version="1.0" encoding="utf-8"?>\n<?xml-stylesheet type="text/xsl" href="${escapeXml(xslPath)}"?>`,
     );
   }
 
   // 2. Inject Atom and Media RSS (xmlns:media) namespaces
   if (!xml.includes("xmlns:atom")) {
     xml = xml.replace(
-      '<rss version="2.0"',
-      '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/"'
+      "<rss version=\"2.0\"",
+      "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:media=\"http://search.yahoo.com/mrss/\"",
     );
   }
 
@@ -133,7 +135,7 @@ function renderFeedResponse(
   latestDate: Date,
   feedUrl: string,
   format: FeedFormat = "rss",
-  relatedFeeds: RelatedFeedLink[] = []
+  relatedFeeds: RelatedFeedLink[] = [],
 ): string {
   if (format === "json") {
     setHeaders(event, {
@@ -177,7 +179,7 @@ export async function generateBlogRssFeed(
     format?: FeedFormat;
     relatedFeeds?: RelatedFeedLink[];
     filterFn?: (post: BlogType) => boolean;
-  }
+  },
 ): Promise<string> {
   const config = useRuntimeConfig(event);
   const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
@@ -239,7 +241,8 @@ export async function generateBlogRssFeed(
         rawHtml = rawHtml.replace(/src="\/([^"]+)"/g, `src="${siteUrl}/$1"`);
 
         bodyHtml = cleanRssHtml(rawHtml);
-      } catch (e) {
+      }
+      catch (e) {
         console.warn(`[RSS Builder] Error rendering HTML for ${post.title}`, e);
       }
     }
@@ -301,7 +304,7 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
 
   for (const author of authors) {
     const authorUrl = `${siteUrl}/authors/${author.slug}`;
-    const authorBlogs = allBlogs.filter(blog => {
+    const authorBlogs = allBlogs.filter((blog) => {
       if (typeof blog.author === "object" && blog.author?.slug) {
         return blog.author.slug === author.slug;
       }
@@ -363,7 +366,7 @@ export async function generateCategoriesRssFeed(event: H3Event, format: FeedForm
 
   for (const category of categories) {
     const categoryUrl = `${siteUrl}/categories/${category.slug}`;
-    const categoryBlogs = allBlogs.filter(blog => {
+    const categoryBlogs = allBlogs.filter((blog) => {
       if (Array.isArray(blog.categories)) {
         return blog.categories.some(c => (typeof c === "object" ? c.slug : c) === category.slug);
       }
@@ -425,7 +428,7 @@ export async function generateTagsRssFeed(event: H3Event, format: FeedFormat = "
 
   for (const tag of tags) {
     const tagUrl = `${siteUrl}/tags/${tag.slug}`;
-    const tagBlogs = allBlogs.filter(blog => {
+    const tagBlogs = allBlogs.filter((blog) => {
       if (Array.isArray(blog.tags)) {
         return blog.tags.some(t => (typeof t === "object" ? t.slug : t) === tag.slug);
       }
