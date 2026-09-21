@@ -1,4 +1,4 @@
-import { renderHTML } from "@comark/html";
+import { renderHtml } from "@comark/html";
 import { Feed } from "feed";
 import { getHeader, setHeaders, setResponseStatus } from "h3";
 import { getAllAuthors, getAllBlogs, getAllCategories, getAllTags } from "~~/server/utils/content";
@@ -113,7 +113,7 @@ function finalizeXmlOutput(
   if (!xml.includes("xmlns:atom")) {
     xml = xml.replace(
       "<rss version=\"2.0\"",
-      "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:media=\"http://search.yahoo.com/mrss/\"",
+      "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:media=\"https://search.yahoo.com/mrss/\"",
     );
   }
 
@@ -232,7 +232,7 @@ export async function generateBlogRssFeed(
     if (post.body) {
       try {
         const comarkTree = { nodes: post.body.value || [], frontmatter: {}, meta: {} };
-        let rawHtml = await renderHTML(comarkTree as unknown as Parameters<typeof renderHTML>[0]);
+        let rawHtml = await renderHtml(comarkTree as unknown as Parameters<typeof renderHtml>[0]);
 
         rawHtml = rawHtml.replace(/className=/g, "class=");
         rawHtml = rawHtml.replace(/\s*(code|language|meta)="[\s\S]*?"/g, "");
@@ -308,10 +308,10 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
       if (typeof blog.author === "object" && blog.author?.slug) {
         return blog.author.slug === author.slug;
       }
-      return blog.author === author.slug;
+      return blog.author.slug === author.slug;
     });
 
-    let html = `<p>${escapeXml(author.bio || "Core technical contributor at NodeWave.")}</p>`;
+    let html = `<p>${escapeXml(author.description || "Core technical contributor at NodeWave.")}</p>`;
     if (authorBlogs.length > 0) {
       html += `<h3>Published Articles (${authorBlogs.length}):</h3><ul>`;
       for (const b of authorBlogs) {
@@ -326,7 +326,7 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
       title: author.name || author.slug,
       id: authorUrl,
       link: authorUrl,
-      description: author.bio || `Author profile for ${author.name}`,
+      description: author.description || `Author profile for ${author.name}`,
       content: cleanRssHtml(html),
       date: getLatestBlogDate(authorBlogs),
     });
