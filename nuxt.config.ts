@@ -48,12 +48,12 @@ export default defineNuxtConfig({
         { name: "apple-mobile-web-app-title", content: "Nodewave Blogging Website" },
         { name: "application-name", content: "Nodewave Blogging Website" },
         {
-          name: 'google-site-verification',
-          content: '5OvApnB9CWkAPirNZDUuxZVEmi9r2xTH4GrP8Om-mz0'
+          name: "google-site-verification",
+          content: "5OvApnB9CWkAPirNZDUuxZVEmi9r2xTH4GrP8Om-mz0",
         },
         {
-          name: 'msvalidate.01',
-          content: '314E0232A9FA1A5018E58CF771C23959'
+          name: "msvalidate.01",
+          content: "314E0232A9FA1A5018E58CF771C23959",
         },
       ],
       link: [
@@ -168,8 +168,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    // Static Content Generation
     "/": { prerender: true },
-    "/search": { ssr: false },
     "/blogs": { prerender: true },
     "/blogs/**": { prerender: true },
     "/authors": { prerender: true },
@@ -178,6 +178,9 @@ export default defineNuxtConfig({
     "/tags/**": { prerender: true },
     "/categories": { prerender: true },
     "/categories/**": { prerender: true },
+
+    // Interactive / Private Routes
+    "/search": { ssr: false },
     "/editor/**": { ssr: false },
 
     // RSS Feed Prerender Rules
@@ -187,6 +190,16 @@ export default defineNuxtConfig({
     "/categories/rss.xml": { prerender: true },
     "/tags/rss.xml": { prerender: true },
 
+    // Cross-Site API Bridge
+    "/api/featured-posts": {
+      cors: true,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET",
+      },
+    },
+
+    // Static Assets Caching
     "/_nuxt/**": { headers: { "Cache-Control": "public, max-age=31536000, immutable" } },
   },
 
