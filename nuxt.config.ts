@@ -184,7 +184,9 @@ export default defineNuxtConfig({
 
     // Interactive / Private Routes
     "/search": { ssr: false },
-    "/editor/**": { ssr: false },
+    "/editor": { ssr: false, prerender: false },
+    "/editor/**": { ssr: false, prerender: false },
+    "/__nuxt_studio/**": { ssr: true, prerender: false },
 
     // RSS Feed Prerender Rules
     "/rss.xml": { prerender: true },
