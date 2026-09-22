@@ -149,6 +149,14 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    studio: {
+      auth: {
+        github: {
+          clientId: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_ID,
+          clientSecret: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_SECRET,
+        }
+      }
+    },
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
       siteName: siteConfig.name,
