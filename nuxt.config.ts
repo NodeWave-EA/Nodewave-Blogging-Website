@@ -229,7 +229,7 @@ export default defineNuxtConfig({
         "/categories/rss.xml",
         "/tags/rss.xml",
       ],
-      ignore: [],
+      ignore: ["/editor", "/editor/**", "/__nuxt_studio/**"],
     },
     experimental: {
       wasm: true,
