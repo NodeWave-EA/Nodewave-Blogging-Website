@@ -145,15 +145,15 @@ useSchemaOrg([
         </template>
 
         <template #title>
-          <h1 id="featured-heading" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
+          <span id="featured-heading" class="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
             Explore the <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent">latest curated posts</span> and insights from <span class="bg-linear-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent">nodewave</span>.
-          </h1>
+          </span>
         </template>
 
         <template #description>
-          <p class="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
+          <span class="block text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
             Discover a wealth of knowledge and inspiration through our curated collection of posts and insights. Stay informed, gain valuable perspectives, and fuel your passion for technology and development with our carefully selected content.
-          </p>
+          </span>
         </template>
 
         <template #links>
