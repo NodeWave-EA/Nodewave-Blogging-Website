@@ -183,11 +183,11 @@ export default defineNuxtConfig({
     "/categories": { prerender: true },
     "/categories/**": { prerender: true },
 
-    // Interactive / Private Routes
+    // Interactive / Private Routes (Client-side rendering)
     "/search": { ssr: false },
-    "/editor": { ssr: false, prerender: false },
-    "/editor/**": { ssr: false, prerender: false },
-    "/__nuxt_studio/**": { ssr: true, prerender: false },
+    "/editor": { ssr: false },
+    "/editor/**": { ssr: false },
+    "/__nuxt_studio/**": { ssr: true },
 
     // RSS Feed Prerender Rules
     "/rss.xml": { prerender: true },
@@ -230,7 +230,7 @@ export default defineNuxtConfig({
         "/categories/rss.xml",
         "/tags/rss.xml",
       ],
-      ignore: ["/editor", "/editor/**", "/__nuxt_studio/**"],
+      ignore: ["/__nuxt_studio/**"],
     },
     experimental: {
       wasm: true,
@@ -407,7 +407,6 @@ export default defineNuxtConfig({
 
   studio: {
     route: "/editor",
-    dev: true,
     auth: {
       github: {
         clientId: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_ID,
