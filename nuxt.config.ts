@@ -40,6 +40,7 @@ export default defineNuxtConfig({
         { name: "msapplication-TileImage", content: "/web-app-manifest-192x192.png" },
         { name: "msapplication-config", content: "/browserconfig.xml" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-status-bar-style", content: "default" },
         { name: "apple-mobile-web-app-title", content: "Nodewave Blogging Website" },
         { name: "application-name", content: "Nodewave Blogging Website" },
@@ -154,8 +155,8 @@ export default defineNuxtConfig({
         github: {
           clientId: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_ID,
           clientSecret: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_SECRET,
-        }
-      }
+        },
+      },
     },
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
@@ -256,14 +257,13 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ["unist-util-visit", "@unhead/schema-org/vue", "@vue/devtools-core", "@vue/devtools-kit", "unist-util-visit", "@comark/vue"],
+      include: ["unist-util-is", "@unhead/schema-org/vue", "@vue/devtools-core", "@vue/devtools-kit", "unist-util-visit", "@comark/vue"],
     },
   },
 
   aiReady: {
     autoI18n: true,
     cron: true,
-    indexNow: true,
     runtimeSync: {
       ttl: 3600,
       batchSize: 20,
@@ -407,6 +407,18 @@ export default defineNuxtConfig({
 
   studio: {
     route: "/editor",
+    dev: true,
+    auth: {
+      github: {
+        clientId: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_ID,
+        clientSecret: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_SECRET,
+      },
+    },
+    git: {
+      commit: {
+        messagePrefix: "content update:",
+      },
+    },
     repository: {
       provider: "github",
       owner: "Nodewave-EA",
