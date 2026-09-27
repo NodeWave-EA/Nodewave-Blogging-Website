@@ -6,7 +6,7 @@ const { headerClass, containerClass } = useFloatingHeader();
 useAOS();
 
 const config = useRuntimeConfig();
-const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
 
 // Dynamically generate SiteNavigationElement Schema from navLinks
 useSchemaOrg([

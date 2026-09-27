@@ -12,7 +12,7 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
-const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
 
 const { searchMetadataCollections } = useContent();
 
