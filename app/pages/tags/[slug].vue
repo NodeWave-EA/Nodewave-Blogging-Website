@@ -47,6 +47,7 @@ const PAGE_DESCRIPTION = computed(
   () => tag.value?.description || tag.value?.meta?.description || `Explore articles and technical publications tagged under #${tag.value?.name || "topics"}.`,
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug || slug}`);
+const TAG_RSS_URL = computed(() => `/tags/${tag.value?.slug || slug}/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -74,6 +75,12 @@ useHead({
     {
       rel: "canonical",
       href: () => PAGE_CANONICAL_URL.value,
+    },
+    {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: () => `NodeWave - #${tag.value?.name || "Tag"} RSS Feed`,
+      href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
       rel: "icon",
@@ -130,26 +137,39 @@ defineOgImage("Taxonomy.takumi", {
       <UPageHeader class="mb-12 pb-8 border-b border-neutral-100 dark:border-neutral-900 mx-1">
         <template #title>
           <div class="space-y-4">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-2">
+                <NuxtLink
+                  to="/tags"
+                  class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
+                  aria-label="Return to all tags"
+                >
+                  <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                  Back to Tags
+                </NuxtLink>
+                <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
+                <span
+                  class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/40 dark:border-neutral-800/50"
+                  :style="{ color: tag.color || 'var(--ui-primary)' }"
+                >
+                  <UIcon
+                    :name="tag.icon || 'i-lucide-hash'"
+                    class="w-3 h-3 inline-block mr-1 align-text-top"
+                  />
+                  {{ tag.name }}
+                </span>
+              </div>
+
+              <!-- Tag RSS Feed Link -->
               <NuxtLink
-                to="/tags"
-                class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
-                aria-label="Return to all tags"
+                :to="TAG_RSS_URL"
+                target="_blank"
+                class="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-neutral-500 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-primary-500/30 transition-all"
+                title="Subscribe to tag RSS feed"
               >
-                <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                Back to Tags
+                <UIcon name="i-lucide-rss" class="w-3.5 h-3.5 text-orange-500" />
+                <span>RSS Feed</span>
               </NuxtLink>
-              <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
-              <span
-                class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/40 dark:border-neutral-800/50"
-                :style="{ color: tag.color || 'var(--ui-primary)' }"
-              >
-                <UIcon
-                  :name="tag.icon || 'i-lucide-hash'"
-                  class="w-3 h-3 inline-block mr-1 align-text-top"
-                />
-                {{ tag.name }}
-              </span>
             </div>
 
             <h1 class="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2.5">
