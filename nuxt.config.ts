@@ -58,16 +58,11 @@ export default defineNuxtConfig({
           rel: "alternate",
           type: "application/rss+xml",
           title: "RSS Feed for Nodewave Blog",
-          href: `${process.env.NUXT_PUBLIC_SITE_URL}/rss.xml`,
+          href: "/rss.xml",
         },
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
         { rel: "icon", type: "image/png", href: "/favicon.png" },
-        {
-          rel: "icon",
-          type: "image/png",
-          href: "/favicon.png",
-        },
         {
           rel: "icon",
           type: "image/png",
@@ -104,6 +99,7 @@ export default defineNuxtConfig({
     defaultLocale: "en",
     trailingSlash: false,
   },
+
   content: {
     build: {
       markdown: {
@@ -113,37 +109,6 @@ export default defineNuxtConfig({
         },
         remarkPlugins: {
           "remark-reading-time": {},
-          // "remark-toc": {
-          //   options: {
-          //     heading: "Table of Contents",
-          //   },
-          // },
-          // "remark-emoji": {
-          //   options: { emoticon: true },
-          // },
-          // "remark-lint": {
-          //   options: {
-          //     "no-duplicate-headings": true,
-          //     "no-empty-url": true,
-          //     "no-file-name-articles": true,
-          //     "no-file-name-consecutive-dashes": true,
-          //     "no-file-name-mixed-case": true,
-          //     "no-file-name-snake-case": true,
-          //     "no-heading-punctuation": true,
-          //     "no-inline-padding": true,
-          //     "no-missing-blank-lines": true,
-          //     "no-multiple-toplevel-headings": true,
-          //     "no-reference-like-url": true,
-          //     "no-space-in-links": true,
-          //     "no-tabs-indentation": true,
-          //   },
-          // },
-          // "remark-github-blockquote-alert": {},
-          // "remark-github": {},
-          // "remark-gfm": {},
-          // "remark-git-contributors": {},
-          // "@akebifiky/remark-simple-plantuml": {},
-          // 'remark-refer-plantuml': {},
         },
       },
     },
@@ -164,7 +129,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // Static Content Generation
+    // Static Content Prerendering
     "/": { prerender: true },
     "/blogs": { prerender: true },
     "/blogs/**": { prerender: true },
@@ -175,18 +140,18 @@ export default defineNuxtConfig({
     "/categories": { prerender: true },
     "/categories/**": { prerender: true },
 
-    // Interactive / Private Routes (Client-side rendering)
-    "/search": { ssr: false },
-    "/editor": { ssr: false },
-    "/editor/**": { ssr: false },
-    "/__nuxt_studio/**": { ssr: true },
-
     // RSS Feed Prerender Rules
     "/rss.xml": { prerender: true },
     "/blogs/rss.xml": { prerender: true },
     "/authors/rss.xml": { prerender: true },
     "/categories/rss.xml": { prerender: true },
     "/tags/rss.xml": { prerender: true },
+
+    // Interactive / Private Routes (Client-side rendering)
+    "/search": { ssr: false },
+    "/editor": { ssr: false },
+    "/editor/**": { ssr: false },
+    "/__nuxt_studio/**": { ssr: true },
 
     // Cross-Site API Bridge
     "/api/featured-posts": {
@@ -214,14 +179,6 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: true,
-      routes: [
-        "/",
-        "/rss.xml",
-        "/blogs/rss.xml",
-        "/authors/rss.xml",
-        "/categories/rss.xml",
-        "/tags/rss.xml",
-      ],
       ignore: ["/__nuxt_studio/**"],
     },
     experimental: {
@@ -249,7 +206,14 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ["unist-util-is", "@unhead/schema-org/vue", "@vue/devtools-core", "@vue/devtools-kit", "unist-util-visit", "@comark/vue"],
+      include: [
+        "unist-util-is",
+        "@unhead/schema-org/vue",
+        "@vue/devtools-core",
+        "@vue/devtools-kit",
+        "unist-util-visit",
+        "@comark/vue",
+      ],
     },
   },
 
