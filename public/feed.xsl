@@ -215,11 +215,11 @@
           <!-- LEFT SIDEBAR -->
           <aside class="sidebar">
             <div class="brand-logo">
-              <img src="/nodewave.png" alt="NodeWave Logo" width="32" height="32"/>
+              <img src="/nodewave.svg" alt="NodeWave Logo"/>
             </div>
             <h1 class="feed-title"><xsl:value-of select="/rss/channel/title"/></h1>
             <p class="feed-desc"><xsl:value-of select="/rss/channel/description"/></p>
-            NW
+            <img src="/nodewave.svg" alt="NodeWave Logo"/>
             <div class="info-card">
               <h4>What is an RSS Feed?</h4>
               <p>Subscribe by copying this page URL into your favorite RSS feed reader to receive auto-updates whenever new content is published.</p>
