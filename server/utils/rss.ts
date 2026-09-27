@@ -339,21 +339,22 @@ function finalizeXmlOutput(
   rawXml: string,
   selfUrl: string,
   relatedFeeds: RelatedFeedLink[] = [],
-  xslPath = "/feed.xsl",
+  siteUrl: string = "https://nodewaveblog.vercel.app",
 ): string {
   let xml = rawXml;
+  const xslUrl = `${siteUrl.replace(/\/$/, "")}/feed.xsl`;
 
   if (!xml.includes("xml-stylesheet")) {
     xml = xml.replace(
       "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
-      `<?xml version="1.0" encoding="utf-8"?>\n<?xml-stylesheet type="text/xsl" href="${escapeXml(xslPath)}"?>`,
+      `<?xml version="1.0" encoding="utf-8"?>\n<?xml-stylesheet type="text/xsl" href="${escapeXml(xslUrl)}"?>`,
     );
   }
 
   if (!xml.includes("xmlns:atom")) {
     xml = xml.replace(
       "<rss version=\"2.0\"",
-      "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:media=\"https://search.yahoo.com/mrss/\"",
+      "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:media=\"https://search.yahoo.com/mrss/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\"",
     );
   }
 
@@ -366,7 +367,7 @@ function finalizeXmlOutput(
 }
 
 /**
- * Helper to set HTTP headers and export the feed.
+ * Sets Content-Type to application/xml so Chrome triggers XSL engine
  */
 function renderFeedResponse(
   event: H3Event,
@@ -375,6 +376,7 @@ function renderFeedResponse(
   feedUrl: string,
   format: FeedFormat = "rss",
   relatedFeeds: RelatedFeedLink[] = [],
+  siteUrl: string = "https://nodewaveblog.vercel.app",
 ): string {
   if (format === "json") {
     setHeaders(event, {
@@ -396,18 +398,19 @@ function renderFeedResponse(
     return feed.atom1();
   }
 
+  // Forces application/xml so Chrome/Edge parse feed.xsl correctly
   setHeaders(event, {
-    "Content-Type": "application/rss+xml; charset=utf-8",
+    "Content-Type": "application/xml; charset=utf-8",
     "Cache-Control": "public, max-age=3600, must-revalidate",
     "Last-Modified": latestDate.toUTCString(),
     "X-Content-Type-Options": "nosniff",
   });
 
-  return finalizeXmlOutput(feed.rss2(), feedUrl, relatedFeeds);
+  return finalizeXmlOutput(feed.rss2(), feedUrl, relatedFeeds, siteUrl);
 }
 
 /**
- * Builds standard blog post RSS feed.
+ * Builds standard blog post RSS feed or custom filtered feeds.
  */
 export async function generateBlogRssFeed(
   event: H3Event,
@@ -438,8 +441,8 @@ export async function generateBlogRssFeed(
   }
 
   const feed = new Feed({
-    title: options.titleSuffix ? `NodeWave — ${options.titleSuffix}` : "NodeWave Blogging Platform",
-    description: options.description || "Latest technical articles, software architecture notes, and engineering logs.",
+    title: options.titleSuffix ? `NodeWave — ${options.titleSuffix}` : "NodeWave — All Technical Articles",
+    description: options.description || "Master feed containing all technical articles, architecture notes, and development logs.",
     id: feedUrl,
     link: `${siteUrl}/`,
     language: "en",
@@ -528,11 +531,43 @@ export async function generateBlogRssFeed(
     });
   }
 
-  return renderFeedResponse(event, feed, latestDate, feedUrl, options.format || "rss", options.relatedFeeds);
+  return renderFeedResponse(event, feed, latestDate, feedUrl, options.format || "rss", options.relatedFeeds, siteUrl);
 }
 
 /**
- * Generates Authors Feed (/authors/rss.xml).
+ * Generates individual Author Feed (/authors/:slug/rss.xml).
+ */
+export async function generateAuthorRssFeed(
+  event: H3Event,
+  authorSlug: string,
+  format: FeedFormat = "rss",
+): Promise<string> {
+  const config = useRuntimeConfig(event);
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+
+  return generateBlogRssFeed(event, {
+    feedPath: `/authors/${authorSlug}/rss.xml`,
+    titleSuffix: `Articles by ${authorSlug}`,
+    description: `RSS feed for articles and insights authored by ${authorSlug} on NodeWave.`,
+    format,
+    relatedFeeds: [
+      { rel: "up", href: `${siteUrl}/authors/rss.xml`, title: "Authors Roster Feed" },
+      { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
+    ],
+    filterFn: (post) => {
+      if (typeof post.author === "object" && post.author?.slug) {
+        return post.author.slug === authorSlug;
+      }
+      if (typeof post.author === "string") {
+        return post.author === authorSlug;
+      }
+      return false;
+    },
+  });
+}
+
+/**
+ * Generates Authors Feed Index (/authors/rss.xml).
  */
 export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
   const config = useRuntimeConfig(event);
@@ -599,13 +634,52 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
     });
   }
 
-  return renderFeedResponse(event, feed, latestDate, feedUrl, format, [
-    { rel: "up", href: `${siteUrl}/rss.xml`, title: "Root RSS Feed" },
-  ]);
+  return renderFeedResponse(
+    event,
+    feed,
+    latestDate,
+    feedUrl,
+    format,
+    [{ rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" }],
+    siteUrl,
+  );
 }
 
 /**
- * Generates Categories Feed (/categories/rss.xml).
+ * Generates individual Category Feed (/categories/:slug/rss.xml).
+ */
+export async function generateCategoryRssFeed(
+  event: H3Event,
+  categorySlug: string,
+  format: FeedFormat = "rss",
+): Promise<string> {
+  const config = useRuntimeConfig(event);
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+
+  const categories = await getAllCategories(event);
+  const category = categories.find(c => c.slug === categorySlug);
+  const catName = category?.name || categorySlug;
+
+  return generateBlogRssFeed(event, {
+    feedPath: `/categories/${categorySlug}/rss.xml`,
+    titleSuffix: `Category: ${catName}`,
+    description: category?.description || `Technical articles and development guides under the ${catName} category on NodeWave.`,
+    format,
+    relatedFeeds: [
+      { rel: "up", href: `${siteUrl}/categories/rss.xml`, title: "Categories Roster Feed" },
+      { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
+    ],
+    filterFn: (post) => {
+      if (Array.isArray(post.categories)) {
+        return post.categories.some(c => matchesCategory(c, categorySlug));
+      }
+      return false;
+    },
+  });
+}
+
+/**
+ * Generates Categories Feed Index (/categories/rss.xml).
  */
 export async function generateCategoriesRssFeed(
   event: H3Event,
@@ -685,11 +759,44 @@ export async function generateCategoriesRssFeed(
     ...extraRelatedFeeds,
   ];
 
-  return renderFeedResponse(event, feed, latestDate, feedUrl, format, allRelatedFeeds);
+  return renderFeedResponse(event, feed, latestDate, feedUrl, format, allRelatedFeeds, siteUrl);
 }
 
 /**
- * Generates Tags Feed (/tags/rss.xml).
+ * Generates individual Tag Feed (/tags/:slug/rss.xml).
+ */
+export async function generateTagRssFeed(
+  event: H3Event,
+  tagSlug: string,
+  format: FeedFormat = "rss",
+): Promise<string> {
+  const config = useRuntimeConfig(event);
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+
+  const tags = await getAllTags(event);
+  const tag = tags.find(t => t.slug === tagSlug);
+  const tagName = tag?.name || tagSlug;
+
+  return generateBlogRssFeed(event, {
+    feedPath: `/tags/${tagSlug}/rss.xml`,
+    titleSuffix: `Tag: #${tagName}`,
+    description: tag?.description || `Technical articles, guides, and engineering notes tagged with #${tagName} on NodeWave.`,
+    format,
+    relatedFeeds: [
+      { rel: "up", href: `${siteUrl}/tags/rss.xml`, title: "Tags Index Feed" },
+      { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
+    ],
+    filterFn: (post) => {
+      if (Array.isArray(post.tags)) {
+        return post.tags.some(t => matchesTag(t, tagSlug));
+      }
+      return false;
+    },
+  });
+}
+
+/**
+ * Generates Tags Feed Index (/tags/rss.xml).
  */
 export async function generateTagsRssFeed(
   event: H3Event,
@@ -769,5 +876,5 @@ export async function generateTagsRssFeed(
     ...extraRelatedFeeds,
   ];
 
-  return renderFeedResponse(event, feed, latestDate, feedUrl, format, allRelatedFeeds);
+  return renderFeedResponse(event, feed, latestDate, feedUrl, format, allRelatedFeeds, siteUrl);
 }
