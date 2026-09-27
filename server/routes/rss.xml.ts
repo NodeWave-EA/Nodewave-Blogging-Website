@@ -2,7 +2,7 @@ import { generateBlogRssFeed } from "~~/server/utils/rss";
 
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
 
   return generateBlogRssFeed(event, {
     feedPath: "/rss.xml",

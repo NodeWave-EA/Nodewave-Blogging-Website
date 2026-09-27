@@ -61,6 +61,94 @@ function getLatestBlogDate(blogs: BlogType[]): Date {
 }
 
 /**
+ * Renders Nuxt Content MiniMark AST nodes to HTML string.
+ */
+function renderMiniMarkToHtml(nodes: any[]): string {
+  if (!Array.isArray(nodes))
+    return "";
+
+  const voidElements = new Set([
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+  ]);
+
+  function renderNode(node: any): string {
+    if (node == null)
+      return "";
+
+    if (typeof node === "string") {
+      return escapeXml(node);
+    }
+
+    if (typeof node === "number" || typeof node === "boolean") {
+      return String(node);
+    }
+
+    // MiniMark Tuple: [tag, attrs, children]
+    if (Array.isArray(node)) {
+      const [tag, attrs, children] = node;
+      if (typeof tag !== "string")
+        return "";
+
+      const tagName = tag.toLowerCase();
+      let attrStr = "";
+
+      if (attrs && typeof attrs === "object" && !Array.isArray(attrs)) {
+        for (const [key, val] of Object.entries(attrs)) {
+          if (val == null || val === false)
+            continue;
+          if (key.startsWith("__") || key === "key")
+            continue;
+
+          if (val === true) {
+            attrStr += ` ${key}`;
+          }
+          else {
+            attrStr += ` ${key}="${escapeXml(String(val))}"`;
+          }
+        }
+      }
+
+      if (voidElements.has(tagName)) {
+        return `<${tagName}${attrStr} />`;
+      }
+
+      let innerHtml = "";
+      if (Array.isArray(children)) {
+        innerHtml = children.map(child => renderNode(child)).join("");
+      }
+
+      return `<${tagName}${attrStr}>${innerHtml}</${tagName}>`;
+    }
+
+    if (typeof node === "object") {
+      if (node.value && typeof node.value === "string") {
+        return escapeXml(node.value);
+      }
+      if (Array.isArray(node.children)) {
+        return node.children.map(renderNode).join("");
+      }
+    }
+
+    return "";
+  }
+
+  return nodes.map(renderNode).join("");
+}
+
+/**
  * Sanitizes HTML content for RSS consumption by stripping style blocks,
  * internal AST attributes, and fixing malformed Shiki code block attributes.
  */
@@ -231,16 +319,32 @@ export async function generateBlogRssFeed(
     let bodyHtml = post.description || "";
     if (post.body) {
       try {
-        const comarkTree = { nodes: post.body.value || [], frontmatter: {}, meta: {} };
-        let rawHtml = await renderHtml(comarkTree as unknown as Parameters<typeof renderHtml>[0]);
+        let rawHtml = "";
 
-        rawHtml = rawHtml.replace(/className=/g, "class=");
-        rawHtml = rawHtml.replace(/\s*(code|language|meta)="[\s\S]*?"/g, "");
-        rawHtml = rawHtml.replace(/href="#([^"]+)"/g, `href="${postUrl}#$1"`);
-        rawHtml = rawHtml.replace(/href="\/([^"]+)"/g, `href="${siteUrl}/$1"`);
-        rawHtml = rawHtml.replace(/src="\/([^"]+)"/g, `src="${siteUrl}/$1"`);
+        if (typeof post.body === "string") {
+          rawHtml = await renderHtml(post.body);
+        }
+        else if (post.body && typeof post.body === "object") {
+          if (post.body.type === "minimark" && Array.isArray(post.body.value)) {
+            rawHtml = renderMiniMarkToHtml(post.body.value);
+          }
+          else if (Array.isArray(post.body.value)) {
+            rawHtml = renderMiniMarkToHtml(post.body.value);
+          }
+          else {
+            rawHtml = await renderHtml(post.body as any);
+          }
+        }
 
-        bodyHtml = cleanRssHtml(rawHtml);
+        if (rawHtml) {
+          rawHtml = rawHtml.replace(/className=/g, "class=");
+          rawHtml = rawHtml.replace(/\s*(code|language|meta)="[\s\S]*?"/g, "");
+          rawHtml = rawHtml.replace(/href="#([^"]+)"/g, `href="${postUrl}#$1"`);
+          rawHtml = rawHtml.replace(/href="\/([^"]+)"/g, `href="${siteUrl}/$1"`);
+          rawHtml = rawHtml.replace(/src="\/([^"]+)"/g, `src="${siteUrl}/$1"`);
+
+          bodyHtml = cleanRssHtml(rawHtml);
+        }
       }
       catch (e) {
         console.warn(`[RSS Builder] Error rendering HTML for ${post.title}`, e);

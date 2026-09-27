@@ -112,6 +112,11 @@
           margin-bottom: 1.25rem;
           box-shadow: 0 10px 20px -5px rgba(20, 184, 166, 0.3);
           }
+          .brand-logo img {
+          width: 100%;
+          height: auto;
+          max-width: 50px;
+          }
           .feed-title {
           font-size: 1.4rem;
           font-weight: 800;

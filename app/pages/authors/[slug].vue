@@ -3,6 +3,7 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
@@ -118,7 +119,6 @@ useSeoMeta({
   keywords: () => `nodewave, author profile, ${author.value?.name || ""}, contributions, articles, tutorials`,
   robots: "index, follow, max-image-preview:large",
 
-  // Open Graph / Facebook
   ogType: "profile",
   ogTitle: () => PAGE_TITLE.value,
   ogDescription: () => PAGE_DESCRIPTION.value,
@@ -126,12 +126,10 @@ useSeoMeta({
   ogImageAlt: () => author.value?.name || "Author Avatar",
   ogSiteName: () => config.siteName || "Nodewave",
 
-  // Profile Specific Meta
   profileFirstName: () => author.value?.name?.split(" ")[0] || "",
   profileLastName: () => author.value?.name?.split(" ").slice(1).join(" ") || "",
   profileUsername: () => author.value?.slug || slug,
 
-  // Twitter
   twitterCard: "summary_large_image",
   twitterTitle: () => PAGE_TITLE.value,
   twitterDescription: () => PAGE_DESCRIPTION.value,
@@ -148,6 +146,12 @@ useHead({
       href: () => PAGE_CANONICAL_URL.value,
     },
     {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: `${author.value?.name || "Author"} RSS Feed`,
+      href: `/authors/${slug}/rss.xml`,
+    },
+    {
       rel: "icon",
       type: "image/png",
       href: "/favicon.png",
@@ -155,9 +159,7 @@ useHead({
   ],
 });
 
-// Nuxt Schema.org Structured Data (Author Person & ProfilePage)
 useSchemaOrg([
-  // Google Search Breadcrumb
   defineBreadcrumb({
     itemListElement: [
       { name: "Home", item: "/" },
@@ -166,7 +168,6 @@ useSchemaOrg([
     ],
   }),
 
-  // Profile Page Document Entity
   {
     "@type": "ProfilePage",
     "@id": `${PAGE_CANONICAL_URL.value}/#profilepage`,
@@ -176,7 +177,6 @@ useSchemaOrg([
     "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#author` },
   },
 
-  // Person / Author Entity
   definePerson({
     "@id": `${PAGE_CANONICAL_URL.value}/#author`,
     "name": author.value?.name || "Contributor",
@@ -213,39 +213,47 @@ defineOgImage("Author.takumi", {
     </div>
 
     <UPage v-else-if="author && !authorError" class="py-10">
-      <div class="flex items-center gap-2">
-        <NuxtLink
-          to="/authors"
-          class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
-        >
-          <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          Back to Authors
-        </NuxtLink>
-        <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
-
-        <UBadge
-          size="sm"
-          class="rounded-full shrink-0"
-          variant="subtle"
-        >
-          <template #leading>
-            <UAvatar
-              v-if="author.avatar?.src"
-              :src="author.avatar.src"
-              :alt="`Avatar of ${author.name}`"
-              class="w-3 h-3 inline-block mr-1 align-text-top rounded-full object-cover"
-            />
-          </template>
-          <span
-            class="text-xs font-mono font-bold uppercase tracking-wider"
-            :style="{ color: author.color || 'var(--ui-primary)' }"
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-2">
+          <NuxtLink
+            to="/authors"
+            class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
           >
-            {{ author.name }}
-          </span>
-        </UBadge>
+            <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            Back to Authors
+          </NuxtLink>
+          <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
+
+          <UBadge
+            size="sm"
+            class="rounded-full shrink-0"
+            variant="subtle"
+          >
+            <template #leading>
+              <UAvatar
+                v-if="author.avatar?.src"
+                :src="author.avatar.src"
+                :alt="`Avatar of ${author.name}`"
+                class="w-3 h-3 inline-block mr-1 align-text-top rounded-full object-cover"
+              />
+            </template>
+            <span
+              class="text-xs font-mono font-bold uppercase tracking-wider"
+              :style="{ color: author.color || 'var(--ui-primary)' }"
+            >
+              {{ author.name }}
+            </span>
+          </UBadge>
+        </div>
+
+        <!-- RSS SUBSCRIBE BUTTON (CLOUDFLARE STYLE) -->
+        <RssSubscribeButton
+          :title="author.name"
+          :feed-path="`/authors/${author.slug || slug}/rss.xml`"
+        />
       </div>
 
-      <header class="mb-16 pt-8 pb-10 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-8">
+      <header class="mb-16 pt-4 pb-10 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-8">
         <!-- Avatar -->
         <div class="shrink-0">
           <NuxtImg
@@ -266,15 +274,12 @@ defineOgImage("Author.takumi", {
               {{ author.name }}
             </h1>
 
-            <!-- Wrapped Title and Company link for better flow -->
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-2 text-lg font-medium text-neutral-600 dark:text-neutral-400 font-mono">
               <span>{{ activeHoverText['author-title'] || author.title }}</span>
 
               <template v-if="author.company">
                 <span class="text-neutral-300 dark:text-neutral-700 hidden md:inline">|</span>
-                <div
-                  class="inline-flex items-center gap-1.5 hover:text-primary-500 transition-colors"
-                >
+                <div class="inline-flex items-center gap-1.5 hover:text-primary-500 transition-colors">
                   <NuxtImg
                     v-if="author.company.icon?.startsWith('http')"
                     :src="author.company.icon"
@@ -295,7 +300,6 @@ defineOgImage("Author.takumi", {
                   </NuxtLink>
                 </div>
 
-                <!-- Role Badge -->
                 <UBadge
                   v-if="author.company.role"
                   :avatar="{
@@ -336,7 +340,6 @@ defineOgImage("Author.takumi", {
               />
             </UTooltip>
 
-            <!-- author website -->
             <UTooltip
               v-if="author.website"
               :text="`Visit ${author.name}'s website`"
@@ -358,7 +361,6 @@ defineOgImage("Author.takumi", {
               </UButton>
             </UTooltip>
 
-            <!-- company link -->
             <UTooltip
               v-if="author.company && author.company.website"
               :text="`Visit ${author.company.name}'s website`"

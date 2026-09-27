@@ -3,6 +3,7 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 
 const route = useRoute();
@@ -76,6 +77,12 @@ useHead({
       href: () => PAGE_CANONICAL_URL.value,
     },
     {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: `${category.value?.name || "Category"} RSS Feed`,
+      href: `/categories/${slug}/rss.xml`,
+    },
+    {
       rel: "icon",
       type: "image/png",
       href: "/favicon.png",
@@ -130,26 +137,34 @@ defineOgImage("Taxonomy.takumi", {
       <UPageHeader class="mb-12 pb-8 border-b border-neutral-100 dark:border-neutral-900 mx-1">
         <template #title>
           <div class="space-y-4">
-            <div class="flex items-center gap-2">
-              <NuxtLink
-                to="/categories"
-                class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
-                aria-label="Return to all categories"
-              >
-                <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                Back to Categories
-              </NuxtLink>
-              <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
-              <span
-                class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/40 dark:border-neutral-800/50"
-                :style="{ color: category.color || 'var(--ui-primary)' }"
-              >
-                <UIcon
-                  :name="category.icon || 'i-lucide-folder-open'"
-                  class="w-3 h-3 inline-block mr-1 align-text-top"
-                />
-                {{ category.name }}
-              </span>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-2">
+                <NuxtLink
+                  to="/categories"
+                  class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
+                  aria-label="Return to all categories"
+                >
+                  <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                  Back to Categories
+                </NuxtLink>
+                <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
+                <span
+                  class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/40 dark:border-neutral-800/50"
+                  :style="{ color: category.color || 'var(--ui-primary)' }"
+                >
+                  <UIcon
+                    :name="category.icon || 'i-lucide-folder-open'"
+                    class="w-3 h-3 inline-block mr-1 align-text-top"
+                  />
+                  {{ category.name }}
+                </span>
+              </div>
+
+              <!-- RSS SUBSCRIBE BUTTON (CLOUDFLARE STYLE) -->
+              <RssSubscribeButton
+                :title="category.name"
+                :feed-path="`/categories/${category.slug || slug}/rss.xml`"
+              />
             </div>
 
             <h1 class="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2.5">
