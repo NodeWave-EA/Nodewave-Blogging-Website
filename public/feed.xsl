@@ -196,7 +196,7 @@
         <!-- STICKY TOP BAR (CLOUDFLARE STYLE) -->
         <header class="top-bar">
           <div class="top-bar-brand">
-            <span>📡 RSS Feed Stream</span>
+            <span>📡 RSS Feed</span>
           </div>
           <div class="top-bar-controls">
             <span style="font-size: 0.85rem; color: var(--text-muted);">Follow with:</span>
@@ -214,10 +214,12 @@
         <div class="layout">
           <!-- LEFT SIDEBAR -->
           <aside class="sidebar">
-            <div class="brand-logo">NW</div>
+            <div class="brand-logo">
+              <img src="/nodewave.png" alt="NodeWave Logo" width="32" height="32"/>
+            </div>
             <h1 class="feed-title"><xsl:value-of select="/rss/channel/title"/></h1>
             <p class="feed-desc"><xsl:value-of select="/rss/channel/description"/></p>
-
+            NW
             <div class="info-card">
               <h4>What is an RSS Feed?</h4>
               <p>Subscribe by copying this page URL into your favorite RSS feed reader to receive auto-updates whenever new content is published.</p>
