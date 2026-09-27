@@ -8,18 +8,23 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <style>
-          /* NodeWave Dark Reading RSS Theme */
+          /* NodeWave Modern Dark Theme */
           :root {
-          --bg: #0b0f17;
-          --card-bg: rgba(17, 24, 39, 0.65);
-          --card-border: rgba(31, 41, 55, 0.8);
+          --bg: #090d16;
+          --card-bg: rgba(17, 24, 39, 0.7);
+          --card-border: rgba(255, 255, 255, 0.08);
+          --card-border-hover: rgba(20, 184, 166, 0.4);
           --text: #f3f4f6;
           --text-muted: #9ca3af;
           --primary: #14b8a6;
           --primary-hover: #0d9488;
-          --accent-blue: #0284c7;
+          --code-bg: #111827;
           }
-          * { box-sizing: border-box; }
+
+          * {
+          box-sizing: border-box;
+          }
+
           body {
           font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           background-color: var(--bg);
@@ -27,38 +32,54 @@
           margin: 0;
           padding: 0;
           line-height: 1.6;
+          -webkit-font-smoothing: antialiased;
           }
 
-          /* Sticky Header Bar */
+          /* Global Image Responsiveness */
+          img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          }
+
+          /* Sticky Glassmorphic Top Bar */
           .top-bar {
           position: sticky;
           top: 0;
           z-index: 50;
-          background: rgba(11, 15, 23, 0.85);
+          background: rgba(9, 13, 22, 0.85);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border-bottom: 1px solid var(--card-border);
-          padding: 0.75rem 1.5rem;
+          padding: 0.75rem 1.75rem;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 1rem;
           }
+
           .top-bar-brand {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          font-size: 0.9rem;
+          gap: 0.6rem;
+          font-size: 0.85rem;
           font-weight: 700;
           color: var(--primary);
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.08em;
           }
+
+          .top-bar-brand img {
+          height: 22px;
+          width: auto;
+          }
+
           .top-bar-controls {
           display: flex;
           align-items: center;
           gap: 0.75rem;
           }
+
           .reader-select {
           background: #111827;
           color: var(--text);
@@ -68,93 +89,117 @@
           font-size: 0.85rem;
           outline: none;
           cursor: pointer;
+          transition: border-color 0.2s ease;
           }
+
+          .reader-select:focus {
+          border-color: var(--primary);
+          }
+
           .btn-primary {
-          background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-          color: #ffffff;
+          background: var(--primary);
+          color: #090d16;
           border: none;
           border-radius: 0.5rem;
           padding: 0.45rem 1rem;
           font-size: 0.85rem;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
-          transition: opacity 0.2s ease;
+          transition: background-color 0.2s ease, transform 0.1s ease;
           }
-          .btn-primary:hover { opacity: 0.9; }
 
-          /* 2-Column Responsive Layout */
+          .btn-primary:hover {
+          background-color: var(--primary-hover);
+          color: #ffffff;
+          }
+
+          /* Layout Container */
           .layout {
           max-width: 1140px;
           margin: 0 auto;
-          padding: 2.5rem 1.5rem;
+          padding: 3rem 1.5rem;
           display: grid;
           grid-template-columns: 280px 1fr;
-          gap: 2.5rem;
+          gap: 3rem;
           }
 
-          /* Sidebar */
+          /* Sidebar Section */
           .sidebar {
           position: sticky;
           top: 5rem;
           height: fit-content;
           }
+
+          /* Transparent Brand Logo Container */
           .brand-logo {
-          width: 48px;
-          height: 48px;
-          background: linear-gradient(135deg, var(--primary), var(--accent-blue));
-          border-radius: 12px;
           display: flex;
           align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: 900;
-          font-size: 1.2rem;
           margin-bottom: 1.25rem;
-          box-shadow: 0 10px 20px -5px rgba(20, 184, 166, 0.3);
           }
+
           .brand-logo img {
-          width: 100%;
-          height: auto;
-          max-width: 50px;
+          height: 44px;
+          width: auto;
+          object-fit: contain;
           }
+
           .feed-title {
-          font-size: 1.4rem;
+          font-size: 1.35rem;
           font-weight: 800;
           margin: 0 0 0.5rem 0;
           letter-spacing: -0.02em;
+          color: #ffffff;
+          line-height: 1.3;
           }
+
           .feed-desc {
           color: var(--text-muted);
           font-size: 0.875rem;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1.75rem;
+          line-height: 1.5;
           }
+
           .info-card {
           background: var(--card-bg);
           border: 1px solid var(--card-border);
-          border-radius: 1rem;
+          border-radius: 0.875rem;
           padding: 1.25rem;
-          text-align: center;
           }
-          .info-card h4 { margin: 0 0 0.25rem 0; font-size: 0.875rem; color: var(--text); }
-          .info-card p { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
 
-          /* Feed Article List */
+          .info-card h4 {
+          margin: 0 0 0.4rem 0;
+          font-size: 0.85rem;
+          color: var(--text);
+          font-weight: 600;
+          }
+
+          .info-card p {
+          margin: 0;
+          font-size: 0.8rem;
+          color: var(--text-muted);
+          line-height: 1.45;
+          }
+
+          /* Article Feed List */
           .feed-list {
           display: flex;
           flex-direction: column;
           gap: 1.25rem;
           }
+
           .article-card {
           background: var(--card-bg);
           border: 1px solid var(--card-border);
-          border-radius: 1rem;
+          border-radius: 0.875rem;
           padding: 1.5rem;
           transition: border-color 0.2s ease, transform 0.2s ease;
           }
+
           .article-card:hover {
-          border-color: rgba(20, 184, 166, 0.4);
+          border-color: var(--card-border-hover);
           transform: translateY(-2px);
           }
+
           .article-meta {
           display: flex;
           align-items: center;
@@ -162,49 +207,90 @@
           font-size: 0.75rem;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.06em;
           color: var(--primary);
           margin-bottom: 0.5rem;
           }
+
           .article-meta span.date {
           color: var(--text-muted);
           font-weight: 400;
           }
+
           .article-title {
-          margin: 0 0 0.5rem 0;
-          font-size: 1.2rem;
+          margin: 0 0 0.6rem 0;
+          font-size: 1.15rem;
           font-weight: 700;
+          line-height: 1.4;
           }
+
           .article-title a {
-          color: var(--text);
+          color: #ffffff;
           text-decoration: none;
+          transition: color 0.15s ease;
           }
+
           .article-title a:hover {
           color: var(--primary);
           }
+
           .article-excerpt {
           margin: 0;
           color: var(--text-muted);
           font-size: 0.9rem;
-          line-height: 1.5;
+          line-height: 1.6;
+          overflow-wrap: break-word;
           }
 
+          /* Responsive formatting for content body inside excerpts */
+          .article-excerpt code {
+          background: var(--code-bg);
+          color: var(--primary);
+          padding: 0.15rem 0.35rem;
+          border-radius: 0.25rem;
+          font-size: 0.825em;
+          }
+
+          .article-excerpt img {
+          border-radius: 0.5rem;
+          margin: 0.75rem 0;
+          }
+
+          /* Responsive Breakpoint */
           @media (max-width: 768px) {
-          .layout { grid-template-columns: 1fr; }
-          .sidebar { position: static; }
-          .top-bar { flex-direction: column; align-items: flex-start; }
-          .top-bar-controls { width: 100%; justify-content: space-between; }
+          .layout {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+          padding: 1.5rem 1rem;
+          }
+
+          .sidebar {
+          position: static;
+          }
+
+          .top-bar {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          }
+
+          .top-bar-controls {
+          width: 100%;
+          justify-content: space-between;
+          }
           }
         </style>
       </head>
       <body>
-        <!-- STICKY TOP BAR (CLOUDFLARE STYLE) -->
+        <!-- STICKY HEADER BAR -->
         <header class="top-bar">
           <div class="top-bar-brand">
-            <span>📡 RSS Feed</span>
+            <img src="/nodewave.svg" alt="NodeWave Logo"/>
+            <span>RSS FEED</span>
           </div>
           <div class="top-bar-controls">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Follow with:</span>
+            <span style="font-size: 0.825rem; color: var(--text-muted);">Follow with:</span>
             <select id="feedReaderSelect" class="reader-select">
               <option value="feedly">Feedly</option>
               <option value="inoreader">Inoreader</option>
@@ -224,10 +310,10 @@
             </div>
             <h1 class="feed-title"><xsl:value-of select="/rss/channel/title"/></h1>
             <p class="feed-desc"><xsl:value-of select="/rss/channel/description"/></p>
-            <img src="/nodewave.svg" alt="NodeWave Logo"/>
+
             <div class="info-card">
               <h4>What is an RSS Feed?</h4>
-              <p>Subscribe by copying this page URL into your favorite RSS feed reader to receive auto-updates whenever new content is published.</p>
+              <p>Subscribe by copying this page URL into your favorite feed reader to receive automated updates whenever new articles are published.</p>
             </div>
           </aside>
 
@@ -247,9 +333,9 @@
                     <xsl:value-of select="title"/>
                   </a>
                 </h2>
-                <p class="article-excerpt">
+                <div class="article-excerpt">
                   <xsl:value-of select="description" disable-output-escaping="yes"/>
-                </p>
+                </div>
               </article>
             </xsl:for-each>
           </main>

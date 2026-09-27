@@ -14,6 +14,136 @@ export type RelatedFeedLink = {
   title: string;
 };
 
+const VOID_ELEMENTS = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
+
+const STANDARD_HTML_TAGS = new Set([
+  "a",
+  "abbr",
+  "address",
+  "article",
+  "aside",
+  "audio",
+  "b",
+  "base",
+  "bdi",
+  "bdo",
+  "blockquote",
+  "body",
+  "br",
+  "button",
+  "canvas",
+  "caption",
+  "cite",
+  "code",
+  "col",
+  "colgroup",
+  "data",
+  "datalist",
+  "dd",
+  "del",
+  "details",
+  "dfn",
+  "dialog",
+  "div",
+  "dl",
+  "dt",
+  "em",
+  "embed",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "head",
+  "header",
+  "hgroup",
+  "hr",
+  "html",
+  "i",
+  "iframe",
+  "img",
+  "input",
+  "ins",
+  "kbd",
+  "label",
+  "legend",
+  "li",
+  "link",
+  "main",
+  "map",
+  "mark",
+  "menu",
+  "meta",
+  "meter",
+  "nav",
+  "noscript",
+  "object",
+  "ol",
+  "optgroup",
+  "option",
+  "output",
+  "p",
+  "param",
+  "picture",
+  "pre",
+  "progress",
+  "q",
+  "rp",
+  "rt",
+  "ruby",
+  "s",
+  "samp",
+  "script",
+  "section",
+  "select",
+  "small",
+  "source",
+  "span",
+  "strong",
+  "style",
+  "sub",
+  "summary",
+  "sup",
+  "table",
+  "tbody",
+  "td",
+  "template",
+  "textarea",
+  "tfoot",
+  "th",
+  "thead",
+  "time",
+  "title",
+  "tr",
+  "track",
+  "u",
+  "ul",
+  "var",
+  "video",
+  "wbr",
+]);
+
 /**
  * Safely escapes special XML characters.
  */
@@ -61,96 +191,113 @@ function getLatestBlogDate(blogs: BlogType[]): Date {
 }
 
 /**
- * Renders Nuxt Content MiniMark AST nodes to HTML string.
+ * Recursively parses Nuxt Content v3 MiniMark AST nodes to valid HTML string.
+ */
+function renderMiniMarkNode(node: any): string {
+  if (node == null)
+    return "";
+
+  if (typeof node === "string") {
+    return escapeXml(node);
+  }
+
+  if (typeof node === "number" || typeof node === "boolean") {
+    return String(node);
+  }
+
+  // MiniMark tuple: [tag, props?, ...children]
+  if (Array.isArray(node)) {
+    if (node.length === 0)
+      return "";
+
+    const first = node[0];
+
+    // Check if element 0 is a tag name (e.g. "p", "li", "codespan")
+    if (typeof first === "string" && /^[\w:-]+$/.test(first)) {
+      const rawTag = first;
+      let props: Record<string, any> = {};
+      let children: any[] = [];
+
+      const second = node[1];
+      if (second && typeof second === "object" && !Array.isArray(second)) {
+        props = second;
+        children = node.slice(2);
+      }
+      else {
+        children = node.slice(1);
+      }
+
+      // Unpack nested child arrays if present
+      if (children.length === 1 && Array.isArray(children[0]) && typeof children[0][0] !== "string") {
+        children = children[0];
+      }
+
+      let tagName = rawTag.toLowerCase();
+
+      // Normalize custom MiniMark internal tags to standard HTML
+      if (tagName === "codespan" || tagName === "code-inline" || tagName === "inline-code" || tagName === "codeinline") {
+        tagName = "code";
+      }
+      else if (tagName === "binding" || tagName === "component") {
+        return children.map(renderMiniMarkNode).join("");
+      }
+
+      // Fallback non-standard MDC components to div containers
+      if (!STANDARD_HTML_TAGS.has(tagName)) {
+        tagName = "div";
+      }
+
+      let attrStr = "";
+      for (const [key, val] of Object.entries(props)) {
+        if (val == null || val === false)
+          continue;
+        if (key.startsWith("__") || key === "key" || key === "v-bind")
+          continue;
+
+        if (val === true) {
+          attrStr += ` ${key}`;
+        }
+        else {
+          attrStr += ` ${key}="${escapeXml(String(val))}"`;
+        }
+      }
+
+      if (VOID_ELEMENTS.has(tagName)) {
+        return `<${tagName}${attrStr} />`;
+      }
+
+      const innerHtml = children.map(renderMiniMarkNode).join("");
+      return `<${tagName}${attrStr}>${innerHtml}</${tagName}>`;
+    }
+
+    // Standard list of child nodes
+    return node.map(renderMiniMarkNode).join("");
+  }
+
+  // Standard object nodes ({ value } or { children })
+  if (typeof node === "object") {
+    if (node.value && typeof node.value === "string") {
+      return escapeXml(node.value);
+    }
+    if (Array.isArray(node.children)) {
+      return node.children.map(renderMiniMarkNode).join("");
+    }
+  }
+
+  return "";
+}
+
+/**
+ * Entry point for rendering MiniMark AST value trees.
  */
 function renderMiniMarkToHtml(nodes: any[]): string {
   if (!Array.isArray(nodes))
     return "";
-
-  const voidElements = new Set([
-    "area",
-    "base",
-    "br",
-    "col",
-    "embed",
-    "hr",
-    "img",
-    "input",
-    "link",
-    "meta",
-    "param",
-    "source",
-    "track",
-    "wbr",
-  ]);
-
-  function renderNode(node: any): string {
-    if (node == null)
-      return "";
-
-    if (typeof node === "string") {
-      return escapeXml(node);
-    }
-
-    if (typeof node === "number" || typeof node === "boolean") {
-      return String(node);
-    }
-
-    // MiniMark Tuple: [tag, attrs, children]
-    if (Array.isArray(node)) {
-      const [tag, attrs, children] = node;
-      if (typeof tag !== "string")
-        return "";
-
-      const tagName = tag.toLowerCase();
-      let attrStr = "";
-
-      if (attrs && typeof attrs === "object" && !Array.isArray(attrs)) {
-        for (const [key, val] of Object.entries(attrs)) {
-          if (val == null || val === false)
-            continue;
-          if (key.startsWith("__") || key === "key")
-            continue;
-
-          if (val === true) {
-            attrStr += ` ${key}`;
-          }
-          else {
-            attrStr += ` ${key}="${escapeXml(String(val))}"`;
-          }
-        }
-      }
-
-      if (voidElements.has(tagName)) {
-        return `<${tagName}${attrStr} />`;
-      }
-
-      let innerHtml = "";
-      if (Array.isArray(children)) {
-        innerHtml = children.map(child => renderNode(child)).join("");
-      }
-
-      return `<${tagName}${attrStr}>${innerHtml}</${tagName}>`;
-    }
-
-    if (typeof node === "object") {
-      if (node.value && typeof node.value === "string") {
-        return escapeXml(node.value);
-      }
-      if (Array.isArray(node.children)) {
-        return node.children.map(renderNode).join("");
-      }
-    }
-
-    return "";
-  }
-
-  return nodes.map(renderNode).join("");
+  return nodes.map(renderMiniMarkNode).join("");
 }
 
 /**
- * Sanitizes HTML content for RSS consumption by stripping style blocks,
- * internal AST attributes, and fixing malformed Shiki code block attributes.
+ * Sanitizes HTML content for RSS consumption.
  */
 function cleanRssHtml(html: string): string {
   if (!html)
@@ -165,7 +312,7 @@ function cleanRssHtml(html: string): string {
 }
 
 /**
- * Evaluates If-Modified-Since headers to issue 304 Not Modified responses when unchanged.
+ * Evaluates If-Modified-Since headers for 304 responses.
  */
 function isCacheFresh(event: H3Event, latestDate: Date): boolean {
   const ifModifiedSince = getHeader(event, "if-modified-since");
@@ -189,7 +336,6 @@ function finalizeXmlOutput(
 ): string {
   let xml = rawXml;
 
-  // 1. Inject XSLT processing instruction for styled browser view
   if (!xml.includes("xml-stylesheet")) {
     xml = xml.replace(
       "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
@@ -197,7 +343,6 @@ function finalizeXmlOutput(
     );
   }
 
-  // 2. Inject Atom and Media RSS (xmlns:media) namespaces
   if (!xml.includes("xmlns:atom")) {
     xml = xml.replace(
       "<rss version=\"2.0\"",
@@ -205,7 +350,6 @@ function finalizeXmlOutput(
     );
   }
 
-  // 3. Inject Atom relational links
   let atomLinks = `  <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />`;
   for (const feed of relatedFeeds) {
     atomLinks += `\n        <atom:link href="${escapeXml(feed.href)}" rel="${feed.rel}" type="application/rss+xml" title="${escapeXml(feed.title)}" />`;
@@ -215,7 +359,7 @@ function finalizeXmlOutput(
 }
 
 /**
- * Helper to set HTTP headers and export the feed in the requested format (RSS 2.0, Atom 1.0, or JSON Feed 1.1).
+ * Helper to set HTTP headers and export the feed.
  */
 function renderFeedResponse(
   event: H3Event,
@@ -256,7 +400,7 @@ function renderFeedResponse(
 }
 
 /**
- * Builds standard blog post RSS feed with embedded entity relationships.
+ * Builds standard blog post RSS feed.
  */
 export async function generateBlogRssFeed(
   event: H3Event,
@@ -278,10 +422,8 @@ export async function generateBlogRssFeed(
     posts = posts.filter(options.filterFn);
   }
 
-  // 1. Explicitly sort posts in reverse chronological order
   posts = sortBlogsByDateDesc(posts);
 
-  // 2. HTTP 304 Conditional Cache Check
   const latestDate = getLatestBlogDate(posts);
   if (isCacheFresh(event, latestDate)) {
     setResponseStatus(event, 304);
@@ -330,6 +472,12 @@ export async function generateBlogRssFeed(
           }
           else if (Array.isArray(post.body.value)) {
             rawHtml = renderMiniMarkToHtml(post.body.value);
+          }
+          // else if (Array.isArray(post.body.children)) {
+          //   rawHtml = renderMiniMarkToHtml(post.body.children);
+          // }
+          else if (Array.isArray(post.body)) {
+            rawHtml = renderMiniMarkToHtml(post.body);
           }
           else {
             rawHtml = await renderHtml(post.body as any);
@@ -380,7 +528,7 @@ export async function generateBlogRssFeed(
 }
 
 /**
- * Generates Authors Feed (/authors/rss.xml) linking each author to their published articles.
+ * Generates Authors Feed (/authors/rss.xml).
  */
 export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
   const config = useRuntimeConfig(event);
@@ -442,7 +590,7 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
 }
 
 /**
- * Generates Categories Feed (/categories/rss.xml) linking each category to its articles.
+ * Generates Categories Feed (/categories/rss.xml).
  */
 export async function generateCategoriesRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
   const config = useRuntimeConfig(event);
@@ -504,7 +652,7 @@ export async function generateCategoriesRssFeed(event: H3Event, format: FeedForm
 }
 
 /**
- * Generates Tags Feed (/tags/rss.xml) linking each tag to its tagged articles.
+ * Generates Tags Feed (/tags/rss.xml).
  */
 export async function generateTagsRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
   const config = useRuntimeConfig(event);
