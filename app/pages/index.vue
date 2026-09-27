@@ -10,15 +10,32 @@ definePageMeta({
 });
 
 const config = useRuntimeConfig().public;
-const { getFeaturedBlogs } = useContent();
+const { getFeaturedBlogs, getAllBlogs } = useContent();
 const { logger } = useLogger({ context: "pages/index.vue" });
 
-const numberOfFeaturedBlogs = 8;
+const numberOfFeaturedBlogs = 12;
 
-const { data, pending: isLoading, error: fetchError } = await getFeaturedBlogs(numberOfFeaturedBlogs);
+const [{ data: featuredData, pending: featuredPending, error: featuredError }, { data: recentData, pending: recentPending, error: recentError }] = await Promise.all([
+  getFeaturedBlogs(numberOfFeaturedBlogs),
+  getAllBlogs(numberOfFeaturedBlogs * 2),
+]);
 
-const featuredBlogs = computed<BlogType[]>(() => (data.value || []) as BlogType[]);
-logger.log(`Fetched ${featuredBlogs.value.length} featured blogs for the homepage.`);
+const featuredBlogs = computed<BlogType[]>(() => {
+  const featured = (featuredData.value || []) as BlogType[];
+  const recent = (recentData.value || []) as BlogType[];
+
+  // Deduplicate recent blogs that are already in the featured list
+  const featuredPaths = new Set(featured.map(blog => blog.path || blog.id || blog.slug));
+  const fallbackRecent = recent.filter(blog => !featuredPaths.has(blog.path || blog.id || blog.slug));
+
+  // Combine featured posts with recent fallback posts to hit the exact limit
+  return [...featured, ...fallbackRecent].slice(0, numberOfFeaturedBlogs);
+});
+
+const isLoading = computed(() => featuredPending.value || recentPending.value);
+const fetchError = computed(() => featuredError.value && recentError.value);
+
+logger.log(`Fetched ${featuredBlogs.value.length} blogs for the homepage preview.`);
 
 const { activeHoverText, startDecryption } = useMatrixDecrypt({
   speed: 25,
