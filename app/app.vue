@@ -1,9 +1,7 @@
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { watch } from "vue";
 
 import LangSwitcher from "~/components/ui/lang-switcher.vue";
-
-import type { BackgroundVariant } from "./components/ui/app/site-background.vue";
 
 const { logger } = useLogger({ context: "app.vue" });
 const route = useRoute();
@@ -32,27 +30,6 @@ watch(
   },
   { immediate: true },
 );
-
-const variants: BackgroundVariant[] = [
-  "parallax-stars",
-  "iot-nodes",
-  "webdev-flow",
-  "mesh",
-];
-
-// Calculate background variant based on the current calendar day
-function getDailyVariant(): BackgroundVariant {
-  const dayIndex = Math.floor(Date.now() / 86400000); // Days since Unix epoch
-  return variants[dayIndex % variants.length] as BackgroundVariant;
-}
-
-// Default to first variant for SSR hydration consistency
-const variant = ref<BackgroundVariant>(variants[0]!);
-
-onMounted(() => {
-  // Set the variant based on today's date upon mount
-  variant.value = getDailyVariant();
-});
 </script>
 
 <template>
@@ -67,7 +44,11 @@ onMounted(() => {
 
       <!-- Floating Language Switcher Widget (Bottom Left) -->
       <LangSwitcher />
-      <UiAppSiteBackground :variant="variant" />
+      <!-- Global Eye-Care Reading Background with Customizable Grain Opacity & Warmth -->
+      <UiAppSiteBackground
+        :grain-opacity="0.2"
+        warmth-profile="cream"
+      />
       <NuxtRouteAnnouncer />
       <NuxtLoadingIndicator
         color="repeating-linear-gradient(to right, #14b8a6 0%, #0d9488 50%, #2dd4bf 100%)"
