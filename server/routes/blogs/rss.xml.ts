@@ -1,4 +1,4 @@
-import { generateBlogRssFeed } from "~~/server/utils/rss";
+import { generateBlogRssFeed } from "#server/utils/rss";
 
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig(event);

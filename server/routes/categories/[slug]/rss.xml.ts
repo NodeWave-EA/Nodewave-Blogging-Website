@@ -1,5 +1,5 @@
+import { generateBlogRssFeed } from "#server/utils/rss";
 import { getRouterParam } from "h3";
-import { generateBlogRssFeed } from "~~/server/utils/rss";
 
 import type { BlogType } from "~/types";
 
