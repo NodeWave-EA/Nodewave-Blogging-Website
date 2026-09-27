@@ -89,6 +89,7 @@ const PAGE_DESCRIPTION = computed(
   () => author.value?.description || `Explore the profile of ${author.value?.name || "this author"} and discover their contributions to our platform.`,
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.value?.slug || slug}`);
+const AUTHOR_RSS_URL = computed(() => `/authors/${author.value?.slug || slug}/rss.xml`);
 
 const authorAvatarUrl = computed(() => {
   const src = author.value?.avatar?.src;
@@ -148,8 +149,8 @@ useHead({
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: `${author.value?.name || "Author"} RSS Feed`,
-      href: `/authors/${slug}/rss.xml`,
+      title: () => `NodeWave — ${author.value?.name || "Author"} RSS Feed`,
+      href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
       rel: "icon",
@@ -246,10 +247,10 @@ defineOgImage("Author.takumi", {
           </UBadge>
         </div>
 
-        <!-- RSS SUBSCRIBE BUTTON (CLOUDFLARE STYLE) -->
+        <!-- Author RSS Subscribe Button -->
         <RssSubscribeButton
           :title="author.name"
-          :feed-path="`/authors/${author.slug || slug}/rss.xml`"
+          :feed-path="AUTHOR_RSS_URL"
         />
       </div>
 

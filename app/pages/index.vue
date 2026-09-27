@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 
 import { siteConfig } from "~/app.meta";
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 
 import type { BlogType } from "~/types";
 
@@ -51,6 +52,7 @@ const HOME_DESCRIPTION = computed(
   () => "Explore the latest curated posts, technical articles, and engineering insights from nodewave. Stay ahead in web development, software architecture, and modern technology.",
 );
 const HOME_CANONICAL_URL = computed(() => `${config.siteUrl}`);
+const HOME_RSS_URL = computed(() => `/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -78,6 +80,12 @@ useHead({
     {
       rel: "canonical",
       href: () => HOME_CANONICAL_URL.value,
+    },
+    {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: () => `${config.siteName || "Nodewave"} RSS Feed`,
+      href: () => HOME_RSS_URL.value,
     },
     {
       rel: "icon",
@@ -142,22 +150,30 @@ useSchemaOrg([
       <!-- Hero Header Section -->
       <UPageHeader>
         <template #headline>
-          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
-            <UIcon
-              name="i-lucide-sparkle"
-              class="h-3.5 w-3.5 animate-pulse"
-              aria-hidden="true"
-            />
-            <ClientOnly>
-              <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-                {{ activeHoverText["home-badge"] || "Curated Posts & Insights" }}
-              </span>
-              <template #fallback>
+          <div class="flex items-center justify-between gap-4">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
+              <UIcon
+                name="i-lucide-sparkle"
+                class="h-3.5 w-3.5 animate-pulse"
+                aria-hidden="true"
+              />
+              <ClientOnly>
                 <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-                  Curated Posts & Insights
+                  {{ activeHoverText["home-badge"] || "Curated Posts & Insights" }}
                 </span>
-              </template>
-            </ClientOnly>
+                <template #fallback>
+                  <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                    Curated Posts & Insights
+                  </span>
+                </template>
+              </ClientOnly>
+            </div>
+
+            <!-- RSS Subscribe Button -->
+            <RssSubscribeButton
+              title="Main Feed"
+              :feed-path="HOME_RSS_URL"
+            />
           </div>
         </template>
 

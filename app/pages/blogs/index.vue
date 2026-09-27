@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
@@ -55,6 +56,7 @@ const BLOGS_DESCRIPTION = computed(
   () => "Browse the complete archive of technical articles, software architecture notes, and development logs published on Nodewave.",
 );
 const BLOGS_CANONICAL_URL = computed(() => `${config.siteUrl}/blogs`);
+const BLOGS_RSS_URL = computed(() => `/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -82,6 +84,12 @@ useHead({
     {
       rel: "canonical",
       href: () => BLOGS_CANONICAL_URL.value,
+    },
+    {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: "NodeWave — Blog RSS Feed",
+      href: () => BLOGS_RSS_URL.value,
     },
     {
       rel: "icon",
@@ -125,25 +133,33 @@ useSchemaOrg([
     <UPage>
       <UPageHeader class="mb-12 mx-2">
         <template #headline>
-          <div
-            class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20"
-          >
-            <UIcon
-              name="i-lucide-library"
-              class="h-3.5 w-3.5"
-              aria-hidden="true"
-            />
-            <ClientOnly>
-              <span class="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">
-                {{ activeHoverText["archive-badge"] || "Complete Archive" }}
-              </span>
-
-              <template #fallback>
+          <div class="flex items-center justify-between gap-4">
+            <div
+              class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20"
+            >
+              <UIcon
+                name="i-lucide-library"
+                class="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
+              <ClientOnly>
                 <span class="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">
-                  Complete Archive
+                  {{ activeHoverText["archive-badge"] || "Complete Archive" }}
                 </span>
-              </template>
-            </ClientOnly>
+
+                <template #fallback>
+                  <span class="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">
+                    Complete Archive
+                  </span>
+                </template>
+              </ClientOnly>
+            </div>
+
+            <!-- RSS Subscribe Button -->
+            <RssSubscribeButton
+              title="Blog Archive"
+              :feed-path="BLOGS_RSS_URL"
+            />
           </div>
         </template>
 

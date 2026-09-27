@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
@@ -50,6 +51,7 @@ const PAGE_DESCRIPTION = computed(
   () => "Explore all technical articles, architecture notes, and software development guides organized by category and subject area on Nodewave.",
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories`);
+const CATEGORIES_INDEX_RSS_URL = computed(() => `/categories/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -82,7 +84,7 @@ useHead({
       rel: "alternate",
       type: "application/rss+xml",
       title: "NodeWave — Categories Directory RSS Feed",
-      href: "/categories/rss.xml",
+      href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
       rel: "icon",
@@ -126,15 +128,23 @@ useSchemaOrg([
     <UPage class="py-10">
       <UPageHeader class="mb-12 mx-2">
         <template #headline>
-          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <UIcon
-              name="i-lucide-grid-3x3"
-              class="h-3.5 w-3.5"
-              aria-hidden="true"
+          <div class="flex items-center justify-between gap-4">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <UIcon
+                name="i-lucide-grid-3x3"
+                class="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
+              <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                {{ activeHoverText["categories-badge"] || "Explore Categories" }}
+              </span>
+            </div>
+
+            <!-- Categories Directory RSS Subscribe Button -->
+            <RssSubscribeButton
+              title="Categories Directory"
+              :feed-path="CATEGORIES_INDEX_RSS_URL"
             />
-            <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-              {{ activeHoverText["categories-badge"] || "Explore Categories" }}
-            </span>
           </div>
         </template>
 

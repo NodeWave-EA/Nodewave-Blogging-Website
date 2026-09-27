@@ -48,6 +48,7 @@ const PAGE_DESCRIPTION = computed(
   () => category.value?.description || category.value?.meta?.description || `Explore articles and tutorials classified under the ${category.value?.name || "category"} topic.`,
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories/${category.value?.slug || slug}`);
+const CATEGORY_RSS_URL = computed(() => `/categories/${category.value?.slug || slug}/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -79,14 +80,8 @@ useHead({
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: `${category.value?.name || "Category"} RSS Feed`,
-      href: `/categories/${slug}/rss.xml`,
-    },
-    {
-      rel: "alternate",
-      type: "application/rss+xml",
-      title: "NodeWave — Categories Directory RSS Feed",
-      href: "/categories/rss.xml",
+      title: () => `NodeWave — ${category.value?.name || "Category"} RSS Feed`,
+      href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
       rel: "icon",
@@ -166,10 +161,10 @@ defineOgImage("Taxonomy.takumi", {
                 </span>
               </div>
 
-              <!-- RSS SUBSCRIBE BUTTON (CLOUDFLARE STYLE) -->
+              <!-- Category RSS Subscribe Button -->
               <RssSubscribeButton
                 :title="category.name"
-                :feed-path="`/categories/${category.slug || slug}/rss.xml`"
+                :feed-path="CATEGORY_RSS_URL"
               />
             </div>
 

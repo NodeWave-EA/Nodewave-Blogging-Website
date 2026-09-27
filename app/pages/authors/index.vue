@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
@@ -70,6 +71,7 @@ const PAGE_DESCRIPTION = computed(
   () => "Discover the dedicated developers, tech enthusiasts, and systems architects building our knowledge database. Explore their profiles and dive into their engineering insights.",
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors`);
+const AUTHORS_INDEX_RSS_URL = computed(() => `/authors/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -97,6 +99,12 @@ useHead({
     {
       rel: "canonical",
       href: () => PAGE_CANONICAL_URL.value,
+    },
+    {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: "NodeWave — Authors Directory RSS Feed",
+      href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
       rel: "icon",
@@ -140,22 +148,30 @@ useSchemaOrg([
     <UPage class="py-10">
       <UPageHeader class="mb-12 mx-2">
         <template #headline>
-          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
-            <UIcon
-              name="i-lucide-users"
-              class="h-3.5 w-3.5 animate-pulse"
-              aria-hidden="true"
-            />
-            <ClientOnly>
-              <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-                {{ activeHoverText["authors-badge"] || "Editorial Roster" }}
-              </span>
-              <template #fallback>
+          <div class="flex items-center justify-between gap-4">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
+              <UIcon
+                name="i-lucide-users"
+                class="h-3.5 w-3.5 animate-pulse"
+                aria-hidden="true"
+              />
+              <ClientOnly>
                 <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-                  Editorial Roster
+                  {{ activeHoverText["authors-badge"] || "Editorial Roster" }}
                 </span>
-              </template>
-            </ClientOnly>
+                <template #fallback>
+                  <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                    Editorial Roster
+                  </span>
+                </template>
+              </ClientOnly>
+            </div>
+
+            <!-- Authors Directory RSS Subscribe Button -->
+            <RssSubscribeButton
+              title="Authors Directory"
+              :feed-path="AUTHORS_INDEX_RSS_URL"
+            />
           </div>
         </template>
 

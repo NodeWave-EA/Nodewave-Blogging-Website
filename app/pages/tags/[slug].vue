@@ -3,7 +3,7 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
-import RssSubscribeButton from "~/components/ui/RssSubscribeButton.vue";
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 
 const route = useRoute();
