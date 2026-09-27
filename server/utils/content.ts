@@ -2,6 +2,75 @@ import type { H3Event } from "h3";
 import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
 
 /**
+ * Normalizes any string, file path, or ID into a clean, lowercased slug.
+ * e.g., "categories/categories/iot.yml" -> "iot"
+ */
+export function normalizeSlug(input?: string): string {
+  if (!input || typeof input !== "string")
+    return "";
+  return input
+    .trim()
+    .split("/")
+    .pop()!
+    .replace(/\.(yml|yaml|json|md)$/i, "")
+    .toLowerCase();
+}
+
+/**
+ * Checks if a blog category reference matches a target category slug or string.
+ */
+export function matchesCategory(
+  categoryItem: string | BlogCategory | undefined | null,
+  targetSlug: string,
+): boolean {
+  if (!categoryItem || !targetSlug)
+    return false;
+
+  const normalizedTarget = normalizeSlug(targetSlug);
+
+  if (typeof categoryItem === "string") {
+    return normalizeSlug(categoryItem) === normalizedTarget;
+  }
+
+  if (typeof categoryItem === "object") {
+    const itemSlug = normalizeSlug(categoryItem.slug || categoryItem.id || categoryItem.stem);
+    if (itemSlug && itemSlug === normalizedTarget)
+      return true;
+    if (categoryItem.name && categoryItem.name.toLowerCase() === targetSlug.toLowerCase())
+      return true;
+  }
+
+  return false;
+}
+
+/**
+ * Checks if a blog tag reference matches a target tag slug or string.
+ */
+export function matchesTag(
+  tagItem: string | BlogTag | undefined | null,
+  targetSlug: string,
+): boolean {
+  if (!tagItem || !targetSlug)
+    return false;
+
+  const normalizedTarget = normalizeSlug(targetSlug);
+
+  if (typeof tagItem === "string") {
+    return normalizeSlug(tagItem) === normalizedTarget;
+  }
+
+  if (typeof tagItem === "object") {
+    const itemSlug = normalizeSlug(tagItem.slug || tagItem.id || tagItem.stem);
+    if (itemSlug && itemSlug === normalizedTarget)
+      return true;
+    if (tagItem.name && tagItem.name.toLowerCase() === targetSlug.toLowerCase())
+      return true;
+  }
+
+  return false;
+}
+
+/**
  * Enriches a blog entry by resolving its relational data (Author, Categories, Tags)
  * from their respective Nuxt Content collections using the backend runtime context.
  */
@@ -9,49 +78,139 @@ export async function enrichBlog(event: H3Event, blog: BlogType): Promise<BlogTy
   if (!blog)
     return blog;
 
-  // Resolve Author
-  if (typeof blog.author === "string") {
-    const authorData = await queryCollection(event, "authors")
-      .where("slug", "=", blog.author)
-      .first();
+  // Fetch all reference metadata collections once for fast in-memory matching
+  const [allAuthors, allCategories, allTags] = await Promise.all([
+    getAllAuthors(event).catch(() => [] as BlogAuthor[]),
+    getAllCategories(event).catch(() => [] as BlogCategory[]),
+    getAllTags(event).catch(() => [] as BlogTag[]),
+  ]);
 
-    if (authorData) {
-      blog.author = authorData as unknown as BlogAuthor;
+  // Resolve Author
+  if (blog.author) {
+    if (typeof blog.author === "string") {
+      const authorSlug = normalizeSlug(blog.author);
+      const matchedAuthor = allAuthors.find(
+        a => normalizeSlug(a.slug) === authorSlug || normalizeSlug(a.id) === authorSlug || normalizeSlug(a.stem) === authorSlug,
+      );
+
+      if (matchedAuthor) {
+        blog.author = matchedAuthor;
+      }
+    }
+    else if (typeof blog.author === "object" && blog.author.slug) {
+      const authorSlug = normalizeSlug(blog.author.slug);
+      const matchedAuthor = allAuthors.find(a => normalizeSlug(a.slug) === authorSlug);
+      if (matchedAuthor) {
+        blog.author = { ...matchedAuthor, ...blog.author };
+      }
     }
   }
 
-  // Resolve Categories
-  if (Array.isArray(blog.categories) && blog.categories.length > 0) {
-    const categoryPromises = blog.categories.map(async (slugOrObj: string | BlogCategory) => {
-      if (typeof slugOrObj !== "string")
-        return slugOrObj;
+  // Resolve Categories (handles string paths, arrays of strings, or arrays of objects)
+  let rawCategories = blog.categories || (blog as any).category;
+  if (rawCategories) {
+    if (!Array.isArray(rawCategories)) {
+      rawCategories = [rawCategories];
+    }
 
-      const categoryData = await queryCollection(event, "categories")
-        .where("slug", "=", slugOrObj)
-        .first();
+    blog.categories = rawCategories
+      .map((item: string | BlogCategory) => {
+        if (!item)
+          return null;
 
-      return categoryData as unknown as BlogCategory;
-    });
+        if (typeof item === "object") {
+          const itemSlug = normalizeSlug(item.slug || item.id || item.stem);
+          const matched = allCategories.find(c => normalizeSlug(c.slug) === itemSlug);
+          return matched ? { ...matched, ...item } : item;
+        }
 
-    const resolvedCategories = await Promise.all(categoryPromises);
-    blog.categories = resolvedCategories.filter(Boolean);
+        if (typeof item === "string") {
+          const itemSlug = normalizeSlug(item);
+          const matched = allCategories.find(
+            c => normalizeSlug(c.slug) === itemSlug || normalizeSlug(c.id) === itemSlug || normalizeSlug(c.stem) === itemSlug,
+          );
+
+          if (matched)
+            return matched;
+
+          // Fallback category object if record is unindexed or missing in database
+          const formattedName = itemSlug
+            .replace(/[-_]/g, " ")
+            .replace(/\b\w/g, char => char.toUpperCase());
+
+          return {
+            id: `categories/${itemSlug}.yml`,
+            name: formattedName || item,
+            slug: itemSlug,
+            description: `Articles categorized under ${formattedName || item}`,
+            icon: "i-heroicons-folder",
+            color: "#64748b",
+            featured: false,
+            extension: "yml",
+            stem: `categories/${itemSlug}`,
+            meta: {},
+          } as BlogCategory;
+        }
+
+        return null;
+      })
+      .filter(Boolean) as BlogCategory[];
+  }
+  else {
+    blog.categories = [];
   }
 
-  // Resolve Tags
-  if (Array.isArray(blog.tags) && blog.tags.length > 0) {
-    const tagPromises = blog.tags.map(async (slugOrObj: string | BlogTag) => {
-      if (typeof slugOrObj !== "string")
-        return slugOrObj;
+  // 4. Resolve Tags (handles string paths, arrays of strings, or arrays of objects)
+  let rawTags = blog.tags || (blog as any).tag;
+  if (rawTags) {
+    if (!Array.isArray(rawTags)) {
+      rawTags = [rawTags];
+    }
 
-      const tagData = await queryCollection(event, "tags")
-        .where("slug", "=", slugOrObj)
-        .first();
+    blog.tags = rawTags
+      .map((item: string | BlogTag) => {
+        if (!item)
+          return null;
 
-      return tagData as unknown as BlogTag;
-    });
+        if (typeof item === "object") {
+          const itemSlug = normalizeSlug(item.slug || item.id || item.stem);
+          const matched = allTags.find(t => normalizeSlug(t.slug) === itemSlug);
+          return matched ? { ...matched, ...item } : item;
+        }
 
-    const resolvedTags = await Promise.all(tagPromises);
-    blog.tags = resolvedTags.filter(Boolean);
+        if (typeof item === "string") {
+          const itemSlug = normalizeSlug(item);
+          const matched = allTags.find(
+            t => normalizeSlug(t.slug) === itemSlug || normalizeSlug(t.id) === itemSlug || normalizeSlug(t.stem) === itemSlug,
+          );
+
+          if (matched)
+            return matched;
+
+          // Fallback tag object
+          const formattedName = itemSlug
+            .replace(/[-_]/g, " ")
+            .replace(/\b\w/g, char => char.toUpperCase());
+
+          return {
+            id: `tags/${itemSlug}.yml`,
+            name: formattedName || item,
+            slug: itemSlug,
+            description: `Articles tagged with #${formattedName || item}`,
+            icon: "i-heroicons-tag",
+            color: "#64748b",
+            extension: "yml",
+            stem: `tags/${itemSlug}`,
+            meta: {},
+          } as BlogTag;
+        }
+
+        return null;
+      })
+      .filter(Boolean) as BlogTag[];
+  }
+  else {
+    blog.tags = [];
   }
 
   return blog;

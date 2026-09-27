@@ -1,7 +1,14 @@
 import { renderHtml } from "@comark/html";
 import { Feed } from "feed";
 import { getHeader, setHeaders, setResponseStatus } from "h3";
-import { getAllAuthors, getAllBlogs, getAllCategories, getAllTags } from "~~/server/utils/content";
+import {
+  getAllAuthors,
+  getAllBlogs,
+  getAllCategories,
+  getAllTags,
+  matchesCategory,
+  matchesTag,
+} from "~~/server/utils/content";
 
 import type { H3Event } from "h3";
 import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
@@ -632,7 +639,7 @@ export async function generateCategoriesRssFeed(
     const categoryUrl = `${siteUrl}/categories/${category.slug}`;
     const categoryBlogs = allBlogs.filter((blog) => {
       if (Array.isArray(blog.categories)) {
-        return blog.categories.some(c => (typeof c === "object" ? c.slug : c) === category.slug);
+        return blog.categories.some(c => matchesCategory(c, category.slug));
       }
       return false;
     });
@@ -716,7 +723,7 @@ export async function generateTagsRssFeed(
     const tagUrl = `${siteUrl}/tags/${tag.slug}`;
     const tagBlogs = allBlogs.filter((blog) => {
       if (Array.isArray(blog.tags)) {
-        return blog.tags.some(t => (typeof t === "object" ? t.slug : t) === tag.slug);
+        return blog.tags.some(t => matchesTag(t, tag.slug));
       }
       return false;
     });
