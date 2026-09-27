@@ -352,20 +352,33 @@ export function finalizeXmlOutput(
   let xml = rawXml;
   const xslUrl = `${siteUrl.replace(/\/$/, "")}/feed.xsl`;
 
+  // Inject stylesheet processing instruction if missing
   if (!xml.includes("xml-stylesheet")) {
     xml = xml.replace(
-      "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+      /<\?xml\s+version="1\.0"\s+encoding="utf-8"\?>/i,
       `<?xml version="1.0" encoding="utf-8"?>\n<?xml-stylesheet type="text/xsl" href="${escapeXml(xslUrl)}"?>`,
     );
   }
 
-  if (!xml.includes("xmlns:atom")) {
-    xml = xml.replace(
-      "<rss version=\"2.0\"",
-      "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:media=\"https://search.yahoo.com/mrss/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\"",
-    );
-  }
+  // Inject missing namespaces onto the <rss> element safely without duplicate attributes
+  xml = xml.replace(/<rss\s+version="2\.0"/i, (match) => {
+    let extraAttrs = "";
+    if (!xml.includes("xmlns:atom")) {
+      extraAttrs += " xmlns:atom=\"http://www.w3.org/2005/Atom\"";
+    }
+    if (!xml.includes("xmlns:media")) {
+      extraAttrs += " xmlns:media=\"https://search.yahoo.com/mrss/\"";
+    }
+    if (!xml.includes("xmlns:dc")) {
+      extraAttrs += " xmlns:dc=\"http://purl.org/dc/elements/1.1/\"";
+    }
+    if (!xml.includes("xmlns:content")) {
+      extraAttrs += " xmlns:content=\"http://purl.org/rss/1.0/modules/content/\"";
+    }
+    return `${match}${extraAttrs}`;
+  });
 
+  // Inject atom links inside <channel>
   let atomLinks = `  <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />`;
   for (const feed of relatedFeeds) {
     atomLinks += `\n        <atom:link href="${escapeXml(feed.href)}" rel="${feed.rel}" type="application/rss+xml" title="${escapeXml(feed.title)}" />`;
