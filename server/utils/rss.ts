@@ -414,7 +414,7 @@ export async function generateBlogRssFeed(
   },
 ): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
   const feedUrl = `${siteUrl}${options.feedPath}`;
 
   let posts = await getAllBlogs(event);
@@ -532,7 +532,7 @@ export async function generateBlogRssFeed(
  */
 export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
   const feedUrl = `${siteUrl}/authors/rss.xml`;
 
   const authors = await getAllAuthors(event);
@@ -589,12 +589,13 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
   ]);
 }
 
-/**
- * Generates Categories Feed (/categories/rss.xml).
- */
-export async function generateCategoriesRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
+export async function generateCategoriesRssFeed(
+  event: H3Event,
+  format: FeedFormat = "rss",
+  extraRelatedFeeds: RelatedFeedLink[] = [],
+): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
   const feedUrl = `${siteUrl}/categories/rss.xml`;
 
   const categories = await getAllCategories(event);
@@ -646,9 +647,19 @@ export async function generateCategoriesRssFeed(event: H3Event, format: FeedForm
     });
   }
 
-  return renderFeedResponse(event, feed, latestDate, feedUrl, format, [
-    { rel: "up", href: `${siteUrl}/rss.xml`, title: "Root RSS Feed" },
-  ]);
+  const categoryRelatedFeeds: RelatedFeedLink[] = categories.map(cat => ({
+    rel: "related",
+    href: `${siteUrl}/categories/${cat.slug}/rss.xml`,
+    title: `${cat.name} Category Feed`,
+  }));
+
+  const allRelatedFeeds: RelatedFeedLink[] = [
+    { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
+    ...categoryRelatedFeeds,
+    ...extraRelatedFeeds,
+  ];
+
+  return renderFeedResponse(event, feed, latestDate, feedUrl, format, allRelatedFeeds);
 }
 
 /**
@@ -656,7 +667,7 @@ export async function generateCategoriesRssFeed(event: H3Event, format: FeedForm
  */
 export async function generateTagsRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewave-blogs.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
   const feedUrl = `${siteUrl}/tags/rss.xml`;
 
   const tags = await getAllTags(event);

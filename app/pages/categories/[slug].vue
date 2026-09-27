@@ -83,6 +83,12 @@ useHead({
       href: `/categories/${slug}/rss.xml`,
     },
     {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: "NodeWave — Categories Directory RSS Feed",
+      href: "/categories/rss.xml",
+    },
+    {
       rel: "icon",
       type: "image/png",
       href: "/favicon.png",

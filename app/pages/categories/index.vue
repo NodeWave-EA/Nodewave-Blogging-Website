@@ -79,6 +79,12 @@ useHead({
       href: () => PAGE_CANONICAL_URL.value,
     },
     {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: "NodeWave — Categories Directory RSS Feed",
+      href: "/categories/rss.xml",
+    },
+    {
       rel: "icon",
       type: "image/png",
       href: "/favicon.png",
