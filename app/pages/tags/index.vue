@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
 
@@ -51,6 +52,7 @@ const PAGE_DESCRIPTION = computed(
   () => "Explore all articles, tutorials, and development logs organized by specific tags, technologies, and technical keywords on Nodewave.",
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags`);
+const TAGS_INDEX_RSS_URL = computed(() => `/tags/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -78,6 +80,12 @@ useHead({
     {
       rel: "canonical",
       href: () => PAGE_CANONICAL_URL.value,
+    },
+    {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: "NodeWave — Tags & Technology Topics Index RSS Feed",
+      href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
       rel: "icon",
@@ -121,15 +129,23 @@ useSchemaOrg([
     <UPage class="py-10">
       <UPageHeader class="mb-12 mx-2">
         <template #headline>
-          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-            <UIcon
-              name="i-lucide-hash"
-              class="h-3.5 w-3.5"
-              aria-hidden="true"
+          <div class="flex items-center justify-between gap-4">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+              <UIcon
+                name="i-lucide-hash"
+                class="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
+              <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                {{ activeHoverText["tags-badge"] || "Explore Tags" }}
+              </span>
+            </div>
+
+            <!-- RSS Subscribe Component -->
+            <RssSubscribeButton
+              title="Tags Directory"
+              :feed-path="TAGS_INDEX_RSS_URL"
             />
-            <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-              {{ activeHoverText["tags-badge"] || "Explore Tags" }}
-            </span>
           </div>
         </template>
 

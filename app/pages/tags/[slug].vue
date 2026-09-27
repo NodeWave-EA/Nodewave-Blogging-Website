@@ -3,6 +3,7 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import RssSubscribeButton from "~/components/ui/RssSubscribeButton.vue";
 import { useContent } from "~/composables/content";
 
 const route = useRoute();
@@ -161,15 +162,10 @@ defineOgImage("Taxonomy.takumi", {
               </div>
 
               <!-- Tag RSS Feed Link -->
-              <NuxtLink
-                :to="TAG_RSS_URL"
-                target="_blank"
-                class="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-neutral-500 dark:text-neutral-400 hover:text-primary-500 dark:hover:text-primary-400 px-2.5 py-1 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:border-primary-500/30 transition-all"
-                title="Subscribe to tag RSS feed"
-              >
-                <UIcon name="i-lucide-rss" class="w-3.5 h-3.5 text-orange-500" />
-                <span>RSS Feed</span>
-              </NuxtLink>
+              <RssSubscribeButton
+                :title="`#${tag?.name || slug}`"
+                :feed-path="TAG_RSS_URL"
+              />
             </div>
 
             <h1 class="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2.5">

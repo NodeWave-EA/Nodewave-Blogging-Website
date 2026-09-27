@@ -473,9 +473,6 @@ export async function generateBlogRssFeed(
           else if (Array.isArray(post.body.value)) {
             rawHtml = renderMiniMarkToHtml(post.body.value);
           }
-          // else if (Array.isArray(post.body.children)) {
-          //   rawHtml = renderMiniMarkToHtml(post.body.children);
-          // }
           else if (Array.isArray(post.body)) {
             rawHtml = renderMiniMarkToHtml(post.body);
           }
@@ -560,12 +557,19 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
       if (typeof blog.author === "object" && blog.author?.slug) {
         return blog.author.slug === author.slug;
       }
-      return blog.author.slug === author.slug;
+      if (typeof blog.author === "string") {
+        return blog.author === author.slug;
+      }
+      return false;
     });
 
-    let html = `<p>${escapeXml(author.description || "Core technical contributor at NodeWave.")}</p>`;
-    if (authorBlogs.length > 0) {
-      html += `<h3>Published Articles (${authorBlogs.length}):</h3><ul>`;
+    const count = authorBlogs.length;
+    const countLabel = `${count} ${count === 1 ? "article" : "articles"}`;
+    const title = `${author.name || author.slug} (${countLabel})`;
+
+    let html = `<p>${escapeXml(author.description || `Core technical contributor at NodeWave (${countLabel}).`)}</p>`;
+    if (count > 0) {
+      html += `<h3>Published Articles (${count}):</h3><ul>`;
       for (const b of authorBlogs) {
         const bPath = b.path.startsWith("/") ? b.path : `/${b.path}`;
         const dateFormatted = b.date ? ` — <em>${formatDate(b.date)}</em>` : "";
@@ -574,11 +578,15 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
       html += `</ul>`;
     }
 
+    const description = author.description
+      ? `${author.description} (${countLabel})`
+      : `Author profile for ${author.name || author.slug}. Total published: ${countLabel}.`;
+
     feed.addItem({
-      title: author.name || author.slug,
+      title,
       id: authorUrl,
       link: authorUrl,
-      description: author.description || `Author profile for ${author.name}`,
+      description,
       content: cleanRssHtml(html),
       date: getLatestBlogDate(authorBlogs),
     });
@@ -589,6 +597,9 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
   ]);
 }
 
+/**
+ * Generates Categories Feed (/categories/rss.xml).
+ */
 export async function generateCategoriesRssFeed(
   event: H3Event,
   format: FeedFormat = "rss",
@@ -626,9 +637,13 @@ export async function generateCategoriesRssFeed(
       return false;
     });
 
+    const count = categoryBlogs.length;
+    const countLabel = `${count} ${count === 1 ? "article" : "articles"}`;
+    const title = `${category.name || category.slug} (${countLabel})`;
+
     let html = `<p>${escapeXml(category.description || `Technical articles under ${category.name}.`)}</p>`;
-    if (categoryBlogs.length > 0) {
-      html += `<h3>Articles in ${escapeXml(category.name)} (${categoryBlogs.length}):</h3><ul>`;
+    if (count > 0) {
+      html += `<h3>Articles in ${escapeXml(category.name || category.slug)} (${count}):</h3><ul>`;
       for (const b of categoryBlogs) {
         const bPath = b.path.startsWith("/") ? b.path : `/${b.path}`;
         const dateFormatted = b.date ? ` — <em>${formatDate(b.date)}</em>` : "";
@@ -637,11 +652,15 @@ export async function generateCategoriesRssFeed(
       html += `</ul>`;
     }
 
+    const description = category.description
+      ? `${category.description} (${countLabel})`
+      : `Category overview for ${category.name || category.slug}. Contains ${countLabel}.`;
+
     feed.addItem({
-      title: category.name || category.slug,
+      title,
       id: categoryUrl,
       link: categoryUrl,
-      description: category.description || `Category overview for ${category.name}`,
+      description,
       content: cleanRssHtml(html),
       date: getLatestBlogDate(categoryBlogs),
     });
@@ -665,7 +684,11 @@ export async function generateCategoriesRssFeed(
 /**
  * Generates Tags Feed (/tags/rss.xml).
  */
-export async function generateTagsRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
+export async function generateTagsRssFeed(
+  event: H3Event,
+  format: FeedFormat = "rss",
+  extraRelatedFeeds: RelatedFeedLink[] = [],
+): Promise<string> {
   const config = useRuntimeConfig(event);
   const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
   const feedUrl = `${siteUrl}/tags/rss.xml`;
@@ -698,9 +721,13 @@ export async function generateTagsRssFeed(event: H3Event, format: FeedFormat = "
       return false;
     });
 
-    let html = `<p>Articles tagged with <strong>#${escapeXml(tag.name)}</strong>.</p>`;
-    if (tagBlogs.length > 0) {
-      html += `<h3>Tagged Articles (${tagBlogs.length}):</h3><ul>`;
+    const count = tagBlogs.length;
+    const countLabel = `${count} ${count === 1 ? "article" : "articles"}`;
+    const title = `#${tag.name || tag.slug} (${countLabel})`;
+
+    let html = `<p>Articles tagged with <strong>#${escapeXml(tag.name || tag.slug)}</strong>.</p>`;
+    if (count > 0) {
+      html += `<h3>Tagged Articles (${count}):</h3><ul>`;
       for (const b of tagBlogs) {
         const bPath = b.path.startsWith("/") ? b.path : `/${b.path}`;
         const dateFormatted = b.date ? ` — <em>${formatDate(b.date)}</em>` : "";
@@ -709,17 +736,31 @@ export async function generateTagsRssFeed(event: H3Event, format: FeedFormat = "
       html += `</ul>`;
     }
 
+    const description = tag.description
+      ? `${tag.description} (${countLabel})`
+      : `Articles tagged under #${tag.name || tag.slug}. Contains ${countLabel}.`;
+
     feed.addItem({
-      title: `#${tag.name || tag.slug}`,
+      title,
       id: tagUrl,
       link: tagUrl,
-      description: `Articles tagged under #${tag.name}`,
+      description,
       content: cleanRssHtml(html),
       date: getLatestBlogDate(tagBlogs),
     });
   }
 
-  return renderFeedResponse(event, feed, latestDate, feedUrl, format, [
-    { rel: "up", href: `${siteUrl}/rss.xml`, title: "Root RSS Feed" },
-  ]);
+  const tagRelatedFeeds: RelatedFeedLink[] = tags.map(tag => ({
+    rel: "related",
+    href: `${siteUrl}/tags/${tag.slug}/rss.xml`,
+    title: `#${tag.name} Tag Feed`,
+  }));
+
+  const allRelatedFeeds: RelatedFeedLink[] = [
+    { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
+    ...tagRelatedFeeds,
+    ...extraRelatedFeeds,
+  ];
+
+  return renderFeedResponse(event, feed, latestDate, feedUrl, format, allRelatedFeeds);
 }
