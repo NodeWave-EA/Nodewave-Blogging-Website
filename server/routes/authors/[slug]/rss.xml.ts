@@ -5,6 +5,14 @@ import type { BlogType } from "~/types";
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug");
+
+  if (!slug) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Author slug parameter is required.",
+    });
+  }
+
   const config = useRuntimeConfig(event);
   const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
 
