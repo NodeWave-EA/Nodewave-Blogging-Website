@@ -182,7 +182,47 @@ export function getLatestBlogDate(blogs: BlogType[]): Date {
 }
 
 /**
- * Recursively parses Nuxt Content v3 MiniMark AST nodes to valid HTML string.
+ * Renders a tag name, props object, and children array into a valid HTML string.
+ */
+function renderHtmlElement(rawTag: string, props: Record<string, any>, children: any[]): string {
+  let tagName = rawTag.toLowerCase();
+
+  if (tagName === "codespan" || tagName === "code-inline" || tagName === "inline-code" || tagName === "codeinline") {
+    tagName = "code";
+  }
+  else if (tagName === "binding" || tagName === "component") {
+    return children.map(renderMiniMarkNode).join("");
+  }
+
+  if (!STANDARD_HTML_TAGS.has(tagName)) {
+    tagName = "div";
+  }
+
+  let attrStr = "";
+  for (const [key, val] of Object.entries(props)) {
+    if (val == null || val === false)
+      continue;
+    if (key.startsWith("__") || key === "key" || key === "v-bind")
+      continue;
+
+    if (val === true) {
+      attrStr += ` ${key}`;
+    }
+    else {
+      attrStr += ` ${key}="${escapeXml(String(val))}"`;
+    }
+  }
+
+  if (VOID_ELEMENTS.has(tagName)) {
+    return `<${tagName}${attrStr} />`;
+  }
+
+  const innerHtml = children.map(renderMiniMarkNode).join("");
+  return `<${tagName}${attrStr}>${innerHtml}</${tagName}>`;
+}
+
+/**
+ * Recursively parses Nuxt Content v2/v3 AST nodes (Object & MiniMark Tuples) to valid HTML string.
  */
 export function renderMiniMarkNode(node: any): string {
   if (node == null)
@@ -196,6 +236,35 @@ export function renderMiniMarkNode(node: any): string {
     return String(node);
   }
 
+  // Handle Object AST Nodes (Nuxt Content Hast/Unist AST objects)
+  if (typeof node === "object" && !Array.isArray(node)) {
+    if (node.type === "text" || (node.value !== undefined && typeof node.value === "string" && !node.tag && !node.type)) {
+      return escapeXml(node.value || "");
+    }
+
+    if (node.type === "root" && Array.isArray(node.children)) {
+      return node.children.map(renderMiniMarkNode).join("");
+    }
+
+    const rawTag = node.tag || node.name || (node.type === "element" ? node.tag || "div" : null);
+    if (rawTag && typeof rawTag === "string") {
+      const props = node.props || node.attributes || {};
+      const children = Array.isArray(node.children) ? node.children : [];
+      return renderHtmlElement(rawTag, props, children);
+    }
+
+    if (Array.isArray(node.children)) {
+      return node.children.map(renderMiniMarkNode).join("");
+    }
+
+    if (node.value !== undefined) {
+      return escapeXml(String(node.value));
+    }
+
+    return "";
+  }
+
+  // Handle Array Nodes (MiniMark tuples [tag, props, ...children] or lists of nodes)
   if (Array.isArray(node)) {
     if (node.length === 0)
       return "";
@@ -216,83 +285,45 @@ export function renderMiniMarkNode(node: any): string {
         children = node.slice(1);
       }
 
-      if (children.length === 1 && Array.isArray(children[0]) && typeof children[0][0] !== "string") {
-        children = children[0];
-      }
-
-      let tagName = rawTag.toLowerCase();
-
-      if (tagName === "codespan" || tagName === "code-inline" || tagName === "inline-code" || tagName === "codeinline") {
-        tagName = "code";
-      }
-      else if (tagName === "binding" || tagName === "component") {
-        return children.map(renderMiniMarkNode).join("");
-      }
-
-      if (!STANDARD_HTML_TAGS.has(tagName)) {
-        tagName = "div";
-      }
-
-      let attrStr = "";
-      for (const [key, val] of Object.entries(props)) {
-        if (val == null || val === false)
-          continue;
-        if (key.startsWith("__") || key === "key" || key === "v-bind")
-          continue;
-
-        if (val === true) {
-          attrStr += ` ${key}`;
-        }
-        else {
-          attrStr += ` ${key}="${escapeXml(String(val))}"`;
-        }
-      }
-
-      if (VOID_ELEMENTS.has(tagName)) {
-        return `<${tagName}${attrStr} />`;
-      }
-
-      const innerHtml = children.map(renderMiniMarkNode).join("");
-      return `<${tagName}${attrStr}>${innerHtml}</${tagName}>`;
+      return renderHtmlElement(rawTag, props, children);
     }
 
     return node.map(renderMiniMarkNode).join("");
-  }
-
-  if (typeof node === "object") {
-    if (node.value && typeof node.value === "string") {
-      return escapeXml(node.value);
-    }
-    if (Array.isArray(node.children)) {
-      return node.children.map(renderMiniMarkNode).join("");
-    }
   }
 
   return "";
 }
 
 /**
- * Entry point for rendering MiniMark AST value trees.
+ * Entry point for rendering MiniMark / Nuxt Content AST value trees.
  */
-export function renderMiniMarkToHtml(nodes: any[]): string {
-  if (!Array.isArray(nodes))
+export function renderMiniMarkToHtml(nodes: any): string {
+  if (!nodes)
     return "";
-  return nodes.map(renderMiniMarkNode).join("");
+  if (Array.isArray(nodes)) {
+    return nodes.map(renderMiniMarkNode).join("");
+  }
+  return renderMiniMarkNode(nodes);
 }
 
 /**
- * Sanitizes HTML content for RSS consumption.
+ * Sanitizes HTML content for RSS consumption and strips orphaned tags.
  */
 export function cleanRssHtml(html: string): string {
   if (!html)
     return "";
-  return html
+  let cleaned = html
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
     .replace(/class="\[\\?&quot;(.*?)\\?&quot;\]"/g, "class=\"$1\"")
     .replace(/class="\["(.*?)"\]"/g, "class=\"$1\"")
     .replace(/class="([^"]*)"@[^"]*"/g, "class=\"$1\"")
     .replace(/\s*__ignoreMap(=("[^"]*"|'[^']*'))?/g, "")
     .trim();
+
+  // Strip residual leading orphaned closing tags
+  cleaned = cleaned.replace(/^(?:\s*<\/span>)+/gi, "");
+
+  return cleaned;
 }
 
 /**
