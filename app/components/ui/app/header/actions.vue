@@ -73,7 +73,12 @@ onUnmounted(() => {
         icon="i-line-md-github-loop"
         class="rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.96]"
         :aria-label="githubAriaLabel"
-      />
+      >
+        <UIcon
+          name="i-heroicons-arrow-up-right-20-solid"
+          class="h-3.5 w-3.5 shrink-0 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
+        />
+      </UButton>
     </UTooltip>
   </div>
 </template>
