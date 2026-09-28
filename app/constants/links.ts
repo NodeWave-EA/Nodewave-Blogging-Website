@@ -41,9 +41,4 @@ export const socialLinks: Link[] = [
     to: siteConfig.social.github,
     icon: "i-line-md-github-loop",
   },
-  {
-    label: "Feed",
-    to: "/rss.xml",
-    icon: "i-line-md-rss",
-  },
 ];
