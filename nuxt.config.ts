@@ -362,7 +362,6 @@ export default defineNuxtConfig({
   },
 
   studio: {
-    dev: true,
     auth: {
       github: {
         clientId: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_ID,
