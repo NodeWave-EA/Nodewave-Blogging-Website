@@ -25,7 +25,7 @@ export async function generateTagRssFeed(
   format: FeedFormat = "rss",
 ): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl).replace(/\/$/, "");
 
   const tags = await getAllTags(event);
   const tag = tags.find(t => t.slug === tagSlug);
@@ -58,7 +58,7 @@ export async function generateTagsRssFeed(
   extraRelatedFeeds: RelatedFeedLink[] = [],
 ): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl).replace(/\/$/, "");
   const feedUrl = `${siteUrl}/tags/rss.xml`;
 
   const tags = await getAllTags(event);

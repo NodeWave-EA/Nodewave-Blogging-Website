@@ -25,7 +25,7 @@ export async function generateCategoryRssFeed(
   format: FeedFormat = "rss",
 ): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl).replace(/\/$/, "");
 
   const categories = await getAllCategories(event);
   const category = categories.find(c => c.slug === categorySlug);
@@ -58,7 +58,7 @@ export async function generateCategoriesRssFeed(
   extraRelatedFeeds: RelatedFeedLink[] = [],
 ): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl).replace(/\/$/, "");
   const feedUrl = `${siteUrl}/categories/rss.xml`;
 
   const categories = await getAllCategories(event);

@@ -31,7 +31,7 @@ export async function generateBlogRssFeed(
   },
 ): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl).replace(/\/$/, "");
   const feedUrl = `${siteUrl}${options.feedPath}`;
 
   let posts = await getAllBlogs(event);

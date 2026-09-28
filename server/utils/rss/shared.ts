@@ -347,7 +347,7 @@ export function finalizeXmlOutput(
   rawXml: string,
   selfUrl: string,
   relatedFeeds: RelatedFeedLink[] = [],
-  siteUrl: string = "https://nodewaveblog.vercel.app",
+  siteUrl: string,
 ): string {
   let xml = rawXml;
   const xslUrl = `${siteUrl.replace(/\/$/, "")}/feed.xsl`;
@@ -397,7 +397,7 @@ export function renderFeedResponse(
   feedUrl: string,
   format: FeedFormat = "rss",
   relatedFeeds: RelatedFeedLink[] = [],
-  siteUrl: string = "https://nodewaveblog.vercel.app",
+  siteUrl: string,
 ): string {
   if (format === "json") {
     setHeaders(event, {

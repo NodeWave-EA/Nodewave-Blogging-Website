@@ -25,7 +25,7 @@ export async function generateAuthorRssFeed(
   format: FeedFormat = "rss",
 ): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl).replace(/\/$/, "");
 
   return generateBlogRssFeed(event, {
     feedPath: `/authors/${authorSlug}/rss.xml`,
@@ -53,7 +53,7 @@ export async function generateAuthorRssFeed(
  */
 export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat = "rss"): Promise<string> {
   const config = useRuntimeConfig(event);
-  const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+  const siteUrl = (config.public.siteUrl).replace(/\/$/, "");
   const feedUrl = `${siteUrl}/authors/rss.xml`;
 
   const authors = await getAllAuthors(event);
