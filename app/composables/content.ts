@@ -391,11 +391,13 @@ export function useContent() {
    * Fetches search sections for the "blogs" collection using the queryCollectionSearchSections function.
    *
    * @returns A promise that resolves to the search sections data for the "blogs" collection.
+   * Explicitly ignores raw code blocks, pre tags, and styles during section indexing.
    */
   const getSearchSections = () => {
     return useAsyncData<Searchable[]>("search-sections", async () => {
-      const data = queryCollectionSearchSections("blogs");
-      return data;
+      return await queryCollectionSearchSections("blogs", {
+        ignoredTags: ["code", "pre", "style", "script"],
+      });
     });
   };
 
@@ -414,8 +416,9 @@ export function useContent() {
    */
   const searchMetadataCollections = async (searchString: string) => {
     const query = searchString.trim().toLowerCase();
-    if (!query)
+    if (!query) {
       return { authors: [], categories: [], tags: [] };
+    }
 
     const [authors, categories, tags] = await Promise.all([
       queryCollection("authors").where("name", "LIKE", `%${query}%`).all(),
@@ -423,7 +426,11 @@ export function useContent() {
       queryCollection("tags").where("name", "LIKE", `%${query}%`).all(),
     ]);
 
-    return { authors, categories, tags };
+    return {
+      authors: authors as BlogAuthor[],
+      categories: categories as BlogCategory[],
+      tags: tags as BlogTag[],
+    };
   };
 
   return {
