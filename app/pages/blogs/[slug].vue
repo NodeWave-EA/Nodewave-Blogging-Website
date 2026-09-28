@@ -8,6 +8,10 @@ defineOptions({
   name: "BlogDetailPage",
 });
 
+definePageMeta({
+  layout: "blog",
+});
+
 const { logger } = useLogger({ context: "BlogDetailPage" });
 
 const carousel = useTemplateRef("carousel");
