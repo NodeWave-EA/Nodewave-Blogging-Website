@@ -23,7 +23,6 @@ const {
 
 const { mouseX, mouseY, isHovered } = useAnimatedBorder(cardRef);
 
-// Intercept pointer hooks for a clean orchestration
 function onPointerEnter() {
   tiltEnter();
   emit("startDecrypt", props.author.name, props.author.slug);
@@ -38,7 +37,7 @@ function onPointerLeave() {
 <template>
   <div
     ref="cardRef"
-    class="group relative flex flex-col justify-between rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/30 p-px overflow-hidden select-none transition-all duration-300"
+    class="group relative flex flex-col justify-between rounded-2xl bg-[#e8e3d8]/80 dark:bg-[#282520]/50 p-px overflow-hidden select-none transition-all duration-300"
     :style="[
       transformStyles,
       {
@@ -57,7 +56,7 @@ function onPointerLeave() {
       style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.05), transparent 60%);"
     />
 
-    <div class="relative z-10 w-full h-full rounded-[15px] bg-white dark:bg-neutral-950 p-6 flex flex-col justify-between items-stretch">
+    <div class="relative z-10 w-full h-full rounded-[15px] bg-[#faf7f2] dark:bg-[#1c1a17] p-6 flex flex-col justify-between items-stretch">
       <div class="absolute top-0 right-0 p-3 opacity-10 dark:opacity-5 group-hover:scale-110 transition-all pointer-events-none select-none">
         <UIcon
           name="i-lucide-quote"
@@ -68,7 +67,7 @@ function onPointerLeave() {
 
       <div class="flex flex-col items-center text-center">
         <div
-          class="relative w-24 h-24 rounded-full p-1 border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 group-hover:scale-105 transition-all duration-300"
+          class="relative w-24 h-24 rounded-full p-1 border border-[#e0dad0] dark:border-[#2d2a24] bg-[#f2eee5] dark:bg-[#1c1a17] group-hover:scale-105 transition-all duration-300"
           :style="{ borderColor: author.color ? `${author.color}30` : '' }"
         >
           <NuxtImg
@@ -79,7 +78,7 @@ function onPointerLeave() {
             height="96"
             loading="lazy"
             format="webp"
-            class="w-full h-full rounded-full object-cover bg-neutral-100 dark:bg-neutral-900"
+            class="w-full h-full rounded-full object-cover bg-[#f2eee5] dark:bg-[#22201c]"
           />
           <div
             v-else
@@ -98,9 +97,7 @@ function onPointerLeave() {
           <span class="text-xs font-medium text-neutral-600 dark:text-neutral-400">
             {{ author.title || 'Contributor' }}
           </span>
-          <!-- vertical separator -->
-          <USeparator v-if="author.company?.name" class="w-px h-3 bg-neutral-300 dark:bg-neutral-700" />
-          <!-- company { name, website, role, icon } -->
+          <USeparator v-if="author.company?.name" class="w-px h-3 bg-[#e0dad0] dark:bg-[#2d2a24]" />
           <span v-if="author.company?.name" class="gradient-text text-xs font-medium hover:text-(--author-accent) transition-colors">
             <NuxtLink
               v-if="author.company?.website"
@@ -114,7 +111,6 @@ function onPointerLeave() {
                 :name="author.company.icon"
                 class="w-3.5 h-3.5 inline-block mr-1"
               />
-              <!-- start with http -->
               <NuxtImg
                 v-else-if="author.company?.icon.startsWith('http')"
                 :src="author.company.icon"
@@ -130,7 +126,7 @@ function onPointerLeave() {
           </span>
         </div>
 
-        <p v-if="author.description" class="text-xs text-neutral-500 dark:text-neutral-400 mt-4 line-clamp-3 leading-relaxed">
+        <p v-if="author.description" class="text-xs text-neutral-600 dark:text-neutral-400 mt-4 line-clamp-3 leading-relaxed">
           {{ author.description }}
         </p>
 
@@ -141,7 +137,7 @@ function onPointerLeave() {
             :href="link.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="p-1.5 rounded-lg border border-neutral-200/50 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 text-neutral-400 dark:text-neutral-500 hover:scale-110 transition-all duration-200 hover:text-(--hover-brand-color)"
+            class="p-1.5 rounded-lg border border-[#e0dad0]/60 dark:border-[#2d2a24] bg-[#f2eee5]/60 dark:bg-[#22201c]/60 text-neutral-500 dark:text-neutral-400 hover:scale-110 transition-all duration-200 hover:text-(--hover-brand-color)"
             :style="{
               '--hover-brand-color': link.color || 'var(--ui-primary)',
             }"
@@ -154,7 +150,7 @@ function onPointerLeave() {
         </div>
       </div>
 
-      <div class="pt-4 flex items-center justify-between border-t border-neutral-100 dark:border-neutral-900 mt-6 w-full">
+      <div class="pt-4 flex items-center justify-between border-t border-[#e8e3d8] dark:border-[#26231f] mt-6 w-full">
         <NuxtLink
           :to="`/${author.stem}`"
           class="text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-(--author-accent) flex items-center gap-1 transition-colors relative z-20"
@@ -167,7 +163,7 @@ function onPointerLeave() {
           variant="solid"
           size="xs"
           color="neutral"
-          class="font-mono rounded px-2 py-0.5 text-[10px] font-bold dark:bg-white dark:text-neutral-950"
+          class="font-mono rounded px-2 py-0.5 text-[10px] font-bold dark:bg-[#e8e3d8] dark:text-[#161513]"
         >
           {{ author.count }} {{ author.count === 1 ? 'Post' : 'Posts' }}
         </UBadge>

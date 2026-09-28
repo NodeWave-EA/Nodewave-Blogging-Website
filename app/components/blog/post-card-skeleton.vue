@@ -19,10 +19,10 @@ withDefaults(
 
 <template>
   <div
-    class="relative rounded-xl bg-neutral-100/40 dark:bg-neutral-900/10 p-px flex flex-col overflow-hidden animate-pulse select-none"
+    class="relative rounded-xl bg-[#e8e3d8]/50 dark:bg-[#282520]/30 p-px flex flex-col overflow-hidden animate-pulse select-none"
   >
     <div
-      class="relative z-10 rounded-[11px] overflow-hidden bg-white dark:bg-neutral-950 grid grid-cols-1 w-full h-full"
+      class="relative z-10 rounded-[11px] overflow-hidden bg-[#faf7f2] dark:bg-[#1c1a17] grid grid-cols-1 w-full h-full"
       :class="[
         meta.class === 'hero-grid-layout-variant'
           ? '[@media(min-width:740px)]:grid-cols-12 [@media(min-width:740px)]:items-stretch'
@@ -38,7 +38,7 @@ withDefaults(
             : 'max-h-33.75',
         ]"
       >
-        <USkeleton class="absolute inset-0 w-full h-full rounded-none bg-neutral-200/60 dark:bg-neutral-800/50" />
+        <USkeleton class="absolute inset-0 w-full h-full rounded-none bg-[#e8e3d8]/70 dark:bg-[#2a2722]/60" />
       </div>
 
       <div
@@ -49,33 +49,33 @@ withDefaults(
       >
         <div class="w-full space-y-2.5">
           <div class="flex items-center gap-2">
-            <USkeleton class="h-4 w-16 rounded bg-neutral-200/60 dark:bg-neutral-800/50" />
-            <USkeleton class="h-3 w-12 rounded bg-neutral-100 dark:bg-neutral-900/50" />
+            <USkeleton class="h-4 w-16 rounded bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70" />
+            <USkeleton class="h-3 w-12 rounded bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40" />
           </div>
 
           <div class="space-y-1.5">
-            <USkeleton class="h-4 w-[90%] rounded bg-neutral-200/80 dark:bg-neutral-800/70" />
-            <USkeleton class="h-4 w-[55%] rounded bg-neutral-200/80 dark:bg-neutral-800/70" />
+            <USkeleton class="h-4 w-[90%] rounded bg-[#e8e3d8]/90 dark:bg-[#2a2722]/80" />
+            <USkeleton class="h-4 w-[55%] rounded bg-[#e8e3d8]/90 dark:bg-[#2a2722]/80" />
           </div>
 
           <div class="space-y-1.5 pt-1">
-            <USkeleton class="h-3 w-full rounded bg-neutral-100 dark:bg-neutral-900/40" />
-            <USkeleton class="h-3 w-[85%] rounded bg-neutral-100 dark:bg-neutral-900/40" />
+            <USkeleton class="h-3 w-full rounded bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40" />
+            <USkeleton class="h-3 w-[85%] rounded bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40" />
           </div>
         </div>
 
-        <div class="w-full space-y-3 pt-2.5 border-t border-neutral-100 dark:border-neutral-900">
+        <div class="w-full space-y-3 pt-2.5 border-t border-[#e8e3d8] dark:border-[#26231f]">
           <div class="flex items-center gap-1.5">
-            <USkeleton class="h-3.5 w-10 rounded bg-neutral-100 dark:bg-neutral-900/40" />
-            <USkeleton class="h-3.5 w-12 rounded bg-neutral-100 dark:bg-neutral-900/40" />
+            <USkeleton class="h-3.5 w-10 rounded bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40" />
+            <USkeleton class="h-3.5 w-12 rounded bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40" />
           </div>
 
           <div class="flex items-center justify-between gap-4 w-full">
             <div class="flex items-center gap-1.5">
-              <USkeleton class="h-4 w-4 rounded-full bg-neutral-200/60 dark:bg-neutral-800/50" />
-              <USkeleton class="h-3 w-16 rounded bg-neutral-100 dark:bg-neutral-900/40" />
+              <USkeleton class="h-4 w-4 rounded-full bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70" />
+              <USkeleton class="h-3 w-16 rounded bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40" />
             </div>
-            <USkeleton class="hidden sm:block h-3 w-10 rounded bg-neutral-100 dark:bg-neutral-900/30" />
+            <USkeleton class="hidden sm:block h-3 w-10 rounded bg-[#e8e3d8]/40 dark:bg-[#2a2722]/30" />
           </div>
         </div>
       </div>

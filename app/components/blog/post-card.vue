@@ -93,9 +93,9 @@ function formatDate(date: string | Date) {
 <template>
   <div
     ref="cardRef"
-    class="group relative rounded-xl transition-all duration-300 bg-neutral-100/80 dark:bg-neutral-900/30 p-px flex flex-col overflow-hidden select-none"
+    class="group relative rounded-xl transition-all duration-300 bg-[#e8e3d8]/80 dark:bg-[#282520]/50 p-px flex flex-col overflow-hidden select-none"
     :class="[
-      isFeatured ? 'ring-1 ring-primary-500/10 shadow-xs' : 'hover:shadow-xs',
+      isFeatured ? 'ring-1 ring-primary-500/20 shadow-xs' : 'hover:shadow-xs',
     ]"
     :style="[
       transformStyles,
@@ -115,7 +115,7 @@ function formatDate(date: string | Date) {
     />
 
     <div
-      class="relative z-10 rounded-[11px] overflow-hidden bg-white dark:bg-neutral-950 grid grid-cols-1 w-full h-full"
+      class="relative z-10 rounded-[11px] overflow-hidden bg-[#faf7f2] dark:bg-[#1c1a17] grid grid-cols-1 w-full h-full"
       :class="[
         meta.class === 'hero-grid-layout-variant'
           ? '[@media(min-width:740px)]:grid-cols-12 [@media(min-width:740px)]:items-stretch'
@@ -125,7 +125,7 @@ function formatDate(date: string | Date) {
     >
       <div
         v-if="post.coverImage"
-        class="relative overflow-hidden bg-neutral-100 dark:bg-neutral-900/50 w-full aspect-video"
+        class="relative overflow-hidden bg-[#f2eee5] dark:bg-[#22201c] w-full aspect-video"
         :class="[
           meta.class === 'hero-grid-layout-variant'
             ? '[@media(min-width:740px)]:col-span-5 [@media(min-width:740px)]:h-full [@media(min-width:740px)]:aspect-auto max-h-35 [@media(min-width:740px)]:max-h-none'
@@ -139,10 +139,10 @@ function formatDate(date: string | Date) {
           class="absolute inset-0 w-full h-full object-cover scale-100 transition-transform duration-500 ease-out group-hover:scale-[1.02]"
           loading="lazy"
         />
-        <div class="absolute inset-0 pointer-events-none bg-linear-to-t from-neutral-950/10 via-transparent to-transparent" />
+        <div class="absolute inset-0 pointer-events-none bg-linear-to-t from-[#161513]/20 via-transparent to-transparent" />
 
         <div v-if="post.featured" class="absolute left-2.5 top-2.5 z-20">
-          <div class="flex items-center gap-1 rounded-full border border-white/10 bg-neutral-950/70 px-2 py-0.5 backdrop-blur-xs">
+          <div class="flex items-center gap-1 rounded-full border border-white/20 bg-[#161513]/80 px-2 py-0.5 backdrop-blur-xs">
             <UIcon name="i-lucide-sparkles" class="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
             <span class="font-mono text-[8px] font-bold uppercase tracking-wider text-neutral-200">Featured</span>
           </div>
@@ -156,7 +156,7 @@ function formatDate(date: string | Date) {
         ]"
       >
         <div class="w-full space-y-1.5">
-          <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-mono tracking-wider uppercase text-neutral-400 dark:text-neutral-500">
+          <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-mono tracking-wider uppercase text-neutral-500 dark:text-neutral-400">
             <UBadge
               variant="subtle"
               :color="post.featured ? 'primary' : 'neutral'"
@@ -187,7 +187,7 @@ function formatDate(date: string | Date) {
           </div>
 
           <h3
-            class="text-neutral-900 dark:text-neutral-50 font-semibold group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors duration-200 line-clamp-2"
+            class="text-neutral-900 dark:text-neutral-100 font-semibold group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors duration-200 line-clamp-2"
             :class="[
               meta.ui?.title ? meta.ui.title : 'text-xs sm:text-sm tracking-tight',
             ]"
@@ -198,12 +198,12 @@ function formatDate(date: string | Date) {
             </NuxtLink>
           </h3>
 
-          <p class="text-neutral-500 dark:text-neutral-400 leading-relaxed font-normal text-[11px] line-clamp-2">
+          <p class="text-neutral-600 dark:text-neutral-400 leading-relaxed font-normal text-[11px] line-clamp-2">
             {{ post.description }}
           </p>
         </div>
 
-        <div class="w-full space-y-2 pt-2 border-t border-neutral-100 dark:border-neutral-900">
+        <div class="w-full space-y-2 pt-2 border-t border-[#e8e3d8] dark:border-[#26231f]">
           <div v-if="categories.length > 0" class="flex flex-wrap items-center gap-1 relative z-30">
             <NuxtLink
               v-for="category in categories"
@@ -212,7 +212,7 @@ function formatDate(date: string | Date) {
               class="transition-transform hover:scale-[1.02]"
             >
               <span
-                class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
+                class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-[#f2eee5] dark:bg-[#22201c] border border-[#e0dad0]/60 dark:border-[#2a2722] text-neutral-600 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
                 :style="{
                   color: category.color || '',
                   backgroundColor: category.color ? `${category.color}10` : '',
@@ -234,9 +234,9 @@ function formatDate(date: string | Date) {
                   :alt="author.avatar.alt || author.name"
                   size="3xs"
                   :aria-label="`Read more posts by ${author.name}`"
-                  class="ring-1 ring-neutral-200 dark:ring-neutral-800"
+                  class="ring-1 ring-[#e0dad0] dark:ring-[#2d2a24]"
                 />
-                <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 group-hover/author:text-primary-500 transition-colors line-clamp-1">
+                <span class="text-[10px] font-medium text-neutral-600 dark:text-neutral-400 group-hover/author:text-primary-500 transition-colors line-clamp-1">
                   {{ author.name }}
                 </span>
               </div>
@@ -250,7 +250,7 @@ function formatDate(date: string | Date) {
                 class="transition-transform hover:scale-[1.02]"
               >
                 <span
-                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 text-neutral-400 hover:text-primary-500 transition-all duration-200"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-[#f2eee5] dark:bg-[#22201c] border border-[#e0dad0]/60 dark:border-[#2a2722] text-neutral-500 hover:text-primary-500 transition-all duration-200"
                   :style="{
                     color: tag.color || '',
                     backgroundColor: tag.color ? `${tag.color}10` : '',
