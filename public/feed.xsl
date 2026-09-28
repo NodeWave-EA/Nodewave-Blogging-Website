@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="html" version="1.0" encoding="UTF-8" indent="yes"/>
   <xsl:template match="/">
@@ -8,17 +8,43 @@
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <style>
-          /* NodeWave Modern Dark Theme */
+          /* NodeWave Sepia Paper Theme Variables */
           :root {
-          --bg: #090d16;
-          --card-bg: rgba(17, 24, 39, 0.7);
+          /* Light Mode Sepia Baseline (#f4efe6 base) */
+          --bg: #f4efe6;
+          --card-bg: rgba(255, 255, 255, 0.65);
+          --card-border: rgba(224, 218, 208, 0.8);
+          --card-border-hover: rgba(13, 148, 136, 0.4);
+          --text: #23201b;
+          --text-muted: #6e675e;
+          --primary: #0d9488;
+          --primary-hover: #0f766e;
+          --code-bg: #e8e2d5;
+          --topbar-bg: rgba(244, 239, 230, 0.85);
+          --input-bg: #eae3d5;
+          --heading-color: #1a1815;
+          --vignette: radial-gradient(circle at center, transparent 30%, rgba(120,53,15,0.05) 100%);
+          --dot-opacity: 0.03;
+          }
+
+          @media (prefers-color-scheme: dark) {
+          :root {
+          /* Dark Mode Sepia Baseline (#181614 base) */
+          --bg: #181614;
+          --card-bg: rgba(28, 26, 23, 0.7);
           --card-border: rgba(255, 255, 255, 0.08);
           --card-border-hover: rgba(20, 184, 166, 0.4);
-          --text: #f3f4f6;
-          --text-muted: #9ca3af;
+          --text: #f4efe6;
+          --text-muted: #9a9388;
           --primary: #14b8a6;
           --primary-hover: #0d9488;
-          --code-bg: #111827;
+          --code-bg: #22201c;
+          --topbar-bg: rgba(24, 22, 20, 0.85);
+          --input-bg: #22201c;
+          --heading-color: #ffffff;
+          --vignette: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.5) 100%);
+          --dot-opacity: 0.08;
+          }
           }
 
           * {
@@ -33,21 +59,106 @@
           padding: 0;
           line-height: 1.6;
           -webkit-font-smoothing: antialiased;
+          position: relative;
+          min-height: 100vh;
           }
 
-          /* Global Image Responsiveness */
+          /* BACKGROUND TEXTURE CONTAINER */
+          .site-background {
+          position: fixed;
+          inset: 0;
+          z-index: -50;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          pointer-events: none;
+          user-select: none;
+          background-color: var(--bg);
+          transition: background-color 0.7s ease;
+          }
+
+          .paper-grain {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+          }
+
+          .light-grain {
+          mix-blend-mode: multiply;
+          opacity: 1.0;
+          display: block;
+          }
+
+          .dark-grain {
+          mix-blend-mode: soft-light;
+          opacity: 1.6;
+          display: none;
+          }
+
+          @media (prefers-color-scheme: dark) {
+          .light-grain { display: none; }
+          .dark-grain { display: block; }
+          }
+
+          .paper-dots {
+          position: absolute;
+          inset: 0;
+          opacity: var(--dot-opacity);
+          pointer-events: none;
+          mix-blend-mode: overlay;
+          background-image: radial-gradient(circle at 50% 50%, rgba(160, 150, 130, 0.6) 1px, transparent 1px);
+          background-size: 12px 12px;
+          }
+
+          .paper-vignette {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background-image: var(--vignette);
+          }
+
+          .ambient-glow {
+          position: absolute;
+          border-radius: 9999px;
+          pointer-events: none;
+          }
+
+          .glow-top {
+          top: -10%;
+          left: -5%;
+          width: 45vw;
+          height: 45vw;
+          max-width: 560px;
+          background: rgba(245, 158, 11, 0.05);
+          filter: blur(120px);
+          }
+
+          .glow-bottom {
+          bottom: -10%;
+          right: -5%;
+          width: 50vw;
+          height: 50vw;
+          max-width: 600px;
+          background: rgba(20, 184, 166, 0.07);
+          filter: blur(130px);
+          }
+
+          /* Responsive Images */
           img {
           max-width: 100%;
           height: auto;
           display: block;
           }
 
-          /* Sticky Glassmorphic Top Bar */
+          /* Sticky Header Bar */
           .top-bar {
           position: sticky;
           top: 0;
           z-index: 50;
-          background: rgba(9, 13, 22, 0.85);
+          background: var(--topbar-bg);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border-bottom: 1px solid var(--card-border);
@@ -81,7 +192,7 @@
           }
 
           .reader-select {
-          background: #111827;
+          background: var(--input-bg);
           color: var(--text);
           border: 1px solid var(--card-border);
           border-radius: 0.5rem;
@@ -98,7 +209,7 @@
 
           .btn-primary {
           background: var(--primary);
-          color: #090d16;
+          color: #ffffff;
           border: none;
           border-radius: 0.5rem;
           padding: 0.45rem 1rem;
@@ -110,7 +221,6 @@
 
           .btn-primary:hover {
           background-color: var(--primary-hover);
-          color: #ffffff;
           }
 
           /* Layout Container */
@@ -130,7 +240,6 @@
           height: fit-content;
           }
 
-          /* Transparent Brand Logo Container */
           .brand-logo {
           display: flex;
           align-items: center;
@@ -148,7 +257,7 @@
           font-weight: 800;
           margin: 0 0 0.5rem 0;
           letter-spacing: -0.02em;
-          color: #ffffff;
+          color: var(--heading-color);
           line-height: 1.3;
           }
 
@@ -162,6 +271,7 @@
           .info-card {
           background: var(--card-bg);
           border: 1px solid var(--card-border);
+          backdrop-filter: blur(8px);
           border-radius: 0.875rem;
           padding: 1.25rem;
           }
@@ -190,14 +300,16 @@
           .article-card {
           background: var(--card-bg);
           border: 1px solid var(--card-border);
+          backdrop-filter: blur(8px);
           border-radius: 0.875rem;
           padding: 1.5rem;
-          transition: border-color 0.2s ease, transform 0.2s ease;
+          transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
           }
 
           .article-card:hover {
           border-color: var(--card-border-hover);
           transform: translateY(-2px);
+          box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
           }
 
           .article-meta {
@@ -225,7 +337,7 @@
           }
 
           .article-title a {
-          color: #ffffff;
+          color: var(--heading-color);
           text-decoration: none;
           transition: color 0.15s ease;
           }
@@ -242,7 +354,6 @@
           overflow-wrap: break-word;
           }
 
-          /* Responsive formatting for content body inside excerpts */
           .article-excerpt code {
           background: var(--code-bg);
           color: var(--primary);
@@ -283,6 +394,63 @@
         </style>
       </head>
       <body>
+        <!-- TACTILE PARCHMENT PAPER BACKGROUND OVERLAY -->
+        <div class="site-background" aria-hidden="true">
+          <!-- Light Mode Grain (Opacity 1.0) -->
+          <svg class="paper-grain light-grain">
+            <filter id="paper-grain-light">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.65"
+                numOctaves="4"
+                stitchTiles="stitch"
+                result="noise"
+              />
+              <feColorMatrix
+                type="matrix"
+                values="
+                  0.3 0 0 0 0.4
+                  0 0.3 0 0 0.35
+                  0 0 0.3 0 0.3
+                  0 0 0 0.7 0"
+              />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#paper-grain-light)"/>
+          </svg>
+
+          <!-- Dark Mode Fiber Texture (Opacity 1.6) -->
+          <svg class="paper-grain dark-grain">
+            <filter id="paper-grain-dark">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.7"
+                numOctaves="4"
+                stitchTiles="stitch"
+                result="noise"
+              />
+              <feColorMatrix
+                type="matrix"
+                values="
+                  1 0 0 0 0
+                  0 1 0 0 0
+                  0 0 1 0 0
+                  0 0 0 0.85 0"
+              />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#paper-grain-dark)"/>
+          </svg>
+
+          <!-- Micro Paper Fiber Dot Pattern -->
+          <div class="paper-dots"/>
+
+          <!-- Vignette Gradient -->
+          <div class="paper-vignette"/>
+
+          <!-- Subtle Ambient Glows -->
+          <div class="ambient-glow glow-top"/>
+          <div class="ambient-glow glow-bottom"/>
+        </div>
+
         <!-- STICKY HEADER BAR -->
         <header class="top-bar">
           <div class="top-bar-brand">
