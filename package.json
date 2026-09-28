@@ -90,6 +90,6 @@
     "vue-demi"
   ],
   "lint-staged": {
-    "*": "bun lint"
+    "*.{js,ts,tsx,vue,mjs,json}": "eslint --fix"
   }
 }
