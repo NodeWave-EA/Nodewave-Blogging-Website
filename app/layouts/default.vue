@@ -1,18 +1,16 @@
 <template>
-  <div class="layout-wrapper">
-    <UApp>
-      <UiAppHeader />
+  <div class="default-layout-wrapper">
+    <UiAppHeader />
 
-      <UMain>
-        <SiteOpenGraph>
-          <slot />
-        </SiteOpenGraph>
-      </UMain>
+    <UMain>
+      <SiteOpenGraph>
+        <slot />
+      </SiteOpenGraph>
+    </UMain>
 
-      <BlogSearchModal />
-      <UiScrollToTop />
+    <BlogSearchModal />
+    <UiScrollToTop />
 
-      <UiAppFooter />
-    </UApp>
+    <UiAppFooter />
   </div>
 </template>

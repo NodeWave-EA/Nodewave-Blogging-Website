@@ -34,27 +34,29 @@ watch(
 
 <template>
   <div class="app-root-container">
-    <NuxtLayout>
-      <!-- Hidden target container for Google Translate widget -->
-      <div
-        id="google_translate_element"
-        class="sr-only"
-        aria-hidden="true"
-      />
+    <UApp>
+      <NuxtLayout>
+        <!-- Hidden target container for Google Translate widget -->
+        <div
+          id="google_translate_element"
+          class="sr-only"
+          aria-hidden="true"
+        />
 
-      <!-- Floating Language Switcher Widget (Bottom Left) -->
-      <LangSwitcher />
-      <!-- Global Eye-Care Reading Background with Customizable Grain Opacity & Warmth -->
-      <UiAppSiteBackground
-        :grain-opacity="0.2"
-        warmth-profile="cream"
-      />
-      <NuxtRouteAnnouncer />
-      <NuxtLoadingIndicator
-        color="repeating-linear-gradient(to right, #14b8a6 0%, #0d9488 50%, #2dd4bf 100%)"
-        :height="3"
-      />
-      <NuxtPage />
-    </NuxtLayout>
+        <!-- Floating Language Switcher Widget (Bottom Left) -->
+        <LangSwitcher />
+        <!-- Global Eye-Care Reading Background with Customizable Grain Opacity & Warmth -->
+        <UiAppSiteBackground
+          :grain-opacity="0.2"
+          warmth-profile="cream"
+        />
+        <NuxtRouteAnnouncer />
+        <NuxtLoadingIndicator
+          color="repeating-linear-gradient(to right, #14b8a6 0%, #0d9488 50%, #2dd4bf 100%)"
+          :height="3"
+        />
+        <NuxtPage />
+      </NuxtLayout>
+    </UApp>
   </div>
 </template>
