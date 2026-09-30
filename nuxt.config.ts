@@ -87,7 +87,10 @@ export default defineNuxtConfig({
     },
   },
 
-  css: ["~/assets/css/main.css"],
+  css: [
+    "~/assets/css/main.css",
+    "katex/dist/katex.min.css",
+  ],
 
   router: {
     options: { scrollBehaviorType: "smooth" },
@@ -107,8 +110,21 @@ export default defineNuxtConfig({
           depth: 5,
           searchDepth: 5,
         },
+        highlight: {
+          theme: { default: "github-light", dark: "github-dark" },
+          langs: ["js", "ts", "rust", "go", "bash", "yaml", "log", "cpp", "json"],
+        },
         remarkPlugins: {
           "remark-reading-time": {},
+          "remark-math": {},
+          "remark-gfm": {}, // Enables Tables, Tasklists, and Strikethroughs
+          "remark-external-links": { target: "_blank", rel: "noopener noreferrer" },
+          "@akebifiky/remark-simple-plantuml": { baseUrl: "https://plantuml.com" },
+        },
+        rehypePlugins: {
+          "rehype-katex": {},
+          "rehype-slug": {}, // Generates distinct semantic IDs for deep headings links
+          "rehype-autolink-headings": { behavior: "append" }, // Generates anchor text symbols
         },
       },
     },

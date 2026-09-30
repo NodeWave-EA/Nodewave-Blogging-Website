@@ -49,17 +49,23 @@
     "@vueuse/nuxt": "15.0.0",
     "better-sqlite3": "^13.0.3",
     "feed": "^6.0.0",
+    "katex": "^0.18.9",
     "nuxt": "^4.5.2",
     "nuxt-ai-ready": "2.3.4",
     "nuxt-aos": "1.2.6",
     "nuxt-studio": "1.7.0",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-katex": "^7.0.1",
+    "rehype-slug": "^6.0.0",
     "remark-cli": "^12.0.1",
     "remark-emoji": "^5.0.2",
+    "remark-external-links": "^10.0.0",
     "remark-gfm": "^4.0.1",
     "remark-git-contributors": "^5.1.0",
     "remark-github": "^12.0.0",
     "remark-github-blockquote-alert": "^2.1.0",
     "remark-lint": "^10.0.1",
+    "remark-math": "^6.0.0",
     "remark-reading-time": "^2.1.0",
     "remark-refer-plantuml": "^0.0.8",
     "remark-toc": "^9.0.0",
@@ -90,6 +96,6 @@
     "vue-demi"
   ],
   "lint-staged": {
-    "*.{js,ts,tsx,vue,mjs,json}": "eslint --fix"
+    "*.{js,ts,tsx,vue,mjs,json,md}": "eslint --fix"
   }
 }
