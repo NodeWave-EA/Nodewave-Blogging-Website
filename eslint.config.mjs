@@ -9,6 +9,7 @@ export default withNuxt(
     vue: true,
     typescript: true,
     formatters: true,
+    markdown: true,
     stylistic: {
       indent: 2,
       semi: true,
@@ -54,6 +55,11 @@ export default withNuxt(
         case: "kebabCase",
         ignore: ["README.md"],
       }],
+    },
+  }, {
+    files: ["**/*.md"],
+    rules: {
+      "no-trailing-spaces": "off",
     },
   }),
 );

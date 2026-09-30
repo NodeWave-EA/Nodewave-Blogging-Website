@@ -32,11 +32,11 @@
         "nuxt-aos": "1.2.6",
         "nuxt-studio": "1.7.0",
         "rehype-autolink-headings": "^7.1.0",
+        "rehype-external-links": "^3.0.0",
         "rehype-katex": "^7.0.1",
         "rehype-slug": "^6.0.0",
         "remark-cli": "^12.0.1",
         "remark-emoji": "^5.0.2",
-        "remark-external-links": "^10.0.0",
         "remark-gfm": "^4.0.1",
         "remark-git-contributors": "^5.1.0",
         "remark-github": "^12.0.0",
@@ -2455,8 +2455,6 @@
     "remark-contributors": ["remark-contributors@7.0.0", "", { "dependencies": { "@types/mdast": "^4.0.0", "is-url": "^1.0.0", "mdast-util-heading-range": "^4.0.0", "parse-author": "^2.0.0", "type-fest": "^4.0.0", "vfile": "^6.0.0", "vfile-find-up": "^7.0.0" } }, "sha512-HuVNlDI/jKWq3LwRHdgNAuYz0jGd5ISZsYXPKTJRwHg+AgtlhwB2bpCGwnVpbwmiozwJgTBBckcd6QcmGGxt1Q=="],
 
     "remark-emoji": ["remark-emoji@5.0.2", "", { "dependencies": { "@types/mdast": "^4.0.4", "emoticon": "^4.0.1", "mdast-util-find-and-replace": "^3.0.1", "node-emoji": "^2.1.3", "unified": "^11.0.4" } }, "sha512-IyIqGELcyK5AVdLFafoiNww+Eaw/F+rGrNSXoKucjo95uL267zrddgxGM83GN1wFIb68pyDuAsY3m5t2Cav1pQ=="],
-
-    "remark-external-links": ["remark-external-links@10.0.0", "", {}, "sha512-i0WMfyR6RT3F6Sunu8Q5mpZvHd9YLLiSio8v2+2E/9KhJ/4g/nCg2rGo5e6vpRFIwwZKGInM9kgVYUoNrCa56g=="],
 
     "remark-gfm": ["remark-gfm@4.0.1", "", { "dependencies": { "@types/mdast": "^4.0.0", "mdast-util-gfm": "^3.0.0", "micromark-extension-gfm": "^3.0.0", "remark-parse": "^11.0.0", "remark-stringify": "^11.0.0", "unified": "^11.0.0" } }, "sha512-1quofZ2RQ9EWdeN34S79+KExV1764+wCUGop5CPL1WGdD0ocPpu91lzPGbwWMECpEpd42kJGQwzRfyov9j4yNg=="],
 

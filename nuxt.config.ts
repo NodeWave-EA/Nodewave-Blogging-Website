@@ -118,7 +118,10 @@ export default defineNuxtConfig({
           "remark-reading-time": {},
           "remark-math": {},
           "remark-gfm": {}, // Enables Tables, Tasklists, and Strikethroughs
-          "remark-external-links": { target: "_blank", rel: "noopener noreferrer" },
+          "rehype-external-links": {
+            target: "_blank",
+            rel: ["noopener", "noreferrer"],
+          },
           "@akebifiky/remark-simple-plantuml": { baseUrl: "https://plantuml.com" },
         },
         rehypePlugins: {
@@ -371,7 +374,6 @@ export default defineNuxtConfig({
 
   sitemap: {
     autoI18n: true,
-    zeroRuntime: true,
     discoverImages: true,
     exclude: ["/app/**", "/api/**", "/_nuxt/**", "/__nuxt_content/**"],
     debug: false,
