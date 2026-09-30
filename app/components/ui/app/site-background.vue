@@ -4,22 +4,22 @@ import { computed } from "vue";
 type Props = {
   /**
    * Opacity of the paper texture overlay (0.1 to 1.0).
-   * @default 0.35
+   * @default 1.0
    */
   grainOpacity?: number;
   /**
-   * Warm color palette profile for reading comfort.
-   * @default 'cream'
+   * Color palette profile for background reading comfort and branding.
+   * @default 'teal'
    */
-  warmthProfile?: "cream" | "sepia" | "amber";
+  warmthProfile?: "teal" | "cream" | "sepia" | "amber";
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  grainOpacity: 0.35,
-  warmthProfile: "cream",
+  grainOpacity: 1.0,
+  warmthProfile: "teal",
 });
 
-// Warm reading paper base colors tuned for low contrast
+// Tuned paper base colors supporting brand teal and legacy warmth profiles
 const paletteClasses = computed(() => {
   switch (props.warmthProfile) {
     case "sepia":
@@ -27,8 +27,10 @@ const paletteClasses = computed(() => {
     case "amber":
       return "bg-[#faf5eb] dark:bg-[#1a1713]";
     case "cream":
-    default:
       return "bg-[#f7f4ed] dark:bg-[#161513]";
+    case "teal":
+    default:
+      return "bg-[#f0f8f7] dark:bg-[#0a1615]";
   }
 });
 </script>
@@ -39,7 +41,7 @@ const paletteClasses = computed(() => {
     :class="paletteClasses"
     aria-hidden="true"
   >
-    <!-- LIGHT MODE TACTILE PARCHMENT GRAIN -->
+    <!-- LIGHT MODE BRAND TEAL TACTILE PARCHMENT GRAIN -->
     <svg
       class="absolute inset-0 h-full w-full dark:hidden pointer-events-none mix-blend-multiply transition-opacity duration-300"
       :style="{ opacity: grainOpacity }"
@@ -55,9 +57,9 @@ const paletteClasses = computed(() => {
         <feColorMatrix
           type="matrix"
           values="
-            0.3 0 0 0 0.4
-            0 0.3 0 0 0.35
-            0 0 0.3 0 0.3
+            0.2 0 0 0 0.1
+            0 0.3 0 0 0.4
+            0 0 0.3 0 0.4
             0 0 0 0.7 0"
         />
       </filter>
@@ -97,27 +99,27 @@ const paletteClasses = computed(() => {
       />
     </svg>
 
-    <!-- MICRO PAPER FIBER DOT PATTERN (ADDS TACTILE DEPTH IN DARK MODE) -->
+    <!-- MICRO PAPER FIBER DOT PATTERN IN BRAND TEAL -->
     <div
-      class="absolute inset-0 opacity-[0.03] dark:opacity-[0.08] pointer-events-none mix-blend-overlay"
+      class="absolute inset-0 opacity-[0.04] dark:opacity-[0.1] pointer-events-none mix-blend-overlay"
       :style="{
-        backgroundImage: `radial-gradient(circle at 50% 50%, rgba(160, 150, 130, 0.6) 1px, transparent 1px)`,
+        backgroundImage: `radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.8) 1px, transparent 1px)`,
         backgroundSize: '12px 12px',
       }"
     />
 
-    <!-- SOFT WARM VIGNETTE TO CENTER READABILITY -->
+    <!-- SOFT BRAND TEAL VIGNETTE TO CENTER READABILITY -->
     <div
-      class="absolute inset-0 [background-image:radial-gradient(circle_at_center,transparent_30%,rgba(120,53,15,0.05)_100%)] dark:[background-image:radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.5)_100%)] pointer-events-none"
+      class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(13,148,136,0.06)_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_30%,rgba(4,47,46,0.6)_100%)] pointer-events-none"
     />
 
-    <!-- SUBTLE BRAND ACCENT AMBIENT GLOWS (WARM AMBER & NODEWAVE TEAL) -->
+    <!-- BRAND ACCENT AMBIENT GLOWS (TEAL 500 / TEAL 400) -->
     <div class="absolute inset-0 transition-opacity duration-1000">
       <div
-        class="absolute top-[-10%] left-[-5%] w-[45vw] h-[45vw] max-w-140 rounded-full bg-amber-500/5 dark:bg-amber-600/5 blur-[120px] transform-gpu"
+        class="absolute top-[-10%] left-[-5%] w-[45vw] h-[45vw] max-w-140 rounded-full bg-teal-500/10 dark:bg-teal-500/8 blur-[120px] transform-gpu"
       />
       <div
-        class="absolute bottom-[-10%] right-[-5%] w-[50vw] h-[50vw] max-w-150 rounded-full bg-teal-500/8 dark:bg-teal-500/5 blur-[130px] transform-gpu"
+        class="absolute bottom-[-10%] right-[-5%] w-[50vw] h-[50vw] max-w-150 rounded-full bg-teal-400/12 dark:bg-teal-600/8 blur-[130px] transform-gpu"
       />
     </div>
   </div>
