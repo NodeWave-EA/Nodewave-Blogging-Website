@@ -380,12 +380,7 @@ export default defineNuxtConfig({
   },
 
   studio: {
-    auth: {
-      github: {
-        clientId: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_ID,
-        clientSecret: process.env.NUXT_STUDIO_AUTH_GITHUB_CLIENT_SECRET,
-      },
-    },
+    route: "/editor",
     git: {
       commit: {
         messagePrefix: "content update:",
