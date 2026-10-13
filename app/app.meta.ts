@@ -16,6 +16,9 @@ export const siteConfig = {
     address: "Nairobi, Kenya",
   },
   company: {
+    name: "NodeWave",
+    website: "https://nodewave.net",
+    logo: "https://nodewave.net/logo.png",
     founded: 2024,
     region: "East Africa",
     industries: ["IoT", "Cloud Infrastructure", "AI/ML", "Edge Computing"],
