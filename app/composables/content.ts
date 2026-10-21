@@ -234,7 +234,7 @@ export function useContent() {
         return await Promise.all(
           categories.map(async (category) => {
             const associatedBlogs = await queryCollection("blogs")
-              .where("categories", "LIKE", `%${category.slug}%`)
+              .where("category", "=", category.slug)
               .where("published", "=", true)
               .where("draft", "=", false)
               .all() as BlogType[];
@@ -279,7 +279,7 @@ export function useContent() {
       cacheKey,
       async () => {
         let query = queryCollection("blogs")
-          .where("categories", "LIKE", `%${toValue(slug)}%`)
+          .where("category", "=", toValue(slug))
           .where("published", "=", true)
           .where("draft", "=", false)
           .order("date", "DESC");

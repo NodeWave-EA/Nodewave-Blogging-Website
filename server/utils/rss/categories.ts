@@ -1,6 +1,6 @@
 import { Feed } from "feed";
 import { setResponseStatus } from "h3";
-import { getAllBlogs, getAllCategories, matchesCategory } from "~~/server/utils/content";
+import { getAllBlogs, getAllCategories } from "~~/server/utils/content";
 
 import { generateBlogRssFeed } from "./blogs";
 import {
@@ -40,12 +40,7 @@ export async function generateCategoryRssFeed(
       { rel: "up", href: `${siteUrl}/categories/rss.xml`, title: "Categories Roster Feed" },
       { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
     ],
-    filterFn: (post) => {
-      if (Array.isArray(post.categories)) {
-        return post.categories.some(c => matchesCategory(c, categorySlug));
-      }
-      return false;
-    },
+    filterFn: post => post.category === categorySlug,
   });
 }
 
@@ -82,12 +77,7 @@ export async function generateCategoriesRssFeed(
 
   for (const category of categories) {
     const categoryUrl = `${siteUrl}/categories/${category.slug}`;
-    const categoryBlogs = allBlogs.filter((blog) => {
-      if (Array.isArray(blog.categories)) {
-        return blog.categories.some(c => matchesCategory(c, category.slug));
-      }
-      return false;
-    });
+    const categoryBlogs = allBlogs.filter(blog => blog.category === category.slug);
 
     const count = categoryBlogs.length;
     const countLabel = `${count} ${count === 1 ? "article" : "articles"}`;

@@ -1,9 +1,7 @@
 ---
 title: Master Git Housekeeping - Auto-Pruning Dead Tracking Branches and Fixing Detached HEADs
 author: gideon-yebei
-categories:
-  - terminal-and-shells
-  - devops
+category: terminal-and-shells
 coverImage:
   src: /blogs/posts/git-cleanup/cover.png
   alt: Visual representation of a terminal cleaning up stale branches and repairing a detached HEAD state

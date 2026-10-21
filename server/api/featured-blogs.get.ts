@@ -61,6 +61,7 @@ export default defineEventHandler(async (event: H3Event) => {
     path: blog.path,
     date: blog.date,
     updatedAt: blog.updatedAt,
+    category: blog.category,
     coverImage: blog.coverImage,
     readingTime: blog.meta?.readingTime?.text ?? null,
     author: typeof blog.author === "object" && blog.author !== null
@@ -71,12 +72,6 @@ export default defineEventHandler(async (event: H3Event) => {
           slug: blog.author.slug,
         }
       : null,
-    categories: Array.isArray(blog.categories)
-      ? blog.categories.map(cat => ({
-          name: typeof cat === "object" ? cat.name : cat,
-          slug: typeof cat === "object" ? cat.slug : cat,
-        }))
-      : [],
     tags: Array.isArray(blog.tags)
       ? blog.tags.map(tag => ({
           name: typeof tag === "object" ? tag.name : tag,

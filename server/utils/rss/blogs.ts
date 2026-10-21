@@ -14,7 +14,7 @@ import {
 
 import type { FeedFormat, RelatedFeedLink } from "./types";
 import type { H3Event } from "h3";
-import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
+import type { BlogAuthor, BlogTag, BlogType } from "~/types";
 
 /**
  * Builds standard blog post RSS feed or custom filtered feeds.
@@ -72,7 +72,6 @@ export async function generateBlogRssFeed(
     const authorName = authorObj?.name || (typeof post.author === "string" ? post.author : "NodeWave Team");
     const authorEmail = authorObj?.email || "info@nodewave.net";
 
-    const categories = Array.isArray(post.categories) ? (post.categories as BlogCategory[]) : [];
     const tags = Array.isArray(post.tags) ? (post.tags as BlogTag[]) : [];
 
     let bodyHtml = post.description || "";
@@ -114,7 +113,7 @@ export async function generateBlogRssFeed(
     }
 
     const xmlCategories = [
-      ...categories.map(c => ({ name: c.name, domain: `${siteUrl}/categories/${c.slug}` })),
+      { name: post.category || "General", domain: `${siteUrl}/categories/${post.category || "general"}` },
       ...tags.map(t => ({ name: t.name, domain: `${siteUrl}/tags/${t.slug}` })),
     ];
 

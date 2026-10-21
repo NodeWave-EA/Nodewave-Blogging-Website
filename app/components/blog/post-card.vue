@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
+import type { BlogAuthor, BlogTag, BlogType } from "~/types";
 
 defineOptions({
   name: "BlogPostCard",
@@ -50,14 +50,6 @@ const author = computed<BlogAuthor | null>(() => {
   return typeof props.post.author === "object" ? (props.post.author as BlogAuthor) : null;
 });
 
-const categories = computed<BlogCategory[]>(() => {
-  if (!Array.isArray(props.post.categories))
-    return [];
-  return props.post.categories.filter((cat): cat is BlogCategory =>
-    cat !== null && typeof cat === "object",
-  );
-});
-
 const tags = computed<BlogTag[]>(() => {
   if (!Array.isArray(props.post.tags))
     return [];
@@ -66,17 +58,10 @@ const tags = computed<BlogTag[]>(() => {
   );
 });
 
-const primaryCategory = computed<BlogCategory | null>(() => {
-  return categories.value[0] || null;
-});
-
 const primaryBadgeLabel = computed(() => {
   if (props.post.featured)
     return "Featured Pick";
-  if (primaryCategory.value) {
-    return primaryCategory.value.name;
-  }
-  return "Insight";
+  return props.post.category || "General";
 });
 
 const formatter = new Intl.DateTimeFormat("en-US", {
@@ -162,19 +147,14 @@ function formatDate(date: string | Date) {
               :color="post.featured ? 'primary' : 'neutral'"
               size="xs"
               class="font-mono text-[8px] font-semibold uppercase tracking-wider rounded-md px-1.5 py-0 flex items-center gap-1"
-              :style="(!post.featured && primaryCategory?.color) ? {
-                color: primaryCategory.color,
-                backgroundColor: `${primaryCategory.color}15`,
-                borderColor: `${primaryCategory.color}25`,
+              :style="!post.featured ? {
+                color: 'var(--ui-primary)',
+                backgroundColor: 'color-mix(in srgb, var(--ui-primary) 8%, transparent)',
+                borderColor: 'color-mix(in srgb, var(--ui-primary) 16%, transparent)',
               } : {}"
             >
               <UIcon
-                v-if="!post.featured && primaryCategory?.icon"
-                :name="primaryCategory.icon"
-                class="w-2.5 h-2.5"
-              />
-              <UIcon
-                v-else-if="!post.featured && primaryCategory"
+                v-if="!post.featured"
                 name="i-lucide-folder-open"
                 class="w-2.5 h-2.5"
               />
@@ -204,24 +184,14 @@ function formatDate(date: string | Date) {
         </div>
 
         <div class="w-full space-y-2 pt-2 border-t border-[#e8e3d8] dark:border-[#26231f]">
-          <div v-if="categories.length > 0" class="flex flex-wrap items-center gap-1 relative z-30">
+          <div class="flex items-center gap-1 relative z-30">
             <NuxtLink
-              v-for="category in categories"
-              :key="category.slug"
-              :to="`/${category.stem}`"
-              class="transition-transform hover:scale-[1.02]"
+              :to="`/categories/${post.category || 'general'}`"
+              class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-[#f2eee5] dark:bg-[#22201c] border border-[#e0dad0]/60 dark:border-[#2a2722] hover:text-primary-500 transition-all duration-200"
+              :style="{ color: 'var(--ui-primary)' }"
             >
-              <span
-                class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded bg-[#f2eee5] dark:bg-[#22201c] border border-[#e0dad0]/60 dark:border-[#2a2722] text-neutral-600 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
-                :style="{
-                  color: category.color || '',
-                  backgroundColor: category.color ? `${category.color}10` : '',
-                  borderColor: category.color ? `${category.color}25` : '',
-                }"
-              >
-                <UIcon :name="category.icon || 'i-lucide-folder-open'" class="w-2.5 h-2.5 shrink-0" />
-                {{ category.name }}
-              </span>
+              <UIcon name="i-lucide-folder-open" class="w-2.5 h-2.5 shrink-0" />
+              {{ post.category || "General" }}
             </NuxtLink>
           </div>
 

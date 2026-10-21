@@ -1,7 +1,6 @@
 import z from "zod";
 
 import { authorSchema } from "./author";
-import { categorySchema } from "./category";
 import { mediaSchema } from "./media";
 import { seoSchema } from "./seo";
 import { tagSchema } from "./tag";
@@ -47,7 +46,10 @@ export const blogSchema = z.object({
   coverImage: mediaSchema,
   gallery: z.array(mediaSchema).default([]),
   tags: z.array(tagSchema).default([]),
-  categories: z.array(categorySchema).default([]),
+  category: z.string()
+    .min(1, "Each blog post must have one category")
+    .default("general")
+    .describe("The single category assigned to this blog post"),
   author: authorSchema,
   anchors: z.array(anchorSchema)
     .default([])
@@ -82,7 +84,6 @@ const _exampleBlog = {
     __hash__: "hVDXOGuGHClVtWJLPMVghucuSBBjtdsWjiYFnAp1g2s",
   },
   body: { type: "minimark", value: [Array], toc: [Object] },
-  categories: [[Object]],
   coverImage: {
     src: "/blogs/posts/powershell-bash/cover.png",
     alt: "Stylized terminal window showing predictive text and interactive completion menus",

@@ -1,9 +1,7 @@
 ---
 title: Getting Started with ESP32 - A Comprehensive Guide to Installing ESP-IDF on Ubuntu
 author: gideon-yebei
-categories:
-  - terminal-and-shells
-  - devops
+category: terminal-and-shells
 coverImage:
     src: /blogs/posts/esp-idf-ubuntu-setup/cover.png
     alt: Ubuntu terminal installing toolchains and compiling firmware for an ESP32 microcontroller

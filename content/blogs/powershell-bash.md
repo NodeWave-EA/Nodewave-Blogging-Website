@@ -1,9 +1,7 @@
 ---
 title: Bash-ify Your PowerShell - The Ultimate Guide to Autosuggestions, Completions, and Subcommands
 author: gideon-yebei
-categories:
-  - terminal-and-shells
-  - devops
+category: terminal-and-shells
 coverImage:
   src: /blogs/posts/powershell-bash/cover.png
   alt: Stylized terminal window showing predictive text and interactive completion menus

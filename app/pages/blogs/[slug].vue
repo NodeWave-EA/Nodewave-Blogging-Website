@@ -2,7 +2,7 @@
 import { useDateFormat } from "@vueuse/core";
 
 import type { ContentSurroundLink } from "@nuxt/ui";
-import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
+import type { BlogAuthor, BlogTag, BlogType } from "~/types";
 
 defineOptions({
   name: "BlogDetailPage",
@@ -37,7 +37,6 @@ const fetchError = computed(() => blogError.value || surroundError.value);
 const currentBlog = computed(() => blogQueryResult.value as unknown as BlogType);
 const surroundingBlog = computed(() => surroundQueryResult.value as unknown as ContentSurroundLink[]);
 const blogAuthor = computed(() => currentBlog.value?.author as unknown as BlogAuthor);
-const blogCategories = computed(() => (currentBlog.value?.categories || []) as unknown as BlogCategory[]);
 const blogTags = computed(() => (currentBlog.value?.tags || []) as unknown as BlogTag[]);
 
 function onSelect(index: number) {
@@ -111,7 +110,7 @@ useSeoMeta({
   articleAuthor: () => [blogAuthor.value?.name || runtimeConfig.siteName || "Nodewave"],
   articlePublishedTime: publishedIsoDate.value,
   articleModifiedTime: modifiedIsoDate.value,
-  articleSection: () => blogCategories.value?.[0]?.name || "General",
+  articleSection: () => currentBlog.value?.category || "General",
   articleTag: () => blogTags.value?.map(tag => tag.name) ?? [],
   author: () => blogAuthor.value?.name || runtimeConfig.siteName || "Nodewave",
   publisher: () => runtimeConfig.siteName || "Nodewave",
@@ -131,8 +130,8 @@ useSchemaOrg([
     itemListElement: [
       { name: "Home", item: "/" },
       { name: "Blogs", item: "/blogs" },
-      ...(blogCategories.value?.[0]
-        ? [{ name: blogCategories.value[0].name, item: `/${blogCategories.value[0].stem}` }]
+      ...(currentBlog.value?.category
+        ? [{ name: currentBlog.value.category, item: `/categories/${currentBlog.value.category}` }]
         : []),
       { name: () => BLOG_TITLE.value, item: () => BLOG_CANONICAL_URL.value },
     ],
@@ -149,7 +148,7 @@ useSchemaOrg([
     "mainEntityOfPage": () => BLOG_CANONICAL_URL.value,
     "inLanguage": "en-US",
     "keywords": blogTags.value?.map(t => t.name) ?? [],
-    "articleSection": blogCategories.value?.[0]?.name || "General",
+    "articleSection": currentBlog.value?.category || "General",
     "wordCount": currentBlog.value?.meta?.readingTime?.words,
     "author": blogAuthor.value
       ? definePerson({
@@ -175,7 +174,7 @@ defineOgImage("BlogPost.takumi", {
   date: currentBlog.value.date instanceof Date
     ? currentBlog.value.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : String(currentBlog.value.date || ""),
-  category: blogCategories.value?.[0]?.name || "General",
+  category: currentBlog.value?.category || "General",
   avatar: blogAuthor.value?.avatar?.src,
   backgroundImage: currentBlog.value?.coverImage?.src,
   readingTime: currentBlog.value?.meta?.readingTime?.text,
@@ -472,32 +471,29 @@ logger.log("All tags:", { blogTags: blogTags.value });
         </div>
 
         <div
-          v-if="blogCategories.length > 0 || blogTags.length > 0"
           class="mt-12 pt-6 border-t border-neutral-200/40 dark:border-neutral-800/60 flex flex-col sm:flex-row gap-8 sm:gap-16"
         >
-          <!-- Categories Section -->
-          <div v-if="blogCategories.length > 0" class="flex flex-col gap-2 min-w-35">
+          <!-- Category section -->
+          <div class="flex flex-col gap-2 min-w-35">
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none">
-              <UIcon name="i-lucide-folders" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
-              <NuxtLink to="/categories">
+              <UIcon name="i-lucide-folder" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
+              <NuxtLink :to="`/categories/${currentBlog.category || 'general'}`">
                 <span class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text">
-                  Categories</span>
+                  Category</span>
               </NuxtLink>
             </div>
             <div class="flex flex-wrap gap-2">
               <UButton
-                v-for="category in blogCategories"
-                :key="category.stem"
-                :to="`/${category.stem}`"
+                :to="`/categories/${currentBlog.category || 'general'}`"
                 variant="subtle"
                 size="xs"
                 class="font-mono text-xs rounded-md border border-neutral-200/30 dark:border-neutral-800/50 hover:border-(--category-color)/40 text-neutral-900 dark:text-neutral-100 hover:text-(--category-color) transition-colors"
                 :style="{
-                  '--category-color': category.color || 'var(--ui-primary)',
+                  '--category-color': 'var(--ui-primary)',
                 }"
               >
-                <UIcon :name="category.icon || 'i-lucide-folder'" class="size-3 text-(--category-color)" />
-                {{ category.name }}
+                <UIcon name="i-lucide-folder" class="size-3 text-(--category-color)" />
+                {{ currentBlog.category || "General" }}
               </UButton>
             </div>
           </div>

@@ -1,9 +1,7 @@
 ---
 title: Debug Pipelines Locally - The Complete Guide to Running GitHub Actions with Act
 author: gideon-yebei
-categories:
-  - devops
-  - automation
+category: devops
 coverImage:
   src: /blogs/posts/local-github-actions/cover.png
   alt: Visual showing a terminal executing a GitHub Actions workflow pipeline entirely on a local machine using Act

@@ -1,9 +1,7 @@
 ---
 title: Automate Your Release Notes - Building a Conventional Commit Changelog Hook
 author: gideon-yebei
-categories:
-  - terminal-and-shells
-  - devops
+category: terminal-and-shells
 coverImage:
   src: /blogs/posts/git-changelog-hook/cover.jpeg
   alt: Terminal interface compiling structured commit messages into a clean, markdown CHANGELOG file

@@ -1,9 +1,7 @@
 ---
 title: Supercharge Your Git Workflow - Automate Quality Control with Pre-Commit Hooks
 author: gideon-yebei
-categories:
-  - terminal-and-shells
-  - devops
+category: terminal-and-shells
 coverImage:
   src: /blogs/posts/git-pre-commit/cover.png
   alt: Visual representation of a terminal blocking a commit due to linting errors and sensitive data exposure

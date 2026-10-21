@@ -1,9 +1,7 @@
 ---
 title: Setting Up a PlatformIO Project with ESP-IDF - step-by-step Guide
 author: gideon-yebei
-categories:
-  - embedded-systems
-  - IoT
+category: iot
 coverImage:
   src: /blogs/posts/platformio-esp-idf-setup/cover.png
   alt: VS Code interface displaying a PlatformIO project structure with C code for an ESP32 microcontroller

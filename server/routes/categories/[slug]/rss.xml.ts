@@ -24,17 +24,6 @@ export default defineEventHandler(async (event) => {
       { rel: "up", href: `${siteUrl}/categories/rss.xml`, title: "Categories Directory Feed" },
       { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
     ],
-    filterFn: (post: BlogType) => {
-      if (!post.categories || !Array.isArray(post.categories)) {
-        return false;
-      }
-
-      return post.categories.some((cat) => {
-        if (typeof cat === "string") {
-          return cat === slug;
-        }
-        return cat?.slug === slug;
-      });
-    },
+    filterFn: (post: BlogType) => post.category === slug,
   });
 });

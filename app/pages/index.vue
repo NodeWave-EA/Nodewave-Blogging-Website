@@ -231,7 +231,7 @@ useSchemaOrg([
             <NuxtLink
               to="/categories"
               class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-5 py-2.5 text-xs font-medium tracking-wide text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-850 dark:hover:text-black transition-all shadow-2xs"
-              aria-label="Explore blog article categories"
+              aria-label="Explore the complete blog collection"
             >
               <UIcon
                 name="i-line-md-grid-3-filled"

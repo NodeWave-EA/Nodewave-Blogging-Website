@@ -1,9 +1,7 @@
 ---
 title: Safely Update All Local Git Branches At Once Without Breaking Your Working Tree
 author: gideon-yebei
-categories:
-  - terminal-and-shells
-  - devops
+category: terminal-and-shells
 coverImage:
   src: /blogs/posts/git-pull-all/cover.png
   alt: Visual depiction of a terminal running a Git automation loop across multiple local branch trees

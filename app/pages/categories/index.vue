@@ -206,7 +206,7 @@ useSchemaOrg([
               No categories indexed
             </h2>
             <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
-              There are currently no structured content categories available for browsing. Please check back later or explore other sections of the site.
+              There are currently no published articles available for browsing. Please check back later or explore other sections of the site.
             </p>
           </div>
 
@@ -221,7 +221,7 @@ useSchemaOrg([
 
           <!-- Completion Signifier -->
           <div v-if="!hasMoreContent && enrichedCategories.length > 0" class="text-center pt-10 pb-6 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60">
-            You've reached the end of the category index.
+            You've reached the end of the collection.
           </div>
         </div>
       </UPageBody>

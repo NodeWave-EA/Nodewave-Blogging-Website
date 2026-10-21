@@ -64,6 +64,7 @@ export type BlogType = BlogPost & {
 const _exampleBlog = {
   id: "blogs/blogs/powershell-bash.md",
   title: "Bash-ify Your PowerShell - The Ultimate Guide to Autosuggestions, Completions, and Subcommands",
+  category: "terminal-and-shells",
   author: {
     id: "authors/authors/gideon-yebei.yml",
     title: "Software Engineer",
@@ -124,18 +125,6 @@ const _exampleBlog = {
     ],
     toc: { title: "", searchDepth: 5, depth: 5, links: [Array] },
   },
-  categories: [
-    {
-      id: "categories/categories/terminal-and-shells.yml",
-      description: "Deep dives into shell configurations, command-line utilities, and productivity workflows.",
-      extension: "yml",
-      meta: {},
-      name: "Terminal & Shells",
-      slug: "terminal-and-shells",
-      stem: "categories/terminal-and-shells",
-      __hash__: "Z1jdE3p2FNdt9MmMMUX1uEj_VfFra5jqJFDeXnC22hQ",
-    },
-  ],
   coverImage: {
     src: "/blogs/posts/powershell-bash/cover.png",
     alt: "Stylized terminal window showing predictive text and interactive completion menus",

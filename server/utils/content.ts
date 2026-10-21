@@ -79,9 +79,8 @@ export async function enrichBlog(event: H3Event, blog: BlogType): Promise<BlogTy
     return blog;
 
   // Fetch all reference metadata collections once for fast in-memory matching
-  const [allAuthors, allCategories, allTags] = await Promise.all([
+  const [allAuthors, allTags] = await Promise.all([
     getAllAuthors(event).catch(() => [] as BlogAuthor[]),
-    getAllCategories(event).catch(() => [] as BlogCategory[]),
     getAllTags(event).catch(() => [] as BlogTag[]),
   ]);
 
@@ -104,60 +103,6 @@ export async function enrichBlog(event: H3Event, blog: BlogType): Promise<BlogTy
         blog.author = { ...matchedAuthor, ...blog.author };
       }
     }
-  }
-
-  // Resolve Categories (handles string paths, arrays of strings, or arrays of objects)
-  let rawCategories = blog.categories || (blog as any).category;
-  if (rawCategories) {
-    if (!Array.isArray(rawCategories)) {
-      rawCategories = [rawCategories];
-    }
-
-    blog.categories = rawCategories
-      .map((item: string | BlogCategory) => {
-        if (!item)
-          return null;
-
-        if (typeof item === "object") {
-          const itemSlug = normalizeSlug(item.slug || item.id || item.stem);
-          const matched = allCategories.find(c => normalizeSlug(c.slug) === itemSlug);
-          return matched ? { ...matched, ...item } : item;
-        }
-
-        if (typeof item === "string") {
-          const itemSlug = normalizeSlug(item);
-          const matched = allCategories.find(
-            c => normalizeSlug(c.slug) === itemSlug || normalizeSlug(c.id) === itemSlug || normalizeSlug(c.stem) === itemSlug,
-          );
-
-          if (matched)
-            return matched;
-
-          // Fallback category object if record is unindexed or missing in database
-          const formattedName = itemSlug
-            .replace(/[-_]/g, " ")
-            .replace(/\b\w/g, char => char.toUpperCase());
-
-          return {
-            id: `categories/${itemSlug}.yml`,
-            name: formattedName || item,
-            slug: itemSlug,
-            description: `Articles categorized under ${formattedName || item}`,
-            icon: "i-heroicons-folder",
-            color: "#64748b",
-            featured: false,
-            extension: "yml",
-            stem: `categories/${itemSlug}`,
-            meta: {},
-          } as BlogCategory;
-        }
-
-        return null;
-      })
-      .filter(Boolean) as BlogCategory[];
-  }
-  else {
-    blog.categories = [];
   }
 
   // 4. Resolve Tags (handles string paths, arrays of strings, or arrays of objects)

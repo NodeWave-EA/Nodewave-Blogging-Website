@@ -1,4 +1,4 @@
-import type { BlogAuthor, BlogCategory, BlogTag, BlogType } from "~/types";
+import type { BlogAuthor, BlogTag, BlogType } from "~/types";
 
 export async function enrichBlog(blog: BlogType): Promise<BlogType> {
   if (!blog)
@@ -14,22 +14,6 @@ export async function enrichBlog(blog: BlogType): Promise<BlogType> {
     if (authorData) {
       blog.author = authorData as unknown as BlogAuthor;
     }
-  }
-
-  // Resolve Categories
-  if (Array.isArray(blog.categories) && blog.categories.length > 0) {
-    // Map existing slugs to query promises
-    const categories = await Promise.all(blog.categories.map(async (slugOrObj: string | BlogCategory) => {
-      // Guard case if it's already resolved somehow
-      if (typeof slugOrObj !== "string")
-        return slugOrObj;
-      const categoryData = await queryCollection("categories")
-        .where("slug", "=", slugOrObj)
-        .first();
-      return categoryData as unknown as BlogCategory;
-    }));
-
-    blog.categories = categories.filter(Boolean);
   }
 
   // Resolve Tags
