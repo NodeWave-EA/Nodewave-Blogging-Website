@@ -433,6 +433,7 @@ export default defineNuxtConfig({
   },
 
   studio: {
+    dev: false,
     route: "/editor",
     git: {
       commit: {
