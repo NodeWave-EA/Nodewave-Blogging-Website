@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     "@nuxtjs/device",
     "nuxt-ai-ready",
     "nuxt-studio",
+    "@nuxtjs/robots",
   ],
 
   devtools: {
@@ -176,10 +177,10 @@ export default defineNuxtConfig({
     "/categories/rss.xml": { prerender: true },
     "/tags/rss.xml": { prerender: true },
 
-    // Interactive / Private Routes (Client-side rendering)
-    "/search": { ssr: false },
-    "/editor": { ssr: false },
-    "/editor/**": { ssr: false },
+    // Interactive / Private Routes (Client-side rendering & excluded from SEO indexing)
+    "/search": { ssr: false, robots: false },
+    "/editor": { ssr: false, robots: false },
+    "/editor/**": { ssr: false, robots: false },
     "/__nuxt_studio/**": { ssr: true },
 
     // Cross-Site API Bridge
@@ -377,7 +378,7 @@ export default defineNuxtConfig({
   linkChecker: {
     enabled: true,
     failOnError: true,
-    fetchRemoteUrls: true,
+    fetchRemoteUrls: process.env.NODE_ENV === "production",
     strictNuxtContentPaths: true,
     showLiveInspections: true,
     debug: process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
