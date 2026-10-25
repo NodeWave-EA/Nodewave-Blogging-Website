@@ -483,16 +483,61 @@ export function useContent() {
       return { authors: [], categories: [], tags: [] };
     }
 
-    const [authors, categories, tags] = await Promise.all([
+    const [rawAuthors, rawCategories, rawTags] = await Promise.all([
       queryCollection("authors").where("name", "LIKE", `%${query}%`).all(),
       queryCollection("categories").where("name", "LIKE", `%${query}%`).all(),
       queryCollection("tags").where("name", "LIKE", `%${query}%`).all(),
     ]);
 
+    const [authors, categories, tags] = await Promise.all([
+      Promise.all(
+        (rawAuthors as BlogAuthor[]).map(async (author) => {
+          const associatedBlogs = await queryCollection("blogs")
+            .where("author", "LIKE", `%${author.slug}%`)
+            .where("published", "=", true)
+            .where("draft", "=", false)
+            .all() as BlogType[];
+
+          return {
+            ...author,
+            count: associatedBlogs.length,
+          };
+        }),
+      ),
+      Promise.all(
+        (rawCategories as BlogCategory[]).map(async (category) => {
+          const associatedBlogs = await queryCollection("blogs")
+            .where("category", "=", category.slug)
+            .where("published", "=", true)
+            .where("draft", "=", false)
+            .all() as BlogType[];
+
+          return {
+            ...category,
+            count: associatedBlogs.length,
+          };
+        }),
+      ),
+      Promise.all(
+        (rawTags as BlogTag[]).map(async (tag) => {
+          const associatedBlogs = await queryCollection("blogs")
+            .where("tags", "LIKE", `%${tag.slug}%`)
+            .where("published", "=", true)
+            .where("draft", "=", false)
+            .all() as BlogType[];
+
+          return {
+            ...tag,
+            count: associatedBlogs.length,
+          };
+        }),
+      ),
+    ]);
+
     return {
-      authors: authors as BlogAuthor[],
-      categories: categories as BlogCategory[],
-      tags: tags as BlogTag[],
+      authors,
+      categories,
+      tags,
     };
   };
 

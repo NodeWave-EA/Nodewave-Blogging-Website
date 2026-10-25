@@ -27,9 +27,9 @@ const searchInputRef = ref<HTMLInputElement | null>(null);
 const blogResults = ref<any[]>([]);
 
 const metaResults = ref<{
-  authors: BlogAuthor[];
-  categories: BlogCategory[];
-  tags: BlogTag[];
+  authors: Array<BlogAuthor & { count?: number }>;
+  categories: Array<BlogCategory & { count?: number }>;
+  tags: Array<BlogTag & { count?: number }>;
 }>({
   authors: [],
   categories: [],
@@ -521,7 +521,7 @@ const AnimatedNumber = defineComponent({
             <span><AnimatedNumber :value="totalResultsCount" /> matches</span>
           </div>
 
-          <!-- Authors -->
+          <!-- Authors Section -->
           <section
             v-if="(activeTabSlot === 'all' || activeTabSlot === 'authors') && metaResults.authors.length > 0"
             aria-label="Matched authors"
@@ -539,31 +539,44 @@ const AnimatedNumber = defineComponent({
                 v-for="author in metaResults.authors"
                 :key="author.slug"
                 :to="`/${author.stem}`"
-                class="group flex items-center gap-3 p-3.5 border-b border-r border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311] hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-primary-500"
+                class="group relative flex flex-col justify-between p-4 sm:p-5 border-b border-r border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311] hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] transition-colors duration-200 select-none h-full w-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500"
               >
-                <UAvatar
-                  :src="author.avatar?.src"
-                  :alt="author.name"
-                  size="2xs"
-                  class="ring-1 ring-[#e0dad0] dark:ring-[#2d2a24] shrink-0"
-                />
-                <div class="min-w-0 flex-1">
-                  <h4 class="text-xs font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-500 transition-colors truncate">
-                    {{ author.name }}
-                  </h4>
-                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono mt-0.5 flex items-center gap-1">
-                    View profile <UIcon
-                      name="i-lucide-arrow-right"
-                      class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      aria-hidden="true"
+                <div class="space-y-3">
+                  <div class="flex items-center gap-3">
+                    <UAvatar
+                      :src="author.avatar?.src"
+                      :alt="author.name"
+                      size="sm"
+                      class="ring-1 ring-[#e0dad0] dark:ring-[#2d2a24] shrink-0"
                     />
+                    <div class="min-w-0 flex-1">
+                      <h4 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-500 transition-colors truncate">
+                        {{ author.name }}
+                      </h4>
+                      <p v-if="author.title" class="text-[10px] font-mono text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
+                        {{ author.title }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p v-if="author.description" class="text-[11px] text-neutral-600 dark:text-neutral-300 leading-relaxed line-clamp-2 font-normal">
+                    {{ author.description }}
                   </p>
+                </div>
+
+                <div class="pt-3 border-t border-[#e8e3d8] dark:border-[#26231f] flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 transition-colors mt-4">
+                  <span>{{ author.count || 0 }} {{ author.count === 1 ? 'Article' : 'Articles' }}</span>
+                  <UIcon
+                    name="i-lucide-arrow-right"
+                    class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform"
+                    aria-hidden="true"
+                  />
                 </div>
               </NuxtLink>
             </div>
           </section>
 
-          <!-- Categories -->
+          <!-- Categories Section -->
           <section
             v-if="(activeTabSlot === 'all' || activeTabSlot === 'categories') && metaResults.categories.length > 0"
             aria-label="Matched categories"
@@ -576,25 +589,18 @@ const AnimatedNumber = defineComponent({
                 aria-hidden="true"
               /> Categories ({{ metaResults.categories.length }})
             </h3>
-            <div class="flex flex-wrap gap-2">
-              <NuxtLink
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+              <BaseTaxonomyCard
                 v-for="category in metaResults.categories"
                 :key="category.slug"
-                :to="`/${category.stem}`"
-                class="px-2.5 py-1 rounded-xs border border-[#e0dad0]/60 dark:border-[#2a2722] bg-[#f2eee5] dark:bg-[#1c1a17] font-mono text-[11px] font-semibold hover:text-primary-500 transition-all focus-visible:ring-1 focus-visible:ring-primary-500"
-                :style="{ color: category.color || '' }"
-              >
-                <UIcon
-                  :name="category.icon || 'i-lucide-folder'"
-                  class="w-3 h-3 inline-block mr-1 opacity-70"
-                  aria-hidden="true"
-                />
-                {{ category.name }}
-              </NuxtLink>
+                :item="category"
+                fallback-icon="i-lucide-folder-open"
+                type-label="category"
+              />
             </div>
           </section>
 
-          <!-- Tags -->
+          <!-- Tags Section -->
           <section
             v-if="(activeTabSlot === 'all' || activeTabSlot === 'tags') && metaResults.tags.length > 0"
             aria-label="Matched tags"
@@ -607,20 +613,18 @@ const AnimatedNumber = defineComponent({
                 aria-hidden="true"
               /> Tags ({{ metaResults.tags.length }})
             </h3>
-            <div class="flex flex-wrap gap-2">
-              <NuxtLink
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+              <BaseTaxonomyCard
                 v-for="tag in metaResults.tags"
                 :key="tag.slug"
-                :to="`/${tag.stem}`"
-                class="px-2 py-0.5 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722] font-mono text-[10px] font-medium text-neutral-600 dark:text-neutral-400 hover:text-primary-500 transition-all focus-visible:ring-1 focus-visible:ring-primary-500"
-                :style="{ color: tag.color || '' }"
-              >
-                #{{ tag.name }}
-              </NuxtLink>
+                :item="tag"
+                fallback-icon="i-lucide-hash"
+                type-label="tag"
+              />
             </div>
           </section>
 
-          <!-- Articles / Blogs -->
+          <!-- Articles / Blogs Section -->
           <section
             v-if="(activeTabSlot === 'all' || activeTabSlot === 'blogs') && blogResults.length > 0"
             aria-label="Matched articles"
