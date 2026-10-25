@@ -112,7 +112,17 @@ export default defineNuxtConfig({
         },
         highlight: {
           theme: { default: "github-light", dark: "github-dark" },
-          langs: ["js", "ts", "rust", "go", "bash", "yaml", "log", "cpp", "json"],
+          langs: [
+            "js",
+            "ts",
+            "rust",
+            "go",
+            "bash",
+            "yaml",
+            "log",
+            "cpp",
+            "json",
+          ],
         },
         remarkPlugins: {
           "remark-reading-time": {},
@@ -182,7 +192,9 @@ export default defineNuxtConfig({
     },
 
     // Static Assets Caching
-    "/_nuxt/**": { headers: { "Cache-Control": "public, max-age=31536000, immutable" } },
+    "/_nuxt/**": {
+      headers: { "Cache-Control": "public, max-age=31536000, immutable" },
+    },
   },
 
   experimental: {
@@ -204,7 +216,9 @@ export default defineNuxtConfig({
       wasm: true,
     },
     routeRules: {
-      "/_nuxt/**": { cache: { maxAge: 31536000 } },
+      "/_nuxt/**": {
+        cache: { maxAge: 31536000 },
+      },
       "/_og/**": {
         ssr: true,
         cache: false,
@@ -287,17 +301,51 @@ export default defineNuxtConfig({
     },
 
     families: [
-      { name: "Plus Jakarta Sans", weights: [400, 500, 600, 700] },
-      { name: "Inter", weights: [400, 500, 600, 700] },
-      { name: "Newsreader", weights: [400, 600, 700], styles: ["normal", "italic"] },
-      { name: "Playfair Display", weights: [400, 700] },
-      { name: "Lora", weights: [400, 500, 600] },
-      { name: "EB Garamond", weights: [400, 500, 700] },
-      { name: "JetBrains Mono", weights: [400, 500, 700] },
-      { name: "IBM Plex Mono", weights: [400, 500] },
-      { name: "Poppins", weights: [400, 500, 600, 700] },
-      { name: "Roboto", weights: [300, 400, 500, 700, 900] },
-      { name: "Special Elite", weights: [400] },
+      {
+        name: "Plus Jakarta Sans",
+        weights: [400, 500, 600, 700],
+      },
+      {
+        name: "Inter",
+        weights: [400, 500, 600, 700],
+      },
+      {
+        name: "Newsreader",
+        weights: [400, 600, 700],
+        styles: ["normal", "italic"],
+      },
+      {
+        name: "Playfair Display",
+        weights: [400, 700],
+      },
+      {
+        name: "Lora",
+        weights: [400, 500, 600],
+      },
+      {
+        name: "EB Garamond",
+        weights: [400, 500, 700],
+      },
+      {
+        name: "JetBrains Mono",
+        weights: [400, 500, 700],
+      },
+      {
+        name: "IBM Plex Mono",
+        weights: [400, 500],
+      },
+      {
+        name: "Poppins",
+        weights: [400, 500, 600, 700],
+      },
+      {
+        name: "Roboto",
+        weights: [300, 400, 500, 700, 900],
+      },
+      {
+        name: "Special Elite",
+        weights: [400],
+      },
     ],
 
     processCSSVariables: true,
@@ -332,7 +380,7 @@ export default defineNuxtConfig({
     fetchRemoteUrls: true,
     strictNuxtContentPaths: true,
     showLiveInspections: true,
-    debug: true,
+    debug: process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
     runOnBuild: true,
     fetchTimeout: 10000,
     report: {
@@ -346,9 +394,8 @@ export default defineNuxtConfig({
     componentDirs: ["components/OgImage"],
     security: {
       strict: true,
-      secret: process.env.NUXT_OG_IMAGE_SECRET,
     },
-    debug: true,
+    debug: process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
   },
 
   robots: {
@@ -375,8 +422,13 @@ export default defineNuxtConfig({
   sitemap: {
     autoI18n: true,
     discoverImages: true,
-    exclude: ["/app/**", "/api/**", "/_nuxt/**", "/__nuxt_content/**"],
-    debug: false,
+    exclude: [
+      "/app/**",
+      "/api/**",
+      "/_nuxt/**",
+      "/__nuxt_content/**",
+    ],
+    debug: process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
   },
 
   studio: {
