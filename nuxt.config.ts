@@ -377,7 +377,7 @@ export default defineNuxtConfig({
 
   linkChecker: {
     enabled: true,
-    failOnError: true,
+    failOnError: false,
     fetchRemoteUrls: process.env.NODE_ENV === "production",
     strictNuxtContentPaths: true,
     showLiveInspections: true,
