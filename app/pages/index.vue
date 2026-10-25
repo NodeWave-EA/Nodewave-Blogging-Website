@@ -30,7 +30,10 @@ const featuredBlogs = computed<BlogType[]>(() => {
   const fallbackRecent = recent.filter(blog => !featuredPaths.has(blog.path || blog.id || blog.slug));
 
   // Combine featured posts with recent fallback posts to hit the exact limit
-  return [...featured, ...fallbackRecent].slice(0, numberOfFeaturedBlogs);
+  return [
+    ...featured,
+    ...fallbackRecent,
+  ].slice(0, numberOfFeaturedBlogs);
 });
 
 const isLoading = computed(() => featuredPending.value || recentPending.value);
@@ -246,8 +249,11 @@ useSchemaOrg([
 
       <!-- Main App Body Context -->
       <UPageBody>
-        <!-- Loading State -->
-        <div v-if="isLoading" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 my-6">
+        <!-- Loading State: Connected Bento Skeleton Grid -->
+        <div
+          v-if="isLoading"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden my-6 shadow-xs"
+        >
           <LazyBlogPostCardSkeleton
             v-for="n in numberOfFeaturedBlogs"
             :key="`home-skeleton-${n}`"
@@ -280,7 +286,7 @@ useSchemaOrg([
           <p>No curated insights available right now.</p>
         </div>
 
-        <!-- Loaded Content States -->
+        <!-- Loaded Content States: Contiguous Bento Grid Matrix -->
         <section
           v-else
           class="my-6"
@@ -289,13 +295,13 @@ useSchemaOrg([
           <h2 id="featured-posts-heading" class="sr-only">
             Featured Articles and Insights
           </h2>
-          <UPageGrid class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
             <BlogPostCard
               v-for="blog in featuredBlogs"
               :key="blog.path"
               :post="blog"
             />
-          </UPageGrid>
+          </div>
         </section>
       </UPageBody>
     </UPage>
