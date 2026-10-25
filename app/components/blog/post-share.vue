@@ -85,21 +85,25 @@ async function copyToClipboard() {
   <UPopover
     arrow
     modal
+    :ui="{
+      content: 'rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311] shadow-2xs overflow-hidden',
+      arrow: 'before:border-[#e8e3d8] dark:before:border-[#26231f] before:bg-[#faf7f2] dark:before:bg-[#141311]',
+    }"
   >
     <UButton
       icon="i-lucide-share-2"
       label="Share"
-      variant="soft"
+      variant="subtle"
       color="neutral"
-      size="sm"
-      class="font-medium rounded-lg transition-colors hover:text-primary-500 dark:hover:text-primary-400"
+      size="xs"
+      class="font-mono text-xs rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/80 dark:border-[#2a2722] hover:border-primary-500/50 hover:text-primary-500 transition-colors cursor-pointer"
     />
 
     <template #content>
-      <div class="p-2 w-56 flex flex-col gap-1">
+      <div class="p-1.5 w-56 flex flex-col gap-0.5 select-none">
         <!-- Header -->
-        <div class="px-3 pt-2 pb-1.5">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+        <div class="px-2.5 pt-2 pb-1.5 border-b border-[#e8e3d8] dark:border-[#26231f] mb-1">
+          <h3 class="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
             Share this post
           </h3>
         </div>
@@ -113,24 +117,24 @@ async function copyToClipboard() {
           rel="noopener noreferrer"
           variant="ghost"
           color="neutral"
-          size="sm"
+          size="xs"
           trailing-icon="i-lucide-external-link"
-          class="w-full justify-start font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          class="w-full justify-start font-mono text-xs text-neutral-700 dark:text-neutral-300 hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] hover:text-primary-500 dark:hover:text-primary-400 rounded-xs transition-colors"
           :icon="link.icon"
           :ui="{
-            trailingIcon: 'absolute right-3 text-neutral-500 dark:text-neutral-400',
+            trailingIcon: 'absolute right-2.5 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 size-3',
           }"
         >
           {{ link.label }}
         </UButton>
 
-        <USeparator class="my-1 border-neutral-200 dark:border-neutral-800" />
+        <USeparator class="my-1 border-[#e8e3d8] dark:border-[#26231f]" />
 
         <!-- Copy URL Button -->
         <UButton
           variant="ghost"
-          size="sm"
-          class="w-full justify-start font-medium transition-all duration-200"
+          size="xs"
+          class="w-full justify-start font-mono text-xs rounded-xs transition-all duration-200 hover:bg-[#f3eee4] dark:hover:bg-[#1a1816]"
           :color="isCopied ? 'success' : 'neutral'"
           :icon="isCopied ? 'i-lucide-copy-check' : 'i-lucide-copy'"
           @click="copyToClipboard"
