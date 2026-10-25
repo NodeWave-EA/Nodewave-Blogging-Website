@@ -134,9 +134,8 @@ useHead({
   ],
 });
 
-// Nuxt Schema.org Structured Data (Google Rich Article Snippets & Breadcrumbs)
+// Nuxt Schema.org Structured Data
 useSchemaOrg([
-  // Breadcrumbs Schema (Home > Blogs > Category > Article)
   defineBreadcrumb({
     itemListElement: [
       { name: "Home", item: "/" },
@@ -153,7 +152,6 @@ useSchemaOrg([
     ],
   }),
 
-  // BlogPosting Article Schema
   defineArticle({
     "@type": "BlogPosting",
     "headline": () => BLOG_TITLE.value,
@@ -220,140 +218,129 @@ logger.log("All tags:", { blogTags: blogTags.value });
         color="neutral"
         variant="subtle"
         size="sm"
-        class="rounded-lg"
+        class="rounded-xs"
       />
     </div>
 
-    <div v-else-if="isLoading" class="space-y-6 max-w-3xl mx-auto animate-pulse">
-      <USkeleton class="h-6 w-24 rounded-md" />
-      <USkeleton class="h-12 w-3/4 rounded-xl" />
+    <div v-else-if="isLoading" class="space-y-6 max-w-3xl mx-auto animate-pulse py-10">
+      <USkeleton class="h-6 w-24 rounded-xs" />
+      <USkeleton class="h-12 w-3/4 rounded-xs" />
       <div class="flex items-center gap-3">
-        <USkeleton class="h-10 w-10 rounded-full" />
+        <USkeleton class="h-8 w-8 rounded-full" />
         <div class="space-y-2">
-          <USkeleton class="h-4 w-32" />
-          <USkeleton class="h-3 w-20" />
+          <USkeleton class="h-4 w-32 rounded-xs" />
+          <USkeleton class="h-3 w-20 rounded-xs" />
         </div>
       </div>
-      <USkeleton class="mt-8 h-96 w-full rounded-2xl" />
+      <USkeleton class="mt-8 h-80 w-full rounded-xs" />
     </div>
 
-    <UPage v-else-if="currentBlog">
-      <UPageHeader
-        class="relative overflow-hidden bg-neutral-900 border border-neutral-200/20 dark:border-neutral-800/40 rounded-2xl py-12 px-6 md:px-12"
-      >
-        <div v-if="currentBlog.coverImage?.src" class="absolute inset-0 z-0">
-          <NuxtImg
-            :src="currentBlog.coverImage.src"
-            :alt="currentBlog.coverImage?.alt || currentBlog.title"
-            class="w-full h-full object-cover scale-105 filter blur-xs opacity-80 dark:opacity-80"
-          />
-        </div>
-
-        <div class="relative z-10 text-white select-none flex flex-col gap-4">
-          <div class="flex items-center gap-2 text-xs font-mono text-neutral-300">
-            <UButton
-              icon="i-lucide-arrow-left"
-              variant="ghost"
-              label="Back to blogs"
-              class="text-xs font-mono p-0 text-neutral-300 hover:text-primary-400 transition-colors"
+    <UPage v-else-if="currentBlog" class="py-8">
+      <!-- NodeWave Matrix Bento Hero Header -->
+      <UPageHeader class="mb-8 border-b border-[#e8e3d8] dark:border-[#26231f] pb-8 bg-transparent">
+        <template #headline>
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <!-- Navigation Breadcrumb -->
+            <NuxtLink
               to="/blogs"
-            />
-            <USeparator orientation="vertical" class="h-3 border-neutral-700 mx-1" />
-          </div>
+              class="text-xs font-mono font-bold text-neutral-500 dark:text-neutral-400 hover:text-primary-500 flex items-center gap-1.5 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+              aria-label="Return to all blogs"
+            >
+              <UIcon
+                name="i-lucide-arrow-left"
+                class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform"
+                aria-hidden="true"
+              />
+              <span>Back to blogs</span>
+            </NuxtLink>
 
-          <h1
-            class="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-white filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] max-w-4xl"
-          >
+            <!-- Category Badge -->
+            <NuxtLink
+              :to="`/categories/${currentBlog.category || 'general'}`"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-500/20 font-mono text-[10px] font-bold uppercase tracking-wider hover:bg-primary-500/20 transition-colors"
+            >
+              <UIcon
+                name="i-lucide-folder"
+                class="w-3 h-3"
+                aria-hidden="true"
+              />
+              <span>{{ currentBlog.category || 'General' }}</span>
+            </NuxtLink>
+          </div>
+        </template>
+
+        <template #title>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-white leading-[1.15]">
             {{ currentBlog.title }}
           </h1>
+        </template>
 
-          <p class="text-sm md:text-base text-neutral-300 max-w-3xl leading-relaxed font-normal">
+        <template #description>
+          <p class="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-300 max-w-4xl leading-relaxed font-normal mt-3">
             {{ currentBlog.description }}
           </p>
+        </template>
 
-          <div class="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs font-mono text-neutral-400 mt-1">
+        <!-- Technical Meta Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-y-3 gap-x-6 text-xs font-mono text-neutral-500 dark:text-neutral-400 pt-6 mt-6 border-t border-[#e8e3d8] dark:border-[#26231f]">
+          <div class="flex flex-wrap items-center gap-y-2 gap-x-4">
+            <!-- Author Pill Badge -->
+            <NuxtLink
+              v-if="blogAuthor"
+              :to="`/${blogAuthor.stem}`"
+              class="group inline-flex items-center gap-2 pr-2.5 py-0.5 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/80 dark:border-[#2a2722] hover:border-primary-500/50 transition-colors"
+            >
+              <UAvatar
+                :src="blogAuthor.avatar?.src"
+                :alt="blogAuthor.name"
+                size="2xs"
+                class="ring-1 ring-[#e0dad0] dark:ring-[#2d2a24] shrink-0"
+              />
+              <span class="font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-500 transition-colors">
+                {{ blogAuthor.name }}
+              </span>
+            </NuxtLink>
+
+            <!-- Publication Date -->
             <div class="flex items-center gap-1.5">
-              <UIcon name="i-lucide-calendar" class="size-4 text-primary-400" />
+              <UIcon
+                name="i-lucide-calendar"
+                class="w-3.5 h-3.5 text-primary-500"
+                aria-hidden="true"
+              />
               <time v-if="currentBlog.date" :datetime="publishedIsoDate">
                 {{ useDateFormat(currentBlog.date, 'MMMM DD, YYYY').value }}
               </time>
             </div>
 
+            <!-- Reading Time -->
             <div v-if="currentBlog.meta?.readingTime" class="flex items-center gap-1.5">
-              <USeparator orientation="vertical" class="h-3 border-neutral-700" />
-              <UIcon name="i-lucide-clock" class="size-4 text-primary-400" />
+              <span class="text-neutral-300 dark:text-neutral-700" aria-hidden="true">•</span>
+              <UIcon
+                name="i-lucide-clock"
+                class="w-3.5 h-3.5 text-primary-500"
+                aria-hidden="true"
+              />
               <span>{{ currentBlog.meta.readingTime.text }}</span>
             </div>
-
-            <!-- post share buttons -->
-            <BlogPostShare :title="currentBlog.title" />
           </div>
+
+          <!-- Share Article Actions -->
+          <BlogPostShare :title="currentBlog.title" />
+        </div>
+
+        <!-- Crisp Bento Cover Feature Banner -->
+        <div
+          v-if="currentBlog.coverImage?.src"
+          class="mt-8 overflow-hidden rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-[#f2eee5] dark:bg-[#1c1a17] aspect-16/9 w-full shadow-2xs relative"
+        >
+          <NuxtImg
+            :src="currentBlog.coverImage.src"
+            :alt="currentBlog.coverImage?.alt || currentBlog.title"
+            class="w-full h-full object-cover"
+          />
         </div>
       </UPageHeader>
-
-      <template #left>
-        <div
-          class="hidden lg:block sticky space-y-6 self-start w-64"
-          :style="{ top: 'calc(var(--ui-header-height) + 1.5rem)' }"
-        >
-          <div v-if="blogAuthor" class="flex flex-col gap-3 ">
-            <!-- Profile Link -->
-            <NuxtLink :to="`/${blogAuthor.stem}`" class="group flex items-center gap-3">
-              <UAvatar
-                :src="blogAuthor.avatar?.src"
-                :alt="blogAuthor.avatar?.alt || blogAuthor.name"
-                size="md"
-                class="ring-2 ring-transparent group-hover:ring-primary-500/20 transition-all duration-300"
-              />
-              <div>
-                <h4 class="text-sm font-bold text-neutral-900 dark:text-white group-hover:text-primary-500 transition-colors">
-                  {{ blogAuthor.name }}
-                </h4>
-                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
-                  {{ blogAuthor.title }}
-                </p>
-              </div>
-            </NuxtLink>
-
-            <!-- Company & Social Links -->
-            <div class="flex items-center gap-1 -ml-1.5">
-              <!-- Company Link -->
-              <UTooltip v-if="blogAuthor.company" :text="blogAuthor.company.name">
-                <NuxtLink
-                  :to="blogAuthor.company.website"
-                  target="_blank"
-                  class="flex items-center p-1.5 rounded-lg text-neutral-400 hover:text-primary-500 transition-colors"
-                >
-                  <NuxtImg
-                    v-if="blogAuthor.company.icon?.startsWith('http')"
-                    :src="blogAuthor.company.icon"
-                    :alt="blogAuthor.company.name"
-                    class="w-4 h-4 rounded-xs shrink-0"
-                  />
-                  <UIcon
-                    v-else
-                    :name="blogAuthor.company.icon || 'i-lucide-globe-check'"
-                    class="w-4 h-4 shrink-0"
-                  />
-                </NuxtLink>
-              </UTooltip>
-
-              <span v-if="blogAuthor.socialLinks?.length" class="h-4 w-px bg-neutral-200 dark:bg-neutral-800 mx-1" />
-
-              <!-- Socials -->
-              <NuxtLink
-                v-for="social in blogAuthor.socialLinks"
-                :key="social.url"
-                :to="social.url"
-                target="_blank"
-                class="p-1.5 rounded-lg text-neutral-400 hover:text-primary-500 transition-colors"
-              >
-                <UIcon :name="social.icon" class="w-4 h-4" />
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
-      </template>
 
       <template #right>
         <UContentToc
@@ -367,80 +354,18 @@ logger.log("All tags:", { blogTags: blogTags.value });
       </template>
 
       <UPageBody>
-        <div
-          v-if="blogAuthor"
-          class="lg:hidden flex items-center gap-3 mb-8 p-3 rounded-xl border border-neutral-200/40 dark:border-neutral-800/50 bg-neutral-50/50 dark:bg-neutral-900/20"
-        >
-          <NuxtLink
-            :to="`/${blogAuthor.stem}`"
-            class="block shrink-0"
-            :aria-label="`View profile of ${blogAuthor.name}`"
-          >
-            <UAvatar
-              :src="blogAuthor.avatar?.src"
-              :alt="blogAuthor.avatar?.alt || blogAuthor.name"
-              size="md"
-              class="rounded-full border border-neutral-200 dark:border-neutral-800"
-            />
-          </NuxtLink>
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
-              Written by
-            </p>
-            <NuxtLink
-              :to="`/${blogAuthor.stem}`"
-              class="inline-block max-w-full"
-              :aria-label="`View profile of ${blogAuthor.name}`"
-            >
-              <h4
-                class="text-sm font-bold text-neutral-900 dark:text-neutral-100 truncate hover:text-primary-500 transition-colors"
-              >
-                {{ blogAuthor.name }}
-              </h4>
-            </NuxtLink>
-          </div>
-          <div v-if="blogAuthor.socialLinks?.length" class="flex items-center gap-1">
-            <UTooltip
-              v-for="social in blogAuthor.socialLinks"
-              :key="social.url"
-              :text="social.platform"
-              placement="top"
-              :style="{
-                '--tooltip-bg-color': social.color || 'var(--ui-primary)',
-                '--tooltip-text-color': 'var(--neutral-50)',
-              }"
-            >
-              <UButton
-                :key="social.url"
-                :to="social.url"
-                target="_blank"
-                color="neutral"
-                variant="ghost"
-                size="xs"
-                :icon="social.icon"
-                :style="{
-                  '--hover-brand-color': social.color || 'var(--ui-primary)',
-                }"
-                class="rounded-lg text-neutral-400 hover:text-(--hover-brand-color) dark:hover:text-(--hover-brand-color)"
-                :aria-label="social.platform"
-              />
-            </UTooltip>
-          </div>
-        </div>
-
         <article class="prose dark:prose-invert max-w-none markdown-body selection:bg-primary-500/10">
           <ContentRenderer :value="currentBlog" />
         </article>
 
+        <!-- Gallery Section -->
         <div
           v-if="currentBlog.gallery?.length"
-          class="mt-12 pt-8 border-t border-neutral-200/40 dark:border-neutral-800/60"
+          class="mt-12 pt-8 border-t border-[#e8e3d8] dark:border-[#26231f]"
         >
-          <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none mb-4">
+          <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none mb-4 uppercase tracking-widest font-bold">
             <UIcon name="i-lucide-images" class="size-4 text-neutral-400" />
-            <span>
-              Gallery
-            </span>
+            <span>Gallery</span>
           </div>
 
           <UCarousel
@@ -453,13 +378,13 @@ logger.log("All tags:", { blogTags: blogTags.value });
             loop
             :ui="{
               item: 'basis-full md:basis-1/2 transition-opacity [&:not(.is-snapped)]:opacity-30',
-              container: 'rounded-xl',
+              container: 'rounded-xs',
             }"
             @select="onSelect"
           >
             <div class="p-2 w-full">
               <div
-                class="group overflow-hidden rounded-xl border border-neutral-200/40 dark:border-neutral-800/60 bg-neutral-50 dark:bg-neutral-900"
+                class="group overflow-hidden rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311]"
               >
                 <NuxtImg
                   :src="item.src"
@@ -470,12 +395,12 @@ logger.log("All tags:", { blogTags: blogTags.value });
             </div>
           </UCarousel>
 
-          <div class="flex gap-2 justify-center mt-10">
+          <div class="flex gap-2 justify-center mt-8">
             <div
               v-for="(item, index) in currentBlog.gallery"
               :key="index"
-              class="size-16 cursor-pointer overflow-hidden rounded-lg border-2 transition-all"
-              :class="activeIndex === index ? 'border-primary-500 opacity-100' : 'border-transparent opacity-40 hover:opacity-100'"
+              class="size-16 cursor-pointer overflow-hidden rounded-xs border transition-all"
+              :class="activeIndex === index ? 'border-primary-500 opacity-100' : 'border-[#e8e3d8] dark:border-[#26231f] opacity-40 hover:opacity-100'"
               @click="select(index)"
             >
               <NuxtImg
@@ -488,16 +413,98 @@ logger.log("All tags:", { blogTags: blogTags.value });
           </div>
         </div>
 
+        <!-- Transparent Footer Author Bio Card -->
         <div
-          class="mt-12 pt-6 border-t border-neutral-200/40 dark:border-neutral-800/60 flex flex-col sm:flex-row gap-8 sm:gap-16"
+          v-if="blogAuthor"
+          class="my-10 p-5 rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-transparent select-none space-y-4"
+        >
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#e8e3d8] dark:border-[#26231f]">
+            <div class="flex items-center gap-3.5">
+              <NuxtLink :to="`/${blogAuthor.stem}`" class="shrink-0">
+                <UAvatar
+                  :src="blogAuthor.avatar?.src"
+                  :alt="blogAuthor.name"
+                  size="md"
+                  class="ring-1 ring-[#e0dad0] dark:ring-[#2d2a24]"
+                />
+              </NuxtLink>
+              <div>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-primary-500 font-bold block">
+                  Written By
+                </span>
+                <NuxtLink
+                  :to="`/${blogAuthor.stem}`"
+                  class="text-sm font-bold text-neutral-900 dark:text-neutral-100 hover:text-primary-500 transition-colors"
+                >
+                  {{ blogAuthor.name }}
+                </NuxtLink>
+                <p v-if="blogAuthor.title" class="text-[11px] font-mono text-neutral-500 dark:text-neutral-400 mt-0.5">
+                  {{ blogAuthor.title }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Company & Social Links -->
+            <div class="flex items-center gap-1.5">
+              <UTooltip v-if="blogAuthor.company" :text="blogAuthor.company.name">
+                <NuxtLink
+                  :to="blogAuthor.company.website"
+                  target="_blank"
+                  class="p-1.5 rounded-xs border border-[#e0dad0]/60 dark:border-[#2a2722] bg-transparent text-neutral-500 hover:text-primary-500 transition-colors"
+                >
+                  <NuxtImg
+                    v-if="blogAuthor.company.icon?.startsWith('http')"
+                    :src="blogAuthor.company.icon"
+                    :alt="blogAuthor.company.name"
+                    class="w-4 h-4 rounded-xs shrink-0"
+                  />
+                  <UIcon
+                    v-else
+                    :name="blogAuthor.company.icon || 'i-lucide-globe'"
+                    class="w-4 h-4 shrink-0"
+                  />
+                </NuxtLink>
+              </UTooltip>
+
+              <NuxtLink
+                v-for="social in blogAuthor.socialLinks"
+                :key="social.url"
+                :to="social.url"
+                target="_blank"
+                class="p-1.5 rounded-xs border border-[#e0dad0]/60 dark:border-[#2a2722] bg-transparent text-neutral-500 hover:text-primary-500 transition-colors"
+              >
+                <UIcon :name="social.icon" class="w-4 h-4" />
+              </NuxtLink>
+            </div>
+          </div>
+
+          <p v-if="blogAuthor.description" class="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed font-normal">
+            {{ blogAuthor.description }}
+          </p>
+
+          <div class="pt-2 flex justify-end">
+            <NuxtLink
+              :to="`/${blogAuthor.stem}`"
+              class="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-primary-500 hover:text-primary-600 transition-colors"
+            >
+              <span>View Author Profile & Articles</span>
+              <UIcon name="i-lucide-arrow-right" class="w-3.5 h-3.5" />
+            </NuxtLink>
+          </div>
+        </div>
+
+        <!-- Categories & Tags Section -->
+        <div
+          class="mt-8 pt-6 border-t border-[#e8e3d8] dark:border-[#26231f] flex flex-col sm:flex-row gap-8 sm:gap-16"
         >
           <!-- Category section -->
           <div class="flex flex-col gap-2 min-w-35">
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none">
               <UIcon name="i-lucide-folder" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
               <NuxtLink :to="`/categories/${currentBlog.category || 'general'}`">
-                <span class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text">
-                  Category</span>
+                <span class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text font-bold uppercase tracking-wider text-[10px]">
+                  Category
+                </span>
               </NuxtLink>
             </div>
             <div class="flex flex-wrap gap-2">
@@ -505,12 +512,9 @@ logger.log("All tags:", { blogTags: blogTags.value });
                 :to="`/categories/${currentBlog.category || 'general'}`"
                 variant="subtle"
                 size="xs"
-                class="font-mono text-xs rounded-md border border-neutral-200/30 dark:border-neutral-800/50 hover:border-(--category-color)/40 text-neutral-900 dark:text-neutral-100 hover:text-(--category-color) transition-colors"
-                :style="{
-                  '--category-color': 'var(--ui-primary)',
-                }"
+                class="font-mono text-xs rounded-xs border border-[#e0dad0]/60 dark:border-[#2a2722] hover:border-primary-500/40 text-neutral-900 dark:text-neutral-100 hover:text-primary-500 transition-colors"
               >
-                <UIcon name="i-lucide-folder" class="size-3 text-(--category-color)" />
+                <UIcon name="i-lucide-folder" class="size-3 text-primary-500" />
                 {{ currentBlog.category || "General" }}
               </UButton>
             </div>
@@ -521,7 +525,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-400 select-none">
               <UIcon name="i-lucide-tags" class="size-3.5 text-neutral-400 dark:text-neutral-500" />
               <NuxtLink to="/tags">
-                <span class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text">
+                <span class="bg-linear-to-r from-primary-500 to-primary-600 text-transparent bg-clip-text font-bold uppercase tracking-wider text-[10px]">
                   Tags
                 </span>
               </NuxtLink>
@@ -533,7 +537,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
                 :to="`/${tag.stem}`"
                 variant="subtle"
                 size="xs"
-                class="font-mono text-xs rounded-md border border-neutral-200/30 dark:border-neutral-800/50 hover:border-(--tag-color)/40 text-neutral-900 dark:text-neutral-100 hover:text-(--tag-color) transition-colors"
+                class="font-mono text-xs rounded-xs border border-[#e0dad0]/60 dark:border-[#2a2722] hover:border-primary-500/40 text-neutral-900 dark:text-neutral-100 hover:text-primary-500 transition-colors"
                 :style="{
                   '--tag-color': tag.color || 'var(--ui-primary)',
                 }"
@@ -550,7 +554,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
         <UContentSurround
           v-if="surroundingBlog && surroundingBlog.length > 0"
           :surround="surroundingBlog"
-          class="mt-6 border border-neutral-200/30 dark:border-neutral-800/30 rounded-xl overflow-hidden shadow-xs"
+          class="mt-6 border border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-2xs"
         />
       </UPageBody>
     </UPage>
