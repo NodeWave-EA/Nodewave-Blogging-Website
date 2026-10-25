@@ -218,30 +218,30 @@ useSchemaOrg([
 
         <template #default>
           <div class="pt-4 flex flex-wrap items-center gap-3">
+            <!-- Primary Link: View All Blogs -->
             <NuxtLink
               to="/blogs"
-              class="group inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-950 hover:bg-neutral-900 dark:bg-white dark:hover:bg-neutral-50 px-5 py-2.5 text-xs font-semibold tracking-wide text-white dark:text-neutral-950 shadow-xs transition-all hover:-translate-y-0.5"
-              aria-label="Navigate to all blog articles"
+              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white dark:focus-visible:outline-neutral-100"
             >
-              View All Blogs
+              <span>View All Blogs</span>
               <UIcon
                 name="i-line-md-arrow-right"
-                class="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500 group-hover:translate-x-0.5 transition-transform"
+                class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-focus-visible:translate-x-0.5"
                 aria-hidden="true"
               />
             </NuxtLink>
 
+            <!-- Secondary Link: Explore Categories -->
             <NuxtLink
               to="/categories"
-              class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-5 py-2.5 text-xs font-medium tracking-wide text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-850 dark:hover:text-black transition-all shadow-2xs"
-              aria-label="Explore the complete blog collection"
+              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs border border-neutral-200 bg-neutral-100/80 px-5 py-2.5 text-sm font-medium text-neutral-800 shadow-xs transition-colors hover:bg-neutral-200/80 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:bg-neutral-700/80 dark:focus-visible:outline-neutral-100"
             >
               <UIcon
                 name="i-line-md-grid-3-filled"
-                class="h-3.5 w-3.5 text-neutral-400"
+                class="h-4 w-4 text-neutral-500 transition-colors duration-200 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200"
                 aria-hidden="true"
               />
-              Explore Categories
+              <span>Explore Categories</span>
             </NuxtLink>
           </div>
         </template>
