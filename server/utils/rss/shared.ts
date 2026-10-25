@@ -164,8 +164,12 @@ export function formatDate(dateInput?: string | Date): string {
  */
 export function sortBlogsByDateDesc(blogs: BlogType[]): BlogType[] {
   return [...blogs].sort((a, b) => {
-    const timeA = a.date ? new Date(a.date).getTime() : 0;
-    const timeB = b.date ? new Date(b.date).getTime() : 0;
+    const timeA = a.date
+      ? new Date(a.date).getTime()
+      : 0;
+    const timeB = b.date
+      ? new Date(b.date).getTime()
+      : 0;
     return timeB - timeA;
   });
 }
@@ -175,10 +179,14 @@ export function sortBlogsByDateDesc(blogs: BlogType[]): BlogType[] {
  */
 export function getLatestBlogDate(blogs: BlogType[]): Date {
   const dates = blogs
-    .map(b => (b.date ? new Date(b.date).getTime() : 0))
+    .map(b => (b.date
+      ? new Date(b.date).getTime()
+      : 0))
     .filter(t => !Number.isNaN(t) && t > 0);
 
-  return dates.length > 0 ? new Date(Math.max(...dates)) : new Date();
+  return dates.length > 0
+    ? new Date(Math.max(...dates))
+    : new Date();
 }
 
 /**
@@ -246,10 +254,14 @@ export function renderMiniMarkNode(node: any): string {
       return node.children.map(renderMiniMarkNode).join("");
     }
 
-    const rawTag = node.tag || node.name || (node.type === "element" ? node.tag || "div" : null);
+    const rawTag = node.tag || node.name || (node.type === "element"
+      ? node.tag || "div"
+      : null);
     if (rawTag && typeof rawTag === "string") {
       const props = node.props || node.attributes || {};
-      const children = Array.isArray(node.children) ? node.children : [];
+      const children = Array.isArray(node.children)
+        ? node.children
+        : [];
       return renderHtmlElement(rawTag, props, children);
     }
 

@@ -78,7 +78,11 @@ const _exampleBlog = {
     meta: {},
     name: "Gideon Yebei",
     slug: "gideon-yebei",
-    socialLinks: [[Object], [Object], [Object]],
+    socialLinks: [
+      [Object],
+      [Object],
+      [Object],
+    ],
     stem: "authors/gideon-yebei",
     website: "https://yebei-gideon.github.io",
     __hash__: "gb7eeTBREBdeqPM6LNshd8OEsWRhnaWh3Dozq-1IpKc",
@@ -123,7 +127,12 @@ const _exampleBlog = {
       [Array],
       [Array],
     ],
-    toc: { title: "", searchDepth: 5, depth: 5, links: [Array] },
+    toc: {
+      title: "",
+      searchDepth: 5,
+      depth: 5,
+      links: [Array],
+    },
   },
   coverImage: {
     src: "/blogs/posts/powershell-bash/cover.png",
@@ -148,7 +157,12 @@ const _exampleBlog = {
     },
   ],
   meta: {
-    readingTime: { text: "5 min read", minutes: 4.45, time: 267000, words: 890 },
+    readingTime: {
+      text: "5 min read",
+      minutes: 4.45,
+      time: 267000,
+      words: 890,
+    },
   },
   navigation: true,
   path: "/blog/powershell-bash",

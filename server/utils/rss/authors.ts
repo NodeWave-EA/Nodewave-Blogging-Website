@@ -88,15 +88,21 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
     });
 
     const count = authorBlogs.length;
-    const countLabel = `${count} ${count === 1 ? "article" : "articles"}`;
+    const countLabel = `${count} ${count === 1
+      ? "article"
+      : "articles"}`;
     const title = `${author.name || author.slug} (${countLabel})`;
 
     let html = `<p>${escapeXml(author.description || `Core technical contributor at NodeWave (${countLabel}).`)}</p>`;
     if (count > 0) {
       html += `<h3>Published Articles (${count}):</h3><ul>`;
       for (const b of authorBlogs) {
-        const bPath = b.path.startsWith("/") ? b.path : `/${b.path}`;
-        const dateFormatted = b.date ? ` — <em>${formatDate(b.date)}</em>` : "";
+        const bPath = b.path.startsWith("/")
+          ? b.path
+          : `/${b.path}`;
+        const dateFormatted = b.date
+          ? ` — <em>${formatDate(b.date)}</em>`
+          : "";
         html += `<li><a href="${siteUrl}${bPath}">${escapeXml(b.title || "Untitled")}</a>${dateFormatted}</li>`;
       }
       html += `</ul>`;
@@ -122,7 +128,9 @@ export async function generateAuthorsRssFeed(event: H3Event, format: FeedFormat 
     latestDate,
     feedUrl,
     format,
-    [{ rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" }],
+    [
+      { rel: "up", href: `${siteUrl}/rss.xml`, title: "Master Root Feed" },
+    ],
     siteUrl,
   );
 }

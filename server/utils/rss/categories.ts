@@ -80,15 +80,21 @@ export async function generateCategoriesRssFeed(
     const categoryBlogs = allBlogs.filter(blog => blog.category === category.slug);
 
     const count = categoryBlogs.length;
-    const countLabel = `${count} ${count === 1 ? "article" : "articles"}`;
+    const countLabel = `${count} ${count === 1
+      ? "article"
+      : "articles"}`;
     const title = `${category.name || category.slug} (${countLabel})`;
 
     let html = `<p>${escapeXml(category.description || `Technical articles under ${category.name}.`)}</p>`;
     if (count > 0) {
       html += `<h3>Articles in ${escapeXml(category.name || category.slug)} (${count}):</h3><ul>`;
       for (const b of categoryBlogs) {
-        const bPath = b.path.startsWith("/") ? b.path : `/${b.path}`;
-        const dateFormatted = b.date ? ` — <em>${formatDate(b.date)}</em>` : "";
+        const bPath = b.path.startsWith("/")
+          ? b.path
+          : `/${b.path}`;
+        const dateFormatted = b.date
+          ? ` — <em>${formatDate(b.date)}</em>`
+          : "";
         html += `<li><a href="${siteUrl}${bPath}">${escapeXml(b.title || "Untitled")}</a>${dateFormatted}</li>`;
       }
       html += `</ul>`;

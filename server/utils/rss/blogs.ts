@@ -48,7 +48,9 @@ export async function generateBlogRssFeed(
   }
 
   const feed = new Feed({
-    title: options.titleSuffix ? `NodeWave — ${options.titleSuffix}` : "NodeWave — All Technical Articles",
+    title: options.titleSuffix
+      ? `NodeWave — ${options.titleSuffix}`
+      : "NodeWave — All Technical Articles",
     description: options.description || "Master feed containing all technical articles, architecture notes, and development logs.",
     id: feedUrl,
     link: `${siteUrl}/`,
@@ -65,14 +67,22 @@ export async function generateBlogRssFeed(
   });
 
   for (const post of posts) {
-    const postPath = post.path.startsWith("/") ? post.path : `/${post.path}`;
+    const postPath = post.path.startsWith("/")
+      ? post.path
+      : `/${post.path}`;
     const postUrl = `${siteUrl}${postPath}`;
 
-    const authorObj = typeof post.author === "object" ? (post.author as BlogAuthor) : null;
-    const authorName = authorObj?.name || (typeof post.author === "string" ? post.author : "NodeWave Team");
+    const authorObj = typeof post.author === "object"
+      ? (post.author as BlogAuthor)
+      : null;
+    const authorName = authorObj?.name || (typeof post.author === "string"
+      ? post.author
+      : "NodeWave Team");
     const authorEmail = authorObj?.email || "info@nodewave.net";
 
-    const tags = Array.isArray(post.tags) ? (post.tags as BlogTag[]) : [];
+    const tags = Array.isArray(post.tags)
+      ? (post.tags as BlogTag[])
+      : [];
 
     let bodyHtml = post.description || "";
     if (post.body) {
@@ -121,7 +131,9 @@ export async function generateBlogRssFeed(
     const imageUrl = coverImage
       ? coverImage.startsWith("http")
         ? coverImage
-        : `${siteUrl}${coverImage.startsWith("/") ? "" : "/"}${coverImage}`
+        : `${siteUrl}${coverImage.startsWith("/")
+          ? ""
+          : "/"}${coverImage}`
       : undefined;
 
     feed.addItem({
@@ -130,10 +142,14 @@ export async function generateBlogRssFeed(
       link: postUrl,
       description: post.description || "",
       content: bodyHtml,
-      date: post.date ? new Date(post.date) : new Date(),
+      date: post.date
+        ? new Date(post.date)
+        : new Date(),
       category: xmlCategories,
       image: imageUrl,
-      author: [{ name: authorName, email: authorEmail }],
+      author: [
+        { name: authorName, email: authorEmail },
+      ],
     });
   }
 

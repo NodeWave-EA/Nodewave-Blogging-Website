@@ -13,7 +13,10 @@ export function useTheme() {
 
   onMounted(() => {
     watch(
-      [() => colorMode.preference, () => colorMode.value],
+      [
+        () => colorMode.preference,
+        () => colorMode.value,
+      ],
       ([preference, resolved]) => {
         logger.log("Current color mode preference:", { preference, resolved });
       },
@@ -26,7 +29,9 @@ export function useTheme() {
   type ThemeEvent = MouseEvent | TouchEvent | KeyboardEvent;
 
   const newTheme = computed(() =>
-    colorMode.value === "dark" ? "light" : "dark",
+    colorMode.value === "dark"
+      ? "light"
+      : "dark",
   );
 
   const currentIcon = computed(() =>
@@ -54,8 +59,12 @@ export function useTheme() {
 
   onMounted(() => {
     lastMousePos.value = {
-      x: typeof window !== "undefined" ? window.innerWidth / 2 : 0,
-      y: typeof window !== "undefined" ? window.innerHeight / 2 : 0,
+      x: typeof window !== "undefined"
+        ? window.innerWidth / 2
+        : 0,
+      y: typeof window !== "undefined"
+        ? window.innerHeight / 2
+        : 0,
     };
 
     if (typeof window !== "undefined") {
@@ -91,8 +100,12 @@ export function useTheme() {
           ? (event.touches?.[0]?.clientY ?? lastMousePos.value.y)
           : lastMousePos.value.y;
 
-    const viewWidth = typeof window !== "undefined" ? window.innerWidth : 1920;
-    const viewHeight = typeof window !== "undefined" ? window.innerHeight : 1080;
+    const viewWidth = typeof window !== "undefined"
+      ? window.innerWidth
+      : 1920;
+    const viewHeight = typeof window !== "undefined"
+      ? window.innerHeight
+      : 1080;
 
     const endRadius = Math.hypot(
       Math.max(x, viewWidth - x),
@@ -138,7 +151,9 @@ export function useTheme() {
       // Always animate the incoming layer (New view expands on top of old view)
       document.documentElement.animate(
         {
-          clipPath: changingToDark ? clipPathFrames : [...clipPathFrames].reverse(),
+          clipPath: changingToDark
+            ? clipPathFrames
+            : [...clipPathFrames].reverse(),
         },
         {
           duration,

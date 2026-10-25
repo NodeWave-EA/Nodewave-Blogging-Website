@@ -31,7 +31,12 @@ export const authorSchema = z.object({
     .min(2, "Name must be at least 2 characters long")
     .describe("The full identity or display name of the author")
     .default("Author Name"),
-  gender: z.enum(["male", "female", "non-binary", "prefer-not-to-say"])
+  gender: z.enum([
+    "male",
+    "female",
+    "non-binary",
+    "prefer-not-to-say",
+  ])
     .default("prefer-not-to-say")
     .describe("The gender identity of the author, used for personalization and inclusivity"),
   slug: z.string()

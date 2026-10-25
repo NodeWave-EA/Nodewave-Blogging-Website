@@ -51,6 +51,14 @@ export type SEO = z.infer<typeof seoSchema>;
 const _exampleSEO = {
   title: "How to Make PowerShell Behave Like Bash/Zsh (2026 Guide)",
   description: "Step-by-step tutorial to configure pwsh with emacs keybindings, fish-style autocomplete, carapace subcommand popups, and fzf fuzzy history search.",
-  keywords: ["PowerShell", "Bash", "Zsh", "Tutorial", "Autosuggestions", "Completions", "Subcommands"],
+  keywords: [
+    "PowerShell",
+    "Bash",
+    "Zsh",
+    "Tutorial",
+    "Autosuggestions",
+    "Completions",
+    "Subcommands",
+  ],
   canonicalUrl: "/blogs/powershell-bash",
 };

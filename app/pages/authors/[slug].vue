@@ -33,7 +33,9 @@ const hasMoreContent = computed(() => {
 });
 
 useInfiniteScroll(
-  typeof window !== "undefined" ? window : null,
+  typeof window !== "undefined"
+    ? window
+    : null,
   () => {
     if (hasMoreContent.value && !blogsPending.value) {
       displayLimit.value += itemsPerPage;
@@ -95,7 +97,9 @@ const authorAvatarUrl = computed(() => {
   const src = author.value?.avatar?.src;
   if (!src)
     return `${config.siteUrl}/avatar.png`;
-  return src.startsWith("http") ? src : `${config.siteUrl}${src}`;
+  return src.startsWith("http")
+    ? src
+    : `${config.siteUrl}${src}`;
 });
 
 const socialUrls = computed(() => {

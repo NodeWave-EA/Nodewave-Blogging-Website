@@ -83,7 +83,11 @@ const _exampleBlog = {
     website: "https://yebei-gideon.github.io",
     __hash__: "hVDXOGuGHClVtWJLPMVghucuSBBjtdsWjiYFnAp1g2s",
   },
-  body: { type: "minimark", value: [Array], toc: [Object] },
+  body: {
+    type: "minimark",
+    value: [Array],
+    toc: [Object],
+  },
   coverImage: {
     src: "/blogs/posts/powershell-bash/cover.png",
     alt: "Stylized terminal window showing predictive text and interactive completion menus",
@@ -94,8 +98,13 @@ const _exampleBlog = {
   draft: false,
   extension: "md",
   featured: true,
-  gallery: [[Object], [Object]],
-  meta: { readingTime: [Object] },
+  gallery: [
+    [Object],
+    [Object],
+  ],
+  meta: {
+    readingTime: [Object],
+  },
   navigation: true,
   path: "/blogs/powershell-bash",
   published: true,
@@ -108,7 +117,11 @@ const _exampleBlog = {
   },
   slug: "powershell-bash",
   stem: "blogs/powershell-bash",
-  tags: [[Object], [Object], [Object]],
+  tags: [
+    [Object],
+    [Object],
+    [Object],
+  ],
   updatedAt: "2026-06-16",
   __hash__: "WCV4fSoaLUDA0dUR7PqLo36XtOuOWpbw9SoFH4Pq_GM",
 };

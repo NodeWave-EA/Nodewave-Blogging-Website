@@ -21,7 +21,12 @@ export const siteConfig = {
     logo: "https://nodewave.net/logo.png",
     founded: 2024,
     region: "East Africa",
-    industries: ["IoT", "Cloud Infrastructure", "AI/ML", "Edge Computing"],
+    industries: [
+      "IoT",
+      "Cloud Infrastructure",
+      "AI/ML",
+      "Edge Computing",
+    ],
     tagline: "Leader in IoT Solutions",
   },
   socialLinks: [

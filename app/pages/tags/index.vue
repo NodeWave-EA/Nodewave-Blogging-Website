@@ -26,13 +26,18 @@ const hasMoreContent = computed(() => {
 });
 
 useInfiniteScroll(
-  typeof window !== "undefined" ? window : null,
+  typeof window !== "undefined"
+    ? window
+    : null,
   () => {
     if (hasMoreContent.value && !tagsPending.value) {
       displayLimit.value += itemsPerPage;
     }
   },
-  { distance: 250, canLoadMore: () => hasMoreContent.value },
+  {
+    distance: 250,
+    canLoadMore: () => hasMoreContent.value,
+  },
 );
 
 // Micro-interaction text decryption for the archive badge

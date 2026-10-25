@@ -23,10 +23,14 @@ const { scrollProgress } = useReadingProgress();
 const { getBlogBySlug, getSurroundingBlogs } = useContent();
 
 const slug = computed(() => route.params.slug as string);
-logger.debug("Current route slug parameter identified:", { slug: toValue(slug) });
+logger.debug("Current route slug parameter identified:", {
+  slug: toValue(slug),
+});
 
 const blogPath = computed(() => route.path);
-logger.debug("Current route path identified:", { blogPath: toValue(blogPath) });
+logger.debug("Current route path identified:", {
+  blogPath: toValue(blogPath),
+});
 
 const { data: blogQueryResult, pending: blogLoading, error: blogError } = await getBlogBySlug(slug);
 const { data: surroundQueryResult, pending: surroundLoading, error: surroundError } = await getSurroundingBlogs(blogPath);
@@ -65,14 +69,18 @@ const coverImageUrl = computed(() => {
   const src = currentBlog.value?.coverImage?.src;
   if (!src)
     return `${runtimeConfig.siteUrl}/preview.png`;
-  return src.startsWith("http") ? src : `${runtimeConfig.siteUrl}${src}`;
+  return src.startsWith("http")
+    ? src
+    : `${runtimeConfig.siteUrl}${src}`;
 });
 
 const publishedIsoDate = computed(() => {
   if (currentBlog.value?.date instanceof Date) {
     return currentBlog.value.date.toISOString();
   }
-  return currentBlog.value?.date ? new Date(currentBlog.value.date).toISOString() : "";
+  return currentBlog.value?.date
+    ? new Date(currentBlog.value.date).toISOString()
+    : "";
 });
 
 const modifiedIsoDate = computed(() => {
@@ -118,7 +126,10 @@ useSeoMeta({
 
 useHead({
   link: [
-    { rel: "canonical", href: () => BLOG_CANONICAL_URL.value },
+    {
+      rel: "canonical",
+      href: () => BLOG_CANONICAL_URL.value,
+    },
     { rel: "icon", type: "image/png", href: "/favicon.png" },
   ],
 });
@@ -131,9 +142,14 @@ useSchemaOrg([
       { name: "Home", item: "/" },
       { name: "Blogs", item: "/blogs" },
       ...(currentBlog.value?.category
-        ? [{ name: currentBlog.value.category, item: `/categories/${currentBlog.value.category}` }]
+        ? [
+            { name: currentBlog.value.category, item: `/categories/${currentBlog.value.category}` },
+          ]
         : []),
-      { name: () => BLOG_TITLE.value, item: () => BLOG_CANONICAL_URL.value },
+      {
+        name: () => BLOG_TITLE.value,
+        item: () => BLOG_CANONICAL_URL.value,
+      },
     ],
   }),
 
@@ -153,7 +169,9 @@ useSchemaOrg([
     "author": blogAuthor.value
       ? definePerson({
           name: blogAuthor.value.name,
-          url: blogAuthor.value.stem ? `${runtimeConfig.siteUrl}/${blogAuthor.value.stem}` : undefined,
+          url: blogAuthor.value.stem
+            ? `${runtimeConfig.siteUrl}/${blogAuthor.value.stem}`
+            : undefined,
           image: blogAuthor.value.avatar?.src,
           jobTitle: blogAuthor.value.title,
         })

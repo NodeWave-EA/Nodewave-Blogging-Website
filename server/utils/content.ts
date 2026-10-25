@@ -100,7 +100,10 @@ export async function enrichBlog(event: H3Event, blog: BlogType): Promise<BlogTy
       const authorSlug = normalizeSlug(blog.author.slug);
       const matchedAuthor = allAuthors.find(a => normalizeSlug(a.slug) === authorSlug);
       if (matchedAuthor) {
-        blog.author = { ...matchedAuthor, ...blog.author };
+        blog.author = {
+          ...matchedAuthor,
+          ...blog.author,
+        };
       }
     }
   }
@@ -120,7 +123,12 @@ export async function enrichBlog(event: H3Event, blog: BlogType): Promise<BlogTy
         if (typeof item === "object") {
           const itemSlug = normalizeSlug(item.slug || item.id || item.stem);
           const matched = allTags.find(t => normalizeSlug(t.slug) === itemSlug);
-          return matched ? { ...matched, ...item } : item;
+          return matched
+            ? {
+                ...matched,
+                ...item,
+              }
+            : item;
         }
 
         if (typeof item === "string") {

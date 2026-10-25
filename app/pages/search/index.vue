@@ -20,7 +20,9 @@ const { searchMetadataCollections } = useContent();
 const { status: blogSearchStatus, search: searchBlogs } = useSearchCollection("blogs");
 
 // Search state
-const searchQuery = ref(typeof route.query.q === "string" ? route.query.q : "");
+const searchQuery = ref(typeof route.query.q === "string"
+  ? route.query.q
+  : "");
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const blogResults = ref<any[]>([]);
 
@@ -59,7 +61,9 @@ function setTabRef(el: any, index: number) {
 
 const searchPageTitle = computed(() => {
   const query = searchQuery.value.trim();
-  return query ? `Search results for "${query}" | NodeWave` : "Search Articles, Authors & Topics | NodeWave";
+  return query
+    ? `Search results for "${query}" | NodeWave`
+    : "Search Articles, Authors & Topics | NodeWave";
 });
 
 const searchPageDescription = computed(() => {
@@ -102,7 +106,9 @@ async function executeSearch(query: string) {
   const cleanQuery = query.trim();
 
   // Sync query parameter to URL (?q=...)
-  const currentUrlQuery = typeof route.query.q === "string" ? route.query.q : "";
+  const currentUrlQuery = typeof route.query.q === "string"
+    ? route.query.q
+    : "";
   if (cleanQuery !== currentUrlQuery) {
     router.replace({
       query: {
@@ -127,7 +133,11 @@ async function executeSearch(query: string) {
     const [blogs, data] = await Promise.all([
       searchBlogs(cleanQuery, {
         limit: 20,
-        snippet: { columns: ["content", "title"], around: 30, tag: "mark" },
+        snippet: {
+          columns: ["content", "title"],
+          around: 30,
+          tag: "mark",
+        },
       }),
       searchMetadataCollections(cleanQuery),
     ]);
@@ -178,7 +188,9 @@ watch(
 watch(
   () => route.query.q,
   (newUrlQuery) => {
-    const queryStr = typeof newUrlQuery === "string" ? newUrlQuery : "";
+    const queryStr = typeof newUrlQuery === "string"
+      ? newUrlQuery
+      : "";
     if (queryStr !== searchQuery.value) {
       searchQuery.value = queryStr;
     }
@@ -216,11 +228,36 @@ const totalResultsCount = computed(() => {
 const hasResults = computed(() => totalResultsCount.value > 0);
 
 const tabs = computed(() => [
-  { slot: "all", label: "All Results", icon: "i-lucide-layers", count: totalResultsCount.value },
-  { slot: "blogs", label: "Articles", icon: "i-lucide-book-open", count: blogResults.value.length },
-  { slot: "authors", label: "Authors", icon: "i-lucide-users", count: metaResults.value.authors.length },
-  { slot: "categories", label: "Categories", icon: "i-lucide-folder", count: metaResults.value.categories.length },
-  { slot: "tags", label: "Tags", icon: "i-lucide-hash", count: metaResults.value.tags.length },
+  {
+    slot: "all",
+    label: "All Results",
+    icon: "i-lucide-layers",
+    count: totalResultsCount.value,
+  },
+  {
+    slot: "blogs",
+    label: "Articles",
+    icon: "i-lucide-book-open",
+    count: blogResults.value.length,
+  },
+  {
+    slot: "authors",
+    label: "Authors",
+    icon: "i-lucide-users",
+    count: metaResults.value.authors.length,
+  },
+  {
+    slot: "categories",
+    label: "Categories",
+    icon: "i-lucide-folder",
+    count: metaResults.value.categories.length,
+  },
+  {
+    slot: "tags",
+    label: "Tags",
+    icon: "i-lucide-hash",
+    count: metaResults.value.tags.length,
+  },
 ]);
 
 async function updateBubblePosition() {

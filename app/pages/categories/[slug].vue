@@ -30,7 +30,9 @@ const hasMoreContent = computed(() => {
 });
 
 useInfiniteScroll(
-  typeof window !== "undefined" ? window : null,
+  typeof window !== "undefined"
+    ? window
+    : null,
   () => {
     if (hasMoreContent.value && !blogsPending.value) {
       displayLimit.value += itemsPerPage;

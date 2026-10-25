@@ -24,8 +24,12 @@ function matchesDescriptor(e: KeyboardEvent, descriptor: string): boolean {
   const requireAlt = parts.includes("alt");
   const requireMeta = parts.includes("meta") || parts.includes("cmd") || parts.includes("command");
 
-  const key = e.key.toLowerCase() === " " ? "space" : e.key.toLowerCase();
-  const targetKey = keyPart === " " ? "space" : keyPart;
+  const key = e.key.toLowerCase() === " "
+    ? "space"
+    : e.key.toLowerCase();
+  const targetKey = keyPart === " "
+    ? "space"
+    : keyPart;
 
   const modifiersMatch
     = requireShift === e.shiftKey
@@ -75,7 +79,9 @@ export function useKeyboard() {
     descriptor: KeyDescriptor | KeyDescriptor[],
     handler: KeyHandler,
   ) {
-    const list = Array.isArray(descriptor) ? descriptor : [descriptor];
+    const list = Array.isArray(descriptor)
+      ? descriptor
+      : [descriptor];
 
     for (const d of list) {
       const normalized = normalizeDescriptor(d);
@@ -86,7 +92,9 @@ export function useKeyboard() {
   }
 
   function removeGlobalShortcut(descriptor: KeyDescriptor | KeyDescriptor[]) {
-    const list = Array.isArray(descriptor) ? descriptor : [descriptor];
+    const list = Array.isArray(descriptor)
+      ? descriptor
+      : [descriptor];
     for (const d of list) {
       const normalized = normalizeDescriptor(d);
       const index = handlers.findIndex(h => h.descriptor === normalized);

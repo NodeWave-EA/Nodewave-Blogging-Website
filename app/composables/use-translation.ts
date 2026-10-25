@@ -139,7 +139,9 @@ export function useTranslation() {
     if (!match || !match[1])
       return undefined;
     const parts = decodeURIComponent(match[1]).split("/").filter(Boolean);
-    return parts.length > 0 ? parts[parts.length - 1] : undefined;
+    return parts.length > 0
+      ? parts[parts.length - 1]
+      : undefined;
   };
 
   const updateGoogTransCookie = (lang: string) => {
@@ -191,7 +193,9 @@ export function useTranslation() {
         parsedLangs.push({
           code: opt.value,
           label: existing?.label || opt.text.trim(),
-          icon: opt.value === "en" ? "i-heroicons-language" : "i-heroicons-globe-alt",
+          icon: opt.value === "en"
+            ? "i-heroicons-language"
+            : "i-heroicons-globe-alt",
         });
       }
     }

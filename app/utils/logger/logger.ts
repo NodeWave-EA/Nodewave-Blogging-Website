@@ -12,7 +12,14 @@
  */
 
 // Log levels in increasing order of severity
-const LOG_LEVELS = ["verbose", "debug", "log", "warn", "error", "fatal"] as const;
+const LOG_LEVELS = [
+  "verbose",
+  "debug",
+  "log",
+  "warn",
+  "error",
+  "fatal",
+] as const;
 
 // Type for log levels, derived from the LOG_LEVELS array
 type LogLevel = (typeof LOG_LEVELS)[number];
@@ -97,16 +104,24 @@ const THEMES: Record<LogLevel, string> = {
 // Default logger implementation that uses the smart pretty print function
 
 function smartPrettyPrint(level: LogLevel, context: string | undefined, showTimestamp: boolean, message: any, ...optionalParams: any[]) {
-  const timestamp = showTimestamp ? `[${new Date().toLocaleTimeString()}] ` : "";
-  const contextStr = context ? `[${context}] ` : "";
+  const timestamp = showTimestamp
+    ? `[${new Date().toLocaleTimeString()}] `
+    : "";
+  const contextStr = context
+    ? `[${context}] `
+    : "";
   const color = THEMES[level];
 
   // We construct the string with ANSI codes
-  const output = `${color}${timestamp} DEV ${contextStr}[${level.toUpperCase()}]:${ANSI_RESET} ${typeof message === "string" ? message : ""}`;
+  const output = `${color}${timestamp} DEV ${contextStr}[${level.toUpperCase()}]:${ANSI_RESET} ${typeof message === "string"
+    ? message
+    : ""}`;
 
   console.log(output);
 
-  const payload = typeof message === "string" ? optionalParams : [message, ...optionalParams];
+  const payload = typeof message === "string"
+    ? optionalParams
+    : [message, ...optionalParams];
 
   payload.forEach((item) => {
     if (item === undefined || item === null)
@@ -148,8 +163,12 @@ export class Logger implements LoggerService {
   // Constructor to initialize the logger with an optional context and options
   constructor(context?: string, options?: { timestamp?: boolean }) {
     this.context = context;
-    if (options)
-      this.options = { ...this.options, ...options };
+    if (options) {
+      this.options = {
+        ...this.options,
+        ...options,
+      };
+    }
     this.registerLocalInstanceRef();
   }
 
@@ -159,11 +178,15 @@ export class Logger implements LoggerService {
 
     if (idx !== -1) {
       // Only set valid levels
-      Logger.logLevels = [...LOG_LEVELS.slice(idx)];
+      Logger.logLevels = [
+        ...LOG_LEVELS.slice(idx),
+      ];
     }
     else if (minLevel !== "disable") {
       // Default to 'log' if the input is garbage
-      Logger.logLevels = [...LOG_LEVELS.slice(2)];
+      Logger.logLevels = [
+        ...LOG_LEVELS.slice(2),
+      ];
     }
   }
 
@@ -317,7 +340,9 @@ export class Logger implements LoggerService {
   }
 
   static isLevelEnabled(level: LogLevel): boolean {
-    return Logger.logLevels ? Logger.logLevels.includes(level) : true;
+    return Logger.logLevels
+      ? Logger.logLevels.includes(level)
+      : true;
   }
 
   private registerLocalInstanceRef() {

@@ -9,12 +9,24 @@ export default defineContentConfig({
       source: "blogs/**/*.md",
       schema: blogSchema,
       indexes: [
-        { columns: ["date"] },
-        { columns: ["draft"] },
-        { columns: ["published"] },
-        { columns: ["featured"] },
-        { columns: ["published", "date"] },
-        { columns: ["draft", "featured"] },
+        {
+          columns: ["date"],
+        },
+        {
+          columns: ["draft"],
+        },
+        {
+          columns: ["published"],
+        },
+        {
+          columns: ["featured"],
+        },
+        {
+          columns: ["published", "date"],
+        },
+        {
+          columns: ["draft", "featured"],
+        },
       ],
     }),
     authors: defineCollection({
@@ -22,9 +34,15 @@ export default defineContentConfig({
       source: "authors/**/*.yml",
       schema: authorSchema,
       indexes: [
-        { columns: ["name"] },
-        { columns: ["slug"] },
-        { columns: ["name", "slug"] },
+        {
+          columns: ["name"],
+        },
+        {
+          columns: ["slug"],
+        },
+        {
+          columns: ["name", "slug"],
+        },
       ],
     }),
     tags: defineCollection({
@@ -32,9 +50,15 @@ export default defineContentConfig({
       source: "tags/**/*.yml",
       schema: tagSchema,
       indexes: [
-        { columns: ["name"] },
-        { columns: ["slug"] },
-        { columns: ["name", "slug"] },
+        {
+          columns: ["name"],
+        },
+        {
+          columns: ["slug"],
+        },
+        {
+          columns: ["name", "slug"],
+        },
       ],
     }),
     categories: defineCollection({
@@ -42,9 +66,15 @@ export default defineContentConfig({
       source: "categories/**/*.yml",
       schema: categorySchema,
       indexes: [
-        { columns: ["name"] },
-        { columns: ["slug"] },
-        { columns: ["name", "slug"] },
+        {
+          columns: ["name"],
+        },
+        {
+          columns: ["slug"],
+        },
+        {
+          columns: ["name", "slug"],
+        },
       ],
     }),
   },

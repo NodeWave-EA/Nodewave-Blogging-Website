@@ -29,7 +29,9 @@ export function useSmoothScroll(behavior: "smooth" | "auto" = "smooth", offset: 
     if (typeof document === "undefined")
       return 0;
     const scrollHeight = document.documentElement.scrollHeight - windowHeight.value;
-    return scrollHeight > 0 ? Math.min(100, (scrollY.value / scrollHeight) * 100) : 0;
+    return scrollHeight > 0
+      ? Math.min(100, (scrollY.value / scrollHeight) * 100)
+      : 0;
   });
 
   return {

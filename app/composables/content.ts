@@ -10,7 +10,9 @@ export function useContent() {
    * @returns A promise that resolves to an array of enriched BlogType objects.
    */
   const getAllBlogs = (limit?: MaybeRefOrGetter<number>) => {
-    const cacheKey = limit ? `blog-all-${toValue(limit)}` : "blog-all-unlimited";
+    const cacheKey = limit
+      ? `blog-all-${toValue(limit)}`
+      : "blog-all-unlimited";
 
     return useAsyncData<BlogType[]>(
       cacheKey,
@@ -31,7 +33,11 @@ export function useContent() {
         );
       },
       {
-        watch: limit ? [() => toValue(limit)] : [],
+        watch: limit
+          ? [
+              () => toValue(limit),
+            ]
+          : [],
       },
     );
   };
@@ -62,7 +68,9 @@ export function useContent() {
         return await enrichBlog(blog);
       },
       {
-        watch: [() => toValue(slug)],
+        watch: [
+          () => toValue(slug),
+        ],
       },
     );
   };
@@ -92,7 +100,9 @@ export function useContent() {
         );
       },
       {
-        watch: [() => toValue(limit)],
+        watch: [
+          () => toValue(limit),
+        ],
       },
     );
   };
@@ -112,7 +122,9 @@ export function useContent() {
       });
       return surroundingBlogs as unknown as ContentNavigationItem[];
     }, {
-      watch: [() => toValue(path)],
+      watch: [
+        () => toValue(path),
+      ],
     });
   };
 
@@ -122,7 +134,9 @@ export function useContent() {
    * @returns A promise that resolves to an array of BlogAuthor objects.
    */
   const getAllAuthors = (limit?: MaybeRefOrGetter<number>) => {
-    const cacheKey = limit ? `authors-all-${toValue(limit)}` : "authors-all-unlimited";
+    const cacheKey = limit
+      ? `authors-all-${toValue(limit)}`
+      : "authors-all-unlimited";
 
     return useAsyncData<Array<BlogAuthor & { count: number }>>(
       cacheKey,
@@ -154,7 +168,11 @@ export function useContent() {
         );
       },
       {
-        watch: limit ? [() => toValue(limit)] : [],
+        watch: limit
+          ? [
+              () => toValue(limit),
+            ]
+          : [],
       },
     );
   };
@@ -180,13 +198,17 @@ export function useContent() {
         return author;
       },
       {
-        watch: [() => toValue(slug)],
+        watch: [
+          () => toValue(slug),
+        ],
       },
     );
   };
 
   const getAuthorBlogs = (authorSlug: MaybeRefOrGetter<string>, limit?: MaybeRefOrGetter<number>) => {
-    const cacheKey = `author-blogs-${toValue(authorSlug)}-${limit ? toValue(limit) : "all"}`;
+    const cacheKey = `author-blogs-${toValue(authorSlug)}-${limit
+      ? toValue(limit)
+      : "all"}`;
 
     return useAsyncData<BlogType[]>(
       cacheKey,
@@ -208,7 +230,14 @@ export function useContent() {
         );
       },
       {
-        watch: [() => toValue(authorSlug), ...(limit ? [() => toValue(limit)] : [])],
+        watch: [
+          () => toValue(authorSlug),
+          ...(limit
+            ? [
+                () => toValue(limit),
+              ]
+            : []),
+        ],
       },
     );
   };
@@ -218,7 +247,9 @@ export function useContent() {
    * Efficiently computes and embeds associated blog post count metrics using native DB queries.
    */
   const getAllCategories = (limit?: MaybeRefOrGetter<number>) => {
-    const cacheKey = limit ? `category-all-${toValue(limit)}` : "category-all-unlimited";
+    const cacheKey = limit
+      ? `category-all-${toValue(limit)}`
+      : "category-all-unlimited";
 
     return useAsyncData<Array<BlogCategory & { count: number }>>(
       cacheKey,
@@ -247,7 +278,11 @@ export function useContent() {
         );
       },
       {
-        watch: limit ? [() => toValue(limit)] : [],
+        watch: limit
+          ? [
+              () => toValue(limit),
+            ]
+          : [],
       },
     );
   };
@@ -267,13 +302,17 @@ export function useContent() {
         return category;
       },
       {
-        watch: [() => toValue(slug)],
+        watch: [
+          () => toValue(slug),
+        ],
       },
     );
   };
 
   const getCategoryBlogs = (slug: MaybeRefOrGetter<string>, limit?: MaybeRefOrGetter<number>) => {
-    const cacheKey = `category-blogs-${toValue(slug)}-${limit ? toValue(limit) : "all"}`;
+    const cacheKey = `category-blogs-${toValue(slug)}-${limit
+      ? toValue(limit)
+      : "all"}`;
 
     return useAsyncData<BlogType[]>(
       cacheKey,
@@ -295,7 +334,14 @@ export function useContent() {
         );
       },
       {
-        watch: [() => toValue(slug), ...(limit ? [() => toValue(limit)] : [])],
+        watch: [
+          () => toValue(slug),
+          ...(limit
+            ? [
+                () => toValue(limit),
+              ]
+            : []),
+        ],
       },
     );
   };
@@ -305,7 +351,9 @@ export function useContent() {
    * Efficiently computes and aggregates associated blog post counters using SQL LIKE wildcards.
    */
   const getAllTags = (limit?: MaybeRefOrGetter<number>) => {
-    const cacheKey = limit ? `tags-all-${toValue(limit)}` : "tags-all-unlimited";
+    const cacheKey = limit
+      ? `tags-all-${toValue(limit)}`
+      : "tags-all-unlimited";
 
     return useAsyncData<Array<BlogTag & { count: number }>>(
       cacheKey,
@@ -334,7 +382,11 @@ export function useContent() {
         );
       },
       {
-        watch: limit ? [() => toValue(limit)] : [],
+        watch: limit
+          ? [
+              () => toValue(limit),
+            ]
+          : [],
       },
     );
   };
@@ -354,13 +406,17 @@ export function useContent() {
         return tag;
       },
       {
-        watch: [() => toValue(slug)],
+        watch: [
+          () => toValue(slug),
+        ],
       },
     );
   };
 
   const getTagBlogs = (tagSlug: MaybeRefOrGetter<string>, limit?: MaybeRefOrGetter<number>) => {
-    const cacheKey = `tag-blogs-${toValue(tagSlug)}-${limit ? toValue(limit) : "all"}`;
+    const cacheKey = `tag-blogs-${toValue(tagSlug)}-${limit
+      ? toValue(limit)
+      : "all"}`;
 
     return useAsyncData<BlogType[]>(
       cacheKey,
@@ -382,7 +438,14 @@ export function useContent() {
         );
       },
       {
-        watch: [() => toValue(tagSlug), ...(limit ? [() => toValue(limit)] : [])],
+        watch: [
+          () => toValue(tagSlug),
+          ...(limit
+            ? [
+                () => toValue(limit),
+              ]
+            : []),
+        ],
       },
     );
   };

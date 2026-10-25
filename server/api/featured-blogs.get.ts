@@ -44,7 +44,10 @@ export default defineEventHandler(async (event: H3Event) => {
       .filter(b => !existingSlugs.has(b.slug))
       .slice(0, remainingCount);
 
-    blogs = [...blogs, ...fallbackBlogs];
+    blogs = [
+      ...blogs,
+      ...fallbackBlogs,
+    ];
   }
 
   // Enrich raw blog items
@@ -74,8 +77,12 @@ export default defineEventHandler(async (event: H3Event) => {
       : null,
     tags: Array.isArray(blog.tags)
       ? blog.tags.map(tag => ({
-          name: typeof tag === "object" ? tag.name : tag,
-          slug: typeof tag === "object" ? tag.slug : tag,
+          name: typeof tag === "object"
+            ? tag.name
+            : tag,
+          slug: typeof tag === "object"
+            ? tag.slug
+            : tag,
         }))
       : [],
   }));

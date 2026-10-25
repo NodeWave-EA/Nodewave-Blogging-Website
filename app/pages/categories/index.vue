@@ -26,13 +26,18 @@ const hasMoreContent = computed(() => {
 });
 
 useInfiniteScroll(
-  typeof window !== "undefined" ? window : null,
+  typeof window !== "undefined"
+    ? window
+    : null,
   () => {
     if (hasMoreContent.value && !categoriesPending.value) {
       displayLimit.value += itemsPerPage;
     }
   },
-  { distance: 250, canLoadMore: () => hasMoreContent.value },
+  {
+    distance: 250,
+    canLoadMore: () => hasMoreContent.value,
+  },
 );
 
 const { activeHoverText, startDecryption } = useMatrixDecrypt({

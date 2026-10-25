@@ -90,15 +90,21 @@ export async function generateTagsRssFeed(
     });
 
     const count = tagBlogs.length;
-    const countLabel = `${count} ${count === 1 ? "article" : "articles"}`;
+    const countLabel = `${count} ${count === 1
+      ? "article"
+      : "articles"}`;
     const title = `#${tag.name || tag.slug} (${countLabel})`;
 
     let html = `<p>Articles tagged with <strong>#${escapeXml(tag.name || tag.slug)}</strong>.</p>`;
     if (count > 0) {
       html += `<h3>Tagged Articles (${count}):</h3><ul>`;
       for (const b of tagBlogs) {
-        const bPath = b.path.startsWith("/") ? b.path : `/${b.path}`;
-        const dateFormatted = b.date ? ` — <em>${formatDate(b.date)}</em>` : "";
+        const bPath = b.path.startsWith("/")
+          ? b.path
+          : `/${b.path}`;
+        const dateFormatted = b.date
+          ? ` — <em>${formatDate(b.date)}</em>`
+          : "";
         html += `<li><a href="${siteUrl}${bPath}">${escapeXml(b.title || "Untitled")}</a>${dateFormatted}</li>`;
       }
       html += `</ul>`;

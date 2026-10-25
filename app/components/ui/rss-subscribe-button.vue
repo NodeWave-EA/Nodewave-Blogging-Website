@@ -17,7 +17,9 @@ const fullFeedUrl = computed(() => {
 });
 
 const tooltipText = computed(() => {
-  return copied.value ? "Feed URL Copied!" : `Subscribe to ${props.title} RSS Feed`;
+  return copied.value
+    ? "Feed URL Copied!"
+    : `Subscribe to ${props.title} RSS Feed`;
 });
 
 async function handleSubscribe() {

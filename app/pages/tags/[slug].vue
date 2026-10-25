@@ -30,7 +30,9 @@ const hasMoreContent = computed(() => {
 });
 
 useInfiniteScroll(
-  typeof window !== "undefined" ? window : null,
+  typeof window !== "undefined"
+    ? window
+    : null,
   () => {
     if (hasMoreContent.value && !blogsPending.value) {
       displayLimit.value += itemsPerPage;
@@ -62,7 +64,9 @@ useSeoMeta({
   ogTitle: () => PAGE_TITLE.value,
   ogDescription: () => PAGE_DESCRIPTION.value,
   ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImageAlt: () => tag.value?.name ? `#${tag.value.name} Tag Archive` : "Tag Archive",
+  ogImageAlt: () => tag.value?.name
+    ? `#${tag.value.name} Tag Archive`
+    : "Tag Archive",
   ogSiteName: () => config.siteName || "Nodewave",
 
   // Twitter
@@ -98,7 +102,12 @@ useSchemaOrg([
     itemListElement: [
       { name: "Home", item: "/" },
       { name: "Tags", item: "/tags" },
-      { name: tag.value?.name ? `#${tag.value.name}` : "Tag Archive", item: PAGE_CANONICAL_URL.value },
+      {
+        name: tag.value?.name
+          ? `#${tag.value.name}`
+          : "Tag Archive",
+        item: PAGE_CANONICAL_URL.value,
+      },
     ],
   }),
 

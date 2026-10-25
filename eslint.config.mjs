@@ -18,14 +18,17 @@ export default withNuxt(
     ignores: [".pnpm-store/**", "**/migrations/*"],
   }, {
     rules: {
-      "vue/max-attributes-per-line": ["error", {
-        singleline: {
-          max: 2,
+      "vue/max-attributes-per-line": [
+        "error",
+        {
+          singleline: {
+            max: 2,
+          },
+          multiline: {
+            max: 1,
+          },
         },
-        multiline: {
-          max: 1,
-        },
-      }],
+      ],
       "ts/no-redeclare": "off",
       "ts/consistent-type-definitions": ["error", "type"],
       "no-console": ["warn"],
@@ -51,10 +54,13 @@ export default withNuxt(
           internalPattern: ["^~/.+"],
         },
       ],
-      "unicorn/filename-case": ["error", {
-        case: "kebabCase",
-        ignore: ["README.md"],
-      }],
+      "unicorn/filename-case": [
+        "error",
+        {
+          case: "kebabCase",
+          ignore: ["README.md"],
+        },
+      ],
     },
   }, {
     files: ["**/*.md"],
