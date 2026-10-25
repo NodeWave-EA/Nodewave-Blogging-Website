@@ -35,9 +35,9 @@ function onPointerLeave() {
 </script>
 
 <template>
-  <div
+  <article
     ref="cardRef"
-    class="group relative flex flex-col justify-between rounded-2xl bg-[#e8e3d8]/80 dark:bg-[#282520]/50 p-px overflow-hidden select-none transition-all duration-300"
+    class="group relative flex flex-col justify-between overflow-hidden bg-[#faf7f2] dark:bg-[#141311] transition-colors duration-200 hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] select-none h-full w-full rounded-none border-b border-r border-[#e8e3d8] dark:border-[#26231f] p-5"
     :style="[
       transformStyles,
       {
@@ -51,45 +51,47 @@ function onPointerLeave() {
     @pointerenter="onPointerEnter"
     @pointerleave="onPointerLeave"
   >
+    <!-- Bento Grid Tile Glow Highlight Effect -->
     <div
       class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 z-0"
-      style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.05), transparent 60%);"
+      style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.06), transparent 60%);"
     />
 
-    <div class="relative z-10 w-full h-full rounded-[15px] bg-[#faf7f2] dark:bg-[#1c1a17] p-6 flex flex-col justify-between items-stretch">
-      <div class="absolute top-0 right-0 p-3 opacity-10 dark:opacity-5 group-hover:scale-110 transition-all pointer-events-none select-none">
-        <UIcon
-          name="i-lucide-quote"
-          class="w-16 h-16 transform rotate-180 transition-colors"
-          :style="{ color: author.color ? 'var(--author-accent)' : '' }"
-        />
-      </div>
+    <div class="absolute top-0 right-0 p-3 opacity-10 dark:opacity-5 group-hover:scale-110 transition-all pointer-events-none select-none z-0">
+      <UIcon
+        name="i-lucide-quote"
+        class="w-16 h-16 transform rotate-180 transition-colors"
+        :style="{ color: author.color ? 'var(--author-accent)' : '' }"
+        aria-hidden="true"
+      />
+    </div>
 
-      <div class="flex flex-col items-center text-center">
+    <div class="relative z-10 flex flex-col items-center text-center flex-1 w-full justify-between">
+      <div class="flex flex-col items-center w-full">
         <div
-          class="relative w-24 h-24 rounded-full p-1 border border-[#e0dad0] dark:border-[#2d2a24] bg-[#f2eee5] dark:bg-[#1c1a17] group-hover:scale-105 transition-all duration-300"
+          class="relative w-20 h-20 rounded-full p-1 border border-[#e0dad0] dark:border-[#2d2a24] bg-[#f2eee5] dark:bg-[#1c1a17] group-hover:scale-105 transition-all duration-300"
           :style="{ borderColor: author.color ? `${author.color}30` : '' }"
         >
           <NuxtImg
             v-if="author.avatar?.src"
             :src="author.avatar.src"
             :alt="author.avatar.alt || author.name"
-            width="96"
-            height="96"
+            width="80"
+            height="80"
             loading="lazy"
             format="webp"
             class="w-full h-full rounded-full object-cover bg-[#f2eee5] dark:bg-[#22201c]"
           />
           <div
             v-else
-            class="w-full h-full rounded-full flex items-center justify-center font-bold text-2xl font-mono"
+            class="w-full h-full rounded-full flex items-center justify-center font-bold text-xl font-mono"
             :style="{ backgroundColor: author.color ? `${author.color}15` : 'rgba(var(--color-primary-500-rgb), 0.1)', color: author.color || 'var(--ui-primary)' }"
           >
             {{ author.name.charAt(0) }}
           </div>
         </div>
 
-        <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100 mt-4 tracking-tight font-mono group-hover:text-(--author-accent) transition-colors min-h-6">
+        <h3 class="text-sm font-bold text-neutral-900 dark:text-neutral-100 mt-3 tracking-tight font-mono group-hover:text-(--author-accent) transition-colors min-h-5">
           {{ activeHoverText[author.slug] || author.name }}
         </h3>
 
@@ -104,19 +106,20 @@ function onPointerLeave() {
               :to="author.company.website"
               target="_blank"
               rel="noopener noreferrer"
+              class="focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
             >
-              <!-- icon or use the image -->
               <UIcon
-                v-if="author.company?.icon.startsWith('i-')"
+                v-if="author.company?.icon?.startsWith('i-')"
                 :name="author.company.icon"
                 class="w-3.5 h-3.5 inline-block mr-1"
+                aria-hidden="true"
               />
               <NuxtImg
-                v-else-if="author.company?.icon.startsWith('http')"
+                v-else-if="author.company?.icon?.startsWith('http')"
                 :src="author.company.icon"
                 width="14"
                 height="14"
-                class="inline-block mr-1 rounded-sm object-cover"
+                class="inline-block mr-1 rounded-xs object-cover"
               />
               {{ author.company.name }}
             </NuxtLink>
@@ -126,50 +129,60 @@ function onPointerLeave() {
           </span>
         </div>
 
-        <p v-if="author.description" class="text-xs text-neutral-600 dark:text-neutral-400 mt-4 line-clamp-3 leading-relaxed">
+        <p v-if="author.description" class="text-xs text-neutral-600 dark:text-neutral-400 mt-3 line-clamp-3 leading-relaxed">
           {{ author.description }}
         </p>
 
-        <div v-if="author.socialLinks?.length" class="flex items-center justify-center gap-3 mt-4 relative z-30">
+        <div v-if="author.socialLinks?.length" class="flex items-center justify-center gap-2 mt-3 relative z-30">
           <NuxtLink
             v-for="(link, lIdx) in author.socialLinks"
             :key="`sl-${lIdx}`"
             :href="link.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="p-1.5 rounded-lg border border-[#e0dad0]/60 dark:border-[#2d2a24] bg-[#f2eee5]/60 dark:bg-[#22201c]/60 text-neutral-500 dark:text-neutral-400 hover:scale-110 transition-all duration-200 hover:text-(--hover-brand-color)"
+            class="p-1 rounded-xs border border-[#e0dad0]/60 dark:border-[#2d2a24] bg-[#f2eee5]/60 dark:bg-[#22201c]/60 text-neutral-500 dark:text-neutral-400 hover:scale-110 transition-all duration-200 hover:text-(--hover-brand-color) focus-visible:ring-1 focus-visible:ring-primary-500"
             :style="{
               '--hover-brand-color': link.color || 'var(--ui-primary)',
             }"
             :title="link.platform"
+            :aria-label="`Author social link: ${link.platform}`"
             onmouseenter="this.style.borderColor = 'var(--hover-brand-color)'"
             onmouseleave="this.style.borderColor = ''"
           >
-            <UIcon :name="link.icon" class="w-4 h-4 block" />
+            <UIcon
+              :name="link.icon"
+              class="w-3.5 h-3.5 block"
+              aria-hidden="true"
+            />
           </NuxtLink>
         </div>
       </div>
 
-      <div class="pt-4 flex items-center justify-between border-t border-[#e8e3d8] dark:border-[#26231f] mt-6 w-full">
+      <div class="pt-3 flex items-center justify-between border-t border-[#e8e3d8] dark:border-[#26231f] mt-4 w-full">
         <NuxtLink
           :to="`/${author.stem}`"
-          class="text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-(--author-accent) flex items-center gap-1 transition-colors relative z-20"
+          class="text-xs font-semibold text-neutral-700 dark:text-neutral-300 hover:text-(--author-accent) flex items-center gap-1 transition-colors relative z-20 focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+          :aria-label="`View author profile for ${author.name}`"
         >
           View Profile
-          <UIcon name="i-lucide-arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-200" />
+          <UIcon
+            name="i-lucide-arrow-right"
+            class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-200"
+            aria-hidden="true"
+          />
         </NuxtLink>
 
         <UBadge
           variant="solid"
           size="xs"
           color="neutral"
-          class="font-mono rounded px-2 py-0.5 text-[10px] font-bold dark:bg-[#e8e3d8] dark:text-[#161513]"
+          class="font-mono rounded-xs px-2 py-0.5 text-[10px] font-bold dark:bg-[#e8e3d8] dark:text-[#161513]"
         >
           {{ author.count }} {{ author.count === 1 ? 'Post' : 'Posts' }}
         </UBadge>
       </div>
     </div>
-  </div>
+  </article>
 </template>
 
 <style scoped>

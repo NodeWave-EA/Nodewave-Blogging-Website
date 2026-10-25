@@ -93,7 +93,7 @@ function formatDate(date: string | Date) {
     @pointerenter="handlePointerEnter"
     @pointerleave="handlePointerLeave"
   >
-    <!-- Bento Grid Tile Glow Highlight Effect -->
+    <!-- Bento Grid Tile Spotlight Radial Glow -->
     <div
       class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 z-0"
       style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.06), transparent 60%);"
@@ -147,6 +147,7 @@ function formatDate(date: string | Date) {
         ]"
       >
         <div class="w-full space-y-1.5">
+          <!-- Metadata Badge & Date Header -->
           <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-mono tracking-wider uppercase text-neutral-500 dark:text-neutral-400">
             <UBadge
               variant="subtle"
@@ -173,6 +174,7 @@ function formatDate(date: string | Date) {
             </span>
           </div>
 
+          <!-- Article Title -->
           <h3
             class="text-neutral-900 dark:text-neutral-100 font-semibold group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors duration-200 line-clamp-2"
             :class="[
@@ -189,12 +191,13 @@ function formatDate(date: string | Date) {
             </NuxtLink>
           </h3>
 
-          <p class="text-neutral-600 dark:text-neutral-400 leading-relaxed font-normal text-[11px] line-clamp-2">
+          <!-- Article Summary / Description -->
+          <p class="text-neutral-600 dark:text-neutral-300 leading-relaxed font-normal text-[11px] line-clamp-2">
             {{ post.description }}
           </p>
         </div>
 
-        <!-- Bento Footer Metadata -->
+        <!-- Bento Footer Metadata (Author & Tags) -->
         <div class="w-full space-y-2 pt-2 border-t border-[#e8e3d8] dark:border-[#26231f] mt-auto">
           <div class="flex items-center gap-1 relative z-30">
             <NuxtLink
@@ -229,7 +232,8 @@ function formatDate(date: string | Date) {
               </div>
             </NuxtLink>
 
-            <div v-if="tags.length > 0" class="hidden sm:flex items-center gap-1 max-w-[50%] overflow-hidden">
+            <!-- Tag Badge -->
+            <div v-if="tags.length > 0" class="flex items-center gap-1 max-w-[50%] overflow-hidden">
               <NuxtLink
                 v-for="tag in tags.slice(0, 1)"
                 :key="tag.slug"
@@ -238,7 +242,7 @@ function formatDate(date: string | Date) {
                 :aria-label="`Tag: ${tag.name}`"
               >
                 <span
-                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722] text-neutral-500 hover:text-primary-500 transition-all duration-200"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722] text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
                   :style="{
                     color: tag.color || '',
                     backgroundColor: tag.color ? `${tag.color}10` : '',

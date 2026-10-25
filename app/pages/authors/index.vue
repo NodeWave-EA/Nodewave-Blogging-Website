@@ -148,7 +148,7 @@ useSchemaOrg([
 <template>
   <UContainer>
     <UPage class="py-10">
-      <UPageHeader class="mb-12 mx-2">
+      <UPageHeader class="mb-12">
         <template #headline>
           <div class="flex items-center justify-between gap-4">
             <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
@@ -194,7 +194,7 @@ useSchemaOrg([
             <!-- Primary Link: Read Their Articles -->
             <NuxtLink
               to="/blogs"
-              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white dark:focus-visible:outline-neutral-100"
+              class="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xs bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white dark:focus-visible:outline-neutral-100"
             >
               <span>Read Their Articles</span>
               <UIcon
@@ -207,7 +207,7 @@ useSchemaOrg([
             <!-- Secondary Link: Explore Topics -->
             <NuxtLink
               to="/categories"
-              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs border border-neutral-200 bg-neutral-100/80 px-5 py-2.5 text-sm font-medium text-neutral-800 shadow-xs transition-colors hover:bg-neutral-200/80 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:bg-neutral-700/80 dark:focus-visible:outline-neutral-100"
+              class="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xs border border-neutral-200 bg-neutral-100/80 px-5 py-2.5 text-sm font-medium text-neutral-800 shadow-xs transition-colors hover:bg-neutral-200/80 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:bg-neutral-700/80 dark:focus-visible:outline-neutral-100"
             >
               <UIcon
                 name="i-line-md-grid-3-filled"
@@ -221,20 +221,34 @@ useSchemaOrg([
       </UPageHeader>
 
       <UPageBody>
-        <div>
-          <div v-if="enrichedAuthors.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-12">
-            <AuthorContributorCard
-              v-for="author in enrichedAuthors"
-              :key="author.slug"
-              :author="author"
-              :active-hover-text="activeHoverText"
-              @start-decrypt="startDecryption"
-              @clear-decrypt="clearDecryption"
-              @get-role-color="getRoleColor"
-            />
-          </div>
+        <div class="my-6">
+          <!-- Loaded Authors Contiguous Bento Matrix -->
+          <section
+            v-if="enrichedAuthors.length > 0"
+            aria-labelledby="editorial-roster-heading"
+          >
+            <h2 id="editorial-roster-heading" class="sr-only">
+              Editorial Roster and Authors List
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+              <AuthorContributorCard
+                v-for="author in enrichedAuthors"
+                :key="author.slug"
+                :author="author"
+                :active-hover-text="activeHoverText"
+                @start-decrypt="startDecryption"
+                @clear-decrypt="clearDecryption"
+                @get-role-color="getRoleColor"
+              />
+            </div>
+          </section>
 
-          <div v-else-if="!authorsPending" class="text-center py-20 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/30 dark:bg-neutral-900/10">
+          <!-- Empty Fallback State -->
+          <div
+            v-else-if="!authorsPending"
+            class="text-center py-20 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-xs bg-neutral-50/30 dark:bg-neutral-900/10"
+            role="status"
+          >
             <UIcon
               name="i-lucide-users"
               class="w-10 h-10 text-neutral-300 dark:text-neutral-700 mx-auto"
@@ -248,14 +262,33 @@ useSchemaOrg([
             </p>
           </div>
 
-          <div v-if="authorsPending" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800">
+          <!-- Loading State: Bento Grid Skeleton Matrix -->
+          <div
+            v-if="authorsPending"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs my-6"
+            aria-label="Loading authors roster"
+          >
             <div
-              v-for="n in 4"
+              v-for="n in (displayLimit === itemsPerPage ? 8 : 4)"
               :key="`loader-auth-${n}`"
-              class="h-68 rounded-2xl bg-neutral-50 dark:bg-neutral-900/20 p-6 animate-pulse border border-transparent"
-            />
+              class="relative overflow-hidden bg-[#faf7f2] dark:bg-[#141311] p-5 flex flex-col items-center justify-between select-none animate-pulse rounded-none border-b border-r border-[#e8e3d8] dark:border-[#26231f]"
+              aria-hidden="true"
+            >
+              <div class="flex flex-col items-center w-full">
+                <USkeleton class="w-20 h-20 rounded-full bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70" />
+                <USkeleton class="h-4 w-28 rounded-xs bg-[#e8e3d8]/90 dark:bg-[#2a2722]/80 mt-4" />
+                <USkeleton class="h-3 w-20 rounded-xs bg-[#e8e3d8]/60 dark:bg-[#2a2722]/50 mt-2" />
+                <USkeleton class="h-3 w-full rounded-xs bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40 mt-4" />
+                <USkeleton class="h-3 w-3/4 rounded-xs bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40 mt-1.5" />
+              </div>
+              <div class="pt-4 flex items-center justify-between border-t border-[#e8e3d8] dark:border-[#26231f] w-full mt-6">
+                <USkeleton class="h-3.5 w-20 rounded-xs bg-[#e8e3d8]/60 dark:bg-[#2a2722]/50" />
+                <USkeleton class="h-4 w-12 rounded-xs bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70" />
+              </div>
+            </div>
           </div>
 
+          <!-- End of List Indicator -->
           <div
             v-if="!hasMoreContent && enrichedAuthors.length > 0"
             class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[9px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"

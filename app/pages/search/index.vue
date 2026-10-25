@@ -349,25 +349,26 @@ const AnimatedNumber = defineComponent({
 </script>
 
 <template>
-  <div class="min-h-screen text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
+  <div class="min-h-screen text-neutral-900 dark:text-neutral-100 transition-colors duration-200">
     <!-- Sticky Search Header Bar -->
-    <div class="sticky top-(--ui-header-height,3.5rem) z-40 bg-background/80 backdrop-blur-md border-b border-[#e8e3d8]/60 dark:border-[#282520]/60 transition-colors">
+    <div class="sticky top-(--ui-header-height,3.5rem) z-40 bg-background/90 backdrop-blur-md border-b border-[#e8e3d8] dark:border-[#26231f] transition-colors">
       <UContainer class="py-3.5 space-y-3">
         <!-- Search Input Container -->
         <div class="max-w-4xl mx-auto w-full relative">
           <div
-            class="relative flex items-center rounded-2xl bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0] dark:border-[#2a2722] shadow-xs focus-within:ring-2 focus-within:ring-primary-500/50 focus-within:border-primary-500 transition-all"
+            class="relative flex items-center rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/80 dark:border-[#2a2722] shadow-2xs focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500 transition-all"
           >
             <UIcon
               name="i-lucide-search"
-              class="w-5 h-5 ml-4 text-neutral-400 shrink-0 pointer-events-none"
+              class="w-4 h-4 ml-3.5 text-neutral-400 shrink-0 pointer-events-none"
+              aria-hidden="true"
             />
             <input
               ref="searchInputRef"
               v-model="searchQuery"
               type="text"
               placeholder="Search articles, technical docs, authors, or tags..."
-              class="search-input-field w-full bg-transparent border-0 outline-none outline-hidden ring-0 ring-offset-0 focus:border-0 focus:outline-none focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none text-sm sm:text-base text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 py-3 px-3"
+              class="search-input-field w-full bg-transparent border-0 outline-none outline-hidden ring-0 ring-offset-0 focus:border-0 focus:outline-none focus:outline-hidden focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none text-xs sm:text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 py-2.5 px-3 font-sans"
               autofocus
             >
 
@@ -376,6 +377,7 @@ const AnimatedNumber = defineComponent({
                 v-if="blogSearchStatus === 'loading' || isSearchingMeta"
                 name="i-lucide-loader"
                 class="w-4 h-4 text-primary-500 animate-spin"
+                aria-hidden="true"
               />
               <UButton
                 v-else-if="searchQuery"
@@ -383,14 +385,14 @@ const AnimatedNumber = defineComponent({
                 variant="ghost"
                 icon="i-lucide-x"
                 size="xs"
-                class="rounded-full hover:bg-[#e8e3d8] dark:hover:bg-[#282520]"
+                class="rounded-xs hover:bg-[#e8e3d8] dark:hover:bg-[#282520]"
                 aria-label="Clear search query"
                 @click="clearSearch"
               />
               <UKbd
                 v-else
                 size="sm"
-                class="hidden sm:inline-flex bg-[#e8e3d8]/80 dark:bg-[#26231f] border-[#d8d2c4] dark:border-[#332f29] text-neutral-500"
+                class="hidden sm:inline-flex rounded-xs bg-[#e8e3d8]/80 dark:bg-[#26231f] border-[#d8d2c4] dark:border-[#332f29] text-neutral-500 font-mono text-[10px]"
               >
                 /
               </UKbd>
@@ -400,10 +402,10 @@ const AnimatedNumber = defineComponent({
 
         <!-- Category Tabs Navigation -->
         <div v-if="searchQuery && hasResults" class="max-w-4xl mx-auto w-full">
-          <div class="relative flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+          <div class="relative flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
             <!-- Sliding Indicator Bubble -->
             <div
-              class="absolute top-1 bottom-1 rounded-xl bg-primary-500 shadow-xs transition-all duration-300 ease-out pointer-events-none"
+              class="absolute top-0.5 bottom-0.5 rounded-xs bg-primary-500 shadow-2xs transition-all duration-300 ease-out pointer-events-none"
               :style="bubbleStyles"
             />
 
@@ -411,21 +413,25 @@ const AnimatedNumber = defineComponent({
               v-for="(tab, index) in tabs"
               :key="tab.slot"
               :ref="(el) => setTabRef(el, index)"
-              class="relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-xs font-semibold whitespace-nowrap transition-colors duration-200 select-none cursor-pointer"
+              class="relative z-10 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs font-mono text-[11px] font-semibold whitespace-nowrap transition-colors duration-200 select-none cursor-pointer focus-visible:ring-1 focus-visible:ring-primary-500"
               :class="[
                 activeTabSlot === tab.slot
-                  ? 'text-white'
+                  ? 'text-white dark:text-neutral-950'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white',
               ]"
               @click="activeTabSlot = (tab.slot as any)"
             >
-              <UIcon :name="tab.icon" class="w-3.5 h-3.5" />
+              <UIcon
+                :name="tab.icon"
+                class="w-3.5 h-3.5"
+                aria-hidden="true"
+              />
               <span>{{ tab.label }}</span>
               <span
-                class="px-1.5 py-0.5 text-[10px] rounded-md font-mono font-bold transition-colors"
+                class="px-1 py-0.2 text-[9px] rounded-xs font-mono font-bold transition-colors"
                 :class="[
                   activeTabSlot === tab.slot
-                    ? 'bg-white/20 text-white'
+                    ? 'bg-white/20 text-white dark:bg-black/15 dark:text-neutral-950'
                     : 'bg-[#e0dad0]/80 dark:bg-[#282520] text-neutral-600 dark:text-neutral-400',
                 ]"
               >
@@ -443,17 +449,22 @@ const AnimatedNumber = defineComponent({
         <!-- Empty Query State -->
         <div
           v-if="!searchQuery"
-          class="text-center py-20 px-4 rounded-3xl border border-[#e8e3d8] dark:border-[#282520] bg-[#f2eee5]/40 dark:bg-[#1c1a17]/40 shadow-xs space-y-4"
+          class="text-center py-20 px-4 rounded-xs border border-dashed border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2]/50 dark:bg-[#141311]/50 space-y-3"
+          role="status"
         >
-          <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#e8e3d8] dark:bg-[#22201c] text-primary-500 ring-1 ring-[#e0dad0] dark:ring-[#2d2a24]">
-            <UIcon name="i-lucide-search-code" class="w-7 h-7" />
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] text-primary-500 border border-[#e0dad0]/60 dark:border-[#2a2722]">
+            <UIcon
+              name="i-lucide-search-code"
+              class="w-5 h-5"
+              aria-hidden="true"
+            />
           </div>
-          <div class="space-y-1.5 max-w-md mx-auto">
-            <h2 class="text-base font-bold font-mono text-neutral-900 dark:text-neutral-100">
+          <div class="space-y-1 max-w-md mx-auto">
+            <h2 class="text-xs font-bold font-mono uppercase tracking-wider text-neutral-900 dark:text-neutral-100">
               Cross-Collection Technical Search
             </h2>
-            <p class="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">
-              Type any keyword, author name, category, or tag to query our knowledge graph. Press <UKbd size="sm">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              Type any keyword, author name, category, or tag to query our technical knowledge base. Press <UKbd size="sm" class="rounded-xs font-mono text-[10px]">
                 /
               </UKbd> anywhere to focus.
             </p>
@@ -461,35 +472,40 @@ const AnimatedNumber = defineComponent({
         </div>
 
         <!-- Skeleton Loader -->
-        <div v-else-if="!hasResults && (isSearchingMeta || blogSearchStatus === 'loading')" class="space-y-4 py-8">
+        <div v-else-if="!hasResults && (isSearchingMeta || blogSearchStatus === 'loading')" class="space-y-4 py-4">
           <div class="flex items-center justify-between font-mono text-xs text-neutral-400 animate-pulse">
-            <div class="h-4 w-32 bg-[#e8e3d8] dark:bg-[#282520] rounded" />
-            <div class="h-4 w-20 bg-[#e8e3d8] dark:bg-[#282520] rounded" />
+            <div class="h-3 w-32 bg-[#e8e3d8] dark:bg-[#282520] rounded-xs" />
+            <div class="h-3 w-20 bg-[#e8e3d8] dark:bg-[#282520] rounded-xs" />
           </div>
           <div
             v-for="i in 3"
             :key="i"
-            class="p-5 rounded-2xl border border-[#e8e3d8] dark:border-[#282520] bg-[#faf7f2] dark:bg-[#1c1a17] space-y-3 animate-pulse"
+            class="p-4 rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311] space-y-3 animate-pulse"
           >
-            <div class="h-3 w-24 bg-[#e8e3d8] dark:bg-[#282520] rounded" />
-            <div class="h-5 w-3/4 bg-[#e8e3d8] dark:bg-[#282520] rounded" />
-            <div class="h-3 w-full bg-[#e8e3d8] dark:bg-[#282520] rounded" />
+            <div class="h-3 w-24 bg-[#e8e3d8] dark:bg-[#282520] rounded-xs" />
+            <div class="h-4 w-3/4 bg-[#e8e3d8] dark:bg-[#282520] rounded-xs" />
+            <div class="h-3 w-full bg-[#e8e3d8] dark:bg-[#282520] rounded-xs" />
           </div>
         </div>
 
         <!-- No Results Found -->
         <div
           v-else-if="!hasResults"
-          class="text-center py-20 px-4 rounded-3xl border border-[#e8e3d8] dark:border-[#282520] bg-[#f2eee5]/40 dark:bg-[#1c1a17]/40 shadow-xs space-y-4"
+          class="text-center py-20 px-4 rounded-xs border border-dashed border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2]/50 dark:bg-[#141311]/50 space-y-3"
+          role="status"
         >
-          <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20">
-            <UIcon name="i-lucide-file-x-2" class="w-6 h-6" />
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-amber-500/10 text-amber-500 border border-amber-500/20">
+            <UIcon
+              name="i-lucide-file-x-2"
+              class="w-5 h-5"
+              aria-hidden="true"
+            />
           </div>
           <div class="space-y-1 max-w-sm mx-auto">
-            <h3 class="text-sm font-bold font-mono text-neutral-900 dark:text-neutral-100">
+            <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-neutral-900 dark:text-neutral-100">
               No Matches Found
             </h3>
-            <p class="text-xs text-neutral-600 dark:text-neutral-400">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">
               We couldn't find anything matching "<span class="font-mono font-bold text-neutral-900 dark:text-white">{{ searchQuery }}</span>".
             </p>
           </div>
@@ -498,7 +514,7 @@ const AnimatedNumber = defineComponent({
         <!-- Active Results List -->
         <div v-else class="space-y-8">
           <!-- Result Counter Bar -->
-          <div class="flex items-center justify-between text-xs font-mono tracking-wider text-neutral-500 dark:text-neutral-400 uppercase px-1 pb-2 border-b border-[#e8e3d8] dark:border-[#282520]">
+          <div class="flex items-center justify-between text-[10px] font-mono tracking-wider text-neutral-500 dark:text-neutral-400 uppercase pb-2 border-b border-[#e8e3d8] dark:border-[#26231f]">
             <span>
               Results for "<span class="font-bold text-neutral-900 dark:text-white">{{ searchQuery }}</span>"
             </span>
@@ -506,21 +522,29 @@ const AnimatedNumber = defineComponent({
           </div>
 
           <!-- Authors -->
-          <section v-if="(activeTabSlot === 'all' || activeTabSlot === 'authors') && metaResults.authors.length > 0" class="space-y-3">
+          <section
+            v-if="(activeTabSlot === 'all' || activeTabSlot === 'authors') && metaResults.authors.length > 0"
+            aria-label="Matched authors"
+            class="space-y-3"
+          >
             <h3 class="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest flex items-center gap-2 font-mono">
-              <UIcon name="i-lucide-users" class="w-4 h-4 text-primary-500" /> Authors ({{ metaResults.authors.length }})
+              <UIcon
+                name="i-lucide-users"
+                class="w-3.5 h-3.5 text-primary-500"
+                aria-hidden="true"
+              /> Authors ({{ metaResults.authors.length }})
             </h3>
-            <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
               <NuxtLink
                 v-for="author in metaResults.authors"
                 :key="author.slug"
                 :to="`/${author.stem}`"
-                class="group flex items-center gap-3 p-3.5 rounded-xl border border-[#e8e3d8] dark:border-[#282520] bg-[#faf7f2] dark:bg-[#1c1a17] hover:border-primary-500/40 hover:shadow-xs transition-all duration-200"
+                class="group flex items-center gap-3 p-3.5 border-b border-r border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311] hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-primary-500"
               >
                 <UAvatar
                   :src="author.avatar?.src"
                   :alt="author.name"
-                  size="sm"
+                  size="2xs"
                   class="ring-1 ring-[#e0dad0] dark:ring-[#2d2a24] shrink-0"
                 />
                 <div class="min-w-0 flex-1">
@@ -528,7 +552,11 @@ const AnimatedNumber = defineComponent({
                     {{ author.name }}
                   </h4>
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono mt-0.5 flex items-center gap-1">
-                    View profile <UIcon name="i-lucide-arrow-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    View profile <UIcon
+                      name="i-lucide-arrow-right"
+                      class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-hidden="true"
+                    />
                   </p>
                 </div>
               </NuxtLink>
@@ -536,35 +564,55 @@ const AnimatedNumber = defineComponent({
           </section>
 
           <!-- Categories -->
-          <section v-if="(activeTabSlot === 'all' || activeTabSlot === 'categories') && metaResults.categories.length > 0" class="space-y-3">
+          <section
+            v-if="(activeTabSlot === 'all' || activeTabSlot === 'categories') && metaResults.categories.length > 0"
+            aria-label="Matched categories"
+            class="space-y-3"
+          >
             <h3 class="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest flex items-center gap-2 font-mono">
-              <UIcon name="i-lucide-folder" class="w-4 h-4 text-emerald-500" /> Categories ({{ metaResults.categories.length }})
+              <UIcon
+                name="i-lucide-folder"
+                class="w-3.5 h-3.5 text-emerald-500"
+                aria-hidden="true"
+              /> Categories ({{ metaResults.categories.length }})
             </h3>
             <div class="flex flex-wrap gap-2">
               <NuxtLink
                 v-for="category in metaResults.categories"
                 :key="category.slug"
                 :to="`/${category.stem}`"
-                class="px-3 py-1.5 rounded-xl border border-[#e0dad0]/60 dark:border-[#2a2722] bg-[#f2eee5] dark:bg-[#22201c] font-mono text-xs font-semibold hover:border-primary-500/40 transition-all shadow-2xs"
+                class="px-2.5 py-1 rounded-xs border border-[#e0dad0]/60 dark:border-[#2a2722] bg-[#f2eee5] dark:bg-[#1c1a17] font-mono text-[11px] font-semibold hover:text-primary-500 transition-all focus-visible:ring-1 focus-visible:ring-primary-500"
                 :style="{ color: category.color || '' }"
               >
-                <UIcon :name="category.icon || 'i-lucide-folder'" class="w-3.5 h-3.5 inline-block mr-1 opacity-70" />
+                <UIcon
+                  :name="category.icon || 'i-lucide-folder'"
+                  class="w-3 h-3 inline-block mr-1 opacity-70"
+                  aria-hidden="true"
+                />
                 {{ category.name }}
               </NuxtLink>
             </div>
           </section>
 
           <!-- Tags -->
-          <section v-if="(activeTabSlot === 'all' || activeTabSlot === 'tags') && metaResults.tags.length > 0" class="space-y-3">
+          <section
+            v-if="(activeTabSlot === 'all' || activeTabSlot === 'tags') && metaResults.tags.length > 0"
+            aria-label="Matched tags"
+            class="space-y-3"
+          >
             <h3 class="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest flex items-center gap-2 font-mono">
-              <UIcon name="i-lucide-hash" class="w-4 h-4 text-amber-500" /> Tags ({{ metaResults.tags.length }})
+              <UIcon
+                name="i-lucide-hash"
+                class="w-3.5 h-3.5 text-amber-500"
+                aria-hidden="true"
+              /> Tags ({{ metaResults.tags.length }})
             </h3>
             <div class="flex flex-wrap gap-2">
               <NuxtLink
                 v-for="tag in metaResults.tags"
                 :key="tag.slug"
                 :to="`/${tag.stem}`"
-                class="px-2.5 py-1 rounded-lg bg-[#f2eee5] dark:bg-[#22201c] border border-[#e0dad0]/60 dark:border-[#2a2722] font-mono text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-primary-500 transition-all"
+                class="px-2 py-0.5 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722] font-mono text-[10px] font-medium text-neutral-600 dark:text-neutral-400 hover:text-primary-500 transition-all focus-visible:ring-1 focus-visible:ring-primary-500"
                 :style="{ color: tag.color || '' }"
               >
                 #{{ tag.name }}
@@ -573,21 +621,33 @@ const AnimatedNumber = defineComponent({
           </section>
 
           <!-- Articles / Blogs -->
-          <section v-if="(activeTabSlot === 'all' || activeTabSlot === 'blogs') && blogResults.length > 0" class="space-y-3">
+          <section
+            v-if="(activeTabSlot === 'all' || activeTabSlot === 'blogs') && blogResults.length > 0"
+            aria-label="Matched articles"
+            class="space-y-3"
+          >
             <h3 class="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest flex items-center gap-2 font-mono">
-              <UIcon name="i-lucide-book-open" class="w-4 h-4 text-indigo-500" /> Articles & Posts ({{ blogResults.length }})
+              <UIcon
+                name="i-lucide-book-open"
+                class="w-3.5 h-3.5 text-indigo-500"
+                aria-hidden="true"
+              /> Articles & Posts ({{ blogResults.length }})
             </h3>
-            <div class="grid gap-3 grid-cols-1">
+            <div class="grid grid-cols-1 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
               <article
                 v-for="blog in blogResults"
                 :key="blog.id"
-                class="group relative p-5 rounded-2xl border border-[#e8e3d8] dark:border-[#282520] bg-[#faf7f2] dark:bg-[#1c1a17] hover:border-primary-500/50 hover:shadow-xs transition-all duration-200 flex flex-col gap-2"
+                class="group relative p-4 sm:p-5 border-b border-r border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311] hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] transition-colors duration-200 flex flex-col gap-2"
               >
-                <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-mono text-neutral-500 dark:text-neutral-400">
-                  <span class="uppercase font-bold text-primary-500 bg-primary-500/10 px-1.5 py-0.5 rounded-md">
+                <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-mono text-neutral-500 dark:text-neutral-400">
+                  <span class="uppercase font-bold text-primary-500 bg-primary-500/10 px-1.5 py-0 rounded-xs border border-primary-500/20">
                     Article
                   </span>
-                  <UIcon name="i-lucide-chevron-right" class="w-2.5 h-2.5 text-neutral-400" />
+                  <UIcon
+                    name="i-lucide-chevron-right"
+                    class="w-2.5 h-2.5 text-neutral-400"
+                    aria-hidden="true"
+                  />
                   <span
                     v-for="(titleSeg, idx) in blog.titles"
                     :key="idx"
@@ -598,13 +658,14 @@ const AnimatedNumber = defineComponent({
                       v-if="+idx < blog.titles.length - 1"
                       name="i-lucide-chevron-right"
                       class="w-2.5 h-2.5 text-neutral-400"
+                      aria-hidden="true"
                     />
                   </span>
                 </div>
 
-                <h4 class="text-sm sm:text-base font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-500 transition-colors duration-200 leading-snug">
-                  <NuxtLink :to="blog.id" class="focus:outline-none">
-                    <span class="absolute inset-0 z-20 rounded-2xl" aria-hidden="true" />
+                <h4 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-500 transition-colors duration-200 leading-snug tracking-tight">
+                  <NuxtLink :to="blog.id" class="focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs">
+                    <span class="absolute inset-0 z-20" aria-hidden="true" />
                     <span v-if="blog.snippets?.title" v-html="blog.snippets.title" />
                     <span v-else>{{ blog.title }}</span>
                   </NuxtLink>
@@ -612,7 +673,7 @@ const AnimatedNumber = defineComponent({
 
                 <p
                   v-if="blog.snippets?.content || blog.description"
-                  class="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-2 markdown-snippet font-normal"
+                  class="text-[11px] text-neutral-600 dark:text-neutral-300 leading-relaxed line-clamp-2 markdown-snippet font-normal"
                   v-html="blog.snippets?.content || blog.description"
                 />
               </article>
@@ -642,7 +703,6 @@ const AnimatedNumber = defineComponent({
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
-  ring: 0 !important;
 }
 
 /* Highlight Markers for Search Matches */
@@ -650,8 +710,8 @@ const AnimatedNumber = defineComponent({
 h4 mark {
   background-color: rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.18);
   color: var(--ui-primary, #6366f1);
-  border-radius: 4px;
-  padding: 1px 4px;
+  border-radius: 2px;
+  padding: 1px 3px;
   font-weight: 600;
   border: 1px solid rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.25);
 }

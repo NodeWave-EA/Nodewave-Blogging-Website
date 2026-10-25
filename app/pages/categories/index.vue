@@ -131,7 +131,7 @@ useSchemaOrg([
 <template>
   <UContainer>
     <UPage class="py-10">
-      <UPageHeader class="mb-12 mx-2">
+      <UPageHeader class="mb-12">
         <template #headline>
           <div class="flex items-center justify-between gap-4">
             <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
@@ -167,65 +167,85 @@ useSchemaOrg([
       </UPageHeader>
 
       <UPageBody>
-        <!-- Skeleton Loading State -->
-        <div v-if="categoriesPending && displayLimit === itemsPerPage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-1">
+        <div class="my-6">
+          <!-- Initial Skeleton Loading State -->
           <div
-            v-for="n in 6"
-            :key="`cat-skeleton-${n}`"
-            class="h-44 rounded-2xl bg-neutral-50 dark:bg-neutral-900/40 p-5 border border-neutral-100 dark:border-neutral-900 flex flex-col justify-between animate-pulse"
+            v-if="categoriesPending && displayLimit === itemsPerPage"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs"
+            aria-label="Loading categories"
           >
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <div class="w-10 h-10 rounded-xl bg-neutral-200 dark:bg-neutral-800" />
-                <div class="w-12 h-5 rounded-md bg-neutral-100 dark:bg-neutral-800" />
+            <div
+              v-for="n in 6"
+              :key="`cat-skeleton-${n}`"
+              class="h-44 p-5 bg-[#faf7f2] dark:bg-[#141311] border-b border-r border-[#e8e3d8] dark:border-[#26231f] flex flex-col justify-between animate-pulse select-none"
+            >
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <USkeleton class="w-9 h-9 rounded-xs bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70" />
+                  <USkeleton class="w-16 h-4 rounded-xs bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70" />
+                </div>
+                <USkeleton class="w-2/3 h-4 bg-[#e8e3d8]/90 dark:bg-[#2a2722]/80 rounded-xs" />
+                <USkeleton class="w-full h-3 bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40 rounded-xs" />
               </div>
-              <div class="w-2/3 h-5 bg-neutral-200 dark:bg-neutral-800 rounded-md" />
-              <div class="w-full h-3 bg-neutral-100 dark:bg-neutral-800 rounded-md" />
+              <USkeleton class="w-24 h-3 bg-[#e8e3d8]/60 dark:bg-[#2a2722]/50 rounded-xs mt-auto" />
             </div>
-            <div class="w-24 h-3 bg-neutral-100 dark:bg-neutral-800 rounded-md" />
           </div>
-        </div>
 
-        <div v-else class="space-y-12 mx-1">
-          <!-- Populated Taxonomy Grid -->
-          <div v-if="enrichedCategories.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-            <BaseTaxonomyCard
-              v-for="category in enrichedCategories"
-              :key="category.slug"
-              :item="category"
-              fallback-icon="i-lucide-folder-open"
-              type-label="category"
-            />
-          </div>
+          <!-- Populated Contiguous Bento Matrix Grid -->
+          <section
+            v-else-if="enrichedCategories.length > 0"
+            aria-label="Categories directory list"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+              <BaseTaxonomyCard
+                v-for="category in enrichedCategories"
+                :key="category.slug"
+                :item="category"
+                fallback-icon="i-lucide-folder-open"
+                type-label="category"
+              />
+            </div>
+          </section>
 
           <!-- Empty Fallback View -->
-          <div v-else class="text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/20 dark:bg-neutral-900/10">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4">
+          <div
+            v-else
+            class="text-center py-24 border border-dashed border-[#e8e3d8] dark:border-[#26231f] rounded-xs bg-[#faf7f2]/50 dark:bg-[#141311]/50"
+            role="status"
+          >
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] mb-3 text-neutral-400">
               <UIcon
                 name="i-lucide-grid-2x2"
-                class="w-6 h-6 text-neutral-400"
+                class="w-5 h-5 text-neutral-400"
                 aria-hidden="true"
               />
             </div>
             <h2 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
               No categories indexed
             </h2>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto leading-relaxed">
               There are currently no published articles available for browsing. Please check back later or explore other sections of the site.
             </p>
           </div>
 
-          <!-- Appending Skeleton Loaders -->
-          <div v-if="categoriesPending" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-dashed border-neutral-200 dark:border-neutral-800">
+          <!-- Appending Skeleton Loaders for Infinite Scroll -->
+          <div
+            v-if="categoriesPending && displayLimit > itemsPerPage"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs mt-6"
+            aria-label="Loading more categories"
+          >
             <div
               v-for="n in 3"
               :key="`append-cat-${n}`"
-              class="h-44 rounded-2xl bg-neutral-50 dark:bg-neutral-900/30 p-5 animate-pulse border border-transparent"
+              class="h-44 p-5 bg-[#faf7f2] dark:bg-[#141311] border-b border-r border-[#e8e3d8] dark:border-[#26231f] animate-pulse"
             />
           </div>
 
           <!-- Completion Signifier -->
-          <div v-if="!hasMoreContent && enrichedCategories.length > 0" class="text-center pt-10 pb-6 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60">
+          <div
+            v-if="!hasMoreContent && enrichedCategories.length > 0"
+            class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
+          >
             You've reached the end of the collection.
           </div>
         </div>

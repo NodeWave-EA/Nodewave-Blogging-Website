@@ -47,7 +47,7 @@ useInfiniteScroll(
 const config = useRuntimeConfig().public;
 const PAGE_TITLE = computed(() => `Browse ${tag.value?.name || "Tag"} Articles`);
 const PAGE_DESCRIPTION = computed(
-  () => tag.value?.description || tag.value?.meta?.description || `Explore articles and technical publications tagged under #${tag.value?.name || "topics"}.`,
+  () => tag.value?.description || tag.value?.meta?.description || `Explore technical posts, guides, and architectural notes tagged under ${tag.value?.name || "this topic"}.`,
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug || slug}`);
 const TAG_RSS_URL = computed(() => `/tags/${tag.value?.slug || slug}/rss.xml`);
@@ -56,7 +56,7 @@ const TAG_RSS_URL = computed(() => `/tags/${tag.value?.slug || slug}/rss.xml`);
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  keywords: () => `nodewave, tag, ${tag.value?.name || ""}, articles, tutorials, technical topics`,
+  keywords: () => `nodewave, tag, ${tag.value?.name || ""}, technical articles, tutorials, documentation`,
   robots: "index, follow, max-image-preview:large",
 
   // Open Graph / Facebook
@@ -64,9 +64,7 @@ useSeoMeta({
   ogTitle: () => PAGE_TITLE.value,
   ogDescription: () => PAGE_DESCRIPTION.value,
   ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImageAlt: () => tag.value?.name
-    ? `#${tag.value.name} Tag Archive`
-    : "Tag Archive",
+  ogImageAlt: () => tag.value?.name || "Tag Archive",
   ogSiteName: () => config.siteName || "Nodewave",
 
   // Twitter
@@ -84,7 +82,7 @@ useHead({
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: () => `NodeWave - #${tag.value?.name || "Tag"} RSS Feed`,
+      title: () => `NodeWave — ${tag.value?.name || "Tag"} RSS Feed`,
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
@@ -102,12 +100,7 @@ useSchemaOrg([
     itemListElement: [
       { name: "Home", item: "/" },
       { name: "Tags", item: "/tags" },
-      {
-        name: tag.value?.name
-          ? `#${tag.value.name}`
-          : "Tag Archive",
-        item: PAGE_CANONICAL_URL.value,
-      },
+      { name: tag.value?.name || "Tag Archive", item: PAGE_CANONICAL_URL.value },
     ],
   }),
 
@@ -137,120 +130,160 @@ defineOgImage("Taxonomy.takumi", {
 
 <template>
   <UContainer>
-    <div v-if="tagPending && !tag" class="py-24 text-center animate-pulse">
-      <div class="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-32 mx-auto mb-4" />
-      <div class="h-8 bg-neutral-200 dark:bg-neutral-800 rounded w-48 mx-auto mb-3" />
-      <div class="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-96 mx-auto" />
+    <div
+      v-if="tagPending && !tag"
+      class="py-24 text-center animate-pulse"
+      aria-hidden="true"
+    >
+      <div class="h-4 bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70 rounded-xs w-32 mx-auto mb-4" />
+      <div class="h-8 bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70 rounded-xs w-48 mx-auto mb-3" />
+      <div class="h-4 bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40 rounded-xs w-96 mx-auto" />
     </div>
 
     <UPage v-else-if="tag && !tagError" class="py-10">
-      <UPageHeader class="mb-12 pb-8 border-b border-neutral-100 dark:border-neutral-900 mx-1">
-        <template #title>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between gap-4">
-              <div class="flex items-center gap-2">
-                <NuxtLink
-                  to="/tags"
-                  class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group"
-                  aria-label="Return to all tags"
-                >
-                  <UIcon name="i-lucide-chevron-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                  Back to Tags
-                </NuxtLink>
-                <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs">/</span>
-                <span
-                  class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/40 dark:border-neutral-800/50"
-                  :style="{ color: tag.color || 'var(--ui-primary)' }"
-                >
-                  <UIcon
-                    :name="tag.icon || 'i-lucide-hash'"
-                    class="w-3 h-3 inline-block mr-1 align-text-top"
-                  />
-                  {{ tag.name }}
-                </span>
-              </div>
-
-              <!-- Tag RSS Feed Link -->
-              <RssSubscribeButton
-                :title="`#${tag?.name || slug}`"
-                :feed-path="TAG_RSS_URL"
-              />
+      <!-- Transparent & Borderless Tag Hero Header -->
+      <header class="mb-10 py-4 bg-transparent border-0 relative overflow-hidden">
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+              <NuxtLink
+                to="/tags"
+                class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+                aria-label="Return to all tags"
+              >
+                <UIcon
+                  name="i-lucide-chevron-left"
+                  class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform"
+                  aria-hidden="true"
+                />
+                Back to Tags
+              </NuxtLink>
+              <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs" aria-hidden="true">/</span>
+              <span
+                class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722]"
+                :style="{ color: tag.color || 'var(--ui-primary)' }"
+              >
+                <UIcon
+                  :name="tag.icon || 'i-lucide-hash'"
+                  class="w-3 h-3 inline-block mr-1 align-text-top"
+                  aria-hidden="true"
+                />
+                {{ tag.name }}
+              </span>
             </div>
 
-            <h1 class="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2.5">
-              <UIcon
-                :name="tag.icon || 'i-lucide-hash'"
-                class="w-8 h-8 shrink-0"
-                :style="{ color: tag.color || 'var(--ui-primary)' }"
-              />
-              {{ tag.name }}
-            </h1>
-          </div>
-        </template>
-
-        <template #description>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-2xl leading-relaxed mt-2">
-            {{ tag.description || "Explore articles and documentation related to this technical topic." }}
-          </p>
-        </template>
-      </UPageHeader>
-
-      <UPageBody>
-        <div class="space-y-12 mx-1">
-          <div v-if="blogs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-            <BlogPostCard
-              v-for="blog in blogs"
-              :key="blog.path"
-              :post="blog"
-              class="h-full transition-all duration-300"
+            <!-- Tag RSS Subscribe Button -->
+            <RssSubscribeButton
+              :title="tag.name"
+              :feed-path="TAG_RSS_URL"
             />
           </div>
 
-          <div v-else-if="!blogsPending" class="text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl bg-neutral-50/20 dark:bg-neutral-900/10">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4 text-neutral-400">
-              <UIcon :name="tag.icon || 'i-lucide-hash'" class="w-6 h-6" />
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-900 dark:text-neutral-100 tracking-tight flex items-center gap-2.5">
+            <UIcon
+              :name="tag.icon || 'i-lucide-hash'"
+              class="w-8 h-8 shrink-0"
+              :style="{ color: tag.color || 'var(--ui-primary)' }"
+              aria-hidden="true"
+            />
+            {{ tag.name }}
+          </h1>
+
+          <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 max-w-2xl leading-relaxed">
+            {{ tag.description || tag.meta?.description || "Explore technical articles and documentation fragments filtered under this keyword tag." }}
+          </p>
+        </div>
+      </header>
+
+      <UPageBody>
+        <div class="space-y-8 my-6">
+          <div class="flex items-center justify-between border-b border-[#e8e3d8] dark:border-[#26231f] pb-3">
+            <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+              Tagged Articles:
+              {{ blogs.length }} {{ blogs.length === 1 ? "Article" : "Articles" }}
+            </h2>
+          </div>
+
+          <!-- Contiguous Bento Matrix Grid for Tagged Articles -->
+          <section
+            v-if="blogs.length > 0"
+            :aria-label="`Articles tagged with ${tag.name}`"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+              <BlogPostCard
+                v-for="blog in blogs"
+                :key="blog.path"
+                :post="blog"
+              />
+            </div>
+          </section>
+
+          <!-- Empty Fallback View -->
+          <div
+            v-else-if="!blogsPending"
+            class="text-center py-20 border border-dashed border-[#e8e3d8] dark:border-[#26231f] rounded-xs bg-[#faf7f2]/50 dark:bg-[#141311]/50"
+            role="status"
+          >
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] mb-3 text-neutral-400">
+              <UIcon
+                :name="tag.icon || 'i-lucide-hash'"
+                class="w-5 h-5"
+                aria-hidden="true"
+              />
             </div>
             <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
-              No Articles Found
+              No Entries Found
             </h3>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
-              There are currently no articles cataloged under <span class="font-semibold text-neutral-700 dark:text-neutral-300">#{{ tag.name }}</span>. Please check back later or explore other topics in the taxonomy.
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto leading-relaxed">
+              There are currently no published articles tagged under <span class="font-semibold text-neutral-700 dark:text-neutral-300">#{{ tag.name }}</span>. Please check back later or explore other technical tags.
             </p>
           </div>
 
+          <!-- Infinite Scroll Appending Skeletons -->
           <div
             v-if="blogsPending"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs mt-6"
+            aria-label="Loading additional articles"
           >
-            <BlogPostCardSkeleton v-for="n in 3" :key="`append-tag-blog-${n}`" />
+            <LazyBlogPostCardSkeleton v-for="n in 3" :key="`append-tag-blog-${n}`" />
           </div>
 
+          <!-- End of Archive Signifier -->
           <div
             v-if="!hasMoreContent && blogs.length > 0"
-            class="text-center pt-10 pb-6 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
+            class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
           >
-            You've reached the end of the blogs archive for <span class="font-semibold text-neutral-700 dark:text-neutral-300">#{{ tag.name }}</span>.
+            You've reached the end of the tagged archive for <span class="font-semibold text-neutral-700 dark:text-neutral-300">#{{ tag.name }}</span>.
           </div>
         </div>
       </UPageBody>
     </UPage>
 
-    <div v-else class="text-center py-24">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-900 mb-4 text-error-500">
-        <UIcon name="i-lucide-octagon-alert" class="w-6 h-6" />
+    <!-- Error State -->
+    <div
+      v-else
+      class="text-center py-24 border border-dashed border-red-200 dark:border-red-900/50 rounded-xs bg-red-50/20 dark:bg-red-950/10 my-10"
+      role="alert"
+    >
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-red-100 dark:bg-red-900/30 mb-4 text-error-500">
+        <UIcon
+          name="i-lucide-octagon-alert"
+          class="w-6 h-6"
+          aria-hidden="true"
+        />
       </div>
       <h2 class="text-lg font-bold text-neutral-900 dark:text-neutral-100">
         Tag Not Found
       </h2>
-      <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto mb-6 leading-relaxed">
-        We couldn't locate any published articles associated with the <span class="font-semibold text-neutral-700 dark:text-neutral-300">#{{ tagSlug }}</span> topic. Please check the URL or return to the taxonomy hub.
+      <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto mb-6 leading-relaxed">
+        The requested tag topic could not be located in the system directory. It may have been renamed or removed.
       </p>
       <UButton
         to="/tags"
         label="Return to Tags"
         color="neutral"
         size="sm"
-        class="rounded-lg"
+        class="rounded-xs"
       />
     </div>
   </UContainer>
