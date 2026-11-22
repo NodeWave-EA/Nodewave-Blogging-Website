@@ -129,16 +129,14 @@ export default defineNuxtConfig({
           "remark-reading-time": {},
           "remark-math": {},
           "remark-gfm": {}, // Enables Tables, Tasklists, and Strikethroughs
-          "rehype-external-links": {
-            target: "_blank",
-            rel: ["noopener", "noreferrer"],
-          },
           "@akebifiky/remark-simple-plantuml": { baseUrl: "https://plantuml.com" },
         },
         rehypePlugins: {
           "rehype-katex": {},
-          "rehype-slug": {}, // Generates distinct semantic IDs for deep headings links
-          "rehype-autolink-headings": { behavior: "append" }, // Generates anchor text symbols
+          "rehype-external-links": {
+            target: "_blank",
+            rel: ["noopener", "noreferrer"],
+          },
         },
       },
     },

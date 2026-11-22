@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { useDateFormat } from "@vueuse/core";
-
 import type { ContentSurroundLink } from "@nuxt/ui";
 import type { BlogAuthor, BlogTag, BlogType } from "~/types";
 
@@ -83,6 +81,20 @@ const publishedIsoDate = computed(() => {
     : "";
 });
 
+const formattedPublishDate = computed(() => {
+  if (!currentBlog.value?.date)
+    return "";
+  const parsed = currentBlog.value.date instanceof Date
+    ? currentBlog.value.date
+    : new Date(currentBlog.value.date);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(parsed);
+});
+
 const modifiedIsoDate = computed(() => {
   if (currentBlog.value?.updatedAt instanceof Date) {
     return currentBlog.value.updatedAt.toISOString();
@@ -96,7 +108,7 @@ const modifiedIsoDate = computed(() => {
 useSeoMeta({
   title: () => BLOG_TITLE.value,
   description: () => BLOG_DESCRIPTION.value,
-  keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || blogTags.value?.map(t => t.name).join(", ") || "",
+  creator: () => blogAuthor.value?.name || runtimeConfig.siteName || "Nodewave",
 
   // Open Graph / Facebook
   ogType: "article",
@@ -153,32 +165,31 @@ useSchemaOrg([
   }),
 
   defineArticle({
-    "@type": "BlogPosting",
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": () => BLOG_CANONICAL_URL.value,
     "headline": () => BLOG_TITLE.value,
     "description": () => BLOG_DESCRIPTION.value,
     "image": coverImageUrl.value,
     "datePublished": publishedIsoDate.value,
     "dateModified": modifiedIsoDate.value,
-    "mainEntityOfPage": () => BLOG_CANONICAL_URL.value,
-    "inLanguage": "en-US",
-    "keywords": blogTags.value?.map(t => t.name) ?? [],
-    "articleSection": currentBlog.value?.category || "General",
     "wordCount": currentBlog.value?.meta?.readingTime?.words,
-    "author": blogAuthor.value
-      ? definePerson({
-          name: blogAuthor.value.name,
-          url: blogAuthor.value.stem
-            ? `${runtimeConfig.siteUrl}/${blogAuthor.value.stem}`
-            : undefined,
-          image: blogAuthor.value.avatar?.src,
-          jobTitle: blogAuthor.value.title,
-        })
-      : undefined,
+    "keywords": blogTags.value?.map(t => t.name) ?? [],
+    "about": currentBlog.value?.description || BLOG_DESCRIPTION.value,
+    "author": {
+      "@type": "Person",
+      "name": blogAuthor.value?.name || runtimeConfig.siteName || "Nodewave",
+      "url": blogAuthor.value?.stem
+        ? `${runtimeConfig.siteUrl}/${blogAuthor.value.stem}`
+        : undefined,
+    },
     "publisher": {
       "@type": "Organization",
       "name": runtimeConfig.siteName || "Nodewave",
-      "logo": runtimeConfig.siteLogo || undefined,
-      "url": runtimeConfig.siteUrl,
+      "logo": {
+        "@type": "ImageObject",
+        "url": runtimeConfig.siteLogo || undefined,
+      },
     },
   }),
 ]);
@@ -188,7 +199,12 @@ defineOgImage("BlogPost.takumi", {
   title: () => BLOG_TITLE.value,
   author: blogAuthor.value?.name,
   date: currentBlog.value.date instanceof Date
-    ? currentBlog.value.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    ? currentBlog.value.date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      })
     : String(currentBlog.value.date || ""),
   category: currentBlog.value?.category || "General",
   avatar: blogAuthor.value?.avatar?.src,
@@ -201,11 +217,13 @@ logger.log("All tags:", { blogTags: blogTags.value });
 
 <template>
   <UContainer>
-    <div
-      v-if="scrollProgress > 0"
-      class="fixed top-0 left-0 h-1 bg-linear-to-r from-primary-500 via-sky-400 to-indigo-600 z-50 transition-all duration-75 ease-out"
-      :style="{ width: `${scrollProgress}%` }"
-    />
+    <ClientOnly>
+      <div
+        v-if="scrollProgress > 0"
+        class="fixed top-0 left-0 h-1 bg-linear-to-r from-primary-500 via-sky-400 to-indigo-600 z-50 transition-all duration-75 ease-out"
+        :style="{ width: `${scrollProgress}%` }"
+      />
+    </ClientOnly>
 
     <div v-if="fetchError" class="flex flex-col items-center justify-center py-24 gap-4">
       <UIcon name="i-lucide-octagon-alert" class="w-12 h-12 text-error-500" />
@@ -237,7 +255,15 @@ logger.log("All tags:", { blogTags: blogTags.value });
 
     <UPage v-else-if="currentBlog" class="py-8">
       <!-- NodeWave Matrix Bento Hero Header -->
-      <UPageHeader class="mb-8 border-b border-[#e8e3d8] dark:border-[#26231f] pb-8 bg-transparent">
+      <UPageHeader
+        :title="currentBlog.title"
+        :description="currentBlog.description"
+        class="mb-8 border-b border-[#e8e3d8] dark:border-[#26231f] pb-8 bg-transparent"
+        :ui="{
+          title: 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-white leading-[1.15]',
+          description: 'text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-300 max-w-4xl leading-relaxed font-normal mt-3',
+        }"
+      >
         <template #headline>
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <!-- Navigation Breadcrumb -->
@@ -269,18 +295,6 @@ logger.log("All tags:", { blogTags: blogTags.value });
           </div>
         </template>
 
-        <template #title>
-          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-white leading-[1.15]">
-            {{ currentBlog.title }}
-          </h1>
-        </template>
-
-        <template #description>
-          <p class="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-300 max-w-4xl leading-relaxed font-normal mt-3">
-            {{ currentBlog.description }}
-          </p>
-        </template>
-
         <!-- Technical Meta Bar -->
         <div class="flex flex-wrap items-center justify-between gap-y-3 gap-x-6 text-xs font-mono text-neutral-500 dark:text-neutral-400 pt-6 mt-6 border-t border-[#e8e3d8] dark:border-[#26231f]">
           <div class="flex flex-wrap items-center gap-y-2 gap-x-4">
@@ -309,7 +323,7 @@ logger.log("All tags:", { blogTags: blogTags.value });
                 aria-hidden="true"
               />
               <time v-if="currentBlog.date" :datetime="publishedIsoDate">
-                {{ useDateFormat(currentBlog.date, 'MMMM DD, YYYY').value }}
+                {{ formattedPublishDate }}
               </time>
             </div>
 
@@ -368,49 +382,51 @@ logger.log("All tags:", { blogTags: blogTags.value });
             <span>Gallery</span>
           </div>
 
-          <UCarousel
-            ref="carousel"
-            v-slot="{ item }"
-            :items="currentBlog.gallery"
-            class-names
-            arrows
-            dots
-            loop
-            :ui="{
-              item: 'basis-full md:basis-1/2 transition-opacity [&:not(.is-snapped)]:opacity-30',
-              container: 'rounded-xs',
-            }"
-            @select="onSelect"
-          >
-            <div class="p-2 w-full">
+          <ClientOnly>
+            <UCarousel
+              ref="carousel"
+              v-slot="{ item }"
+              :items="currentBlog.gallery"
+              class-names
+              arrows
+              dots
+              loop
+              :ui="{
+                item: 'basis-full md:basis-1/2 transition-opacity [&:not(.is-snapped)]:opacity-30',
+                container: 'rounded-xs',
+              }"
+              @select="onSelect"
+            >
+              <div class="p-2 w-full">
+                <div
+                  class="group overflow-hidden rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311]"
+                >
+                  <NuxtImg
+                    :src="item.src"
+                    :alt="item.alt || 'Gallery image'"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            </UCarousel>
+
+            <div class="flex gap-2 justify-center mt-8">
               <div
-                class="group overflow-hidden rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311]"
+                v-for="(item, index) in currentBlog.gallery"
+                :key="index"
+                class="size-16 cursor-pointer overflow-hidden rounded-xs border transition-all"
+                :class="activeIndex === index ? 'border-primary-500 opacity-100' : 'border-[#e8e3d8] dark:border-[#26231f] opacity-40 hover:opacity-100'"
+                @click="select(index)"
               >
                 <NuxtImg
+                  :alt="item.alt || 'Gallery thumbnail'"
                   :src="item.src"
-                  :alt="item.alt || 'Gallery image'"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
             </div>
-          </UCarousel>
-
-          <div class="flex gap-2 justify-center mt-8">
-            <div
-              v-for="(item, index) in currentBlog.gallery"
-              :key="index"
-              class="size-16 cursor-pointer overflow-hidden rounded-xs border transition-all"
-              :class="activeIndex === index ? 'border-primary-500 opacity-100' : 'border-[#e8e3d8] dark:border-[#26231f] opacity-40 hover:opacity-100'"
-              @click="select(index)"
-            >
-              <NuxtImg
-                :alt="item.alt || 'Gallery thumbnail'"
-                :src="item.src"
-                class="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          </div>
+          </ClientOnly>
         </div>
 
         <!-- Transparent Footer Author Bio Card -->
@@ -549,7 +565,11 @@ logger.log("All tags:", { blogTags: blogTags.value });
           </div>
         </div>
 
-        <UPageAnchors title="External Anchors" :links="currentBlog.anchors" />
+        <UPageAnchors
+          v-if="currentBlog.anchors?.length"
+          title="External Anchors"
+          :links="currentBlog.anchors"
+        />
 
         <UContentSurround
           v-if="surroundingBlog && surroundingBlog.length > 0"

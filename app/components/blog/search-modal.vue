@@ -20,19 +20,22 @@ const links = [
     icon: "i-lucide-users",
     to: "/authors",
   },
+  {
+    label: "Advanced Search",
+    icon: "i-lucide-search",
+    to: "/search",
+  },
 ];
 </script>
 
 <template>
-  <UApp>
-    <ClientOnly>
-      <LazyUContentSearch
-        :navigation="navigation"
-        :files="files"
-        :fuse="{ resultLimit: 20, fuseOptions: { threshold: 0.2 } }"
-        shortcut="meta_k"
-        :links="links"
-      />
-    </ClientOnly>
-  </UApp>
+  <ClientOnly>
+    <LazyUContentSearch
+      :navigation="navigation"
+      :files="files"
+      :fuse="{ resultLimit: 20, fuseOptions: { threshold: 0.2 } }"
+      shortcut="meta_k"
+      :links="links"
+    />
+  </ClientOnly>
 </template>
