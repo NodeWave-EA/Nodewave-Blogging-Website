@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 96" width="336" height="96" fill="none" role="img"
+     aria-labelledby="nw-title nw-desc">
+  <title id="nw-title">NodeWave — Smart IoT Solutions</title>
+  <desc id="nw-desc">Animated NodeWave circuit logo with two-line wordmark</desc>
+
+  <defs>
+
+    <linearGradient id="nw-grad" x1="10" y1="12" x2="110" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14b8a6"/>
+      <stop offset="52%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+
+
+    <mask id="nw-mask">
+      <rect x="0" y="0" width="120" height="120" fill="white"/>
+      <circle cx="26" cy="73" r="4.2" fill="black"/>
+      <circle cx="40" cy="48" r="4.2" fill="black"/>
+      <circle cx="60" cy="56" r="4.2" fill="black"/>
+      <circle cx="108" cy="14" r="4.2" fill="black"/>
+    </mask>
+  </defs>
+
+  <style>
+    :root {
+    --nw-title: #18181b;
+    --nw-tagline: #71717a;
+    --nw-accent: #0d9488;
+    }
+
+    @media (prefers-color-scheme: dark) {
+    :root {
+    --nw-title: #fafafa;
+    --nw-tagline: #a1a1aa;
+    --nw-accent: #2dd4bf;
+    }
+    }
+
+    .nw-brand {
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    fill: var(--nw-title);
+    }
+
+    .nw-tagline {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    fill: var(--nw-tagline);
+    animation: nw-tagline-pulse 4.8s ease-in-out infinite;
+    }
+
+    /* Infinite Self-Drawing Circuit Strokes (Start Drawn at 0%) */
+    .nw-trace-1 {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+    animation: nw-trace-1-loop 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    .nw-trace-2 {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+    animation: nw-trace-2-loop 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    .nw-pin-1,
+    .nw-pin-2,
+    .nw-pin-3,
+    .nw-pin-4 {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+    }
+
+    .nw-pin-1 {
+    animation: nw-pin-1-loop 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    .nw-pin-2 {
+    animation: nw-pin-2-loop 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    .nw-pin-3 {
+    animation: nw-pin-3-loop 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    .nw-pin-4 {
+    animation: nw-pin-4-loop 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+
+    /* Per-Letter Wave Highlight (Always Readable, Zero Kerning Shift) */
+    .nw-char {
+    fill: var(--nw-title);
+    animation: nw-letter-wave 4.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    }
+
+    .nw-c0 { animation-delay: 0ms; }
+    .nw-c1 { animation-delay: 65ms; }
+    .nw-c2 { animation-delay: 130ms; }
+    .nw-c3 { animation-delay: 195ms; }
+    .nw-c4 { animation-delay: 260ms; }
+    .nw-c5 { animation-delay: 325ms; }
+    .nw-c6 { animation-delay: 390ms; }
+    .nw-c7 { animation-delay: 455ms; }
+
+    @keyframes nw-trace-1-loop {
+    0%, 26% { stroke-dashoffset: 0; }
+    50%, 58% { stroke-dashoffset: 100; }
+    84%, 100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes nw-trace-2-loop {
+    0%, 20% { stroke-dashoffset: 0; }
+    44%, 64% { stroke-dashoffset: 100; }
+    90%, 100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes nw-pin-1-loop {
+    0%, 28% { stroke-dashoffset: 0; }
+    36%, 56% { stroke-dashoffset: 100; }
+    64%, 100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes nw-pin-2-loop {
+    0%, 24% { stroke-dashoffset: 0; }
+    32%, 80% { stroke-dashoffset: 100; }
+    88%, 100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes nw-pin-3-loop {
+    0%, 22% { stroke-dashoffset: 0; }
+    30%, 62% { stroke-dashoffset: 100; }
+    70%, 100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes nw-pin-4-loop {
+    0%, 16% { stroke-dashoffset: 0; }
+    24%, 86% { stroke-dashoffset: 100; }
+    94%, 100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes nw-letter-wave {
+    0%, 100% {
+    fill: var(--nw-title);
+    opacity: 1;
+    }
+    12% {
+    fill: var(--nw-accent);
+    opacity: 1;
+    }
+    26% {
+    fill: var(--nw-title);
+    opacity: 1;
+    }
+    62% {
+    opacity: 0.78;
+    }
+    }
+
+    @keyframes nw-tagline-pulse {
+    0%, 100% { opacity: 0.95; }
+    55% { opacity: 0.68; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+    .nw-trace-1,
+    .nw-trace-2,
+    .nw-pin-1,
+    .nw-pin-2,
+    .nw-pin-3,
+    .nw-pin-4,
+    .nw-char,
+    .nw-tagline {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+    }
+    }
+  </style>
+
+
+  <g transform="translate(12, 12) scale(0.6)" mask="url(#nw-mask)">
+
+    <g opacity="0.2">
+      <path d="M 26 73 L 12 108 L 12 12 L 60 108 L 60 56" stroke="url(#nw-grad)" stroke-width="8" stroke-linecap="round"
+            stroke-linejoin="round"/>
+      <path d="M 40 48 L 60 12 L 108 108 L 108 14" stroke="url(#nw-grad)" stroke-width="8" stroke-linecap="round"
+            stroke-linejoin="round"/>
+      <circle cx="26" cy="73" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6"/>
+      <circle cx="60" cy="56" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6"/>
+      <circle cx="40" cy="48" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6"/>
+      <circle cx="108" cy="14" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6"/>
+    </g>
+
+
+    <path d="M 26 73 L 12 108 L 12 12 L 60 108 L 60 56" stroke="url(#nw-grad)" stroke-width="8" stroke-linecap="round"
+          stroke-linejoin="round" pathLength="100" class="nw-trace-1"/>
+    <path d="M 40 48 L 60 12 L 108 108 L 108 14" stroke="url(#nw-grad)" stroke-width="8" stroke-linecap="round"
+          stroke-linejoin="round" pathLength="100" class="nw-trace-2"/>
+
+
+    <circle cx="26" cy="73" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6" stroke-linecap="round" pathLength="100"
+            transform="rotate(-90 26 73)" class="nw-pin-1"/>
+    <circle cx="60" cy="56" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6" stroke-linecap="round" pathLength="100"
+            transform="rotate(-90 60 56)" class="nw-pin-2"/>
+    <circle cx="40" cy="48" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6" stroke-linecap="round" pathLength="100"
+            transform="rotate(-90 40 48)" class="nw-pin-3"/>
+    <circle cx="108" cy="14" r="5.8" stroke="url(#nw-grad)" stroke-width="3.6" stroke-linecap="round" pathLength="100"
+            transform="rotate(-90 108 14)" class="nw-pin-4"/>
+  </g>
+
+
+  <text x="102" y="47" class="nw-brand">
+    <tspan class="nw-char nw-c0">N</tspan>
+    <tspan class="nw-char nw-c1">o</tspan>
+    <tspan class="nw-char nw-c2">d</tspan>
+    <tspan class="nw-char nw-c3">e</tspan>
+    <tspan class="nw-char nw-c4">W</tspan>
+    <tspan class="nw-char nw-c5">a</tspan>
+    <tspan class="nw-char nw-c6">v</tspan>
+    <tspan class="nw-char nw-c7">e</tspan>
+  </text>
+  <text x="103" y="71" class="nw-tagline">Smart IoT Solutions</text>
+</svg>
