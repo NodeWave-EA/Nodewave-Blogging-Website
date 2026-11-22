@@ -6,8 +6,8 @@ import { useKeyboard } from "~/composables/use-keyboard";
 import { useNavigate } from "~/composables/use-navigate";
 
 const { navigate } = useNavigate();
+const { isMotionReduced } = useReduceMotion();
 const { addGlobalShortcut, removeGlobalShortcut } = useKeyboard();
-
 const { open: openSearchPalette } = useContentSearch();
 
 const githubAriaLabel = `Open ${siteConfig.name} on GitHub`;
@@ -37,11 +37,12 @@ onUnmounted(() => {
 <template>
   <div
     class="flex items-center gap-1.5"
-    data-aos="fade-left"
+    :data-aos="!isMotionReduced ? 'fade-left' : undefined"
     data-aos-duration="400"
     data-aos-easing="ease-out-quad"
     data-aos-anchor="body"
   >
+    <!-- Search Trigger -->
     <UTooltip
       text="Search"
       :kbds="['meta', 'K']"
@@ -51,14 +52,17 @@ onUnmounted(() => {
         icon="i-line-md-file-search"
         color="neutral"
         variant="ghost"
-        class="rounded-full transition-all duration-200 active:scale-95 cursor-pointer"
+        size="sm"
+        class="rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-surface-hover) text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer"
         aria-label="Open documentation search palette"
         @click="openSearchPalette = true"
       />
     </UTooltip>
 
+    <!-- Color Mode Toggle -->
     <UiAppThemeToggle />
 
+    <!-- GitHub External Link -->
     <UTooltip
       text="Open on GitHub"
       :kbds="['meta', 'G']"
@@ -67,16 +71,18 @@ onUnmounted(() => {
       <UButton
         color="primary"
         variant="ghost"
+        size="sm"
         :href="siteConfig.social.github"
         target="_blank"
         rel="noopener noreferrer"
         icon="i-line-md-github-loop"
-        class="rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.96]"
+        class="group rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-surface-hover) transition-colors"
         :aria-label="githubAriaLabel"
       >
         <UIcon
-          name="i-heroicons-arrow-up-right-20-solid"
-          class="h-3.5 w-3.5 shrink-0 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
+          name="i-lucide-arrow-up-right"
+          class="size-3.5 shrink-0 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
+          aria-hidden="true"
         />
       </UButton>
     </UTooltip>

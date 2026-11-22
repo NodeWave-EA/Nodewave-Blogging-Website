@@ -47,7 +47,7 @@ export default defineAppConfig({
     },
     tooltip: {
       slots: {
-        content: "delay-300 font-medium text-xs rounded-lg",
+        content: "delay-300 font-medium text-xs rounded-xs border border-(--app-border)",
       },
     },
     navigationMenu: {
@@ -109,6 +109,7 @@ export default defineAppConfig({
       loading: "i-lucide-loader-circle",
       search: "i-lucide-search",
       menu: "i-lucide-menu",
+      close: "i-lucide-x",
     },
     experimental: {
       componentDetection: true,
@@ -116,20 +117,21 @@ export default defineAppConfig({
 
     header: {
       slots: {
-        root: "bg-transparent backdrop-blur-md border-b border-(--app-border) h-(--ui-header-height) sticky top-0 z-50 transition-colors duration-300",
+        root: "sticky top-0 z-50 h-(--ui-header-height) bg-(--app-bg)/85 backdrop-blur-md border-b border-(--app-border) transition-all duration-300",
         container:
-          "flex items-center justify-between gap-3 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
-        left: "lg:flex-1 flex items-center gap-2",
-        center: "hidden lg:flex items-center gap-6",
-        right: "flex items-center justify-end lg:flex-1 gap-3",
+          "flex items-center justify-between gap-3 h-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8",
+        left: "lg:flex-1 flex items-center gap-2 min-w-0",
+        center: "hidden lg:flex items-center justify-center",
+        right: "flex items-center justify-end lg:flex-1 gap-1.5",
         title:
-          "shrink-0 font-extrabold text-xl text-gray-900 dark:text-white flex items-center gap-2 tracking-tight",
-        toggle: "lg:hidden",
-        content: "lg:hidden",
-        overlay: "lg:hidden bg-gray-950/20 backdrop-blur-xs",
+          "shrink-0 font-extrabold text-xl text-neutral-900 dark:text-white flex items-center gap-2 tracking-tight",
+        toggle:
+          "lg:hidden rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-surface-hover) text-neutral-700 dark:text-neutral-300",
+        content: "lg:hidden bg-(--app-bg) border-l border-(--app-border)",
+        overlay: "lg:hidden bg-neutral-950/40 backdrop-blur-xs",
         header:
-          "px-4 sm:px-6 h-(--ui-header-height) shrink-0 flex items-center justify-between gap-3 border-b border-(--app-border)",
-        body: "p-6 overflow-y-auto space-y-6",
+          "px-4 sm:px-6 h-(--ui-header-height) shrink-0 flex items-center justify-between gap-3 border-b border-(--app-border) bg-(--app-bg)",
+        body: "p-4 sm:p-6 overflow-y-auto bg-(--app-bg) flex-1",
       },
       variants: {
         toggleSide: {

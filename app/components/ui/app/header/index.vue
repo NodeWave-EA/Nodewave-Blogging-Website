@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { navLinks } from "~/constants";
 
+const route = useRoute();
 const { headerClass, containerClass } = useFloatingHeader();
 
 useAOS();
+
+const isMobileMenuOpen = ref(false);
+
+watch(
+  () => route.fullPath,
+  () => {
+    isMobileMenuOpen.value = false;
+  },
+);
 
 const config = useRuntimeConfig();
 const siteUrl = (config.public.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
@@ -23,15 +33,20 @@ useSchemaOrg([
 
 <template>
   <UHeader
+    v-model:open="isMobileMenuOpen"
     mode="slideover"
     :class="headerClass"
     :ui="{
-      root: 'sticky top-0 z-50 border-0 bg-transparent ring-0 transition-colors duration-300',
+      root: 'sticky top-0 z-50 h-(--ui-header-height) transition-all duration-300',
       container: containerClass,
-      left: 'flex items-center gap-1.5',
-      center: 'hidden lg:flex flex-1 items-center justify-center',
-      right: 'flex items-center gap-2',
-      body: 'border-0 bg-transparent p-6 backdrop-blur-md',
+      left: 'lg:flex-1 flex items-center gap-2 min-w-0',
+      center: 'hidden lg:flex items-center justify-center',
+      right: 'flex items-center justify-end lg:flex-1 gap-1.5',
+      toggle: 'lg:hidden rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-surface-hover) text-neutral-700 dark:text-neutral-300',
+      content: 'lg:hidden bg-(--app-bg) border-l border-(--app-border)',
+      overlay: 'lg:hidden bg-neutral-950/40 backdrop-blur-xs',
+      header: 'px-4 sm:px-6 h-(--ui-header-height) shrink-0 flex items-center justify-between gap-3 border-b border-(--app-border) bg-(--app-bg)',
+      body: 'p-4 sm:p-6 overflow-y-auto bg-(--app-bg) flex-1',
     }"
   >
     <!-- Logo -->
@@ -51,7 +66,7 @@ useSchemaOrg([
 
     <!-- Mobile Navigation Panel -->
     <template #body>
-      <LazyUiAppHeaderMobile />
+      <LazyUiAppHeaderMobile @navigate="isMobileMenuOpen = false" />
     </template>
   </UHeader>
 </template>

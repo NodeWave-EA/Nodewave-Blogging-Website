@@ -6,6 +6,14 @@ import type { Link } from "~/types";
 
 type RouteLocation = ReturnType<typeof useRoute>;
 
+export function isNavLinkActive(linkTo: string, currentPath: string): boolean {
+  if (!linkTo)
+    return false;
+  if (linkTo === "/")
+    return currentPath === "/";
+  return currentPath === linkTo || currentPath.startsWith(`${linkTo}/`);
+}
+
 export function useNavBubble(
   route: RouteLocation,
   navLinks: Link[],
@@ -18,7 +26,6 @@ export function useNavBubble(
     opacity: "0",
   });
 
-  // Resolves the Union layout types returned from Vue 3 dynamic template ref bounds
   const setLinkRef = (
     el: Element | ComponentPublicInstance | null,
     index: number,
@@ -28,7 +35,6 @@ export function useNavBubble(
       return;
     }
 
-    // Safely extract the raw DOM Node layer whether it is a global native tag or component instance
     if ("$el" in el) {
       linkRefs.value[index] = el.$el as HTMLElement;
     }
@@ -40,7 +46,7 @@ export function useNavBubble(
   const updateBubblePosition = async (): Promise<void> => {
     await nextTick();
     const currentPath = route.path;
-    const activeIndex = navLinks.findIndex(link => link.to === currentPath);
+    const activeIndex = navLinks.findIndex(link => isNavLinkActive(link.to, currentPath));
 
     if (activeIndex === -1) {
       bubbleStyles.value.opacity = "0";
@@ -55,7 +61,7 @@ export function useNavBubble(
 
     bubbleStyles.value = {
       transform: `translateX(${activeEl.offsetLeft}px)`,
-      width: `${activeEl.offsetWidth}px`,
+      width: `${activeEl.offsetWidth}px)`,
       opacity: "1",
     };
   };
@@ -63,7 +69,7 @@ export function useNavBubble(
   let resizeObserver: ResizeObserver | null = null;
 
   onMounted(() => {
-    updateBubblePosition();
+    void updateBubblePosition();
     if (typeof window !== "undefined" && "ResizeObserver" in window) {
       resizeObserver = new ResizeObserver(() => {
         void updateBubblePosition();
@@ -83,7 +89,7 @@ export function useNavBubble(
   watch(
     () => route.path,
     () => {
-      void nextTick(updateBubblePosition);
+      void updateBubblePosition();
     },
   );
 
