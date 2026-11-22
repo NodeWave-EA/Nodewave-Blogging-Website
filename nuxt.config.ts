@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     "@nuxt/ui",
     "@nuxt/content",
-    "@comark/nuxt",
+    "@comark/vue",
     "@vueuse/nuxt",
     "@nuxt/image",
     "@nuxtjs/seo",
@@ -279,8 +279,6 @@ export default defineNuxtConfig({
     anchorPlacement: "top-bottom",
   },
 
-  comark: {},
-
   eslint: {
     config: {
       standalone: false,
@@ -396,7 +394,7 @@ export default defineNuxtConfig({
     security: {
       strict: true,
     },
-    debug: process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    debug: process.env.NODE_ENV === "development" && process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
   },
 
   robots: {
