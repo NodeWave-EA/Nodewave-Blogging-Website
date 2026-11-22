@@ -42,7 +42,8 @@ watch(
           class="sr-only"
           aria-hidden="true"
         />
-
+        <!-- Initial App Hydration Overlay -->
+        <UiAppLoadingScreen />
         <!-- Floating Language Switcher Widget (Bottom Left) -->
         <LangSwitcher />
         <!-- Global Eye-Care Reading Background with Customizable Grain Opacity & Warmth -->
