@@ -36,7 +36,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="flex items-center gap-1.5"
+    class="inline-flex items-center gap-1"
     :data-aos="!isMotionReduced ? 'fade-left' : undefined"
     data-aos-duration="400"
     data-aos-easing="ease-out-quad"
@@ -53,7 +53,7 @@ onUnmounted(() => {
         color="neutral"
         variant="ghost"
         size="sm"
-        class="rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-surface-hover) text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer"
+        class="rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-bg) text-neutral-700 dark:text-neutral-300 transition-colors cursor-pointer"
         aria-label="Open documentation search palette"
         @click="openSearchPalette = true"
       />
@@ -62,7 +62,7 @@ onUnmounted(() => {
     <!-- Color Mode Toggle -->
     <UiAppThemeToggle />
 
-    <!-- GitHub External Link -->
+    <!-- GitHub External Link (hidden on xs mobile since it lives in the mobile drawer) -->
     <UTooltip
       text="Open on GitHub"
       :kbds="['meta', 'G']"
@@ -76,7 +76,7 @@ onUnmounted(() => {
         target="_blank"
         rel="noopener noreferrer"
         icon="i-line-md-github-loop"
-        class="group rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-surface-hover) transition-colors"
+        class="hidden sm:inline-flex group rounded-xs border border-transparent hover:border-(--app-border) hover:bg-(--app-bg) transition-colors"
         :aria-label="githubAriaLabel"
       >
         <UIcon

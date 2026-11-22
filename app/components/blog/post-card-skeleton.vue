@@ -19,7 +19,7 @@ withDefaults(
 
 <template>
   <div
-    class="relative overflow-hidden bg-(--app-bg) flex flex-col select-none h-full w-full animate-pulse rounded-none border-b border-r border-(--app-border)"
+    class="relative overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] flex flex-col select-none h-full w-full animate-pulse"
     aria-hidden="true"
   >
     <div
@@ -39,7 +39,7 @@ withDefaults(
             : 'max-h-36',
         ]"
       >
-        <USkeleton class="absolute inset-0 w-full h-full rounded-xs bg-(--app-surface-subtle) opacity-75" />
+        <USkeleton class="absolute inset-0 w-full h-full rounded-xs bg-(--app-bg) opacity-85" />
       </div>
 
       <div
@@ -50,33 +50,33 @@ withDefaults(
       >
         <div class="w-full space-y-2.5">
           <div class="flex items-center gap-2">
-            <USkeleton class="h-4 w-16 rounded-xs bg-(--app-surface-subtle) opacity-85" />
-            <USkeleton class="h-3 w-12 rounded-xs bg-(--app-surface-subtle) opacity-55" />
+            <USkeleton class="h-4 w-16 rounded-xs bg-(--app-bg) opacity-90" />
+            <USkeleton class="h-3 w-12 rounded-xs bg-(--app-bg) opacity-65" />
           </div>
 
           <div class="space-y-1.5">
-            <USkeleton class="h-4 w-[90%] rounded-xs bg-(--app-surface-subtle) opacity-95" />
-            <USkeleton class="h-4 w-[55%] rounded-xs bg-(--app-surface-subtle) opacity-95" />
+            <USkeleton class="h-4 w-[90%] rounded-xs bg-(--app-bg) opacity-95" />
+            <USkeleton class="h-4 w-[55%] rounded-xs bg-(--app-bg) opacity-95" />
           </div>
 
           <div class="space-y-1.5 pt-1">
-            <USkeleton class="h-3 w-full rounded-xs bg-(--app-surface-subtle) opacity-55" />
-            <USkeleton class="h-3 w-[85%] rounded-xs bg-(--app-surface-subtle) opacity-55" />
+            <USkeleton class="h-3 w-full rounded-xs bg-(--app-bg) opacity-65" />
+            <USkeleton class="h-3 w-[85%] rounded-xs bg-(--app-bg) opacity-65" />
           </div>
         </div>
 
         <div class="w-full space-y-3 pt-2.5 border-t border-(--app-border) mt-auto">
           <div class="flex items-center gap-1.5">
-            <USkeleton class="h-3.5 w-10 rounded-xs bg-(--app-surface-subtle) opacity-55" />
-            <USkeleton class="h-3.5 w-12 rounded-xs bg-(--app-surface-subtle) opacity-55" />
+            <USkeleton class="h-3.5 w-10 rounded-xs bg-(--app-bg) opacity-65" />
+            <USkeleton class="h-3.5 w-12 rounded-xs bg-(--app-bg) opacity-65" />
           </div>
 
           <div class="flex items-center justify-between gap-4 w-full">
             <div class="flex items-center gap-1.5">
-              <USkeleton class="h-4 w-4 rounded-full bg-(--app-surface-subtle) opacity-85" />
-              <USkeleton class="h-3 w-16 rounded-xs bg-(--app-surface-subtle) opacity-55" />
+              <USkeleton class="h-4 w-4 rounded-full bg-(--app-bg) opacity-90" />
+              <USkeleton class="h-3 w-16 rounded-xs bg-(--app-bg) opacity-65" />
             </div>
-            <USkeleton class="hidden sm:block h-3 w-10 rounded-xs bg-(--app-surface-subtle) opacity-45" />
+            <USkeleton class="hidden sm:block h-3 w-10 rounded-xs bg-(--app-bg) opacity-55" />
           </div>
         </div>
       </div>

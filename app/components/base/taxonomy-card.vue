@@ -63,7 +63,7 @@ function onPointerLeave() {
   <NuxtLink
     ref="cardRef"
     :to="`/${item.stem}`"
-    class="group relative flex flex-col justify-between overflow-hidden bg-[#faf7f2] dark:bg-[#141311] transition-colors duration-200 hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] select-none h-full w-full rounded-none border-b border-r border-[#e8e3d8] dark:border-[#26231f] p-5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-500"
+    class="group relative flex flex-col justify-between overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] select-none h-full w-full p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
     :style="[
       transformStyles,
       {
@@ -73,46 +73,49 @@ function onPointerLeave() {
         '--taxonomy-color': item.color || 'var(--ui-primary)',
       },
     ]"
-    :aria-label="`Browse ${item.name} category with ${item.count || 0} articles`"
+    :aria-label="`Browse ${item.name} ${typeLabel} with ${item.count || 0} ${item.count === 1 ? 'article' : 'articles'}`"
     @pointermove="onPointerMove"
     @pointerenter="onPointerEnter"
     @pointerleave="onPointerLeave"
   >
-    <!-- Bento Grid Tile Spotlight Radial Glow -->
+    <!-- Spotlight Radial Glow -->
     <div
       class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 z-0"
-      style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.06), transparent 60%);"
+      style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), color-mix(in srgb, var(--taxonomy-color) 10%, transparent), transparent 60%);"
     />
 
     <div class="relative z-10 flex flex-col justify-between h-full w-full gap-5">
       <div class="space-y-3">
         <!-- Top Metadata Row -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <div
-            class="w-9 h-9 rounded-xs flex items-center justify-center border transition-all duration-300 group-hover:scale-105"
+            class="w-9 h-9 rounded-xs flex items-center justify-center border transition-all duration-300 group-hover:scale-105 shadow-2xs"
             :style="{
-              backgroundColor: item.color ? `${item.color}15` : 'rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.05)',
-              borderColor: item.color ? `${item.color}30` : 'rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.15)',
+              backgroundColor: 'color-mix(in srgb, var(--taxonomy-color) 12%, transparent)',
+              borderColor: 'color-mix(in srgb, var(--taxonomy-color) 28%, transparent)',
             }"
           >
             <UIcon
               :name="item.icon || fallbackIcon"
-              class="w-4 h-4 transition-transform group-hover:rotate-6"
+              class="w-4 h-4 transition-transform duration-300 group-hover:rotate-6"
               :style="{ color: 'var(--taxonomy-color)' }"
               aria-hidden="true"
             />
           </div>
 
           <span
-            class="px-2 py-0.5 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722] font-mono text-[10px] font-bold text-neutral-600 dark:text-neutral-400 group-hover:bg-[#e8e3d8] dark:group-hover:bg-[#2a2722] transition-all"
-            :style="isHovered && item.color ? { borderColor: `${item.color}30`, color: 'var(--taxonomy-color)' } : {}"
+            class="px-2 py-0.5 rounded-xs bg-(--app-bg)/80 border border-(--app-border) font-mono text-[10px] font-bold text-neutral-600 dark:text-neutral-300 transition-all duration-200"
+            :style="isHovered ? {
+              borderColor: 'color-mix(in srgb, var(--taxonomy-color) 35%, transparent)',
+              color: 'var(--taxonomy-color)',
+            } : {}"
           >
-            {{ item.count || 0 }} {{ item.count === 1 ? 'Article' : 'Articles' }}
+            {{ item.count || 0 }} {{ item.count === 1 ? "Article" : "Articles" }}
           </span>
         </div>
 
         <!-- Title & Description -->
-        <div class="space-y-1">
+        <div class="space-y-1.5">
           <h3
             class="text-sm font-bold text-neutral-900 dark:text-neutral-100 transition-colors duration-200 font-mono tracking-tight min-h-5"
             :style="isHovered ? { color: 'var(--taxonomy-color)' } : {}"
@@ -123,15 +126,14 @@ function onPointerLeave() {
           <p v-if="item.description" class="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed line-clamp-2">
             {{ item.description }}
           </p>
-          <p v-else class="text-xs text-neutral-400 dark:text-neutral-500 italic">
+          <p v-else class="text-xs text-neutral-500 dark:text-neutral-400 italic">
             No description available for this {{ typeLabel }}.
           </p>
         </div>
       </div>
 
-      <!-- Bento Tile Footer Link Signifier -->
       <div
-        class="pt-3 border-t border-[#e8e3d8] dark:border-[#26231f] flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-400 transition-colors duration-200 mt-auto"
+        class="pt-3 border-t border-(--app-border) flex items-center justify-between text-[10px] font-mono font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 transition-colors duration-200 mt-auto"
         :style="isHovered ? { color: 'var(--taxonomy-color)' } : {}"
       >
         <span>
@@ -139,7 +141,7 @@ function onPointerLeave() {
         </span>
         <UIcon
           name="i-lucide-arrow-right"
-          class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform"
+          class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200"
           aria-hidden="true"
         />
       </div>
@@ -156,7 +158,7 @@ function onPointerLeave() {
   padding: 1px;
   background: radial-gradient(
     180px circle at var(--mouse-x) var(--mouse-y),
-    rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.35),
+    color-mix(in srgb, var(--taxonomy-color) 45%, transparent),
     transparent 80%
   );
   -webkit-mask:

@@ -16,7 +16,10 @@ const { logger } = useLogger({ context: "pages/index.vue" });
 
 const numberOfFeaturedBlogs = 12;
 
-const [{ data: featuredData, pending: featuredPending, error: featuredError }, { data: recentData, pending: recentPending, error: recentError }] = await Promise.all([
+const [
+  { data: featuredData, pending: featuredPending, error: featuredError },
+  { data: recentData, pending: recentPending, error: recentError },
+] = await Promise.all([
   getFeaturedBlogs(numberOfFeaturedBlogs),
   getAllBlogs(numberOfFeaturedBlogs * 2),
 ]);
@@ -36,8 +39,8 @@ const featuredBlogs = computed<BlogType[]>(() => {
   ].slice(0, numberOfFeaturedBlogs);
 });
 
-const isLoading = computed(() => featuredPending.value || recentPending.value);
-const fetchError = computed(() => featuredError.value && recentError.value);
+const isLoading = computed(() => (featuredPending.value || recentPending.value) && featuredBlogs.value.length === 0);
+const fetchError = computed(() => Boolean(featuredError.value && recentError.value));
 
 logger.log(`Fetched ${featuredBlogs.value.length} blogs for the homepage preview.`);
 
@@ -61,7 +64,7 @@ const HOME_RSS_URL = computed(() => `/rss.xml`);
 useSeoMeta({
   title: () => HOME_TITLE.value,
   description: () => HOME_DESCRIPTION.value,
-  keywords: "nodewave, curated posts, insights, technology, software engineering, web development, blog, articles, tutorials",
+  // keywords: "nodewave, curated posts, insights, technology, software engineering, web development, blog, articles, tutorials",
   robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
   // Open Graph / Facebook
@@ -111,12 +114,12 @@ useSchemaOrg([
   // WebSite Schema with Site Search Integration
   defineWebSite({
     name: config.siteName || "Nodewave",
-    url: config.siteUrl,
-    description: HOME_DESCRIPTION.value,
+    url: () => config.siteUrl,
+    description: () => HOME_DESCRIPTION.value,
     potentialAction: [
       {
         "@type": "SearchAction",
-        "target": `${config.siteUrl}/blogs?q={search_term_string}`,
+        "target": `${config.siteUrl}/search?q={search_term_string}`,
         "query-input": "required name=search_term_string",
       },
     ],
@@ -125,9 +128,9 @@ useSchemaOrg([
   // WebPage Document Entity
   defineWebPage({
     "@id": `${config.siteUrl}/#webpage`,
-    "name": HOME_TITLE.value,
-    "description": HOME_DESCRIPTION.value,
-    "url": HOME_CANONICAL_URL.value,
+    "name": () => HOME_TITLE.value,
+    "description": () => HOME_DESCRIPTION.value,
+    "url": () => HOME_CANONICAL_URL.value,
   }),
 
   // Featured Posts ItemList Schema
@@ -148,10 +151,16 @@ useSchemaOrg([
 </script>
 
 <template>
-  <UContainer class="py-4 sm:py-8">
+  <UContainer class="py-4 sm:py-6">
     <UPage>
       <!-- Hero Header Section -->
-      <UPageHeader>
+      <UPageHeader
+        class="mb-12"
+        :ui="{
+          title: 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]',
+          description: 'text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed',
+        }"
+      >
         <template #headline>
           <div class="flex items-center justify-between gap-4">
             <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
@@ -161,11 +170,11 @@ useSchemaOrg([
                 aria-hidden="true"
               />
               <ClientOnly>
-                <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                <span class="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">
                   {{ activeHoverText["home-badge"] || "Curated Posts & Insights" }}
                 </span>
                 <template #fallback>
-                  <span class="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
+                  <span class="font-mono text-[9px] font-bold uppercase tracking-[0.2em]">
                     Curated Posts & Insights
                   </span>
                 </template>
@@ -181,19 +190,15 @@ useSchemaOrg([
         </template>
 
         <template #title>
-          <span id="featured-heading" class="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]">
-            Explore the <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent">latest curated posts</span> and insights from <span class="bg-linear-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent">nodewave</span>.
-          </span>
+          Explore the <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent font-extrabold">latest curated posts</span> and insights from <span class="bg-linear-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent font-extrabold">nodewave</span>.
         </template>
 
         <template #description>
-          <span class="block text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
-            Discover a wealth of knowledge and inspiration through our curated collection of posts and insights. Stay informed, gain valuable perspectives, and fuel your passion for technology and development with our carefully selected content.
-          </span>
+          Discover a wealth of knowledge and inspiration through our curated collection of posts, guides, and insights. Stay informed, gain valuable perspectives, and fuel your passion for technology and development with our carefully selected content.
         </template>
 
         <template #links>
-          <div class="flex flex-wrap gap-2 mt-2" aria-label="Social connections">
+          <div class="flex flex-wrap items-center gap-2 mt-2" aria-label="Social connections">
             <UButton
               v-for="socialLink in siteConfig.socialLinks"
               :key="socialLink.url"
@@ -203,15 +208,20 @@ useSchemaOrg([
               variant="subtle"
               color="neutral"
               size="sm"
-              class="flex items-center gap-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800"
+              class="group inline-flex items-center gap-1.5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/80 hover:bg-(--app-surface-hover) hover:border-primary-500/40 font-mono text-xs text-neutral-700 dark:text-neutral-200 shadow-2xs transition-colors"
               :aria-label="`Visit Nodewave on ${socialLink.platform}`"
             >
               <UIcon
                 :name="socialLink.icon"
-                class="h-4 w-4 text-neutral-500"
+                class="h-4 w-4 text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 transition-colors"
                 aria-hidden="true"
               />
-              {{ socialLink.platform.charAt(0).toUpperCase() + socialLink.platform.slice(1) }}
+              <span>{{ socialLink.platform.charAt(0).toUpperCase() + socialLink.platform.slice(1) }}</span>
+              <UIcon
+                name="i-lucide-arrow-up-right"
+                class="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
+                aria-hidden="true"
+              />
             </UButton>
           </div>
         </template>
@@ -221,7 +231,7 @@ useSchemaOrg([
             <!-- Primary Link: View All Blogs -->
             <NuxtLink
               to="/blogs"
-              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white dark:focus-visible:outline-neutral-100"
+              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs transition-colors hover:bg-primary-700 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:bg-primary-500 dark:text-neutral-950 dark:hover:bg-primary-400 dark:focus-visible:outline-primary-400"
             >
               <span>View All Blogs</span>
               <UIcon
@@ -234,7 +244,7 @@ useSchemaOrg([
             <!-- Secondary Link: Explore Categories -->
             <NuxtLink
               to="/categories"
-              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs border border-neutral-200 bg-neutral-100/80 px-5 py-2.5 text-sm font-medium text-neutral-800 shadow-xs transition-colors hover:bg-neutral-200/80 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:border-neutral-700/60 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:bg-neutral-700/80 dark:focus-visible:outline-neutral-100"
+              class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/80 px-5 py-2.5 text-sm font-medium text-neutral-800 shadow-xs transition-colors hover:bg-(--app-surface-hover) focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:text-neutral-200"
             >
               <UIcon
                 name="i-line-md-grid-3-filled"
@@ -247,12 +257,12 @@ useSchemaOrg([
         </template>
       </UPageHeader>
 
-      <!-- Main App Body Context -->
       <UPageBody>
-        <!-- Loading State: Connected Bento Skeleton Grid -->
+        <!-- Loading State -->
         <div
           v-if="isLoading"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden my-6 shadow-xs"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 my-6"
+          aria-label="Loading curated articles"
         >
           <LazyBlogPostCardSkeleton
             v-for="n in numberOfFeaturedBlogs"
@@ -263,44 +273,109 @@ useSchemaOrg([
         <!-- Error State -->
         <div
           v-else-if="fetchError"
-          class="text-center py-16 text-red-500 flex flex-col items-center gap-2"
+          class="text-center py-20 px-4 border border-dashed border-red-300/60 dark:border-red-900/50 rounded-xs bg-red-500/5 my-6"
           role="alert"
         >
-          <UIcon
-            name="i-lucide-alert-circle"
-            class="w-8 h-8"
-            aria-hidden="true"
-          />
-          <p class="font-medium">
-            Failed to retrieve posts. Please check your connection or refresh the page.
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-red-500/10 border border-red-500/20 mb-4 text-error-500">
+            <UIcon
+              name="i-lucide-alert-circle"
+              class="w-6 h-6"
+              aria-hidden="true"
+            />
+          </div>
+          <h2 class="text-base font-bold text-neutral-900 dark:text-neutral-100">
+            Unable to Load Articles
+          </h2>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
+            Failed to retrieve curated posts. Please check your connection or refresh the page to try again.
           </p>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="featuredBlogs.length === 0" class="text-center py-16 text-neutral-500 dark:text-neutral-400">
-          <UIcon
-            name="i-lucide-book-open"
-            class="w-8 h-8 mx-auto mb-2 opacity-40"
-            aria-hidden="true"
-          />
-          <p>No curated insights available right now.</p>
+        <div
+          v-else-if="featuredBlogs.length === 0"
+          class="text-center py-20 px-4 border border-dashed border-(--app-border) rounded-xs bg-(--app-surface-subtle)/40 my-6"
+          role="status"
+        >
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-(--app-surface-subtle) border border-(--app-border) mb-3 text-neutral-400">
+            <UIcon
+              name="i-lucide-book-open"
+              class="w-5 h-5"
+              aria-hidden="true"
+            />
+          </div>
+          <h2 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+            No Curated Posts Available
+          </h2>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
+            Currently, there are no curated posts to display. Please check back later for updates and new content.
+          </p>
         </div>
 
-        <!-- Loaded Content States: Contiguous Bento Grid Matrix -->
         <section
           v-else
-          class="my-6"
+          class="my-6 space-y-8"
           aria-labelledby="featured-posts-heading"
         >
-          <h2 id="featured-posts-heading" class="sr-only">
-            Featured Articles and Insights
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+          <div class="flex items-center justify-between gap-4 border-b border-(--app-border) pb-3">
+            <h2
+              id="featured-posts-heading"
+              class="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400"
+            >
+              Featured &amp; Latest Publications ({{ featuredBlogs.length }})
+            </h2>
+
+            <NuxtLink
+              to="/blogs"
+              class="group inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xs"
+            >
+              <span>All Articles</span>
+              <UIcon
+                name="i-lucide-arrow-right"
+                class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+            </NuxtLink>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             <BlogPostCard
               v-for="blog in featuredBlogs"
               :key="blog.path"
               :post="blog"
             />
+          </div>
+
+          <div class="pt-8 border-t border-(--app-border) flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="font-mono text-[11px] uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+              Showing {{ featuredBlogs.length }} curated &amp; latest posts from Nodewave.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <NuxtLink
+                to="/blogs"
+                class="group inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/80 hover:bg-(--app-surface-hover) hover:border-primary-500/40 font-mono text-xs font-semibold text-neutral-800 dark:text-neutral-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              >
+                <span>Browse All Articles</span>
+                <UIcon
+                  name="i-lucide-arrow-right"
+                  class="w-3.5 h-3.5 text-primary-500 transition-transform duration-200 group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </NuxtLink>
+
+              <NuxtLink
+                to="/tags"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/80 hover:bg-(--app-surface-hover) hover:border-primary-500/40 font-mono text-xs font-semibold text-neutral-700 dark:text-neutral-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              >
+                <UIcon
+                  name="i-lucide-tags"
+                  class="w-3.5 h-3.5 text-sky-500"
+                  aria-hidden="true"
+                />
+                <span>Browse Tags</span>
+              </NuxtLink>
+            </div>
           </div>
         </section>
       </UPageBody>

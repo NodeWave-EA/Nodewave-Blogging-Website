@@ -80,7 +80,7 @@ function formatDate(date: string | Date) {
 <template>
   <article
     ref="cardRef"
-    class="group relative flex flex-col justify-between overflow-hidden bg-(--app-bg) transition-colors duration-200 hover:bg-(--app-surface-hover) select-none h-full w-full rounded-none border-b border-r border-(--app-border)"
+    class="group relative flex flex-col justify-between overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] select-none h-full w-full"
     :style="[
       transformStyles,
       {
@@ -96,11 +96,11 @@ function formatDate(date: string | Date) {
     <!-- Bento Grid Tile Spotlight Radial Glow -->
     <div
       class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 z-0"
-      style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.06), transparent 60%);"
+      style="background: radial-gradient(240px circle at var(--mouse-x) var(--mouse-y), rgba(var(--color-primary-500-rgb, 20, 184, 166), 0.08), transparent 60%);"
     />
 
     <div
-      class="relative z-10 grid grid-cols-1 w-full h-full p-3.5 gap-3 flex-1"
+      class="relative z-10 grid grid-cols-1 w-full h-full flex-1"
       :class="[
         meta.class === 'hero-grid-layout-variant'
           ? '[@media(min-width:740px)]:grid-cols-12 [@media(min-width:740px)]:items-stretch'
@@ -108,27 +108,27 @@ function formatDate(date: string | Date) {
         meta.class,
       ]"
     >
-      <!-- Cover Image Bento Block -->
+      <!-- Cover Image -->
       <div
         v-if="post.coverImage"
-        class="relative overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle) w-full aspect-video"
+        class="relative overflow-hidden border-b border-(--app-border) bg-(--app-bg)/70 w-full aspect-video"
         :class="[
           meta.class === 'hero-grid-layout-variant'
-            ? '[@media(min-width:740px)]:col-span-5 [@media(min-width:740px)]:h-full [@media(min-width:740px)]:aspect-auto max-h-35 [@media(min-width:740px)]:max-h-none'
-            : 'max-h-36',
+            ? '[@media(min-width:740px)]:col-span-5 [@media(min-width:740px)]:h-full [@media(min-width:740px)]:aspect-auto [@media(min-width:740px)]:border-b-0 [@media(min-width:740px)]:border-r max-h-40 [@media(min-width:740px)]:max-h-none'
+            : 'max-h-40',
         ]"
       >
         <NuxtImg
           v-if="post.coverImage"
           :src="post.coverImage.src"
           :alt="post.coverImage.alt || post.title"
-          class="absolute inset-0 w-full h-full object-cover scale-100 transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+          class="absolute inset-0 w-full h-full object-cover scale-100 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
           loading="lazy"
         />
         <div class="absolute inset-0 pointer-events-none bg-linear-to-t from-[#161513]/30 via-transparent to-transparent" />
 
-        <div v-if="post.featured" class="absolute left-2 top-2 z-20">
-          <div class="flex items-center gap-1 rounded-xs border border-white/20 bg-[#161513]/85 px-1.5 py-0.5 backdrop-blur-xs">
+        <div v-if="post.featured" class="absolute left-2.5 top-2.5 z-20">
+          <div class="flex items-center gap-1 rounded-xs border border-white/20 bg-[#161513]/85 px-1.5 py-0.5 backdrop-blur-xs shadow-xs">
             <UIcon
               name="i-lucide-sparkles"
               class="h-2.5 w-2.5 text-amber-400 fill-amber-400"
@@ -139,9 +139,9 @@ function formatDate(date: string | Date) {
         </div>
       </div>
 
-      <!-- Bento Tile Body Content -->
+      <!-- Body Content -->
       <div
-        class="flex flex-col justify-between items-start min-w-0 gap-3 flex-1"
+        class="flex flex-col justify-between items-start min-w-0 gap-3 flex-1 p-3.5"
         :class="[
           meta.class === 'hero-grid-layout-variant' ? '[@media(min-width:740px)]:col-span-7' : 'w-full',
         ]"
@@ -202,7 +202,7 @@ function formatDate(date: string | Date) {
           <div class="flex items-center gap-1 relative z-30">
             <NuxtLink
               :to="`/categories/${post.category || 'general'}`"
-              class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-(--app-surface-subtle) border border-(--app-border) hover:text-primary-500 transition-all duration-200 focus-visible:ring-1 focus-visible:ring-primary-500"
+              class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-(--app-bg)/80 border border-(--app-border) hover:text-primary-500 transition-all duration-200 focus-visible:ring-1 focus-visible:ring-primary-500"
               :style="{ color: 'var(--ui-primary)' }"
               :aria-label="`Category: ${post.category || 'General'}`"
             >
@@ -242,7 +242,7 @@ function formatDate(date: string | Date) {
                 :aria-label="`Tag: ${tag.name}`"
               >
                 <span
-                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-(--app-surface-subtle) border border-(--app-border) text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-(--app-bg)/80 border border-(--app-border) text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
                   :style="{
                     color: tag.color || '',
                     backgroundColor: tag.color ? `${tag.color}10` : '',
@@ -274,7 +274,7 @@ function formatDate(date: string | Date) {
   padding: 1px;
   background: radial-gradient(
     180px circle at var(--mouse-x) var(--mouse-y),
-    rgba(var(--color-primary-500-rgb, 99, 102, 241), 0.35),
+    rgba(var(--color-primary-500-rgb, 20, 184, 166), 0.45),
     transparent 80%
   );
   -webkit-mask:

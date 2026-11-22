@@ -214,17 +214,17 @@ useSchemaOrg([
       </UPageHeader>
 
       <UPageBody>
-        <!-- Initial Loading State: Bento Grid Skeleton -->
+        <!-- Initial Loading State -->
         <div
           v-if="blogsPending && displayLimit === itemsPerPage"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-(--app-border) rounded-xs overflow-hidden my-6 shadow-xs"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 my-6"
         >
           <LazyBlogPostCardSkeleton v-for="n in 6" :key="`blog-skeleton-${n}`" />
         </div>
 
         <div v-else class="space-y-6 my-6">
           <div class="space-y-12">
-            <!-- Content Grid Layout: Contiguous Bento Matrix -->
+            <!-- Content Grid Layout -->
             <section
               v-if="blogs.length > 0"
               aria-labelledby="archive-blogs-heading"
@@ -232,7 +232,7 @@ useSchemaOrg([
               <h2 id="archive-blogs-heading" class="sr-only">
                 Complete Blog Archive List
               </h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-(--app-border) rounded-xs overflow-hidden shadow-xs">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 <BlogPostCard
                   v-for="blog in blogs"
                   :key="blog.path"
@@ -267,7 +267,7 @@ useSchemaOrg([
             <!-- Infinite Scroll Appending Skeletons -->
             <div
               v-if="blogsPending && displayLimit > itemsPerPage"
-              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-(--app-border) rounded-xs overflow-hidden mt-6 shadow-xs"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5"
               aria-label="Loading additional articles"
             >
               <LazyBlogPostCardSkeleton v-for="n in 3" :key="`append-${n}`" />

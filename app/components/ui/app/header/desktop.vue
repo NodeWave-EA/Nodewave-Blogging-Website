@@ -18,7 +18,7 @@ onMounted(() => {
 
 <template>
   <nav
-    class="hidden lg:flex relative mx-auto items-center rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/70 p-1 isolation-auto"
+    class="hidden lg:flex relative items-center p-0.5 isolation-auto"
     aria-label="Global desktop site navigation"
     :data-aos="!isMotionReduced ? 'fade-down' : undefined"
     data-aos-duration="450"
@@ -30,7 +30,7 @@ onMounted(() => {
       v-if="isMounted"
       :style="bubbleStyles"
       aria-hidden="true"
-      class="absolute left-0 top-1 bottom-1 z-0 pointer-events-none rounded-xs border border-(--app-border) bg-(--app-bg) shadow-2xs transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+      class="absolute left-0 top-0.5 bottom-0.5 z-0 pointer-events-none rounded-xs border border-(--app-border) bg-(--app-bg) shadow-2xs transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
       :class="{ 'transition-none': isMotionReduced }"
     />
 

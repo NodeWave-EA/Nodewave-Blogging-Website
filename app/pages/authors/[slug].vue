@@ -12,14 +12,12 @@ definePageMeta({
 });
 
 const route = useRoute();
-const slug = route.params.slug as string;
+const authorSlug = computed(() => route.params.slug as string);
 
 const { getAuthorBySlug, getAuthorBlogs } = useContent();
 
 const itemsPerPage = 12;
 const displayLimit = ref(itemsPerPage);
-
-const authorSlug = computed(() => slug);
 
 const { data: author, pending: authorPending, error: authorError } = await getAuthorBySlug(authorSlug);
 const { data: rawBlogs, pending: blogsPending } = await getAuthorBlogs(authorSlug, displayLimit);
@@ -62,25 +60,25 @@ function getSocialPlatformMeta(platform: string) {
   const platforms: Record<string, { icon: string; style: Record<string, string> }> = {
     github: {
       icon: "i-simple-icons-github",
-      style: { "--social-hover-color": "#24292e", "--social-bg": "rgba(36, 41, 46, 0.1)" },
+      style: { "--social-hover-color": "currentColor", "--social-bg": "rgba(128, 128, 128, 0.14)" },
     },
     twitter: {
       icon: "i-simple-icons-x",
-      style: { "--social-hover-color": "#1da1f2", "--social-bg": "rgba(29, 161, 242, 0.1)" },
+      style: { "--social-hover-color": "currentColor", "--social-bg": "rgba(128, 128, 128, 0.14)" },
     },
     x: {
       icon: "i-simple-icons-x",
-      style: { "--social-hover-color": "#000000", "--social-bg": "rgba(0, 0, 0, 0.1)" },
+      style: { "--social-hover-color": "currentColor", "--social-bg": "rgba(128, 128, 128, 0.14)" },
     },
     linkedin: {
       icon: "i-simple-icons-linkedin",
-      style: { "--social-hover-color": "#0077b5", "--social-bg": "rgba(0, 119, 181, 0.1)" },
+      style: { "--social-hover-color": "#0077b5", "--social-bg": "rgba(0, 119, 181, 0.12)" },
     },
   };
 
   return platforms[platform.toLowerCase()] || {
     icon: "i-lucide-link",
-    style: { "--social-hover-color": "var(--ui-primary)", "--social-bg": "rgba(var(--color-primary-500-rgb), 0.1)" },
+    style: { "--social-hover-color": "var(--ui-primary)", "--social-bg": "color-mix(in srgb, var(--ui-primary) 12%, transparent)" },
   };
 }
 
@@ -90,8 +88,8 @@ const PAGE_TITLE = computed(() => `${author.value?.name || "Author"} Profile`);
 const PAGE_DESCRIPTION = computed(
   () => author.value?.description || `Explore the profile of ${author.value?.name || "this author"} and discover their contributions to our platform.`,
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.value?.slug || slug}`);
-const AUTHOR_RSS_URL = computed(() => `/authors/${author.value?.slug || slug}/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.value?.slug || authorSlug.value}`);
+const AUTHOR_RSS_URL = computed(() => `/authors/${author.value?.slug || authorSlug.value}/rss.xml`);
 
 const authorAvatarUrl = computed(() => {
   const src = author.value?.avatar?.src;
@@ -133,7 +131,7 @@ useSeoMeta({
 
   profileFirstName: () => author.value?.name?.split(" ")[0] || "",
   profileLastName: () => author.value?.name?.split(" ").slice(1).join(" ") || "",
-  profileUsername: () => author.value?.slug || slug,
+  profileUsername: () => author.value?.slug || authorSlug.value,
 
   twitterCard: "summary_large_image",
   twitterTitle: () => PAGE_TITLE.value,
@@ -169,7 +167,10 @@ useSchemaOrg([
     itemListElement: [
       { name: "Home", item: "/" },
       { name: "Authors", item: "/authors" },
-      { name: author.value?.name || "Author Profile", item: PAGE_CANONICAL_URL.value },
+      {
+        name: () => author.value?.name || "Author Profile",
+        item: () => PAGE_CANONICAL_URL.value,
+      },
     ],
   }),
 
@@ -202,31 +203,33 @@ useSchemaOrg([
 
 defineOgImage("Author.takumi", {
   colorMode: "light",
-  name: author.value?.name,
-  role: author.value?.title,
-  avatar: author.value?.avatar?.src,
-  articleCount: blogs.value.length,
+  name: () => author.value?.name,
+  role: () => author.value?.title,
+  avatar: () => author.value?.avatar?.src,
+  articleCount: () => blogs.value.length,
 });
 </script>
 
 <template>
-  <UContainer>
+  <UContainer class="py-4 sm:py-6">
+    <!-- Author Profile Initial Skeleton -->
     <div
       v-if="authorPending && !author"
-      class="py-16 text-center animate-pulse"
-      aria-hidden="true"
+      class="py-12 text-center animate-pulse"
+      aria-label="Loading author profile"
     >
-      <div class="w-24 h-24 rounded-full bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70 mx-auto mb-4" />
-      <div class="h-8 bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70 rounded-xs w-1/4 mx-auto mb-2" />
-      <div class="h-4 bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40 rounded-xs w-1/2 mx-auto" />
+      <USkeleton class="w-24 h-24 rounded-full bg-(--app-surface-subtle) mx-auto mb-4" />
+      <USkeleton class="h-8 rounded-xs w-48 bg-(--app-surface-subtle) mx-auto mb-2" />
+      <USkeleton class="h-4 rounded-xs w-80 max-w-full bg-(--app-surface-subtle) mx-auto" />
     </div>
 
-    <UPage v-else-if="author && !authorError" class="py-10">
+    <UPage v-else-if="author && !authorError" class="py-6">
+      <!-- Top Breadcrumb & RSS Bar -->
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div class="flex items-center gap-2">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2">
           <NuxtLink
             to="/authors"
-            class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+            class="text-xs font-mono font-bold text-neutral-500 dark:text-neutral-400 hover:text-primary-500 flex items-center gap-1 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
           >
             <UIcon
               name="i-lucide-chevron-left"
@@ -235,11 +238,11 @@ defineOgImage("Author.takumi", {
             />
             Back to Authors
           </NuxtLink>
-          <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs" aria-hidden="true">/</span>
+          <span class="text-neutral-400 dark:text-neutral-600 font-mono text-xs" aria-hidden="true">/</span>
 
           <UBadge
             size="sm"
-            class="rounded-xs shrink-0"
+            class="rounded-xs shrink-0 bg-(--app-surface-subtle)/80 border border-(--app-border)"
             variant="subtle"
           >
             <template #leading>
@@ -247,7 +250,7 @@ defineOgImage("Author.takumi", {
                 v-if="author.avatar?.src"
                 :src="author.avatar.src"
                 :alt="`Avatar of ${author.name}`"
-                class="w-3 h-3 inline-block mr-1 align-text-top rounded-full object-cover"
+                class="w-3.5 h-3.5 inline-block mr-1 align-text-top rounded-full object-cover"
               />
             </template>
             <span
@@ -257,7 +260,7 @@ defineOgImage("Author.takumi", {
               {{ author.name }}
             </span>
           </UBadge>
-        </div>
+        </nav>
 
         <!-- Author RSS Subscribe Button -->
         <RssSubscribeButton
@@ -266,17 +269,22 @@ defineOgImage("Author.takumi", {
         />
       </div>
 
-      <!-- Completely Borderless & Transparent Author Profile Hero Block -->
       <header class="mb-10 py-4 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-8 bg-transparent border-0 relative overflow-hidden">
         <!-- Avatar Block -->
         <div class="shrink-0">
           <NuxtImg
             v-if="author.avatar?.src"
             :src="author.avatar.src"
-            :alt="`Avatar of ${author.name}`"
-            class="w-32 h-32 rounded-full object-cover border border-[#e0dad0] dark:border-[#2d2a24] bg-[#f2eee5] dark:bg-[#1c1a17]"
+            :alt="author.avatar.alt || `Portrait of ${author.name}`"
+            width="128"
+            height="128"
+            class="w-32 h-32 rounded-full object-cover border border-(--app-border) bg-(--app-surface-subtle) shadow-sm"
           />
-          <div v-else class="w-32 h-32 rounded-full bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0] dark:border-[#2d2a24] flex items-center justify-center text-neutral-400 dark:text-neutral-500 font-mono text-3xl font-bold">
+          <div
+            v-else
+            class="w-32 h-32 rounded-full bg-(--app-surface-subtle) border border-(--app-border) flex items-center justify-center text-neutral-500 dark:text-neutral-400 font-mono text-3xl font-bold shadow-sm"
+            aria-hidden="true"
+          >
             {{ author.name.charAt(0) }}
           </div>
         </div>
@@ -289,7 +297,7 @@ defineOgImage("Author.takumi", {
             </h1>
 
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-2 text-base sm:text-lg font-medium text-neutral-600 dark:text-neutral-400 font-mono">
-              <span>{{ activeHoverText['author-title'] || author.title }}</span>
+              <span>{{ activeHoverText["author-title"] || author.title }}</span>
 
               <template v-if="author.company">
                 <span class="text-neutral-300 dark:text-neutral-700 hidden md:inline" aria-hidden="true">|</span>
@@ -297,32 +305,34 @@ defineOgImage("Author.takumi", {
                   <NuxtImg
                     v-if="author.company.icon?.startsWith('http')"
                     :src="author.company.icon"
-                    :alt="author.company.name"
+                    :alt="`${author.company.name} logo`"
                     class="w-4 h-4 rounded-xs shrink-0"
                   />
                   <UIcon
                     v-else
-                    :name="author.company.icon || 'i-lucide-globe-check'"
+                    :name="author.company.icon || 'i-lucide-building-2'"
                     class="w-4 h-4 shrink-0"
                     aria-hidden="true"
                   />
                   <NuxtLink
+                    v-if="author.company.website"
                     :to="author.company.website"
                     target="_blank"
+                    rel="noopener noreferrer"
                     class="truncate focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+                    :aria-label="`Visit ${author.company.name} website (opens in a new tab)`"
                   >
                     {{ author.company.name }}
                   </NuxtLink>
+                  <span v-else class="truncate">{{ author.company.name }}</span>
                 </div>
 
                 <UBadge
                   v-if="author.company.role"
-                  :avatar="{
-                    src: author.avatar?.src || author.company.icon,
-                    loading: 'lazy',
-                  }"
+                  :avatar="author.company.icon?.startsWith('http') ? { src: author.company.icon, alt: `${author.company.name} logo`, loading: 'lazy' } : undefined"
+                  :icon="!author.company.icon?.startsWith('http') ? (author.company.icon || 'i-lucide-briefcase') : undefined"
                   size="sm"
-                  class="rounded-xs shrink-0"
+                  class="rounded-xs shrink-0 bg-(--app-surface-subtle)/80 border border-(--app-border)"
                   variant="subtle"
                 >
                   {{ author.company.role }}
@@ -331,12 +341,15 @@ defineOgImage("Author.takumi", {
             </div>
           </div>
 
-          <p v-if="author.description" class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 leading-relaxed text-center md:text-left">
+          <p v-if="author.description" class="text-sm sm:text-base text-neutral-600 dark:text-neutral-300 leading-relaxed text-center md:text-left">
             {{ author.description }}
           </p>
 
-          <!-- Social Links -->
-          <div v-if="author.socialLinks && author.socialLinks.length > 0" class="flex items-center justify-center md:justify-start gap-3">
+          <!-- Social & Website Links -->
+          <div
+            v-if="(author.socialLinks && author.socialLinks.length > 0) || author.website || author.company?.website"
+            class="flex items-center justify-center md:justify-start gap-2.5"
+          >
             <UTooltip
               v-for="link in author.socialLinks"
               :key="link.url"
@@ -346,32 +359,43 @@ defineOgImage("Author.takumi", {
               <UButton
                 :to="link.url"
                 target="_blank"
+                rel="noopener noreferrer"
                 variant="ghost"
                 size="md"
-                class="social-brand-btn rounded-xs p-2 transition-all duration-200 border border-[#e8e3d8] dark:border-[#26231f] hover:border-transparent bg-[#f2eee5]/60 dark:bg-[#1c1a17]/60 text-neutral-500 dark:text-neutral-400"
+                class="social-brand-btn rounded-xs p-2 transition-all duration-200 border border-(--app-border) hover:border-transparent bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 text-neutral-600 dark:text-neutral-300"
                 :style="getSocialPlatformMeta(link.platform).style"
                 :icon="getSocialPlatformMeta(link.platform).icon"
-                :aria-label="`Visit ${author.name}'s ${link.platform} profile`"
+                :aria-label="`Visit ${author.name}'s ${link.platform} profile (opens in a new tab)`"
               />
             </UTooltip>
 
             <UTooltip
               v-if="author.website"
-              :text="`Visit ${author.name}'s website`"
+              :text="`Visit ${author.name}'s personal website`"
               placement="top"
             >
               <UButton
                 :to="author.website"
                 target="_blank"
+                rel="noopener noreferrer"
                 variant="ghost"
                 size="md"
-                class="social-brand-btn rounded-xs p-2 transition-all duration-200 border border-[#e8e3d8] dark:border-[#26231f] hover:border-transparent bg-[#f2eee5]/60 dark:bg-[#1c1a17]/60 text-neutral-500 dark:text-neutral-400"
-                :aria-label="`Visit ${author.name}'s personal website`"
+                class="social-brand-btn rounded-xs p-2 transition-all duration-200 border border-(--app-border) hover:border-transparent bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 text-neutral-600 dark:text-neutral-300"
+                :style="{ '--social-hover-color': 'var(--ui-primary)', '--social-bg': 'color-mix(in srgb, var(--ui-primary) 12%, transparent)' }"
+                :aria-label="`Visit ${author.name}'s personal website (opens in a new tab)`"
               >
                 <UAvatar
                   v-if="author.avatar?.src"
                   :src="author.avatar.src"
+                  :alt="author.name"
+                  size="2xs"
                   class="rounded-full shrink-0"
+                />
+                <UIcon
+                  v-else
+                  name="i-lucide-globe"
+                  class="w-4 h-4 shrink-0"
+                  aria-hidden="true"
                 />
               </UButton>
             </UTooltip>
@@ -384,20 +408,22 @@ defineOgImage("Author.takumi", {
               <UButton
                 :to="author.company.website"
                 target="_blank"
+                rel="noopener noreferrer"
                 variant="ghost"
                 size="md"
-                class="social-brand-btn rounded-xs p-2 transition-all duration-200 border border-[#e8e3d8] dark:border-[#26231f] hover:border-transparent bg-[#f2eee5]/60 dark:bg-[#1c1a17]/60 text-neutral-500 dark:text-neutral-400"
-                :aria-label="`Visit ${author.company.name}'s company website`"
+                class="social-brand-btn rounded-xs p-2 transition-all duration-200 border border-(--app-border) hover:border-transparent bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 text-neutral-600 dark:text-neutral-300"
+                :style="{ '--social-hover-color': 'var(--ui-primary)', '--social-bg': 'color-mix(in srgb, var(--ui-primary) 12%, transparent)' }"
+                :aria-label="`Visit ${author.company.name}'s company website (opens in a new tab)`"
               >
                 <NuxtImg
                   v-if="author.company.icon?.startsWith('http')"
                   :src="author.company.icon"
-                  :alt="author.company.name"
+                  :alt="`${author.company.name} logo`"
                   class="w-4 h-4 rounded-xs shrink-0"
                 />
                 <UIcon
                   v-else
-                  :name="author.company.icon || 'i-lucide-globe-check'"
+                  :name="author.company.icon || 'i-lucide-building-2'"
                   class="w-4 h-4 shrink-0"
                   aria-hidden="true"
                 />
@@ -409,19 +435,27 @@ defineOgImage("Author.takumi", {
 
       <UPageBody>
         <div class="space-y-8 my-6">
-          <div class="flex items-center justify-between border-b border-[#e8e3d8] dark:border-[#26231f] pb-3">
+          <div class="flex items-center justify-between border-b border-(--app-border) pb-3">
             <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
               Published Contributions:
               {{ blogs.length }} {{ blogs.length === 1 ? "Article" : "Articles" }}
             </h2>
           </div>
 
-          <!-- Contiguous Bento Matrix Grid for Published Contributions -->
+          <!-- Initial Loading Skeletons -->
+          <div
+            v-if="blogsPending && displayLimit === itemsPerPage"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+            aria-label="Loading author articles"
+          >
+            <LazyBlogPostCardSkeleton v-for="n in 6" :key="`init-auth-blog-${n}`" />
+          </div>
+
           <section
-            v-if="blogs.length > 0"
+            v-else-if="blogs.length > 0"
             aria-label="Author's published articles"
           >
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               <BlogPostCard
                 v-for="blog in blogs"
                 :key="blog.path"
@@ -432,11 +466,11 @@ defineOgImage("Author.takumi", {
 
           <!-- Empty Fallback State -->
           <div
-            v-else-if="!blogsPending"
-            class="text-center py-20 border border-dashed border-[#e8e3d8] dark:border-[#26231f] rounded-xs bg-[#faf7f2]/50 dark:bg-[#141311]/50"
+            v-else
+            class="text-center py-20 border border-dashed border-(--app-border) rounded-xs bg-(--app-surface-subtle)/40"
             role="status"
           >
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] mb-3 text-neutral-400">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-(--app-surface-subtle) border border-(--app-border) mb-3 text-neutral-400">
               <UIcon
                 name="i-lucide-pen-tool"
                 class="w-5 h-5"
@@ -446,15 +480,15 @@ defineOgImage("Author.takumi", {
             <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
               No contributions found
             </h3>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto leading-relaxed">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
               {{ author.name }} hasn't contributed any articles or documentation fragments yet. We couldn't locate any published entries associated with this contributor's profile.
             </p>
           </div>
 
           <!-- Infinite Scroll Appending Skeletons -->
           <div
-            v-if="blogsPending"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs mt-6"
+            v-if="blogsPending && displayLimit > itemsPerPage"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5"
             aria-label="Loading additional articles"
           >
             <LazyBlogPostCardSkeleton v-for="n in 3" :key="`append-auth-blog-${n}`" />
@@ -463,7 +497,7 @@ defineOgImage("Author.takumi", {
           <!-- End of List Indicator -->
           <div
             v-if="!hasMoreContent && blogs.length > 0"
-            class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
+            class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-(--app-border)"
           >
             You've reached the end of the author's contributions.
           </div>
@@ -474,7 +508,7 @@ defineOgImage("Author.takumi", {
     <!-- Error State -->
     <div
       v-else
-      class="text-center py-24 border border-dashed border-red-200 dark:border-red-900/50 rounded-xs bg-red-50/20 dark:bg-red-950/10 my-10"
+      class="text-center py-24 border border-dashed border-red-300/60 dark:border-red-900/50 rounded-xs bg-red-500/5 my-10"
       role="alert"
     >
       <UIcon
@@ -485,13 +519,14 @@ defineOgImage("Author.takumi", {
       <h2 class="text-lg font-bold text-neutral-900 dark:text-neutral-100">
         Author Not Found
       </h2>
-      <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto mb-6">
+      <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto mb-6 leading-relaxed">
         The requested author profile could not be located. It may have been removed, renamed, or never existed. Please verify the URL or explore other sections of the site.
       </p>
       <UButton
         to="/authors"
         label="Return to Authors"
         color="neutral"
+        variant="subtle"
         size="sm"
         class="rounded-xs"
       />

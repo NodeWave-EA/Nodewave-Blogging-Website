@@ -7,14 +7,12 @@ import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 
 const route = useRoute();
-const slug = route.params.slug as string;
+const tagSlug = computed(() => route.params.slug as string);
 
 const { getTagBySlug, getTagBlogs } = useContent();
 
 const itemsPerPage = 12;
 const displayLimit = ref(itemsPerPage);
-
-const tagSlug = computed(() => slug);
 
 const { data: tag, pending: tagPending, error: tagError } = await getTagBySlug(tagSlug);
 const { data: rawBlogs, pending: blogsPending } = await getTagBlogs(tagSlug, displayLimit);
@@ -49,8 +47,8 @@ const PAGE_TITLE = computed(() => `Browse ${tag.value?.name || "Tag"} Articles`)
 const PAGE_DESCRIPTION = computed(
   () => tag.value?.description || tag.value?.meta?.description || `Explore technical posts, guides, and architectural notes tagged under ${tag.value?.name || "this topic"}.`,
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug || slug}`);
-const TAG_RSS_URL = computed(() => `/tags/${tag.value?.slug || slug}/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug || tagSlug.value}`);
+const TAG_RSS_URL = computed(() => `/tags/${tag.value?.slug || tagSlug.value}/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
@@ -95,16 +93,17 @@ useHead({
 
 // Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
 useSchemaOrg([
-  // Google Search Breadcrumb
   defineBreadcrumb({
     itemListElement: [
       { name: "Home", item: "/" },
       { name: "Tags", item: "/tags" },
-      { name: tag.value?.name || "Tag Archive", item: PAGE_CANONICAL_URL.value },
+      {
+        name: () => tag.value?.name || "Tag Archive",
+        item: () => PAGE_CANONICAL_URL.value,
+      },
     ],
   }),
 
-  // CollectionPage Schema for Tag Topic
   {
     "@type": "CollectionPage",
     "@id": `${PAGE_CANONICAL_URL.value}/#collectionpage`,
@@ -121,35 +120,35 @@ useSchemaOrg([
 
 defineOgImage("Taxonomy.takumi", {
   colorMode: "light",
-  title: toValue(PAGE_TITLE),
-  description: toValue(PAGE_DESCRIPTION),
+  title: () => toValue(PAGE_TITLE),
+  description: () => toValue(PAGE_DESCRIPTION),
   type: "Tag",
-  articleCount: blogs.value.length,
+  articleCount: () => blogs.value.length,
 });
 </script>
 
 <template>
-  <UContainer>
+  <UContainer class="py-4 sm:py-6">
+    <!-- Tag Initial Skeleton -->
     <div
       v-if="tagPending && !tag"
-      class="py-24 text-center animate-pulse"
-      aria-hidden="true"
+      class="py-12 text-center animate-pulse"
+      aria-label="Loading tag"
     >
-      <div class="h-4 bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70 rounded-xs w-32 mx-auto mb-4" />
-      <div class="h-8 bg-[#e8e3d8]/80 dark:bg-[#2a2722]/70 rounded-xs w-48 mx-auto mb-3" />
-      <div class="h-4 bg-[#e8e3d8]/50 dark:bg-[#2a2722]/40 rounded-xs w-96 mx-auto" />
+      <USkeleton class="h-4 bg-(--app-surface-subtle) rounded-xs w-32 mx-auto mb-4" />
+      <USkeleton class="h-8 bg-(--app-surface-subtle) rounded-xs w-48 mx-auto mb-3" />
+      <USkeleton class="h-4 bg-(--app-surface-subtle) rounded-xs w-96 max-w-full mx-auto" />
     </div>
 
-    <UPage v-else-if="tag && !tagError" class="py-10">
+    <UPage v-else-if="tag && !tagError" class="py-6">
       <!-- Transparent & Borderless Tag Hero Header -->
       <header class="mb-10 py-4 bg-transparent border-0 relative overflow-hidden">
         <div class="space-y-4">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
+            <nav aria-label="Breadcrumb" class="flex items-center gap-2">
               <NuxtLink
                 to="/tags"
-                class="text-xs font-mono font-bold text-neutral-400 dark:text-neutral-500 hover:text-primary-500 flex items-center gap-1 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
-                aria-label="Return to all tags"
+                class="text-xs font-mono font-bold text-neutral-500 dark:text-neutral-400 hover:text-primary-500 flex items-center gap-1 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
               >
                 <UIcon
                   name="i-lucide-chevron-left"
@@ -158,19 +157,19 @@ defineOgImage("Taxonomy.takumi", {
                 />
                 Back to Tags
               </NuxtLink>
-              <span class="text-neutral-300 dark:text-neutral-700 font-mono text-xs" aria-hidden="true">/</span>
+              <span class="text-neutral-400 dark:text-neutral-600 font-mono text-xs" aria-hidden="true">/</span>
               <span
-                class="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722]"
+                class="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs bg-(--app-surface-subtle)/80 border border-(--app-border)"
                 :style="{ color: tag.color || 'var(--ui-primary)' }"
               >
                 <UIcon
                   :name="tag.icon || 'i-lucide-hash'"
-                  class="w-3 h-3 inline-block mr-1 align-text-top"
+                  class="w-3 h-3 shrink-0"
                   aria-hidden="true"
                 />
                 {{ tag.name }}
               </span>
-            </div>
+            </nav>
 
             <!-- Tag RSS Subscribe Button -->
             <RssSubscribeButton
@@ -189,7 +188,7 @@ defineOgImage("Taxonomy.takumi", {
             {{ tag.name }}
           </h1>
 
-          <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 max-w-2xl leading-relaxed">
+          <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-300 max-w-2xl leading-relaxed">
             {{ tag.description || tag.meta?.description || "Explore technical articles and documentation fragments filtered under this keyword tag." }}
           </p>
         </div>
@@ -197,19 +196,27 @@ defineOgImage("Taxonomy.takumi", {
 
       <UPageBody>
         <div class="space-y-8 my-6">
-          <div class="flex items-center justify-between border-b border-[#e8e3d8] dark:border-[#26231f] pb-3">
+          <div class="flex items-center justify-between border-b border-(--app-border) pb-3">
             <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
               Tagged Articles:
               {{ blogs.length }} {{ blogs.length === 1 ? "Article" : "Articles" }}
             </h2>
           </div>
 
-          <!-- Contiguous Bento Matrix Grid for Tagged Articles -->
+          <!-- Initial Loading Skeletons -->
+          <div
+            v-if="blogsPending && displayLimit === itemsPerPage"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+            aria-label="Loading tagged articles"
+          >
+            <LazyBlogPostCardSkeleton v-for="n in 6" :key="`init-tag-blog-${n}`" />
+          </div>
+
           <section
-            v-if="blogs.length > 0"
+            v-else-if="blogs.length > 0"
             :aria-label="`Articles tagged with ${tag.name}`"
           >
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               <BlogPostCard
                 v-for="blog in blogs"
                 :key="blog.path"
@@ -220,11 +227,11 @@ defineOgImage("Taxonomy.takumi", {
 
           <!-- Empty Fallback View -->
           <div
-            v-else-if="!blogsPending"
-            class="text-center py-20 border border-dashed border-[#e8e3d8] dark:border-[#26231f] rounded-xs bg-[#faf7f2]/50 dark:bg-[#141311]/50"
+            v-else
+            class="text-center py-20 border border-dashed border-(--app-border) rounded-xs bg-(--app-surface-subtle)/40"
             role="status"
           >
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] mb-3 text-neutral-400">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-(--app-surface-subtle) border border-(--app-border) mb-3 text-neutral-400">
               <UIcon
                 :name="tag.icon || 'i-lucide-hash'"
                 class="w-5 h-5"
@@ -234,15 +241,15 @@ defineOgImage("Taxonomy.takumi", {
             <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">
               No Entries Found
             </h3>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto leading-relaxed">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
               There are currently no published articles tagged under <span class="font-semibold text-neutral-700 dark:text-neutral-300">#{{ tag.name }}</span>. Please check back later or explore other technical tags.
             </p>
           </div>
 
           <!-- Infinite Scroll Appending Skeletons -->
           <div
-            v-if="blogsPending"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs mt-6"
+            v-if="blogsPending && displayLimit > itemsPerPage"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5"
             aria-label="Loading additional articles"
           >
             <LazyBlogPostCardSkeleton v-for="n in 3" :key="`append-tag-blog-${n}`" />
@@ -251,7 +258,7 @@ defineOgImage("Taxonomy.takumi", {
           <!-- End of Archive Signifier -->
           <div
             v-if="!hasMoreContent && blogs.length > 0"
-            class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-neutral-200/60 dark:border-neutral-800/60"
+            class="text-center pt-10 pb-4 text-neutral-400 dark:text-neutral-500 font-mono text-[10px] uppercase tracking-widest select-none border-t border-(--app-border)"
           >
             You've reached the end of the tagged archive for <span class="font-semibold text-neutral-700 dark:text-neutral-300">#{{ tag.name }}</span>.
           </div>
@@ -262,10 +269,10 @@ defineOgImage("Taxonomy.takumi", {
     <!-- Error State -->
     <div
       v-else
-      class="text-center py-24 border border-dashed border-red-200 dark:border-red-900/50 rounded-xs bg-red-50/20 dark:bg-red-950/10 my-10"
+      class="text-center py-24 border border-dashed border-red-300/60 dark:border-red-900/50 rounded-xs bg-red-500/5 my-10"
       role="alert"
     >
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-red-100 dark:bg-red-900/30 mb-4 text-error-500">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-red-500/10 border border-red-500/20 mb-4 text-error-500">
         <UIcon
           name="i-lucide-octagon-alert"
           class="w-6 h-6"
@@ -275,13 +282,14 @@ defineOgImage("Taxonomy.takumi", {
       <h2 class="text-lg font-bold text-neutral-900 dark:text-neutral-100">
         Tag Not Found
       </h2>
-      <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto mb-6 leading-relaxed">
+      <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 max-w-xs mx-auto mb-6 leading-relaxed">
         The requested tag topic could not be located in the system directory. It may have been renamed or removed.
       </p>
       <UButton
         to="/tags"
         label="Return to Tags"
         color="neutral"
+        variant="subtle"
         size="sm"
         class="rounded-xs"
       />
