@@ -86,8 +86,8 @@ async function copyToClipboard() {
     arrow
     modal
     :ui="{
-      content: 'rounded-xs border border-[#e8e3d8] dark:border-[#26231f] bg-[#faf7f2] dark:bg-[#141311] shadow-2xs overflow-hidden',
-      arrow: 'before:border-[#e8e3d8] dark:before:border-[#26231f] before:bg-[#faf7f2] dark:before:bg-[#141311]',
+      content: 'rounded-xs border border-[var(--app-border)] bg-[var(--app-bg)] shadow-2xs overflow-hidden',
+      arrow: 'before:border-[var(--app-border)] before:bg-[var(--app-bg)]',
     }"
   >
     <UButton
@@ -96,13 +96,13 @@ async function copyToClipboard() {
       variant="subtle"
       color="neutral"
       size="xs"
-      class="font-mono text-xs rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/80 dark:border-[#2a2722] hover:border-primary-500/50 hover:text-primary-500 transition-colors cursor-pointer"
+      class="font-mono text-xs rounded-xs bg-(--app-surface-subtle) border border-(--app-border) hover:border-primary-500/50 hover:text-primary-500 transition-colors cursor-pointer"
     />
 
     <template #content>
       <div class="p-1.5 w-56 flex flex-col gap-0.5 select-none">
         <!-- Header -->
-        <div class="px-2.5 pt-2 pb-1.5 border-b border-[#e8e3d8] dark:border-[#26231f] mb-1">
+        <div class="px-2.5 pt-2 pb-1.5 border-b border-(--app-border) mb-1">
           <h3 class="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
             Share this post
           </h3>
@@ -119,7 +119,7 @@ async function copyToClipboard() {
           color="neutral"
           size="xs"
           trailing-icon="i-lucide-external-link"
-          class="w-full justify-start font-mono text-xs text-neutral-700 dark:text-neutral-300 hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] hover:text-primary-500 dark:hover:text-primary-400 rounded-xs transition-colors"
+          class="w-full justify-start font-mono text-xs text-neutral-700 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-500 dark:hover:text-primary-400 rounded-xs transition-colors"
           :icon="link.icon"
           :ui="{
             trailingIcon: 'absolute right-2.5 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 size-3',
@@ -128,13 +128,13 @@ async function copyToClipboard() {
           {{ link.label }}
         </UButton>
 
-        <USeparator class="my-1 border-[#e8e3d8] dark:border-[#26231f]" />
+        <USeparator class="my-1 border-(--app-border)" />
 
         <!-- Copy URL Button -->
         <UButton
           variant="ghost"
           size="xs"
-          class="w-full justify-start font-mono text-xs rounded-xs transition-all duration-200 hover:bg-[#f3eee4] dark:hover:bg-[#1a1816]"
+          class="w-full justify-start font-mono text-xs rounded-xs transition-all duration-200 hover:bg-(--app-surface-hover)"
           :color="isCopied ? 'success' : 'neutral'"
           :icon="isCopied ? 'i-lucide-copy-check' : 'i-lucide-copy'"
           @click="copyToClipboard"

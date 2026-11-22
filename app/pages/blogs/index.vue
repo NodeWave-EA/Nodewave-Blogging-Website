@@ -64,7 +64,7 @@ const BLOGS_RSS_URL = computed(() => `/rss.xml`);
 useSeoMeta({
   title: () => BLOGS_TITLE.value,
   description: () => BLOGS_DESCRIPTION.value,
-  keywords: "nodewave, complete archive, technical articles, architecture notes, development logs, blog, tutorials, engineering insights",
+  // keywords: "nodewave, complete archive, technical articles, architecture notes, development logs, blog, tutorials, engineering insights",
   robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
   // Open Graph / Facebook
@@ -133,7 +133,13 @@ useSchemaOrg([
 <template>
   <UContainer class="py-4 sm:py-6">
     <UPage>
-      <UPageHeader class="mb-12">
+      <UPageHeader
+        class="mb-12"
+        :ui="{
+          title: 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]',
+          description: 'text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed',
+        }"
+      >
         <template #headline>
           <div class="flex items-center justify-between gap-4">
             <div
@@ -166,20 +172,14 @@ useSchemaOrg([
         </template>
 
         <template #title>
-          <h1
-            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]"
-          >
-            Explore our
-            <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent font-extrabold">complete collection</span>
-            of technical articles, architecture notes, and development logs.
-          </h1>
+          Explore our
+          <span class="bg-linear-to-r from-primary-500 to-indigo-500 bg-clip-text text-transparent font-extrabold">complete collection</span>
+          of technical articles, architecture notes, and development logs.
         </template>
 
         <template #description>
-          <p class="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed">
-            A comprehensive archive of all technical articles, architecture notes, and development logs published on
-            nodewave.
-          </p>
+          A comprehensive archive of all technical articles, architecture notes, and development logs published on
+          nodewave.
         </template>
 
         <template #default>
@@ -217,7 +217,7 @@ useSchemaOrg([
         <!-- Initial Loading State: Bento Grid Skeleton -->
         <div
           v-if="blogsPending && displayLimit === itemsPerPage"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden my-6 shadow-xs"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-(--app-border) rounded-xs overflow-hidden my-6 shadow-xs"
         >
           <LazyBlogPostCardSkeleton v-for="n in 6" :key="`blog-skeleton-${n}`" />
         </div>
@@ -232,7 +232,7 @@ useSchemaOrg([
               <h2 id="archive-blogs-heading" class="sr-only">
                 Complete Blog Archive List
               </h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden shadow-xs">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-(--app-border) rounded-xs overflow-hidden shadow-xs">
                 <BlogPostCard
                   v-for="blog in blogs"
                   :key="blog.path"
@@ -267,7 +267,7 @@ useSchemaOrg([
             <!-- Infinite Scroll Appending Skeletons -->
             <div
               v-if="blogsPending && displayLimit > itemsPerPage"
-              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#e8e3d8] dark:border-[#26231f] rounded-xs overflow-hidden mt-6 shadow-xs"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-(--app-border) rounded-xs overflow-hidden mt-6 shadow-xs"
               aria-label="Loading additional articles"
             >
               <LazyBlogPostCardSkeleton v-for="n in 3" :key="`append-${n}`" />

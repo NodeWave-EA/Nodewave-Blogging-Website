@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useHead } from "#imports";
 import { computed } from "vue";
 
 type Props = {
@@ -19,11 +20,17 @@ const props = withDefaults(defineProps<Props>(), {
   warmthProfile: "teal",
 });
 
+// Sync active warmth profile to <html data-warmth="..."> for SSR and all child components
+useHead({
+  htmlAttrs: {
+    "data-warmth": () => props.warmthProfile,
+  },
+});
+
 const themeConfig = computed(() => {
   switch (props.warmthProfile) {
     case "sepia":
       return {
-        base: "bg-[#f4efe6] dark:bg-[#181614]",
         lightMatrix: "0.3 0 0 0 0.4 0 0.3 0 0 0.35 0 0 0.3 0 0.3 0 0 0 0.7 0",
         dotOpacity: "opacity-[0.03] dark:opacity-[0.08]",
         dotColor: "rgba(160, 150, 130, 0.6)",
@@ -34,7 +41,6 @@ const themeConfig = computed(() => {
       };
     case "amber":
       return {
-        base: "bg-[#faf5eb] dark:bg-[#1a1713]",
         lightMatrix: "0.3 0 0 0 0.4 0 0.3 0 0 0.35 0 0 0.3 0 0.3 0 0 0 0.7 0",
         dotOpacity: "opacity-[0.03] dark:opacity-[0.08]",
         dotColor: "rgba(160, 150, 130, 0.6)",
@@ -45,7 +51,6 @@ const themeConfig = computed(() => {
       };
     case "cream":
       return {
-        base: "bg-[#f7f4ed] dark:bg-[#161513]",
         lightMatrix: "0.3 0 0 0 0.4 0 0.3 0 0 0.35 0 0 0.3 0 0.3 0 0 0 0.7 0",
         dotOpacity: "opacity-[0.03] dark:opacity-[0.08]",
         dotColor: "rgba(160, 150, 130, 0.6)",
@@ -57,7 +62,6 @@ const themeConfig = computed(() => {
     case "teal":
     default:
       return {
-        base: "bg-[#f0f8f7] dark:bg-[#0a1615]",
         lightMatrix: "0.2 0 0 0 0.1 0 0.3 0 0 0.4 0 0 0.3 0 0.4 0 0 0 0.7 0",
         dotOpacity: "opacity-[0.04] dark:opacity-[0.1]",
         dotColor: "rgba(20, 184, 166, 0.8)",
@@ -72,8 +76,7 @@ const themeConfig = computed(() => {
 
 <template>
   <div
-    class="fixed inset-0 -z-50 h-full w-full overflow-hidden pointer-events-none select-none transition-colors duration-700 ease-in-out"
-    :class="themeConfig.base"
+    class="fixed inset-0 -z-50 h-full w-full overflow-hidden pointer-events-none select-none bg-(--app-bg) transition-colors duration-700 ease-in-out"
     aria-hidden="true"
   >
     <!-- LIGHT MODE TACTILE PARCHMENT GRAIN -->

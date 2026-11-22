@@ -42,7 +42,7 @@ export default defineAppConfig({
         size: "md",
       },
       slots: {
-        root: "rounded-xl ring-1 ring-gray-200 dark:ring-gray-800",
+        root: "rounded-xl ring-1 ring-(--app-border)",
       },
     },
     tooltip: {
@@ -57,7 +57,7 @@ export default defineAppConfig({
     },
     card: {
       slots: {
-        root: "rounded-2xl border border-gray-200/60 dark:border-gray-800/60 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md shadow-xs hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden",
+        root: "rounded-2xl border border-(--app-border) bg-(--app-bg) shadow-xs hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden",
         body: "flex flex-col gap-4 p-6 sm:p-8",
       },
     },
@@ -92,7 +92,7 @@ export default defineAppConfig({
 
     header: {
       slots: {
-        root: "bg-transparent backdrop-blur-md border-b border-gray-100 dark:border-gray-900 h-(--ui-header-height) sticky top-0 z-50 transition-colors duration-300",
+        root: "bg-transparent backdrop-blur-md border-b border-(--app-border) h-(--ui-header-height) sticky top-0 z-50 transition-colors duration-300",
         container:
           "flex items-center justify-between gap-3 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
         left: "lg:flex-1 flex items-center gap-2",
@@ -104,7 +104,7 @@ export default defineAppConfig({
         content: "lg:hidden",
         overlay: "lg:hidden bg-gray-950/20 backdrop-blur-xs",
         header:
-          "px-4 sm:px-6 h-(--ui-header-height) shrink-0 flex items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-900",
+          "px-4 sm:px-6 h-(--ui-header-height) shrink-0 flex items-center justify-between gap-3 border-b border-(--app-border)",
         body: "p-6 overflow-y-auto space-y-6",
       },
       variants: {

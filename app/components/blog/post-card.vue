@@ -80,7 +80,7 @@ function formatDate(date: string | Date) {
 <template>
   <article
     ref="cardRef"
-    class="group relative flex flex-col justify-between overflow-hidden bg-[#faf7f2] dark:bg-[#141311] transition-colors duration-200 hover:bg-[#f3eee4] dark:hover:bg-[#1a1816] select-none h-full w-full rounded-none border-b border-r border-[#e8e3d8] dark:border-[#26231f]"
+    class="group relative flex flex-col justify-between overflow-hidden bg-(--app-bg) transition-colors duration-200 hover:bg-(--app-surface-hover) select-none h-full w-full rounded-none border-b border-r border-(--app-border)"
     :style="[
       transformStyles,
       {
@@ -111,7 +111,7 @@ function formatDate(date: string | Date) {
       <!-- Cover Image Bento Block -->
       <div
         v-if="post.coverImage"
-        class="relative overflow-hidden rounded-xs border border-[#e8e3d8]/80 dark:border-[#26231f] bg-[#f2eee5] dark:bg-[#1c1a17] w-full aspect-video"
+        class="relative overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle) w-full aspect-video"
         :class="[
           meta.class === 'hero-grid-layout-variant'
             ? '[@media(min-width:740px)]:col-span-5 [@media(min-width:740px)]:h-full [@media(min-width:740px)]:aspect-auto max-h-35 [@media(min-width:740px)]:max-h-none'
@@ -198,11 +198,11 @@ function formatDate(date: string | Date) {
         </div>
 
         <!-- Bento Footer Metadata (Author & Tags) -->
-        <div class="w-full space-y-2 pt-2 border-t border-[#e8e3d8] dark:border-[#26231f] mt-auto">
+        <div class="w-full space-y-2 pt-2 border-t border-(--app-border) mt-auto">
           <div class="flex items-center gap-1 relative z-30">
             <NuxtLink
               :to="`/categories/${post.category || 'general'}`"
-              class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722] hover:text-primary-500 transition-all duration-200 focus-visible:ring-1 focus-visible:ring-primary-500"
+              class="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-(--app-surface-subtle) border border-(--app-border) hover:text-primary-500 transition-all duration-200 focus-visible:ring-1 focus-visible:ring-primary-500"
               :style="{ color: 'var(--ui-primary)' }"
               :aria-label="`Category: ${post.category || 'General'}`"
             >
@@ -224,7 +224,7 @@ function formatDate(date: string | Date) {
                   :alt="author.avatar.alt || author.name"
                   size="3xs"
                   :aria-label="`Read more posts by ${author.name}`"
-                  class="ring-1 ring-[#e0dad0] dark:ring-[#2d2a24]"
+                  class="ring-1 ring-(--app-border)"
                 />
                 <span class="text-[10px] font-medium text-neutral-600 dark:text-neutral-400 group-hover/author:text-primary-500 transition-colors line-clamp-1">
                   {{ author.name }}
@@ -242,7 +242,7 @@ function formatDate(date: string | Date) {
                 :aria-label="`Tag: ${tag.name}`"
               >
                 <span
-                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-[#f2eee5] dark:bg-[#1c1a17] border border-[#e0dad0]/60 dark:border-[#2a2722] text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 font-mono text-[8px] font-medium rounded-xs bg-(--app-surface-subtle) border border-(--app-border) text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-all duration-200"
                   :style="{
                     color: tag.color || '',
                     backgroundColor: tag.color ? `${tag.color}10` : '',
