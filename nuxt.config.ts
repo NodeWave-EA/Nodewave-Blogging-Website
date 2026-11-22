@@ -209,7 +209,7 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: true,
-      ignore: ["/__nuxt_studio/**"],
+      ignore: ["/__nuxt_studio", "/_vercel"],
     },
     experimental: {
       wasm: true,
