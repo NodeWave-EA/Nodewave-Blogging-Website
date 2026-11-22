@@ -19,18 +19,53 @@ const props = withDefaults(defineProps<Props>(), {
   warmthProfile: "teal",
 });
 
-// Tuned paper base colors supporting brand teal and legacy warmth profiles
-const paletteClasses = computed(() => {
+const themeConfig = computed(() => {
   switch (props.warmthProfile) {
     case "sepia":
-      return "bg-[#f4efe6] dark:bg-[#181614]";
+      return {
+        base: "bg-[#f4efe6] dark:bg-[#181614]",
+        lightMatrix: "0.3 0 0 0 0.4 0 0.3 0 0 0.35 0 0 0.3 0 0.3 0 0 0 0.7 0",
+        dotOpacity: "opacity-[0.03] dark:opacity-[0.08]",
+        dotColor: "rgba(160, 150, 130, 0.6)",
+        vignette:
+          "bg-[radial-gradient(circle_at_center,transparent_30%,rgba(120,53,15,0.05)_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.5)_100%)]",
+        glowTop: "bg-amber-500/[0.05] dark:bg-amber-500/[0.05]",
+        glowBottom: "bg-teal-500/[0.07] dark:bg-teal-500/[0.07]",
+      };
     case "amber":
-      return "bg-[#faf5eb] dark:bg-[#1a1713]";
+      return {
+        base: "bg-[#faf5eb] dark:bg-[#1a1713]",
+        lightMatrix: "0.3 0 0 0 0.4 0 0.3 0 0 0.35 0 0 0.3 0 0.3 0 0 0 0.7 0",
+        dotOpacity: "opacity-[0.03] dark:opacity-[0.08]",
+        dotColor: "rgba(160, 150, 130, 0.6)",
+        vignette:
+          "bg-[radial-gradient(circle_at_center,transparent_30%,rgba(120,53,15,0.05)_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.5)_100%)]",
+        glowTop: "bg-amber-500/[0.06] dark:bg-amber-500/[0.05]",
+        glowBottom: "bg-amber-400/[0.06] dark:bg-teal-500/[0.06]",
+      };
     case "cream":
-      return "bg-[#f7f4ed] dark:bg-[#161513]";
+      return {
+        base: "bg-[#f7f4ed] dark:bg-[#161513]",
+        lightMatrix: "0.3 0 0 0 0.4 0 0.3 0 0 0.35 0 0 0.3 0 0.3 0 0 0 0.7 0",
+        dotOpacity: "opacity-[0.03] dark:opacity-[0.08]",
+        dotColor: "rgba(160, 150, 130, 0.6)",
+        vignette:
+          "bg-[radial-gradient(circle_at_center,transparent_30%,rgba(120,53,15,0.04)_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.5)_100%)]",
+        glowTop: "bg-amber-500/[0.04] dark:bg-amber-500/[0.04]",
+        glowBottom: "bg-teal-500/[0.05] dark:bg-teal-500/[0.05]",
+      };
     case "teal":
     default:
-      return "bg-[#f0f8f7] dark:bg-[#0a1615]";
+      return {
+        base: "bg-[#f0f8f7] dark:bg-[#0a1615]",
+        lightMatrix: "0.2 0 0 0 0.1 0 0.3 0 0 0.4 0 0 0.3 0 0.4 0 0 0 0.7 0",
+        dotOpacity: "opacity-[0.04] dark:opacity-[0.1]",
+        dotColor: "rgba(20, 184, 166, 0.8)",
+        vignette:
+          "bg-[radial-gradient(circle_at_center,transparent_30%,rgba(13,148,136,0.06)_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_30%,rgba(4,47,46,0.6)_100%)]",
+        glowTop: "bg-teal-500/10 dark:bg-teal-500/8",
+        glowBottom: "bg-teal-400/12 dark:bg-teal-600/8",
+      };
   }
 });
 </script>
@@ -38,10 +73,10 @@ const paletteClasses = computed(() => {
 <template>
   <div
     class="fixed inset-0 -z-50 h-full w-full overflow-hidden pointer-events-none select-none transition-colors duration-700 ease-in-out"
-    :class="paletteClasses"
+    :class="themeConfig.base"
     aria-hidden="true"
   >
-    <!-- LIGHT MODE BRAND TEAL TACTILE PARCHMENT GRAIN -->
+    <!-- LIGHT MODE TACTILE PARCHMENT GRAIN -->
     <svg
       class="absolute inset-0 h-full w-full dark:hidden pointer-events-none mix-blend-multiply transition-opacity duration-300"
       :style="{ opacity: grainOpacity }"
@@ -56,11 +91,7 @@ const paletteClasses = computed(() => {
         />
         <feColorMatrix
           type="matrix"
-          values="
-            0.2 0 0 0 0.1
-            0 0.3 0 0 0.4
-            0 0 0.3 0 0.4
-            0 0 0 0.7 0"
+          :values="themeConfig.lightMatrix"
         />
       </filter>
       <rect
@@ -99,27 +130,31 @@ const paletteClasses = computed(() => {
       />
     </svg>
 
-    <!-- MICRO PAPER FIBER DOT PATTERN IN BRAND TEAL -->
+    <!-- MICRO PAPER FIBER DOT PATTERN -->
     <div
-      class="absolute inset-0 opacity-[0.04] dark:opacity-[0.1] pointer-events-none mix-blend-overlay"
+      class="absolute inset-0 pointer-events-none mix-blend-overlay"
+      :class="themeConfig.dotOpacity"
       :style="{
-        backgroundImage: `radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.8) 1px, transparent 1px)`,
+        backgroundImage: `radial-gradient(circle at 50% 50%, ${themeConfig.dotColor} 1px, transparent 1px)`,
         backgroundSize: '12px 12px',
       }"
     />
 
-    <!-- SOFT BRAND TEAL VIGNETTE TO CENTER READABILITY -->
+    <!-- SOFT VIGNETTE TO CENTER READABILITY -->
     <div
-      class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(13,148,136,0.06)_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_30%,rgba(4,47,46,0.6)_100%)] pointer-events-none"
+      class="absolute inset-0 pointer-events-none"
+      :class="themeConfig.vignette"
     />
 
-    <!-- BRAND ACCENT AMBIENT GLOWS (TEAL 500 / TEAL 400) -->
+    <!-- AMBIENT GLOWS -->
     <div class="absolute inset-0 transition-opacity duration-1000">
       <div
-        class="absolute top-[-10%] left-[-5%] w-[45vw] h-[45vw] max-w-140 rounded-full bg-teal-500/10 dark:bg-teal-500/8 blur-[120px] transform-gpu"
+        class="absolute top-[-10%] left-[-5%] w-[45vw] h-[45vw] max-w-140 rounded-full blur-[120px] transform-gpu"
+        :class="themeConfig.glowTop"
       />
       <div
-        class="absolute bottom-[-10%] right-[-5%] w-[50vw] h-[50vw] max-w-150 rounded-full bg-teal-400/12 dark:bg-teal-600/8 blur-[130px] transform-gpu"
+        class="absolute bottom-[-10%] right-[-5%] w-[50vw] h-[50vw] max-w-150 rounded-full blur-[130px] transform-gpu"
+        :class="themeConfig.glowBottom"
       />
     </div>
   </div>

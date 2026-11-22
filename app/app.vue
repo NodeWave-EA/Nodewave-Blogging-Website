@@ -48,7 +48,7 @@ watch(
         <!-- Global Eye-Care Reading Background with Customizable Grain Opacity & Warmth -->
         <UiAppSiteBackground
           :grain-opacity="1.0"
-          warmth-profile="teal"
+          warmth-profile="sepia"
         />
         <NuxtRouteAnnouncer />
         <NuxtLoadingIndicator
