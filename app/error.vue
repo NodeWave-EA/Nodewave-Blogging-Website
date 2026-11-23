@@ -5,7 +5,19 @@ defineOptions({
   name: "AppErrorPage",
 });
 
-const error = useError();
+type ExtendedNuxtError = {
+  statusCode?: number;
+  status?: number;
+  statusMessage?: string;
+  statusText?: string;
+  message?: string;
+  url?: string;
+  stack?: string;
+};
+
+const rawError = useError();
+const error = computed(() => rawError.value as ExtendedNuxtError | null);
+const route = useRoute();
 const runtimeConfig = useRuntimeConfig().public;
 
 const isDev = import.meta.dev;
@@ -14,13 +26,14 @@ const copied = ref(false);
 const siteName = computed(() => runtimeConfig.siteName || siteConfig.name || "NodeWave");
 const currentYear = new Date().getUTCFullYear();
 
-const statusCode = computed(() => Number(error.value?.statusCode) || 500);
+const statusCode = computed(() => Number(error.value?.statusCode ?? error.value?.status) || 500);
 const is404 = computed(() => statusCode.value === 404);
 const isClientError = computed(() => statusCode.value >= 400 && statusCode.value < 500);
 
 const statusLabel = computed(() => {
-  if (error.value?.statusMessage)
-    return error.value.statusMessage;
+  const statusMsg = (error.value?.statusMessage || error.value?.statusText || "").trim();
+  if (statusMsg)
+    return statusMsg;
   if (is404.value)
     return "Not Found";
   if (statusCode.value === 403)
@@ -41,10 +54,15 @@ const errorTitle = computed(() => {
 });
 
 const errorDescription = computed(() => {
-  const detail = error.value?.message?.trim();
-  const statusMsg = error.value?.statusMessage?.trim();
+  const detail = (error.value?.message || "").trim();
+  const statusMsg = (error.value?.statusMessage || error.value?.statusText || "").trim();
 
-  if (detail && detail !== statusMsg && !detail.startsWith("Cannot find any path")) {
+  if (
+    detail
+    && detail !== statusMsg
+    && !detail.startsWith("Cannot find any path")
+    && !detail.startsWith("Page not found:")
+  ) {
     return detail;
   }
 
@@ -56,18 +74,18 @@ const errorDescription = computed(() => {
 });
 
 const requestedPath = computed(() => {
-  const url = error.value?.url;
+  const url = error.value?.url || route.path;
   return typeof url === "string" && url.length > 0
     ? url
     : "";
 });
 
 const formattedTrace = computed(() => {
-  if (!error.value)
+  if (!rawError.value)
     return "";
-  if (error.value.stack)
+  if (error.value?.stack)
     return error.value.stack;
-  return JSON.stringify(error.value, null, 2);
+  return JSON.stringify(rawError.value, null, 2);
 });
 
 function handleRedirect(path: string) {
@@ -93,10 +111,33 @@ async function copyTrace() {
   }
 }
 
+// Enforce X-Robots-Tag HTTP header & meta robots on all error responses
+useRobotsRule("noindex, nofollow");
+
 useSeoMeta({
-  title: () => `${statusCode.value} — ${errorTitle.value} | ${siteName.value}`,
+  title: () => `${statusCode.value} — ${errorTitle.value} · ${siteName.value}`,
   description: () => errorDescription.value,
   robots: "noindex, nofollow",
+  ogTitle: () => `${statusCode.value} — ${errorTitle.value} · ${siteName.value}`,
+  ogDescription: () => errorDescription.value,
+  ogSiteName: () => siteName.value,
+  twitterCard: "summary",
+  twitterTitle: () => `${statusCode.value} — ${errorTitle.value} · ${siteName.value}`,
+  twitterDescription: () => errorDescription.value,
+});
+
+// app.vue does not mount on error.vue, so declare lang and favicon directly
+useHead({
+  htmlAttrs: {
+    lang: "en",
+  },
+  link: [
+    {
+      rel: "icon",
+      type: "image/png",
+      href: "/icons/favicon.png",
+    },
+  ],
 });
 </script>
 
@@ -193,7 +234,7 @@ useSeoMeta({
               </p>
 
               <div v-if="requestedPath" class="pt-1 flex justify-center min-w-0">
-                <code class="inline-block max-w-full px-2.5 py-1 rounded-xs border border-(--app-border) bg-(--app-bg) font-mono text-xs text-neutral-600 dark:text-neutral-400 [overflow-wrap:anywhere]">
+                <code class="inline-block max-w-full px-2.5 py-1 rounded-xs border border-(--app-border) bg-(--app-bg) font-mono text-xs text-neutral-600 dark:text-neutral-400 wrap-anywhere">
                   {{ requestedPath }}
                 </code>
               </div>
