@@ -1,0 +1,165 @@
+{
+  "name": "NodeWave Blogging Website",
+  "short_name": "NodeWave Blogs",
+  "description": "Official NodeWave Blogging Website. Read the latest engineering articles, IoT guides, and insights from NodeWave.",
+  "version": "1.0.0",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "natural",
+  "theme_color": "#14b8a6",
+  "background_color": "#fafafa",
+  "categories": [
+    "smart-home",
+    "iot",
+    "automation",
+    "technology",
+    "home-automation"
+  ],
+  "icons": [
+    {
+      "src": "/icons/favicon-16x16.png",
+      "type": "image/png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "/icons/favicon-72x72.png",
+      "type": "image/png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "/icons/favicon-96x96.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "/icons/favicon-128x128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "/icons/favicon-144x144.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "/icons/favicon-152x152.png",
+      "type": "image/png",
+      "sizes": "152x152"
+    },
+    {
+      "src": "/icons/favicon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/favicon-384x384.png",
+      "type": "image/png",
+      "sizes": "384x384"
+    },
+    {
+      "src": "/icons/favicon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": [
+      "focus-existing",
+      "navigate-existing"
+    ]
+  },
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "NodeWave Blogs — Desktop View"
+    },
+    {
+      "src": "/screenshots/mobile-narrow.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "NodeWave Blogs — Mobile View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "NodeWave",
+      "short_name": "NodeWave",
+      "description": "Visit the main NodeWave website for more information about our products and services.",
+      "url": "/?main=https://nodewave.net",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Blog Posts",
+      "short_name": "Posts",
+      "description": "Read the latest articles and insights from NodeWave's blog.",
+      "url": "/blogs",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Blog Authors",
+      "short_name": "Authors",
+      "description": "Meet the talented writers and contributors behind NodeWave's content.",
+      "url": "/authors",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Blog Categories",
+      "short_name": "Categories",
+      "description": "Browse articles by category and find content that interests you.",
+      "url": "/categories",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Blog Tags",
+      "short_name": "Tags",
+      "description": "Explore articles by tag and discover content on topics that matter to you.",
+      "url": "/tags",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
