@@ -96,6 +96,13 @@ export const footerLinkGroups: FooterLinkGroup[] = [
         icon: "i-line-md-github-loop",
         external: true,
       },
+      // Nodewave Website
+      {
+        label: "Nodewave",
+        to: siteConfig.company.website,
+        icon: "i-line-md-home",
+        external: true,
+      },
       // Nuxt Studio
       {
         label: "Editor",

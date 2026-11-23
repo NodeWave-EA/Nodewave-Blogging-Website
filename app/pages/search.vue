@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, defineComponent, h, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { watchDebounced } from "@vueuse/core";
+import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
 import { siteConfig } from "~/app.meta";
 import { useContent } from "~/composables/content";
@@ -12,6 +13,24 @@ definePageMeta({
 
 type SearchTabSlot = "all" | "blogs" | "authors" | "categories" | "tags";
 
+type BlogSearchHit = {
+  id: string;
+  title: string;
+  titles?: string[];
+  description?: string;
+  content?: string;
+  snippets?: {
+    title?: string;
+    content?: string;
+  };
+};
+
+type MetaSearchBuckets = {
+  authors: Array<BlogAuthor & { count?: number }>;
+  categories: Array<BlogCategory & { count?: number }>;
+  tags: Array<BlogTag & { count?: number }>;
+};
+
 const route = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig().public;
@@ -23,21 +42,22 @@ const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave"
 
 const { searchMetadataCollections } = useContent();
 
-// Initialize full-text search collection (client-only FTS5 index)
-const { status: blogSearchStatus, search: searchBlogs } = useSearchCollection("blogs");
+// Strip code/pre/style/script tags & deep h4-h6 headings to keep FTS5 index small & fast
+const { status: blogSearchStatus, search: searchBlogs } = useSearchCollection("blogs", {
+  ignoredTags: ["code", "pre", "style", "script"],
+  minHeading: "h1",
+  maxHeading: "h3",
+});
 
-// Search state
+// Search state (shallowRef avoids deep-proxying large search result arrays)
 const searchQuery = ref(typeof route.query.q === "string"
   ? route.query.q
   : "");
-const searchInputRef = ref<HTMLInputElement | null>(null);
-const blogResults = ref<any[]>([]);
+const searchInputRef = useTemplateRef<HTMLInputElement>("searchInput");
+const tablistRef = useTemplateRef<HTMLElement>("tablist");
 
-const metaResults = ref<{
-  authors: Array<BlogAuthor & { count?: number }>;
-  categories: Array<BlogCategory & { count?: number }>;
-  tags: Array<BlogTag & { count?: number }>;
-}>({
+const blogResults = shallowRef<BlogSearchHit[]>([]);
+const metaResults = shallowRef<MetaSearchBuckets>({
   authors: [],
   categories: [],
   tags: [],
@@ -46,25 +66,17 @@ const metaResults = ref<{
 const isSearchingMeta = ref(false);
 const activeTabSlot = ref<SearchTabSlot>("all");
 
-// Debouncing & Race-Condition Guard
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
+// Race-condition guard & bounded LRU result cache for instant backspace / repeat queries
 let lastSearchRequestId = 0;
+const resultCache = new Map<string, { blogs: BlogSearchHit[]; meta: MetaSearchBuckets }>();
+const MAX_CACHE_ENTRIES = 30;
 
-// Nav Bubble Indicator state (shallowRef avoids deep-proxying DOM nodes)
-const tabRefs = shallowRef<(HTMLButtonElement | null)[]>([]);
+// Sliding tab pill indicator styles
 const bubbleStyles = ref({
   transform: "translateX(0px)",
   width: "0px",
   opacity: "0",
 });
-
-function setTabRef(el: unknown, index: number) {
-  const next = [...tabRefs.value];
-  next[index] = el
-    ? (((el as { $el?: HTMLButtonElement }).$el || el) as HTMLButtonElement)
-    : null;
-  tabRefs.value = next;
-}
 
 const searchPageTitle = computed(() => {
   const query = searchQuery.value.trim();
@@ -80,7 +92,6 @@ const searchPageDescription = computed(() => {
     : `Search across all engineering logs, articles, author rosters, categories, and technical topics on ${siteName.value}.`;
 });
 
-// Page-Specific Meta & Social Sharing Overrides (noindex enforced globally & locally)
 useSeoMeta({
   title: () => searchPageTitle.value,
   description: () => searchPageDescription.value,
@@ -109,7 +120,6 @@ defineOgImage("NuxtSeo.takumi", {
   description: `Query technical documentation, engineering logs, author profiles, categories, and tags across ${siteName.value}.`,
 });
 
-// Connected Schema.org Structured Data (SearchResultsPage + Breadcrumbs)
 useSchemaOrg([
   defineBreadcrumb({
     itemListElement: [
@@ -130,27 +140,31 @@ useSchemaOrg([
   }),
 ]);
 
-// Execute Search across Indexed Collections
-async function executeSearch(query: string) {
+function syncQueryToUrl(cleanQuery: string) {
   if (import.meta.server)
     return;
-
-  const cleanQuery = query.trim();
-
-  // Sync query parameter to URL (?q=...)
   const currentUrlQuery = typeof route.query.q === "string"
     ? route.query.q
     : "";
   if (cleanQuery !== currentUrlQuery) {
-    await router.replace({
+    void router.replace({
       query: {
         ...route.query,
         q: cleanQuery || undefined,
       },
     });
   }
+}
+
+async function executeSearch(rawQuery: string) {
+  if (import.meta.server)
+    return;
+
+  const cleanQuery = rawQuery.trim();
+  syncQueryToUrl(cleanQuery);
 
   if (!cleanQuery) {
+    lastSearchRequestId++;
     blogResults.value = [];
     metaResults.value = { authors: [], categories: [], tags: [] };
     isSearchingMeta.value = false;
@@ -158,31 +172,61 @@ async function executeSearch(query: string) {
     return;
   }
 
+  const cacheKey = cleanQuery.toLowerCase();
+  const isFtsReady = blogSearchStatus.value === "ready";
+
+  if (isFtsReady && resultCache.has(cacheKey)) {
+    const cached = resultCache.get(cacheKey)!;
+    blogResults.value = cached.blogs;
+    metaResults.value = cached.meta;
+    isSearchingMeta.value = false;
+    return;
+  }
+
   const requestId = ++lastSearchRequestId;
   isSearchingMeta.value = true;
 
   try {
-    const [blogs, data] = await Promise.all([
-      searchBlogs(cleanQuery, {
-        limit: 20,
-        snippet: {
-          columns: ["content", "title"],
-          around: 30,
-          tag: "mark",
-        },
-      }),
+    // Skip single-character FTS5 full-table prefix scans; metadata search still runs in < 0.1ms
+    const blogPromise = cleanQuery.length >= 2
+      ? searchBlogs(cleanQuery, {
+          limit: 20,
+          minTermLength: 2,
+          weights: { title: 2, content: 1 },
+          snippet: {
+            columns: ["content", "title"],
+            around: 24,
+            tag: "mark",
+          },
+        })
+      : Promise.resolve([]);
+
+    const [blogs, meta] = await Promise.all([
+      blogPromise,
       searchMetadataCollections(cleanQuery),
     ]);
 
     if (requestId !== lastSearchRequestId)
       return;
 
-    blogResults.value = blogs || [];
-    metaResults.value = (data as typeof metaResults.value) || {
+    const resolvedBlogs = (blogs || []) as BlogSearchHit[];
+    const resolvedMeta: MetaSearchBuckets = meta || {
       authors: [],
       categories: [],
       tags: [],
     };
+
+    blogResults.value = resolvedBlogs;
+    metaResults.value = resolvedMeta;
+
+    if (isFtsReady) {
+      if (resultCache.size >= MAX_CACHE_ENTRIES) {
+        const oldestKey = resultCache.keys().next().value;
+        if (oldestKey)
+          resultCache.delete(oldestKey);
+      }
+      resultCache.set(cacheKey, { blogs: resolvedBlogs, meta: resolvedMeta });
+    }
   }
   catch (err) {
     if (requestId === lastSearchRequestId) {
@@ -196,30 +240,25 @@ async function executeSearch(query: string) {
   }
 }
 
-watch(
-  [searchQuery, blogSearchStatus],
-  ([newQuery, newStatus], [_, oldStatus]) => {
-    if (import.meta.server)
-      return;
-
-    if (searchTimer)
-      clearTimeout(searchTimer);
-
-    if (!newQuery.trim()) {
-      executeSearch("");
-      return;
-    }
-
-    const isStatusReadyTransition = oldStatus !== newStatus && newStatus !== "loading";
-    const delay = isStatusReadyTransition ? 0 : 250;
-
-    searchTimer = setTimeout(() => {
-      executeSearch(newQuery);
-    }, delay);
+// Debounce user typing (180ms) for snappy responsiveness without thrashing FTS5
+watchDebounced(
+  searchQuery,
+  (newQuery) => {
+    void executeSearch(newQuery);
   },
-  { immediate: true },
+  { debounce: 180, maxWait: 450 },
 );
 
+// Re-run immediately once client FTS5 index transitions to "ready"
+watch(blogSearchStatus, (newStatus, oldStatus) => {
+  if (import.meta.server)
+    return;
+  if (newStatus === "ready" && oldStatus !== "ready" && searchQuery.value.trim()) {
+    void executeSearch(searchQuery.value);
+  }
+});
+
+// Sync external browser back/forward navigation (?q=...)
 watch(
   () => route.query.q,
   (newUrlQuery) => {
@@ -232,7 +271,6 @@ watch(
   },
 );
 
-// Global Keyboard Shortcuts ('/' to focus, 'Escape' to clear or blur)
 function handleGlobalKeyDown(event: KeyboardEvent) {
   if (
     event.key === "/"
@@ -267,6 +305,7 @@ const totalResultsCount = computed(() => {
 });
 
 const hasResults = computed(() => totalResultsCount.value > 0);
+const isBusy = computed(() => isSearchingMeta.value || blogSearchStatus.value === "loading");
 
 const tabs = computed<Array<{ slot: SearchTabSlot; label: string; icon: string; count: number }>>(() => [
   {
@@ -323,20 +362,25 @@ function handleTabKeyDown(event: KeyboardEvent, currentIndex: number) {
     const targetTab = tabs.value[nextIndex];
     if (targetTab) {
       activeTabSlot.value = targetTab.slot;
-      tabRefs.value[nextIndex]?.focus();
+      tablistRef.value?.querySelector<HTMLButtonElement>(`#search-tab-${targetTab.slot}`)?.focus();
     }
   }
 }
 
 async function updateBubblePosition() {
   await nextTick();
-  const activeIndex = tabs.value.findIndex(t => t.slot === activeTabSlot.value);
-  if (activeIndex === -1 || !tabRefs.value[activeIndex]) {
+  const container = tablistRef.value;
+  if (!container) {
     bubbleStyles.value.opacity = "0";
     return;
   }
 
-  const activeEl = tabRefs.value[activeIndex]!;
+  const activeEl = container.querySelector<HTMLButtonElement>(`#search-tab-${activeTabSlot.value}`);
+  if (!activeEl) {
+    bubbleStyles.value.opacity = "0";
+    return;
+  }
+
   bubbleStyles.value = {
     transform: `translateX(${activeEl.offsetLeft}px)`,
     width: `${activeEl.offsetWidth}px`,
@@ -345,18 +389,20 @@ async function updateBubblePosition() {
 }
 
 watch([activeTabSlot, totalResultsCount], () => {
-  updateBubblePosition();
-});
+  void updateBubblePosition();
+}, { flush: "post" });
 
 onMounted(() => {
   window.addEventListener("keydown", handleGlobalKeyDown);
-  window.addEventListener("resize", updateBubblePosition);
-  updateBubblePosition();
+  window.addEventListener("resize", updateBubblePosition, { passive: true });
+
+  if (searchQuery.value.trim()) {
+    void executeSearch(searchQuery.value);
+  }
+  void updateBubblePosition();
 });
 
 onUnmounted(() => {
-  if (searchTimer)
-    clearTimeout(searchTimer);
   window.removeEventListener("keydown", handleGlobalKeyDown);
   window.removeEventListener("resize", updateBubblePosition);
 });
@@ -364,67 +410,9 @@ onUnmounted(() => {
 function clearSearch() {
   searchQuery.value = "";
   activeTabSlot.value = "all";
+  void executeSearch("");
   focusSearchInput();
 }
-
-const AnimatedNumber = defineComponent({
-  props: {
-    value: { type: Number, required: true },
-  },
-  setup(props) {
-    const displayValue = ref(props.value);
-    let animationFrameId: number | null = null;
-
-    watch(
-      () => props.value,
-      (newVal) => {
-        const prefersReducedMotion = typeof window !== "undefined"
-          && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        if (prefersReducedMotion) {
-          displayValue.value = newVal;
-          return;
-        }
-
-        const startVal = displayValue.value;
-        const diff = newVal - startVal;
-        if (diff === 0)
-          return;
-
-        const duration = 400;
-        const startTime = performance.now();
-
-        if (animationFrameId !== null)
-          cancelAnimationFrame(animationFrameId);
-
-        const step = (currentTime: number) => {
-          const elapsed = currentTime - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          const easeOut = 1 - (1 - progress) ** 3;
-
-          displayValue.value = Math.round(startVal + diff * easeOut);
-
-          if (progress < 1) {
-            animationFrameId = requestAnimationFrame(step);
-          }
-          else {
-            animationFrameId = null;
-          }
-        };
-
-        animationFrameId = requestAnimationFrame(step);
-      },
-      { immediate: true },
-    );
-
-    onUnmounted(() => {
-      if (animationFrameId !== null)
-        cancelAnimationFrame(animationFrameId);
-    });
-
-    return () => h("span", displayValue.value);
-  },
-});
 </script>
 
 <template>
@@ -471,7 +459,7 @@ const AnimatedNumber = defineComponent({
             />
             <input
               id="global-search-input"
-              ref="searchInputRef"
+              ref="searchInput"
               v-model="searchQuery"
               type="text"
               enterkeyhint="search"
@@ -484,7 +472,7 @@ const AnimatedNumber = defineComponent({
 
             <div class="flex items-center gap-1.5 mr-3 shrink-0">
               <UIcon
-                v-if="blogSearchStatus === 'loading' || isSearchingMeta"
+                v-if="isBusy"
                 name="i-lucide-loader"
                 class="w-4 h-4 text-primary-500 animate-spin"
                 aria-hidden="true"
@@ -511,8 +499,9 @@ const AnimatedNumber = defineComponent({
         </div>
 
         <!-- Category Tabs Navigation -->
-        <div v-if="searchQuery && hasResults" class="max-w-4xl mx-auto w-full">
+        <div v-if="searchQuery.trim() && hasResults" class="max-w-4xl mx-auto w-full">
           <div
+            ref="tablist"
             role="tablist"
             aria-label="Filter search results by content type"
             class="relative flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"
@@ -528,7 +517,6 @@ const AnimatedNumber = defineComponent({
               v-for="(tab, index) in tabs"
               :id="`search-tab-${tab.slot}`"
               :key="tab.slot"
-              :ref="(el) => setTabRef(el, index)"
               type="button"
               role="tab"
               :aria-selected="activeTabSlot === tab.slot"
@@ -550,14 +538,14 @@ const AnimatedNumber = defineComponent({
               />
               <span>{{ tab.label }}</span>
               <span
-                class="px-1.5 py-0.2 text-[9px] rounded-xs font-mono font-bold transition-colors"
+                class="px-1.5 py-0.2 text-[9px] rounded-xs font-mono font-bold tabular-nums transition-colors"
                 :class="[
                   activeTabSlot === tab.slot
                     ? 'bg-white/20 text-white dark:bg-black/15 dark:text-neutral-950'
                     : 'bg-(--app-bg)/85 border border-(--app-border) text-neutral-600 dark:text-neutral-300',
                 ]"
               >
-                <AnimatedNumber :value="tab.count" />
+                {{ tab.count }}
               </span>
             </button>
           </div>
@@ -570,7 +558,7 @@ const AnimatedNumber = defineComponent({
       <div class="max-w-4xl mx-auto">
         <!-- Empty Query State -->
         <div
-          v-if="!searchQuery"
+          v-if="!searchQuery.trim()"
           class="text-center py-16 px-4 rounded-xs border border-dashed border-(--app-border) bg-(--app-surface-subtle)/40 space-y-5"
           role="status"
         >
@@ -642,9 +630,9 @@ const AnimatedNumber = defineComponent({
           </div>
         </div>
 
-        <!-- Skeleton Loader -->
+        <!-- Skeleton Loader (shown only while searching & no results resolved yet) -->
         <div
-          v-else-if="!hasResults && (isSearchingMeta || blogSearchStatus === 'loading')"
+          v-else-if="!hasResults && isBusy"
           class="space-y-4 py-4"
           aria-label="Searching knowledge base"
         >
@@ -706,13 +694,18 @@ const AnimatedNumber = defineComponent({
         >
           <!-- Result Counter Bar -->
           <div
-            class="flex items-center justify-between text-[10px] font-mono tracking-wider text-neutral-500 dark:text-neutral-400 uppercase pb-2.5 border-b border-(--app-border)"
+            class="flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono tracking-wider text-neutral-500 dark:text-neutral-400 uppercase pb-2.5 border-b border-(--app-border)"
             aria-live="polite"
           >
             <span>
               Results for "<span class="font-bold text-neutral-900 dark:text-white">{{ searchQuery }}</span>"
             </span>
-            <span><AnimatedNumber :value="totalResultsCount" /> {{ totalResultsCount === 1 ? "match" : "matches" }}</span>
+            <div class="flex items-center gap-3 tabular-nums">
+              <span v-if="blogSearchStatus === 'loading'" class="text-primary-600 dark:text-primary-400">
+                Indexing articles...
+              </span>
+              <span>{{ totalResultsCount }} {{ totalResultsCount === 1 ? "match" : "matches" }}</span>
+            </div>
           </div>
 
           <!-- Authors Section -->
@@ -734,7 +727,7 @@ const AnimatedNumber = defineComponent({
                 v-for="author in metaResults.authors"
                 :key="author.slug || author.stem"
                 :to="`/${author.stem}`"
-                class="group relative flex flex-col justify-between p-4 sm:p-5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] select-none h-full w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                class="search-result-card group relative flex flex-col justify-between p-4 sm:p-5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] select-none h-full w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 :aria-label="`View author profile for ${author.name} (${author.count || 0} ${author.count === 1 ? 'article' : 'articles'})`"
               >
                 <div class="space-y-3">
@@ -743,6 +736,7 @@ const AnimatedNumber = defineComponent({
                       :src="author.avatar?.src"
                       :alt="`Portrait of ${author.name}`"
                       size="sm"
+                      loading="lazy"
                       class="ring-1 ring-(--app-border) shrink-0"
                     />
                     <div class="min-w-0 flex-1">
@@ -840,7 +834,7 @@ const AnimatedNumber = defineComponent({
               <article
                 v-for="blog in blogResults"
                 :key="blog.id"
-                class="group relative p-4 sm:p-5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] flex flex-col gap-2"
+                class="search-result-card group relative p-4 sm:p-5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] flex flex-col gap-2"
               >
                 <div class="flex flex-wrap items-center gap-1.5 text-[9px] font-mono text-neutral-500 dark:text-neutral-400">
                   <span class="uppercase font-bold text-primary-600 dark:text-primary-400 bg-primary-500/10 px-1.5 py-0.5 rounded-xs border border-primary-500/20">
@@ -911,6 +905,12 @@ const AnimatedNumber = defineComponent({
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
+}
+
+/* Defer layout/paint of offscreen result cards for smoother scrolling */
+.search-result-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 132px;
 }
 
 /* Highlight Markers for Search Matches */
