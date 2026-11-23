@@ -1,8 +1,8 @@
 <template>
-  <div class="default-layout-wrapper min-w-0 overflow-x-clip">
+  <div class="default-layout-wrapper w-full max-w-full min-w-0 overflow-x-clip">
     <UiAppHeader />
 
-    <UMain class="min-w-0">
+    <UMain class="w-full max-w-full min-w-0">
       <SiteOpenGraph>
         <slot />
       </SiteOpenGraph>

@@ -27,29 +27,27 @@ function scrollToTop() {
 </script>
 
 <template>
-  <UFooter aria-label="Main Footer" class="border-t-0 bg-transparent p-0 m-0">
-    <div class="w-full rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_8px_24px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-2px_rgba(0,0,0,0.45),0_12px_32px_-6px_rgba(0,0,0,0.4)] overflow-hidden transition-colors duration-300">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 sm:p-8 lg:p-10">
+  <UFooter aria-label="Main Footer" class="border-t-0 bg-transparent p-0 m-0 min-w-0">
+    <div class="w-full min-w-0 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_8px_24px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-2px_rgba(0,0,0,0.45),0_12px_32px_-6px_rgba(0,0,0,0.4)] overflow-hidden transition-colors duration-300">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 p-6 sm:p-8 lg:p-10 min-w-0">
         <!-- Brand, Bio & Quick Connect -->
-        <div class="lg:col-span-5 flex flex-col justify-between gap-6">
-          <div class="space-y-4">
-            <NuxtLink
-              to="/"
-              class="inline-flex items-center gap-2 transition-transform duration-200 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xs"
-              aria-label="Return to homepage"
-            >
-              <UiAppLogo letter-mode="draw" :letter-stagger="45" />
-            </NuxtLink>
+        <div class="lg:col-span-5 flex flex-col justify-between gap-6 min-w-0">
+          <div class="space-y-4 min-w-0">
+            <UiAppLogo
+              letter-mode="draw"
+              :letter-stagger="45"
+              class="transition-transform duration-200 hover:scale-[1.01]"
+            />
 
             <p class="font-sans text-xs sm:text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed max-w-md">
               Deep-dives into the world of technology, software development, and the latest trends in the tech industry. Stay informed and inspired with our expert insights and analysis.
             </p>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex flex-wrap items-center gap-2.5 min-w-0">
             <!-- Status / Made with badge -->
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xs border border-(--app-border) bg-(--app-bg)/80 font-mono text-[10px] text-neutral-600 dark:text-neutral-300 shadow-2xs">
-              <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
+              <span class="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
               </span>
@@ -59,7 +57,7 @@ function scrollToTop() {
             </div>
 
             <!-- Social & RSS Quick Actions -->
-            <div class="inline-flex items-center gap-1.5">
+            <div class="inline-flex flex-wrap items-center gap-1.5 min-w-0">
               <UButton
                 v-for="link in socialLinks"
                 :key="link.label"
@@ -91,26 +89,30 @@ function scrollToTop() {
 
         <nav
           aria-label="Footer categorized navigation"
-          class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 lg:pl-6 lg:border-l lg:border-(--app-border)"
+          class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 lg:pl-6 lg:border-l lg:border-(--app-border) min-w-0"
         >
           <div
             v-for="(group, groupIdx) in footerLinkGroups"
             :key="group.title"
-            class="flex flex-col gap-3.5"
+            class="flex flex-col gap-3.5 min-w-0"
             :class="{ 'col-span-2 sm:col-span-1 pt-4 border-t border-(--app-border) sm:pt-0 sm:border-t-0': groupIdx === footerLinkGroups.length - 1 }"
           >
             <h2 class="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
               {{ group.title }}
             </h2>
 
-            <ul class="space-y-2 p-0 m-0 list-none">
-              <li v-for="link in group.links" :key="`${group.title}-${link.label}`">
+            <ul class="space-y-2 p-0 m-0 list-none min-w-0">
+              <li
+                v-for="link in group.links"
+                :key="`${group.title}-${link.label}`"
+                class="min-w-0"
+              >
                 <a
                   v-if="link.external"
                   :href="link.to"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="group font-mono text-[11px] font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xs px-1 -ml-1 py-0.5"
+                  class="group font-mono text-[11px] font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-2 max-w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xs px-1 -ml-1 py-0.5"
                   @mouseenter="startDecryption(link.label, `footer-${group.title}-${link.label}`)"
                   @mouseleave="clearDecryption(`footer-${group.title}-${link.label}`)"
                   @focus="startDecryption(link.label, `footer-${group.title}-${link.label}`)"
@@ -122,7 +124,7 @@ function scrollToTop() {
                     class="size-3.5 shrink-0 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 transition-colors"
                     aria-hidden="true"
                   />
-                  <span>
+                  <span class="truncate">
                     {{ activeHoverText[`footer-${group.title}-${link.label}`] || link.label }}
                   </span>
                   <UIcon
@@ -135,7 +137,7 @@ function scrollToTop() {
                 <NuxtLink
                   v-else
                   :to="link.to"
-                  class="group font-mono text-[11px] font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xs px-1 -ml-1 py-0.5"
+                  class="group font-mono text-[11px] font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors inline-flex items-center gap-2 max-w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xs px-1 -ml-1 py-0.5"
                   @mouseenter="startDecryption(link.label, `footer-${group.title}-${link.label}`)"
                   @mouseleave="clearDecryption(`footer-${group.title}-${link.label}`)"
                   @focus="startDecryption(link.label, `footer-${group.title}-${link.label}`)"
@@ -147,7 +149,7 @@ function scrollToTop() {
                     class="size-3.5 shrink-0 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 transition-colors"
                     aria-hidden="true"
                   />
-                  <span>
+                  <span class="truncate">
                     {{ activeHoverText[`footer-${group.title}-${link.label}`] || link.label }}
                   </span>
                 </NuxtLink>
@@ -158,8 +160,8 @@ function scrollToTop() {
       </div>
 
       <!-- Bottom Utility & Copyright Strip -->
-      <div class="px-6 sm:px-8 lg:px-10 py-3.5 border-t border-(--app-border) bg-(--app-bg)/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 font-mono text-[10px]">
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-neutral-500 dark:text-neutral-400">
+      <div class="px-6 sm:px-8 lg:px-10 py-3.5 border-t border-(--app-border) bg-(--app-bg)/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 font-mono text-[10px] min-w-0">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-neutral-500 dark:text-neutral-400 min-w-0">
           <span>
             &copy; {{ currentYear }} <span class="font-bold text-neutral-800 dark:text-neutral-200">{{ siteConfig.name }}</span>. All rights reserved.
           </span>
@@ -175,7 +177,7 @@ function scrollToTop() {
 
         <button
           type="button"
-          class="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/80 hover:bg-(--app-surface-hover) hover:border-primary-500/40 text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          class="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/80 hover:bg-(--app-surface-hover) hover:border-primary-500/40 text-neutral-600 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           aria-label="Scroll back to top of page"
           @click="scrollToTop"
         >
