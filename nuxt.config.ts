@@ -25,6 +25,10 @@ export default defineNuxtConfig({
 
   devtools: {
     enabled: true,
+
+    timeline: {
+      enabled: true,
+    },
   },
 
   app: {
@@ -117,6 +121,11 @@ export default defineNuxtConfig({
     url: process.env.NUXT_PUBLIC_SITE_URL,
     defaultLocale: "en",
     trailingSlash: false,
+  },
+
+  colorMode: {
+    preference: "system",
+    fallback: "dark",
   },
 
   content: {
@@ -316,35 +325,43 @@ export default defineNuxtConfig({
       {
         name: "Plus Jakarta Sans",
         weights: [400, 500, 600, 700],
+        global: true,
       },
       {
         name: "Inter",
         weights: [400, 500, 600, 700],
+        global: true,
       },
       {
         name: "Newsreader",
         weights: [400, 600, 700],
         styles: ["normal", "italic"],
+        global: true,
       },
       {
         name: "Playfair Display",
         weights: [400, 700],
+        global: true,
       },
       {
         name: "Lora",
         weights: [400, 500, 600],
+        global: true,
       },
       {
         name: "EB Garamond",
         weights: [400, 500, 700],
+        global: true,
       },
       {
         name: "JetBrains Mono",
         weights: [400, 500, 700],
+        global: true,
       },
       {
         name: "IBM Plex Mono",
         weights: [400, 500],
+        global: true,
       },
       {
         name: "Poppins",
@@ -353,10 +370,12 @@ export default defineNuxtConfig({
       {
         name: "Roboto",
         weights: [300, 400, 500, 700, 900],
+        global: true,
       },
       {
         name: "Special Elite",
         weights: [400],
+        global: true,
       },
     ],
 
@@ -404,6 +423,11 @@ export default defineNuxtConfig({
   ogImage: {
     enabled: true,
     componentDirs: ["components/OgImage"],
+    defaults: {
+      width: 1200,
+      height: 630,
+      extension: "png",
+    },
     security: {
       strict: true,
     },
