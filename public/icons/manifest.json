@@ -26,9 +26,9 @@
   ],
   "icons": [
     {
-      "src": "/icons/favicon-16x16.png",
+      "src": "/icons/favicon.png",
       "type": "image/png",
-      "sizes": "16x16"
+      "sizes": "any"
     },
     {
       "src": "/icons/favicon-72x72.png",
