@@ -131,21 +131,27 @@ useSchemaOrg([
 </script>
 
 <template>
-  <UContainer class="py-4 sm:py-6">
-    <UPage>
+  <UContainer class="py-4 sm:py-6 min-w-0">
+    <UPage
+      class="min-w-0"
+      :ui="{
+        root: 'min-w-0',
+        center: 'min-w-0',
+      }"
+    >
       <UPageHeader
-        class="mb-12"
+        class="mb-12 min-w-0"
         :ui="{
-          title: 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1]',
+          title: 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.1] break-words',
           description: 'text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 max-w-3xl leading-relaxed',
         }"
       >
         <template #headline>
-          <div class="flex items-center justify-between gap-4">
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20">
+          <div class="flex flex-wrap items-center justify-between gap-3 min-w-0">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary-500/10 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-500/20 max-w-full">
               <UIcon
                 name="i-lucide-users"
-                class="h-3.5 w-3.5"
+                class="h-3.5 w-3.5 shrink-0"
                 aria-hidden="true"
               />
               <ClientOnly>
@@ -207,20 +213,20 @@ useSchemaOrg([
         </template>
       </UPageHeader>
 
-      <UPageBody>
+      <UPageBody class="min-w-0">
         <!-- Initial Loading State -->
         <div
           v-if="authorsPending && displayLimit === itemsPerPage"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 my-6"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 my-6 min-w-0"
           aria-label="Loading authors roster"
         >
           <div
             v-for="n in 8"
             :key="`init-auth-skeleton-${n}`"
-            class="relative overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] p-5 flex flex-col items-center justify-between select-none animate-pulse"
+            class="relative overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] p-5 flex flex-col items-center justify-between select-none animate-pulse min-w-0"
             aria-hidden="true"
           >
-            <div class="flex flex-col items-center w-full">
+            <div class="flex flex-col items-center w-full min-w-0">
               <USkeleton class="w-20 h-20 rounded-full bg-(--app-bg) opacity-85" />
               <USkeleton class="h-4 w-28 rounded-xs bg-(--app-bg) opacity-95 mt-4" />
               <USkeleton class="h-3 w-20 rounded-xs bg-(--app-bg) opacity-70 mt-2" />
@@ -234,16 +240,17 @@ useSchemaOrg([
           </div>
         </div>
 
-        <div v-else class="my-6 space-y-12">
+        <div v-else class="my-6 space-y-12 min-w-0">
           <!-- Loaded Authors -->
           <section
             v-if="enrichedAuthors.length > 0"
             aria-labelledby="editorial-roster-heading"
+            class="min-w-0"
           >
             <h2 id="editorial-roster-heading" class="sr-only">
               Editorial Roster and Authors List
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 min-w-0">
               <AuthorContributorCard
                 v-for="author in enrichedAuthors"
                 :key="author.slug || author.stem"
@@ -258,7 +265,7 @@ useSchemaOrg([
           <!-- Empty Fallback State -->
           <div
             v-else
-            class="text-center py-20 border border-dashed border-(--app-border) rounded-xs bg-(--app-surface-subtle)/40"
+            class="text-center py-20 px-4 border border-dashed border-(--app-border) rounded-xs bg-(--app-surface-subtle)/40"
             role="status"
           >
             <div class="inline-flex items-center justify-center w-14 h-14 rounded-xs bg-(--app-surface-subtle) border border-(--app-border) mb-4">
@@ -279,16 +286,16 @@ useSchemaOrg([
           <!-- Infinite Scroll Appending Skeletons -->
           <div
             v-if="authorsPending && displayLimit > itemsPerPage"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mt-5"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mt-5 min-w-0"
             aria-label="Loading additional authors"
           >
             <div
               v-for="n in 4"
               :key="`append-auth-${n}`"
-              class="relative overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] p-5 flex flex-col items-center justify-between select-none animate-pulse"
+              class="relative overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] p-5 flex flex-col items-center justify-between select-none animate-pulse min-w-0"
               aria-hidden="true"
             >
-              <div class="flex flex-col items-center w-full">
+              <div class="flex flex-col items-center w-full min-w-0">
                 <USkeleton class="w-20 h-20 rounded-full bg-(--app-bg) opacity-85" />
                 <USkeleton class="h-4 w-28 rounded-xs bg-(--app-bg) opacity-95 mt-4" />
                 <USkeleton class="h-3 w-20 rounded-xs bg-(--app-bg) opacity-70 mt-2" />

@@ -211,7 +211,7 @@ defineOgImage("Author.takumi", {
 </script>
 
 <template>
-  <UContainer class="py-4 sm:py-6">
+  <UContainer class="py-4 sm:py-6 min-w-0">
     <!-- Author Profile Initial Skeleton -->
     <div
       v-if="authorPending && !author"
@@ -219,17 +219,24 @@ defineOgImage("Author.takumi", {
       aria-label="Loading author profile"
     >
       <USkeleton class="w-24 h-24 rounded-full bg-(--app-surface-subtle) mx-auto mb-4" />
-      <USkeleton class="h-8 rounded-xs w-48 bg-(--app-surface-subtle) mx-auto mb-2" />
+      <USkeleton class="h-8 rounded-xs w-48 max-w-full bg-(--app-surface-subtle) mx-auto mb-2" />
       <USkeleton class="h-4 rounded-xs w-80 max-w-full bg-(--app-surface-subtle) mx-auto" />
     </div>
 
-    <UPage v-else-if="author && !authorError" class="py-6">
+    <UPage
+      v-else-if="author && !authorError"
+      class="py-6 min-w-0"
+      :ui="{
+        root: 'min-w-0',
+        center: 'min-w-0',
+      }"
+    >
       <!-- Top Breadcrumb & RSS Bar -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <nav aria-label="Breadcrumb" class="flex items-center gap-2">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 min-w-0">
+        <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 min-w-0 max-w-full">
           <NuxtLink
             to="/authors"
-            class="text-xs font-mono font-bold text-neutral-500 dark:text-neutral-400 hover:text-primary-500 flex items-center gap-1 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+            class="text-xs font-mono font-bold text-neutral-500 dark:text-neutral-400 hover:text-primary-500 inline-flex items-center gap-1 shrink-0 transition-colors group focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
           >
             <UIcon
               name="i-lucide-chevron-left"
@@ -238,11 +245,11 @@ defineOgImage("Author.takumi", {
             />
             Back to Authors
           </NuxtLink>
-          <span class="text-neutral-400 dark:text-neutral-600 font-mono text-xs" aria-hidden="true">/</span>
+          <span class="text-neutral-400 dark:text-neutral-600 font-mono text-xs select-none" aria-hidden="true">/</span>
 
           <UBadge
             size="sm"
-            class="rounded-xs shrink-0 bg-(--app-surface-subtle)/80 border border-(--app-border)"
+            class="rounded-xs max-w-full min-w-0 bg-(--app-surface-subtle)/80 border border-(--app-border)"
             variant="subtle"
           >
             <template #leading>
@@ -250,11 +257,11 @@ defineOgImage("Author.takumi", {
                 v-if="author.avatar?.src"
                 :src="author.avatar.src"
                 :alt="`Avatar of ${author.name}`"
-                class="w-3.5 h-3.5 inline-block mr-1 align-text-top rounded-full object-cover"
+                class="w-3.5 h-3.5 inline-block mr-1 align-text-top rounded-full object-cover shrink-0"
               />
             </template>
             <span
-              class="text-xs font-mono font-bold uppercase tracking-wider"
+              class="text-xs font-mono font-bold uppercase tracking-wider truncate"
               :style="{ color: author.color || 'var(--ui-primary)' }"
             >
               {{ author.name }}
@@ -263,13 +270,15 @@ defineOgImage("Author.takumi", {
         </nav>
 
         <!-- Author RSS Subscribe Button -->
-        <RssSubscribeButton
-          :title="author.name"
-          :feed-path="AUTHOR_RSS_URL"
-        />
+        <div class="shrink-0">
+          <RssSubscribeButton
+            :title="author.name"
+            :feed-path="AUTHOR_RSS_URL"
+          />
+        </div>
       </div>
 
-      <header class="mb-10 py-4 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-8 bg-transparent border-0 relative overflow-hidden">
+      <header class="mb-10 py-4 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 sm:gap-8 bg-transparent border-0 relative overflow-hidden min-w-0 w-full">
         <!-- Avatar Block -->
         <div class="shrink-0">
           <NuxtImg
@@ -278,11 +287,11 @@ defineOgImage("Author.takumi", {
             :alt="author.avatar.alt || `Portrait of ${author.name}`"
             width="128"
             height="128"
-            class="w-32 h-32 rounded-full object-cover border border-(--app-border) bg-(--app-surface-subtle) shadow-sm"
+            class="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border border-(--app-border) bg-(--app-surface-subtle) shadow-sm"
           />
           <div
             v-else
-            class="w-32 h-32 rounded-full bg-(--app-surface-subtle) border border-(--app-border) flex items-center justify-center text-neutral-500 dark:text-neutral-400 font-mono text-3xl font-bold shadow-sm"
+            class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-(--app-surface-subtle) border border-(--app-border) flex items-center justify-center text-neutral-500 dark:text-neutral-400 font-mono text-3xl font-bold shadow-sm"
             aria-hidden="true"
           >
             {{ author.name.charAt(0) }}
@@ -290,18 +299,18 @@ defineOgImage("Author.takumi", {
         </div>
 
         <!-- Info Block -->
-        <div class="flex-1 space-y-4 max-w-2xl">
-          <div>
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-neutral-950 dark:text-white tracking-tight mb-2 text-center md:text-left">
+        <div class="flex-1 space-y-4 max-w-2xl min-w-0 w-full">
+          <div class="min-w-0">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-neutral-950 dark:text-white tracking-tight mb-2 text-center md:text-left break-words">
               {{ author.name }}
             </h1>
 
-            <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-2 text-base sm:text-lg font-medium text-neutral-600 dark:text-neutral-400 font-mono">
-              <span>{{ activeHoverText["author-title"] || author.title }}</span>
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-2 text-sm sm:text-base md:text-lg font-medium text-neutral-600 dark:text-neutral-400 font-mono min-w-0">
+              <span class="break-words">{{ activeHoverText["author-title"] || author.title }}</span>
 
               <template v-if="author.company">
                 <span class="text-neutral-300 dark:text-neutral-700 hidden md:inline" aria-hidden="true">|</span>
-                <div class="inline-flex items-center gap-1.5 hover:text-primary-500 transition-colors">
+                <div class="inline-flex items-center gap-1.5 max-w-full min-w-0 hover:text-primary-500 transition-colors">
                   <NuxtImg
                     v-if="author.company.icon?.startsWith('http')"
                     :src="author.company.icon"
@@ -319,12 +328,12 @@ defineOgImage("Author.takumi", {
                     :to="author.company.website"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="truncate focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+                    class="truncate min-w-0 focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
                     :aria-label="`Visit ${author.company.name} website (opens in a new tab)`"
                   >
                     {{ author.company.name }}
                   </NuxtLink>
-                  <span v-else class="truncate">{{ author.company.name }}</span>
+                  <span v-else class="truncate min-w-0">{{ author.company.name }}</span>
                 </div>
 
                 <UBadge
@@ -332,23 +341,23 @@ defineOgImage("Author.takumi", {
                   :avatar="author.company.icon?.startsWith('http') ? { src: author.company.icon, alt: `${author.company.name} logo`, loading: 'lazy' } : undefined"
                   :icon="!author.company.icon?.startsWith('http') ? (author.company.icon || 'i-lucide-briefcase') : undefined"
                   size="sm"
-                  class="rounded-xs shrink-0 bg-(--app-surface-subtle)/80 border border-(--app-border)"
+                  class="rounded-xs max-w-full bg-(--app-surface-subtle)/80 border border-(--app-border)"
                   variant="subtle"
                 >
-                  {{ author.company.role }}
+                  <span class="truncate">{{ author.company.role }}</span>
                 </UBadge>
               </template>
             </div>
           </div>
 
-          <p v-if="author.description" class="text-sm sm:text-base text-neutral-600 dark:text-neutral-300 leading-relaxed text-center md:text-left">
+          <p v-if="author.description" class="text-sm sm:text-base text-neutral-600 dark:text-neutral-300 leading-relaxed text-center md:text-left break-words">
             {{ author.description }}
           </p>
 
           <!-- Social & Website Links -->
           <div
             v-if="(author.socialLinks && author.socialLinks.length > 0) || author.website || author.company?.website"
-            class="flex items-center justify-center md:justify-start gap-2.5"
+            class="flex flex-wrap items-center justify-center md:justify-start gap-2.5 min-w-0"
           >
             <UTooltip
               v-for="link in author.socialLinks"
@@ -433,9 +442,9 @@ defineOgImage("Author.takumi", {
         </div>
       </header>
 
-      <UPageBody>
-        <div class="space-y-8 my-6">
-          <div class="flex items-center justify-between border-b border-(--app-border) pb-3">
+      <UPageBody class="min-w-0">
+        <div class="space-y-8 my-6 min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-(--app-border) pb-3 min-w-0">
             <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
               Published Contributions:
               {{ blogs.length }} {{ blogs.length === 1 ? "Article" : "Articles" }}
@@ -445,7 +454,7 @@ defineOgImage("Author.takumi", {
           <!-- Initial Loading Skeletons -->
           <div
             v-if="blogsPending && displayLimit === itemsPerPage"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 min-w-0"
             aria-label="Loading author articles"
           >
             <LazyBlogPostCardSkeleton v-for="n in 6" :key="`init-auth-blog-${n}`" />
@@ -454,8 +463,9 @@ defineOgImage("Author.takumi", {
           <section
             v-else-if="blogs.length > 0"
             aria-label="Author's published articles"
+            class="min-w-0"
           >
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 min-w-0">
               <BlogPostCard
                 v-for="blog in blogs"
                 :key="blog.path"
@@ -467,7 +477,7 @@ defineOgImage("Author.takumi", {
           <!-- Empty Fallback State -->
           <div
             v-else
-            class="text-center py-20 border border-dashed border-(--app-border) rounded-xs bg-(--app-surface-subtle)/40"
+            class="text-center py-20 px-4 border border-dashed border-(--app-border) rounded-xs bg-(--app-surface-subtle)/40"
             role="status"
           >
             <div class="inline-flex items-center justify-center w-12 h-12 rounded-xs bg-(--app-surface-subtle) border border-(--app-border) mb-3 text-neutral-400">
@@ -488,7 +498,7 @@ defineOgImage("Author.takumi", {
           <!-- Infinite Scroll Appending Skeletons -->
           <div
             v-if="blogsPending && displayLimit > itemsPerPage"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5 min-w-0"
             aria-label="Loading additional articles"
           >
             <LazyBlogPostCardSkeleton v-for="n in 3" :key="`append-auth-blog-${n}`" />
@@ -508,7 +518,7 @@ defineOgImage("Author.takumi", {
     <!-- Error State -->
     <div
       v-else
-      class="text-center py-24 border border-dashed border-red-300/60 dark:border-red-900/50 rounded-xs bg-red-500/5 my-10"
+      class="text-center py-24 px-4 border border-dashed border-red-300/60 dark:border-red-900/50 rounded-xs bg-red-500/5 my-10"
       role="alert"
     >
       <UIcon

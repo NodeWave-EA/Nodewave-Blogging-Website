@@ -50,7 +50,7 @@ function onPointerLeave() {
 <template>
   <article
     ref="cardRef"
-    class="group relative flex flex-col justify-between overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] select-none h-full w-full p-5"
+    class="group relative flex flex-col justify-between overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-(--app-surface-hover)/90 dark:hover:bg-(--app-surface-hover) hover:border-primary-500/40 hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.1),0_18px_36px_-8px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] select-none h-full w-full min-w-0 p-5"
     :style="[
       transformStyles,
       {
@@ -80,11 +80,11 @@ function onPointerLeave() {
       />
     </div>
 
-    <div class="relative z-10 flex flex-col items-center text-center flex-1 w-full justify-between">
-      <div class="flex flex-col items-center w-full">
+    <div class="relative z-10 flex flex-col items-center text-center flex-1 w-full min-w-0 justify-between">
+      <div class="flex flex-col items-center w-full min-w-0">
         <!-- Author Avatar -->
         <div
-          class="relative w-20 h-20 rounded-full p-1 border border-(--app-border) bg-(--app-bg)/80 shadow-2xs group-hover:scale-105 transition-all duration-300"
+          class="relative w-20 h-20 shrink-0 rounded-full p-1 border border-(--app-border) bg-(--app-bg)/80 shadow-2xs group-hover:scale-105 transition-all duration-300"
           :style="{ borderColor: author.color ? `${author.color}40` : '' }"
         >
           <NuxtImg
@@ -111,7 +111,7 @@ function onPointerLeave() {
         </div>
 
         <!-- Primary Stretched Link on Author Name -->
-        <h3 class="text-sm font-bold text-neutral-900 dark:text-neutral-100 mt-3 tracking-tight font-mono group-hover:text-(--author-accent) transition-colors min-h-5">
+        <h3 class="w-full max-w-full text-sm font-bold text-neutral-900 dark:text-neutral-100 mt-3 tracking-tight font-mono group-hover:text-(--author-accent) transition-colors min-h-5 break-words">
           <NuxtLink
             :to="`/${author.stem}`"
             class="focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
@@ -123,8 +123,8 @@ function onPointerLeave() {
         </h3>
 
         <!-- Role & Company -->
-        <div class="flex flex-wrap items-center justify-center gap-1.5 mt-1">
-          <span class="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+        <div class="flex flex-wrap items-center justify-center gap-1.5 mt-1 w-full min-w-0">
+          <span class="text-xs font-medium text-neutral-600 dark:text-neutral-400 break-words">
             {{ author.title || "Contributor" }}
           </span>
           <USeparator
@@ -132,13 +132,13 @@ function onPointerLeave() {
             orientation="vertical"
             class="w-px h-3 bg-(--app-border)"
           />
-          <span v-if="author.company?.name" class="gradient-text text-xs font-medium transition-colors relative z-30">
+          <span v-if="author.company?.name" class="gradient-text text-xs font-medium transition-colors relative z-30 max-w-full min-w-0 break-words">
             <NuxtLink
               v-if="author.company?.website"
               :to="author.company.website"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center hover:underline focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
+              class="inline-flex items-center max-w-full min-w-0 hover:underline focus-visible:ring-1 focus-visible:ring-primary-500 rounded-xs"
               :aria-label="`Visit ${author.company.name} website (opens in a new tab)`"
             >
               <UIcon
@@ -155,21 +155,21 @@ function onPointerLeave() {
                 height="14"
                 class="inline-block mr-1 rounded-xs object-cover shrink-0"
               />
-              {{ author.company.name }}
+              <span class="truncate">{{ author.company.name }}</span>
             </NuxtLink>
-            <span v-else>
+            <span v-else class="truncate block">
               {{ author.company.name }}
             </span>
           </span>
         </div>
 
         <!-- Short Bio -->
-        <p v-if="author.description" class="text-xs text-neutral-600 dark:text-neutral-300 mt-3 line-clamp-3 leading-relaxed">
+        <p v-if="author.description" class="text-xs text-neutral-600 dark:text-neutral-300 mt-3 line-clamp-3 leading-relaxed break-words">
           {{ author.description }}
         </p>
 
         <!-- Social Links -->
-        <div v-if="author.socialLinks?.length" class="flex items-center justify-center gap-2 mt-3 relative z-30">
+        <div v-if="author.socialLinks?.length" class="flex flex-wrap items-center justify-center gap-2 mt-3 relative z-30 min-w-0">
           <NuxtLink
             v-for="(link, lIdx) in author.socialLinks"
             :key="`sl-${lIdx}`"
@@ -193,7 +193,7 @@ function onPointerLeave() {
       </div>
 
       <!-- Footer Action & Post Count -->
-      <div class="pt-3 flex items-center justify-between border-t border-(--app-border) mt-4 w-full">
+      <div class="pt-3 flex items-center justify-between gap-2 border-t border-(--app-border) mt-4 w-full min-w-0">
         <span
           class="text-xs font-semibold text-neutral-700 dark:text-neutral-300 group-hover:text-(--author-accent) flex items-center gap-1 transition-colors"
           aria-hidden="true"
@@ -210,7 +210,7 @@ function onPointerLeave() {
           variant="subtle"
           size="xs"
           color="neutral"
-          class="font-mono rounded-xs px-2 py-0.5 text-[10px] font-bold bg-(--app-bg)/85 border border-(--app-border) text-neutral-800 dark:text-neutral-200"
+          class="font-mono rounded-xs px-2 py-0.5 text-[10px] font-bold shrink-0 bg-(--app-bg)/85 border border-(--app-border) text-neutral-800 dark:text-neutral-200"
         >
           {{ author.count }} {{ author.count === 1 ? "Post" : "Posts" }}
         </UBadge>
