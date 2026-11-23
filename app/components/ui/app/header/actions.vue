@@ -6,7 +6,6 @@ import { useKeyboard } from "~/composables/use-keyboard";
 import { useNavigate } from "~/composables/use-navigate";
 
 const { navigate } = useNavigate();
-const { isMotionReduced } = useReduceMotion();
 const { addGlobalShortcut, removeGlobalShortcut } = useKeyboard();
 const { open: openSearchPalette } = useContentSearch();
 
@@ -35,13 +34,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="inline-flex items-center gap-1"
-    :data-aos="!isMotionReduced ? 'fade-left' : undefined"
-    data-aos-duration="400"
-    data-aos-easing="ease-out-quad"
-    data-aos-anchor="body"
-  >
+  <div class="inline-flex items-center gap-1">
     <!-- Search Trigger -->
     <UTooltip
       text="Search"

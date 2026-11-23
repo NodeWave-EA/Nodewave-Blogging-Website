@@ -3,8 +3,6 @@ import { navLinks } from "~/constants";
 
 const route = useRoute();
 
-useAOS();
-
 const isMobileMenuOpen = ref(false);
 
 watch(

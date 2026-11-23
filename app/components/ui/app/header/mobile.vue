@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { nextTick, onMounted } from "vue";
-
 import { siteConfig } from "~/app.meta";
 import { isNavLinkActive } from "~/composables/use-nav-bubble";
 import { navLinks } from "~/constants";
@@ -10,14 +8,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
-const { isMotionReduced } = useReduceMotion();
 const { open: openSearchPalette } = useContentSearch();
-const { $refreshAos } = useNuxtApp();
-
-onMounted(async () => {
-  await nextTick();
-  $refreshAos?.();
-});
 
 function handleOpenSearch() {
   emit("navigate");
@@ -35,13 +26,9 @@ function handleOpenSearch() {
 
       <ul class="space-y-1 w-full p-1.5 m-0 list-none rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/75 dark:bg-(--app-surface-subtle)/85 backdrop-blur-xs ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_12px_28px_-6px_rgba(0,0,0,0.4)]">
         <li
-          v-for="(link, idx) in navLinks"
+          v-for="link in navLinks"
           :key="link.to"
           class="w-full"
-          :data-aos="!isMotionReduced ? 'fade-right' : undefined"
-          :data-aos-delay="idx * 40"
-          data-aos-duration="280"
-          data-aos-easing="ease-out-quad"
         >
           <NuxtLink
             :to="link.to"

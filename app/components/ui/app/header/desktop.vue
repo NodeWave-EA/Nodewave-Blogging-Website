@@ -20,10 +20,6 @@ onMounted(() => {
   <nav
     class="hidden lg:flex relative items-center p-0.5 isolation-auto"
     aria-label="Global desktop site navigation"
-    :data-aos="!isMotionReduced ? 'fade-down' : undefined"
-    data-aos-duration="450"
-    data-aos-easing="ease-out-quad"
-    data-aos-anchor="body"
   >
     <!-- Sliding Bento Active Pill -->
     <div
