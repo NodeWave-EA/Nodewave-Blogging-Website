@@ -53,45 +53,44 @@ onMounted(() => {
   startDecryption("Curated Posts & Insights", "home-badge");
 });
 
-const HOME_TITLE = computed(() => `${config.siteName || "Nodewave"} — Curated Posts & Engineering Insights`);
-const HOME_DESCRIPTION = computed(
+const PAGE_TITLE = computed(() => `Nodewave Curated Posts & Insights`);
+const PAGE_DESCRIPTION = computed(
   () => "Explore the latest curated posts, technical articles, and engineering insights from nodewave. Stay ahead in web development, software architecture, and modern technology.",
 );
-const HOME_CANONICAL_URL = computed(() => `${config.siteUrl}`);
-const HOME_RSS_URL = computed(() => `/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}`);
+const PAGE_RSS_URL = computed(() => `/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
-  title: () => HOME_TITLE.value,
-  description: () => HOME_DESCRIPTION.value,
-  // keywords: "nodewave, curated posts, insights, technology, software engineering, web development, blog, articles, tutorials",
+  title: () => PAGE_TITLE.value,
+  description: () => PAGE_DESCRIPTION.value,
   robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
   // Open Graph / Facebook
   ogType: "website",
-  ogTitle: () => HOME_TITLE.value,
-  ogDescription: () => HOME_DESCRIPTION.value,
-  ogUrl: () => HOME_CANONICAL_URL.value,
+  ogTitle: () => PAGE_TITLE.value,
+  ogDescription: () => PAGE_DESCRIPTION.value,
+  ogUrl: () => PAGE_CANONICAL_URL.value,
   ogImageAlt: () => `${config.siteName || "Nodewave Blogs"} Homepage`,
   ogSiteName: () => config.siteName || "Nodewave",
 
   // Twitter
   twitterCard: "summary_large_image",
-  twitterTitle: () => HOME_TITLE.value,
-  twitterDescription: () => HOME_DESCRIPTION.value,
+  twitterTitle: () => PAGE_TITLE.value,
+  twitterDescription: () => PAGE_DESCRIPTION.value,
 });
 
 useHead({
   link: [
     {
       rel: "canonical",
-      href: () => HOME_CANONICAL_URL.value,
+      href: () => PAGE_CANONICAL_URL.value,
     },
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: () => `${config.siteName || "Nodewave"} RSS Feed`,
-      href: () => HOME_RSS_URL.value,
+      title: () => `${config.siteName} RSS Feed`,
+      href: () => PAGE_RSS_URL.value,
     },
     {
       rel: "icon",
@@ -101,12 +100,18 @@ useHead({
   ],
 });
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 defineOgImage("NuxtSeo.takumi", {
-  title: HOME_TITLE.value,
-  description: HOME_DESCRIPTION.value,
-  brand: config.siteName,
-  colorMode: "light",
-  isPro: true,
+  title: PAGE_TITLE.value,
+  description: PAGE_DESCRIPTION.value,
+  badge: "All Categories",
+  colorMode: ogColorMode.value,
 });
 
 // Nuxt Schema.org Structured Data
@@ -115,7 +120,7 @@ useSchemaOrg([
   defineWebSite({
     name: config.siteName || "Nodewave",
     url: () => config.siteUrl,
-    description: () => HOME_DESCRIPTION.value,
+    description: () => PAGE_DESCRIPTION.value,
     potentialAction: [
       {
         "@type": "SearchAction",
@@ -128,9 +133,9 @@ useSchemaOrg([
   // WebPage Document Entity
   defineWebPage({
     "@id": `${config.siteUrl}/#webpage`,
-    "name": () => HOME_TITLE.value,
-    "description": () => HOME_DESCRIPTION.value,
-    "url": () => HOME_CANONICAL_URL.value,
+    "name": () => PAGE_TITLE.value,
+    "description": () => PAGE_DESCRIPTION.value,
+    "url": () => PAGE_CANONICAL_URL.value,
   }),
 
   // Featured Posts ItemList Schema
@@ -184,7 +189,7 @@ useSchemaOrg([
             <!-- RSS Subscribe Button -->
             <RssSubscribeButton
               title="Main Feed"
-              :feed-path="HOME_RSS_URL"
+              :feed-path="PAGE_RSS_URL"
             />
           </div>
         </template>

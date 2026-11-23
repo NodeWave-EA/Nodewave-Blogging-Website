@@ -287,7 +287,6 @@ const coverImageUrl = computed(() => {
 useSeoMeta({
   title: () => BLOG_TITLE.value,
   description: () => BLOG_DESCRIPTION.value,
-  keywords: () => currentBlog.value?.seo?.keywords?.join(", ") || undefined,
   creator: () => blogAuthor.value?.name || siteName.value,
   author: () => blogAuthor.value?.name || siteName.value,
   publisher: () => siteName.value,
@@ -380,18 +379,33 @@ useSchemaOrg([
   }),
 ]);
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 if (currentBlog.value) {
   defineOgImage("BlogPost.takumi", {
-    colorMode: "light",
-    title: () => BLOG_TITLE.value,
+    colorMode: ogColorMode.value,
+    brand: siteName.value,
+    siteUrl: siteUrl.value,
+    title: BLOG_TITLE.value,
+    description: BLOG_DESCRIPTION.value,
     author: blogAuthor.value?.name,
+    authorTitle: blogAuthor.value?.title,
     date: publishedDateObj.value
       ? shortUtcDateFormatter.format(publishedDateObj.value)
       : String(currentBlog.value.date || ""),
+    updatedDate: hasBeenUpdated.value ? formattedUpdatedDate.value : "",
+    readingTime: readingTimeText.value,
+    wordCount: wordCountFormatted.value,
     category: categorySlug.value,
+    tags: blogTags.value.map(tag => tag.name),
+    featured: Boolean(currentBlog.value.featured),
     avatar: blogAuthor.value?.avatar?.src,
     backgroundImage: currentBlog.value?.coverImage?.src,
-    readingTime: readingTimeText.value,
   });
 }
 

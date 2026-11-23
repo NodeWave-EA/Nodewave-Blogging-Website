@@ -54,7 +54,6 @@ const TAG_RSS_URL = computed(() => `/tags/${tag.value?.slug || tagSlug.value}/rs
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  keywords: () => `nodewave, tag, ${tag.value?.name || ""}, technical articles, tutorials, documentation`,
   robots: "index, follow, max-image-preview:large",
 
   // Open Graph / Facebook
@@ -118,12 +117,23 @@ useSchemaOrg([
   },
 ]);
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 defineOgImage("Taxonomy.takumi", {
-  colorMode: "light",
-  title: () => toValue(PAGE_TITLE),
-  description: () => toValue(PAGE_DESCRIPTION),
+  colorMode: ogColorMode.value,
+  brand: config.siteName || "NodeWave",
+  siteUrl: config.siteUrl,
+  title: PAGE_TITLE.value,
+  description: PAGE_DESCRIPTION.value,
   type: "Tag",
-  articleCount: () => blogs.value.length,
+  slug: tag.value?.slug || tagSlug.value,
+  accentColor: tag.value?.color || "",
+  articleCount: blogs.value.length,
 });
 </script>
 

@@ -51,18 +51,17 @@ onMounted(() => {
 
 const config = useRuntimeConfig().public;
 
-const PAGE_TITLE = computed(() => `Browse by Tags — Technical Index & Keywords`);
+const PAGE_TITLE = computed(() => `Browse by Tags`);
 const PAGE_DESCRIPTION = computed(
   () => "Filter and explore technical articles, system architecture notes, and development guides by specific technologies, concepts, and keywords on Nodewave.",
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags`);
-const TAGS_INDEX_RSS_URL = computed(() => `/tags/rss.xml`);
+const PAGE_RSS_URL = computed(() => `/tags/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  keywords: "nodewave, tags, keywords, taxonomy, software engineering, framework, languages, tutorials, engineering insights",
   robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
   // Open Graph / Facebook
@@ -88,7 +87,7 @@ useHead({
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: "NodeWave — Tags Directory RSS Feed",
+      title: "Tags RSS Feed",
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
@@ -99,12 +98,18 @@ useHead({
   ],
 });
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 defineOgImage("NuxtSeo.takumi", {
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
-  brand: config.siteName,
-  colorMode: "light",
-  isPro: true,
+  badge: "All Tags",
+  colorMode: ogColorMode.value,
 });
 
 // Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
@@ -159,7 +164,7 @@ useSchemaOrg([
             <!-- Tags Directory RSS Subscribe Button -->
             <RssSubscribeButton
               title="Tags Directory"
-              :feed-path="TAGS_INDEX_RSS_URL"
+              :feed-path="PAGE_RSS_URL"
             />
           </div>
         </template>

@@ -53,45 +53,44 @@ onMounted(() => {
 
 const config = useRuntimeConfig().public;
 
-const BLOGS_TITLE = computed(() => `Browse All Blogs — Technical Articles & Engineering Logs`);
-const BLOGS_DESCRIPTION = computed(
-  () => "Browse the complete archive of technical articles, software architecture notes, and development logs published on Nodewave.",
+const PAGE_TITLE = computed(() => `Browse All Blogs`);
+const PAGE_DESCRIPTION = computed(
+  () => "Browse the complete blogs archive of technical articles, software architecture notes, and guides published on Nodewave.",
 );
-const BLOGS_CANONICAL_URL = computed(() => `${config.siteUrl}/blogs`);
-const BLOGS_RSS_URL = computed(() => `/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/blogs`);
+const PAGE_RSS_URL = computed(() => `/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
-  title: () => BLOGS_TITLE.value,
-  description: () => BLOGS_DESCRIPTION.value,
-  // keywords: "nodewave, complete archive, technical articles, architecture notes, development logs, blog, tutorials, engineering insights",
+  title: () => PAGE_TITLE.value,
+  description: () => PAGE_DESCRIPTION.value,
   robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
   // Open Graph / Facebook
   ogType: "website",
-  ogTitle: () => BLOGS_TITLE.value,
-  ogDescription: () => BLOGS_DESCRIPTION.value,
-  ogUrl: () => BLOGS_CANONICAL_URL.value,
+  ogTitle: () => PAGE_TITLE.value,
+  ogDescription: () => PAGE_DESCRIPTION.value,
+  ogUrl: () => PAGE_CANONICAL_URL.value,
   ogImageAlt: () => `${config.siteName || "Nodewave"} Blog Archive`,
   ogSiteName: () => config.siteName || "Nodewave",
 
   // Twitter
   twitterCard: "summary_large_image",
-  twitterTitle: () => BLOGS_TITLE.value,
-  twitterDescription: () => BLOGS_DESCRIPTION.value,
+  twitterTitle: () => PAGE_TITLE.value,
+  twitterDescription: () => PAGE_DESCRIPTION.value,
 });
 
 useHead({
   link: [
     {
       rel: "canonical",
-      href: () => BLOGS_CANONICAL_URL.value,
+      href: () => PAGE_CANONICAL_URL.value,
     },
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: "NodeWave — Blog RSS Feed",
-      href: () => BLOGS_RSS_URL.value,
+      title: "Blogs RSS Feed",
+      href: () => PAGE_RSS_URL.value,
     },
     {
       rel: "icon",
@@ -101,12 +100,18 @@ useHead({
   ],
 });
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 defineOgImage("NuxtSeo.takumi", {
-  title: BLOGS_TITLE.value,
-  description: BLOGS_DESCRIPTION.value,
-  brand: config.siteName,
-  colorMode: "light",
-  isPro: true,
+  title: PAGE_TITLE.value,
+  description: PAGE_DESCRIPTION.value,
+  badge: "All Blogs",
+  colorMode: ogColorMode.value,
 });
 
 // Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
@@ -115,17 +120,17 @@ useSchemaOrg([
   defineBreadcrumb({
     itemListElement: [
       { name: "Home", item: "/" },
-      { name: "Blogs", item: BLOGS_CANONICAL_URL.value },
+      { name: "Blogs", item: PAGE_CANONICAL_URL.value },
     ],
   }),
 
   // CollectionPage Schema for Complete Blog Archive
   {
     "@type": "CollectionPage",
-    "@id": `${BLOGS_CANONICAL_URL.value}/#collectionpage`,
-    "url": BLOGS_CANONICAL_URL.value,
-    "name": BLOGS_TITLE.value,
-    "description": BLOGS_DESCRIPTION.value,
+    "@id": `${PAGE_CANONICAL_URL.value}/#collectionpage`,
+    "url": PAGE_CANONICAL_URL.value,
+    "name": PAGE_TITLE.value,
+    "description": PAGE_DESCRIPTION.value,
   },
 ]);
 </script>
@@ -166,7 +171,7 @@ useSchemaOrg([
             <!-- RSS Subscribe Button -->
             <RssSubscribeButton
               title="Blog Archive"
-              :feed-path="BLOGS_RSS_URL"
+              :feed-path="PAGE_RSS_URL"
             />
           </div>
         </template>

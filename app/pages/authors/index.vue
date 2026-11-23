@@ -55,18 +55,17 @@ onMounted(() => {
 });
 
 const config = useRuntimeConfig().public;
-const PAGE_TITLE = computed(() => `Meet Our Contributors — Editorial Roster & Engineering Team`);
+const PAGE_TITLE = computed(() => `Meet Our Contributors`);
 const PAGE_DESCRIPTION = computed(
   () => "Discover the dedicated developers, tech enthusiasts, and systems architects building our knowledge database. Explore their profiles and dive into their engineering insights.",
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors`);
-const AUTHORS_INDEX_RSS_URL = computed(() => `/authors/rss.xml`);
+const PAGE_RSS_URL = computed(() => `/authors/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  keywords: "nodewave, authors, contributors, developers, tech enthusiasts, systems architects, profiles, insights, engineering team",
   robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
   // Open Graph / Facebook
@@ -92,7 +91,7 @@ useHead({
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: "NodeWave — Authors Directory RSS Feed",
+      title: "Authors RSS Feed",
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
@@ -103,12 +102,18 @@ useHead({
   ],
 });
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 defineOgImage("NuxtSeo.takumi", {
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
-  brand: config.siteName,
-  colorMode: "light",
-  isPro: true,
+  badge: "All Authors",
+  colorMode: ogColorMode.value,
 });
 
 // Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
@@ -169,7 +174,7 @@ useSchemaOrg([
             <!-- Authors Directory RSS Subscribe Button -->
             <RssSubscribeButton
               title="Authors Directory"
-              :feed-path="AUTHORS_INDEX_RSS_URL"
+              :feed-path="PAGE_RSS_URL"
             />
           </div>
         </template>

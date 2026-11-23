@@ -51,18 +51,17 @@ onMounted(() => {
 
 const config = useRuntimeConfig().public;
 
-const PAGE_TITLE = computed(() => `Browse by Categories — Technical Topics & Domains`);
+const PAGE_TITLE = computed(() => `Browse by Categories`);
 const PAGE_DESCRIPTION = computed(
   () => "Explore all technical articles, architecture notes, and software development guides organized by category and subject area on Nodewave.",
 );
 const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories`);
-const CATEGORIES_INDEX_RSS_URL = computed(() => `/categories/rss.xml`);
+const PAGE_RSS_URL = computed(() => `/categories/rss.xml`);
 
 // Meta & Social Sharing Tags
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  keywords: "nodewave, categories, topics, taxonomy, software engineering, architecture, web development, articles, tutorials",
   robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
   // Open Graph / Facebook
@@ -88,7 +87,7 @@ useHead({
     {
       rel: "alternate",
       type: "application/rss+xml",
-      title: "NodeWave — Categories Directory RSS Feed",
+      title: "Categories RSS Feed",
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
     },
     {
@@ -99,12 +98,18 @@ useHead({
   ],
 });
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 defineOgImage("NuxtSeo.takumi", {
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
-  brand: config.siteName,
-  colorMode: "light",
-  isPro: true,
+  badge: "All Categories",
+  colorMode: ogColorMode.value,
 });
 
 // Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
@@ -159,7 +164,7 @@ useSchemaOrg([
             <!-- Categories Directory RSS Subscribe Button -->
             <RssSubscribeButton
               title="Categories Directory"
-              :feed-path="CATEGORIES_INDEX_RSS_URL"
+              :feed-path="PAGE_RSS_URL"
             />
           </div>
         </template>

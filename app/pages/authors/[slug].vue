@@ -119,7 +119,6 @@ const socialUrls = computed(() => {
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  keywords: () => `nodewave, author profile, ${author.value?.name || ""}, contributions, articles, tutorials`,
   robots: "index, follow, max-image-preview:large",
 
   ogType: "profile",
@@ -201,12 +200,25 @@ useSchemaOrg([
   }),
 ]);
 
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
 defineOgImage("Author.takumi", {
-  colorMode: "light",
-  name: () => author.value?.name,
-  role: () => author.value?.title,
-  avatar: () => author.value?.avatar?.src,
-  articleCount: () => blogs.value.length,
+  colorMode: ogColorMode.value,
+  brand: config.siteName || "NodeWave",
+  siteUrl: config.siteUrl,
+  name: author.value?.name,
+  role: author.value?.title,
+  companyName: author.value?.company?.name,
+  companyRole: author.value?.company?.role,
+  bio: author.value?.description,
+  slug: author.value?.slug || authorSlug.value,
+  avatar: author.value?.avatar?.src,
+  articleCount: blogs.value.length,
 });
 </script>
 
