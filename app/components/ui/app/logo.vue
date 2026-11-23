@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { NuxtLink } from "#components";
 import { computed, useId } from "vue";
 
 import { siteConfig } from "~/app.meta";
@@ -113,7 +114,7 @@ function getLineClass(isActive: boolean) {
 
 <template>
   <component
-    :is="asLink ? resolveComponent('NuxtLink') : 'div'"
+    :is="asLink ? NuxtLink : 'div'"
     :to="asLink ? '/' : undefined"
     :aria-label="asLink ? `${resolvedBrand} — Return to homepage` : undefined"
     :style="rootStyles"
