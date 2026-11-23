@@ -17,9 +17,9 @@ export default defineAppConfig({
 
     header: {
       slots: {
-        root: "sticky top-0 z-50 pt-2.5 pb-1 px-3 sm:px-6 lg:px-8 bg-transparent border-0 shadow-none transition-all duration-300",
+        root: "sticky top-0 z-50 pt-0 pb-0 px-0 lg:pt-2.5 lg:pb-1 lg:px-8 bg-transparent border-0 shadow-none transition-all duration-300",
         container:
-          "max-w-(--ui-container) mx-auto h-13 sm:h-14 px-3 sm:px-4 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/85 dark:bg-(--app-surface-subtle)/90 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)] flex items-center justify-between gap-2 transition-colors duration-300",
+          "w-full max-w-none lg:max-w-(--ui-container) mx-auto h-14 px-4 sm:px-6 lg:px-4 rounded-none lg:rounded-xs border-0 border-b border-(--app-border) lg:border bg-(--app-surface-subtle)/90 dark:bg-(--app-surface-subtle)/95 lg:bg-(--app-surface-subtle)/85 dark:lg:bg-(--app-surface-subtle)/90 backdrop-blur-md shadow-none lg:ring-1 lg:ring-inset lg:ring-white/45 dark:lg:ring-white/6 lg:shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:lg:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)] flex items-center justify-between gap-2 transition-colors duration-300",
         left: "flex items-center justify-start min-w-0 shrink lg:flex-1",
         center: "hidden lg:flex items-center justify-center shrink-0",
         right: "flex items-center justify-end gap-1 shrink-0 lg:flex-1",
