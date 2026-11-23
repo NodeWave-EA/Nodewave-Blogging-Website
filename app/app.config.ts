@@ -145,7 +145,7 @@ export default defineAppConfig({
 
     contentToc: {
       slots: {
-        root: "sticky top-(--ui-header-height) z-20 bg-(--app-bg)/95 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none border-b border-(--app-border) lg:border-b-0 -mx-4 sm:-mx-6 px-4 sm:px-6 lg:mx-0 lg:px-0 overflow-y-auto max-h-[calc(100vh-var(--ui-header-height))]",
+        root: "order-first lg:order-none sticky top-[var(--blog-header-offset,var(--ui-header-height))] z-20 bg-(--app-bg)/95 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none border-b border-(--app-border) lg:border-b-0 -mx-4 sm:-mx-6 px-4 sm:px-6 lg:mx-0 lg:px-0 overflow-y-auto max-h-[calc(100vh_-_var(--blog-header-offset,var(--ui-header-height)))] transition-[top,max-height] duration-300",
         container: "pt-2.5 pb-3 lg:py-0 border-b-0",
         trigger: "font-mono text-xs uppercase tracking-wider text-neutral-700 dark:text-neutral-300 py-1.5",
         title: "font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400",

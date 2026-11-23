@@ -15,6 +15,7 @@ const route = useRoute();
 const runtimeConfig = useRuntimeConfig().public;
 
 const { scrollProgress } = useReadingProgress();
+const { isMotionReduced } = useReduceMotion();
 const { getBlogBySlug, getSurroundingBlogs } = useContent();
 
 const slug = computed(() => String(route.params.slug || ""));
@@ -52,20 +53,141 @@ const categorySlug = computed(() => currentBlog.value?.category || "general");
 const tocLinks = computed(() => currentBlog.value?.body?.toc?.links || []);
 const hasToc = computed(() => tocLinks.value.length > 0);
 
-// Mobile TOC disclosure state: auto-closes when a user selects an anchor link
+// Mobile TOC disclosure state & post-collapse anchor alignment
 const isTocOpen = ref(false);
+const tocWrapperRef = useTemplateRef<HTMLElement>("tocWrapper");
+const isHeaderVisible = useState<boolean>("blog-header-visible", () => true);
 
-function handleTocClick(event: MouseEvent) {
-  const target = event.target as HTMLElement | null;
-  if (target?.closest("a")) {
-    isTocOpen.value = false;
-  }
+function resolveHashTarget(hash: string): HTMLElement | null {
+  if (!hash || !hash.startsWith("#"))
+    return null;
+
+  const rawId = hash.slice(1);
+  if (!rawId)
+    return null;
+
+  const decodedId = decodeURIComponent(rawId);
+  return (
+    document.getElementById(decodedId)
+    || document.getElementById(rawId)
+    || document.querySelector<HTMLElement>(`[id="${CSS.escape(decodedId)}"]`)
+  );
 }
+
+function getMobileTocBarHeight(): number {
+  if (window.innerWidth >= 1024)
+    return 0;
+
+  const tocNav = tocWrapperRef.value?.querySelector<HTMLElement>("nav");
+  if (!tocNav)
+    return 0;
+
+  return tocNav.getBoundingClientRect().height;
+}
+
+async function waitForTocCollapse(wasOpen: boolean): Promise<void> {
+  await nextTick();
+  if (!wasOpen || window.innerWidth >= 1024)
+    return;
+
+  const tocNav = tocWrapperRef.value?.querySelector<HTMLElement>("nav");
+  if (!tocNav)
+    return;
+
+  await new Promise<void>((resolve) => {
+    const start = performance.now();
+    let prevHeight = tocNav.getBoundingClientRect().height;
+    let stableFrames = 0;
+
+    function checkSettled() {
+      const currentHeight = tocNav!.getBoundingClientRect().height;
+      if (Math.abs(currentHeight - prevHeight) < 0.5 && currentHeight < 90) {
+        stableFrames++;
+      }
+      else {
+        stableFrames = 0;
+      }
+
+      prevHeight = currentHeight;
+
+      if (stableFrames >= 2 || performance.now() - start > 350) {
+        resolve();
+        return;
+      }
+
+      window.requestAnimationFrame(checkSettled);
+    }
+
+    window.requestAnimationFrame(checkSettled);
+  });
+}
+
+async function scrollToTocAnchor(hash: string) {
+  const wasTocOpen = isTocOpen.value;
+  isTocOpen.value = false;
+
+  await waitForTocCollapse(wasTocOpen);
+
+  const targetEl = resolveHashTarget(hash);
+  if (!targetEl)
+    return;
+
+  const currentScrollY = window.scrollY || 0;
+  const rawTargetY = currentScrollY + targetEl.getBoundingClientRect().top;
+  const tocHeight = getMobileTocBarHeight();
+  const breathingRoom = 16;
+
+  // Determine whether scrolling down (header hides) or scrolling up (header appears)
+  const willScrollDown = rawTargetY - (tocHeight + breathingRoom) > currentScrollY + 10;
+  const headerEl = document.querySelector<HTMLElement>("header");
+  const headerHeight = !willScrollDown && headerEl
+    ? headerEl.getBoundingClientRect().height
+    : 0;
+
+  const stickyOffset = headerHeight + tocHeight + breathingRoom;
+  const targetTop = Math.max(0, rawTargetY - stickyOffset);
+
+  isHeaderVisible.value = !willScrollDown || targetTop <= 48;
+
+  if (window.location.hash !== hash) {
+    window.history.replaceState(window.history.state, "", hash);
+  }
+
+  window.scrollTo({
+    top: targetTop,
+    behavior: isMotionReduced.value ? "auto" : "smooth",
+  });
+}
+
+function handleAnchorClick(event: MouseEvent) {
+  const target = event.target as HTMLElement | null;
+  const anchor = target?.closest("a");
+  if (!anchor)
+    return;
+
+  const href = anchor.getAttribute("href");
+  if (!href || !href.startsWith("#"))
+    return;
+
+  // Intercept in capture phase before NuxtLink triggers router.push scrollBehavior
+  event.preventDefault();
+  event.stopPropagation();
+  void scrollToTocAnchor(href);
+}
+
+onMounted(() => {
+  if (route.hash) {
+    void scrollToTocAnchor(route.hash);
+  }
+});
 
 watch(
   () => route.hash,
-  () => {
+  (newHash) => {
     isTocOpen.value = false;
+    if (newHash) {
+      void scrollToTocAnchor(newHash);
+    }
   },
 );
 
@@ -361,7 +483,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
       :ui="{
         root: 'flex flex-col lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-10 min-w-0',
         center: hasToc ? 'lg:col-span-8 xl:col-span-9 min-w-0' : 'lg:col-span-12 min-w-0',
-        right: 'lg:col-span-4 xl:col-span-3 min-w-0',
+        right: 'contents lg:block lg:col-span-4 xl:col-span-3 min-w-0',
       }"
     >
       <!-- Editorial Hero Header -->
@@ -494,16 +616,24 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
 
       <!-- Sticky Desktop & Auto-Closing Mobile Table of Contents -->
       <template v-if="hasToc" #right>
-        <UContentToc
-          v-model:open="isTocOpen"
-          :links="tocLinks"
-          title="On this page"
-          highlight
-          highlight-color="primary"
-          highlight-variant="circuit"
-          class="lg:pt-1"
-          @click="handleTocClick"
-        />
+        <div
+          ref="tocWrapper"
+          class="contents"
+          @click.capture="handleAnchorClick"
+        >
+          <UContentToc
+            v-model:open="isTocOpen"
+            :links="tocLinks"
+            title="On this page"
+            highlight
+            highlight-color="primary"
+            highlight-variant="circuit"
+            :ui="{
+              root: 'order-first lg:order-none sticky top-[var(--blog-header-offset,var(--ui-header-height))] z-20 bg-(--app-bg)/95 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none border-b border-(--app-border) lg:border-b-0 -mx-4 sm:-mx-6 px-4 sm:px-6 lg:mx-0 lg:px-0 overflow-y-auto max-h-[calc(100vh_-_var(--blog-header-offset,var(--ui-header-height)))] transition-[top,max-height] duration-300',
+            }"
+            class="lg:pt-1"
+          />
+        </div>
       </template>
 
       <!-- Main Article Column -->
@@ -539,6 +669,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
         <article
           :aria-label="currentBlog.title"
           class="prose dark:prose-invert max-w-none w-full min-w-0 markdown-body selection:bg-primary-500/15"
+          @click.capture="handleAnchorClick"
         >
           <ContentRenderer :value="currentBlog" />
         </article>
@@ -884,15 +1015,15 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
 }
 
 :deep(.markdown-body h2) {
-  @apply scroll-mt-28 lg:scroll-mt-24 text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight mt-11 mb-4 pb-2.5 border-b border-(--app-border);
+  @apply scroll-mt-32 lg:scroll-mt-24 text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight mt-11 mb-4 pb-2.5 border-b border-(--app-border);
 }
 
 :deep(.markdown-body h3) {
-  @apply scroll-mt-28 lg:scroll-mt-24 text-lg sm:text-xl font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight mt-8 mb-3;
+  @apply scroll-mt-32 lg:scroll-mt-24 text-lg sm:text-xl font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight mt-8 mb-3;
 }
 
 :deep(.markdown-body h4) {
-  @apply scroll-mt-28 lg:scroll-mt-24 text-base font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight mt-6 mb-2.5;
+  @apply scroll-mt-32 lg:scroll-mt-24 text-base font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight mt-6 mb-2.5;
 }
 
 :deep(.markdown-body a) {

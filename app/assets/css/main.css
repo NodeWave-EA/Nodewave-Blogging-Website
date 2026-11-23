@@ -60,6 +60,7 @@
 
 :root,
 [data-warmth] {
+  --blog-header-offset: var(--ui-header-height);
   --ui-bg: var(--app-bg);
   --ui-bg-muted: var(--app-surface-subtle);
   --ui-bg-elevated: var(--app-surface-hover);
