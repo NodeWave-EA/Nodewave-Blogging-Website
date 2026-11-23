@@ -268,12 +268,13 @@ function selectSlide(index: number) {
 }
 
 // SEO, Social Meta, Schema.org & OG Image
-const siteName = computed(() => runtimeConfig.siteName || "Nodewave");
-const siteUrl = computed(() => (runtimeConfig.siteUrl || "").replace(/\/$/, ""));
+const siteName = computed(() => runtimeConfig.siteName || "NodeWave");
+const siteUrl = computed(() => (runtimeConfig.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""));
 
 const BLOG_TITLE = computed(() => currentBlog.value?.seo?.title || currentBlog.value?.title || "Article Detail");
 const BLOG_DESCRIPTION = computed(() => currentBlog.value?.seo?.description || currentBlog.value?.description || "");
 const BLOG_CANONICAL_URL = computed(() => `${siteUrl.value}${toValue(blogPath)}`);
+const isNoIndex = computed(() => Boolean(currentBlog.value?.seo?.noIndex));
 
 const coverImageUrl = computed(() => {
   const src = currentBlog.value?.coverImage?.src;
@@ -284,6 +285,9 @@ const coverImageUrl = computed(() => {
     : `${siteUrl.value}${src}`;
 });
 
+// Sync X-Robots-Tag HTTP header when an article sets seo.noIndex
+useRobotsRule(computed<boolean | string>(() => (isNoIndex.value ? "noindex, nofollow" : true)));
+
 useSeoMeta({
   title: () => BLOG_TITLE.value,
   description: () => BLOG_DESCRIPTION.value,
@@ -291,22 +295,19 @@ useSeoMeta({
   author: () => blogAuthor.value?.name || siteName.value,
   publisher: () => siteName.value,
 
-  // Open Graph / Facebook
+  // Open Graph / Facebook (Article overrides)
   ogType: "article",
   ogTitle: () => currentBlog.value?.seo?.ogTitle || BLOG_TITLE.value,
   ogDescription: () => currentBlog.value?.seo?.ogDescription || BLOG_DESCRIPTION.value,
-  ogUrl: () => BLOG_CANONICAL_URL.value,
   ogImageAlt: () => currentBlog.value?.coverImage?.alt || BLOG_TITLE.value,
-  ogSiteName: () => siteName.value,
 
   // Twitter
-  twitterCard: "summary_large_image",
   twitterTitle: () => currentBlog.value?.seo?.twitterTitle || BLOG_TITLE.value,
   twitterDescription: () => currentBlog.value?.seo?.twitterDescription || BLOG_DESCRIPTION.value,
 
-  // Indexing Directives
+  // Conditional Indexing Directive
   robots: () =>
-    currentBlog.value?.seo?.noIndex
+    isNoIndex.value
       ? "noindex, nofollow"
       : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 
@@ -316,20 +317,6 @@ useSeoMeta({
   articleModifiedTime: () => modifiedIsoDate.value,
   articleSection: () => categorySlug.value,
   articleTag: () => blogTags.value.map(tag => tag.name),
-});
-
-useHead({
-  link: [
-    {
-      rel: "canonical",
-      href: () => BLOG_CANONICAL_URL.value,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
-    },
-  ],
 });
 
 useSchemaOrg([
@@ -350,32 +337,36 @@ useSchemaOrg([
   }),
 
   defineArticle({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "@id": () => BLOG_CANONICAL_URL.value,
-    "headline": () => BLOG_TITLE.value,
-    "description": () => BLOG_DESCRIPTION.value,
-    "image": () => coverImageUrl.value,
-    "datePublished": () => publishedIsoDate.value,
-    "dateModified": () => modifiedIsoDate.value,
-    "wordCount": () => currentBlog.value?.meta?.readingTime?.words,
-    "keywords": () => blogTags.value.map(t => t.name),
-    "about": () => currentBlog.value?.description || BLOG_DESCRIPTION.value,
+    "@type": "BlogPosting",
+    "@id": `${BLOG_CANONICAL_URL.value}/#article`,
+    "url": BLOG_CANONICAL_URL.value,
+    "mainEntityOfPage": {
+      "@id": `${BLOG_CANONICAL_URL.value}/#webpage`,
+    },
+    "headline": BLOG_TITLE.value,
+    "description": BLOG_DESCRIPTION.value,
+    "image": coverImageUrl.value,
+    "datePublished": publishedIsoDate.value,
+    "dateModified": modifiedIsoDate.value,
+    "articleSection": [categorySlug.value],
+    "inLanguage": "en-US",
+    ...(currentBlog.value?.meta?.readingTime?.words != null
+      ? { wordCount: currentBlog.value.meta.readingTime.words }
+      : {}),
+    "keywords": blogTags.value.map(t => t.name),
+    "about": currentBlog.value?.description || BLOG_DESCRIPTION.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
     "author": {
-      "@type": "Person",
+      "@type": "Person" as const,
       "name": blogAuthor.value?.name || siteName.value,
-      "url": blogAuthor.value?.stem
-        ? `${siteUrl.value}/${blogAuthor.value.stem}`
-        : undefined,
+      ...(blogAuthor.value?.stem
+        ? {
+            "@id": `${siteUrl.value}/${blogAuthor.value.stem}/#author`,
+            "url": `${siteUrl.value}/${blogAuthor.value.stem}`,
+          }
+        : {}),
     },
-    "publisher": {
-      "@type": "Organization",
-      "name": siteName.value,
-      "logo": {
-        "@type": "ImageObject",
-        "url": runtimeConfig.siteLogo || undefined,
-      },
-    },
+    "publisher": { "@id": `${siteUrl.value}/#organization` },
   }),
 ]);
 
@@ -386,28 +377,26 @@ const ogColorMode = computed<"light" | "dark">(() =>
     : "dark",
 );
 
-if (currentBlog.value) {
-  defineOgImage("BlogPost.takumi", {
-    colorMode: ogColorMode.value,
-    brand: siteName.value,
-    siteUrl: siteUrl.value,
-    title: BLOG_TITLE.value,
-    description: BLOG_DESCRIPTION.value,
-    author: blogAuthor.value?.name,
-    authorTitle: blogAuthor.value?.title,
-    date: publishedDateObj.value
-      ? shortUtcDateFormatter.format(publishedDateObj.value)
-      : String(currentBlog.value.date || ""),
-    updatedDate: hasBeenUpdated.value ? formattedUpdatedDate.value : "",
-    readingTime: readingTimeText.value,
-    wordCount: wordCountFormatted.value,
-    category: categorySlug.value,
-    tags: blogTags.value.map(tag => tag.name),
-    featured: Boolean(currentBlog.value.featured),
-    avatar: blogAuthor.value?.avatar?.src,
-    backgroundImage: currentBlog.value?.coverImage?.src,
-  });
-}
+defineOgImage("BlogPost.takumi", {
+  colorMode: ogColorMode.value,
+  brand: siteName.value,
+  siteUrl: siteUrl.value,
+  title: BLOG_TITLE.value,
+  description: BLOG_DESCRIPTION.value,
+  author: blogAuthor.value?.name,
+  authorTitle: blogAuthor.value?.title,
+  date: publishedDateObj.value
+    ? shortUtcDateFormatter.format(publishedDateObj.value)
+    : String(currentBlog.value?.date || ""),
+  updatedDate: hasBeenUpdated.value ? formattedUpdatedDate.value : "",
+  readingTime: readingTimeText.value,
+  wordCount: wordCountFormatted.value,
+  category: categorySlug.value,
+  tags: blogTags.value.map(tag => tag.name).join(", "),
+  featured: Boolean(currentBlog.value?.featured),
+  avatar: blogAuthor.value?.avatar?.src,
+  backgroundImage: currentBlog.value?.coverImage?.src,
+});
 
 logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.value.length });
 </script>
