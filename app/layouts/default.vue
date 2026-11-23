@@ -3,9 +3,7 @@
     <UiAppHeader />
 
     <UMain class="w-full max-w-full min-w-0">
-      <SiteOpenGraph>
-        <slot />
-      </SiteOpenGraph>
+      <slot />
     </UMain>
 
     <BlogSearchModal />

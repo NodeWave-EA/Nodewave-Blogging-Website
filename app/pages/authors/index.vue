@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import { siteConfig } from "~/app.meta";
 import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
@@ -20,9 +21,7 @@ const { data: rawAuthors, pending: authorsPending } = await getAllAuthors(displa
 const { logger } = useLogger({ context: "Authors Page" });
 logger.log("Fetched authors data:", { rawAuthors: rawAuthors.value, authorsPending: authorsPending.value });
 
-const enrichedAuthors = computed(() => {
-  return rawAuthors.value || [];
-});
+const enrichedAuthors = computed(() => rawAuthors.value || []);
 
 const hasMoreContent = computed(() => {
   if (!rawAuthors.value)
@@ -55,49 +54,36 @@ onMounted(() => {
 });
 
 const config = useRuntimeConfig().public;
-const PAGE_TITLE = computed(() => `Meet Our Contributors`);
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
+);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
+
+const PAGE_TITLE = computed(() => "Meet Our Contributors");
 const PAGE_DESCRIPTION = computed(
   () => "Discover the dedicated developers, tech enthusiasts, and systems architects building our knowledge database. Explore their profiles and dive into their engineering insights.",
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors`);
-const PAGE_RSS_URL = computed(() => `/authors/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${siteUrl.value}/authors`);
+const PAGE_RSS_URL = "/authors/rss.xml";
 
-// Meta & Social Sharing Tags
+// Page-Specific Meta & Social Sharing Overrides
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-
-  // Open Graph / Facebook
-  ogType: "website",
-  ogTitle: () => PAGE_TITLE.value,
+  ogTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   ogDescription: () => PAGE_DESCRIPTION.value,
-  ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImageAlt: () => `${config.siteName || "Nodewave"} Contributors & Authors`,
-  ogSiteName: () => config.siteName || "Nodewave",
-
-  // Twitter
-  twitterCard: "summary_large_image",
-  twitterTitle: () => PAGE_TITLE.value,
+  ogImageAlt: () => `${siteName.value} Contributors & Authors`,
+  twitterTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   twitterDescription: () => PAGE_DESCRIPTION.value,
 });
 
 useHead({
   link: [
     {
-      rel: "canonical",
-      href: () => PAGE_CANONICAL_URL.value,
-    },
-    {
       rel: "alternate",
       type: "application/rss+xml",
-      title: "Authors RSS Feed",
+      title: () => `${siteName.value} — Authors RSS Feed`,
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
     },
   ],
 });
@@ -110,13 +96,16 @@ const ogColorMode = computed<"light" | "dark">(() =>
 );
 
 defineOgImage("NuxtSeo.takumi", {
+  colorMode: ogColorMode.value,
+  brand: siteName.value,
+  tagline: "Engineering & Insights",
+  badge: "Editorial Roster",
+  siteUrl: siteUrl.value,
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
-  badge: "All Authors",
-  colorMode: ogColorMode.value,
 });
 
-// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+// Connected Schema.org Structured Data (CollectionPage + ItemList + Breadcrumbs)
 useSchemaOrg([
   defineBreadcrumb({
     itemListElement: [
@@ -131,6 +120,23 @@ useSchemaOrg([
     "url": PAGE_CANONICAL_URL.value,
     "name": PAGE_TITLE.value,
     "description": PAGE_DESCRIPTION.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
+    "about": { "@id": `${siteUrl.value}/#organization` },
+    "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#authors-list` },
+    "inLanguage": "en-US",
+  },
+
+  {
+    "@type": "ItemList",
+    "@id": `${PAGE_CANONICAL_URL.value}/#authors-list`,
+    "name": "NodeWave Contributors & Authors",
+    "numberOfItems": enrichedAuthors.value.length,
+    "itemListElement": enrichedAuthors.value.map((author, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": `${siteUrl.value}/authors/${author.slug}`,
+      "name": author.name,
+    })),
   },
 ]);
 </script>

@@ -3,23 +3,37 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import { siteConfig } from "~/app.meta";
 import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 
 const route = useRoute();
-const tagSlug = computed(() => route.params.slug as string);
+const tagSlug = computed(() => String(route.params.slug || ""));
 
 const { getTagBySlug, getTagBlogs } = useContent();
 
 const itemsPerPage = 12;
 const displayLimit = ref(itemsPerPage);
 
-const { data: tag, pending: tagPending, error: tagError } = await getTagBySlug(tagSlug);
-const { data: rawBlogs, pending: blogsPending } = await getTagBlogs(tagSlug, displayLimit);
+const [
+  { data: tag, pending: tagPending, error: tagError },
+  { data: rawBlogs, pending: blogsPending },
+] = await Promise.all([
+  getTagBySlug(tagSlug),
+  getTagBlogs(tagSlug, displayLimit),
+]);
 
-const blogs = computed(() => {
-  return rawBlogs.value || [];
-});
+// Prevent soft-404 indexing when a tag slug does not exist
+if (!tag.value && !tagError.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Tag not found",
+    message: `The tag with slug "${tagSlug.value}" could not be found.`,
+    fatal: true,
+  });
+}
+
+const blogs = computed(() => rawBlogs.value || []);
 
 const hasMoreContent = computed(() => {
   if (!rawBlogs.value || rawBlogs.value.length === 0)
@@ -43,54 +57,42 @@ useInfiniteScroll(
 );
 
 const config = useRuntimeConfig().public;
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
+);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
+
+const resolvedSlug = computed(() => tag.value?.slug || tagSlug.value);
 const PAGE_TITLE = computed(() => `Browse ${tag.value?.name || "Tag"} Articles`);
 const PAGE_DESCRIPTION = computed(
   () => tag.value?.description || tag.value?.meta?.description || `Explore technical posts, guides, and architectural notes tagged under ${tag.value?.name || "this topic"}.`,
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags/${tag.value?.slug || tagSlug.value}`);
-const TAG_RSS_URL = computed(() => `/tags/${tag.value?.slug || tagSlug.value}/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${siteUrl.value}/tags/${resolvedSlug.value}`);
+const TAG_RSS_URL = computed(() => `/tags/${resolvedSlug.value}/rss.xml`);
 
-// Meta & Social Sharing Tags
+// Page-Specific Meta & Social Sharing Overrides
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  robots: "index, follow, max-image-preview:large",
-
-  // Open Graph / Facebook
-  ogType: "website",
-  ogTitle: () => PAGE_TITLE.value,
+  ogTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   ogDescription: () => PAGE_DESCRIPTION.value,
-  ogUrl: () => PAGE_CANONICAL_URL.value,
   ogImageAlt: () => tag.value?.name || "Tag Archive",
-  ogSiteName: () => config.siteName || "Nodewave",
-
-  // Twitter
-  twitterCard: "summary_large_image",
-  twitterTitle: () => PAGE_TITLE.value,
+  twitterTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   twitterDescription: () => PAGE_DESCRIPTION.value,
 });
 
 useHead({
   link: [
     {
-      rel: "canonical",
-      href: () => PAGE_CANONICAL_URL.value,
-    },
-    {
       rel: "alternate",
       type: "application/rss+xml",
-      title: () => `NodeWave — ${tag.value?.name || "Tag"} RSS Feed`,
+      title: () => `${siteName.value} — ${tag.value?.name || "Tag"} RSS Feed`,
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
     },
   ],
 });
 
-// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+// Connected Schema.org Structured Data (CollectionPage + ItemList + Breadcrumbs)
 useSchemaOrg([
   defineBreadcrumb({
     itemListElement: [
@@ -109,11 +111,27 @@ useSchemaOrg([
     "url": PAGE_CANONICAL_URL.value,
     "name": PAGE_TITLE.value,
     "description": PAGE_DESCRIPTION.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
     "about": {
       "@type": "Thing",
       "name": tag.value?.name,
-      "description": tag.value?.description,
+      "description": PAGE_DESCRIPTION.value,
     },
+    "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#tag-articles` },
+    "inLanguage": "en-US",
+  },
+
+  {
+    "@type": "ItemList",
+    "@id": `${PAGE_CANONICAL_URL.value}/#tag-articles`,
+    "name": `Articles tagged with ${tag.value?.name || "Tag"}`,
+    "numberOfItems": blogs.value.length,
+    "itemListElement": blogs.value.map((blog, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": `${siteUrl.value}${blog.path}`,
+      "name": blog.title,
+    })),
   },
 ]);
 
@@ -124,17 +142,19 @@ const ogColorMode = computed<"light" | "dark">(() =>
     : "dark",
 );
 
-defineOgImage("Taxonomy.takumi", {
-  colorMode: ogColorMode.value,
-  brand: config.siteName || "NodeWave",
-  siteUrl: config.siteUrl,
-  title: PAGE_TITLE.value,
-  description: PAGE_DESCRIPTION.value,
-  type: "Tag",
-  slug: tag.value?.slug || tagSlug.value,
-  accentColor: tag.value?.color || "",
-  articleCount: blogs.value.length,
-});
+if (tag.value) {
+  defineOgImage("Taxonomy.takumi", {
+    colorMode: ogColorMode.value,
+    brand: siteName.value,
+    siteUrl: siteUrl.value,
+    title: tag.value.name || PAGE_TITLE.value,
+    description: PAGE_DESCRIPTION.value,
+    type: "Tag",
+    slug: resolvedSlug.value,
+    accentColor: tag.value.color || "",
+    articleCount: blogs.value.length,
+  });
+}
 </script>
 
 <template>

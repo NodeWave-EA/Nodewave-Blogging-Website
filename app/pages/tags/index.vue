@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import { siteConfig } from "~/app.meta";
 import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
@@ -50,50 +51,36 @@ onMounted(() => {
 });
 
 const config = useRuntimeConfig().public;
-
-const PAGE_TITLE = computed(() => `Browse by Tags`);
-const PAGE_DESCRIPTION = computed(
-  () => "Filter and explore technical articles, system architecture notes, and development guides by specific technologies, concepts, and keywords on Nodewave.",
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/tags`);
-const PAGE_RSS_URL = computed(() => `/tags/rss.xml`);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
 
-// Meta & Social Sharing Tags
+const PAGE_TITLE = computed(() => "Browse by Tags");
+const PAGE_DESCRIPTION = computed(
+  () => `Filter and explore technical articles, system architecture notes, and development guides by specific technologies, concepts, and keywords on ${siteName.value}.`,
+);
+const PAGE_CANONICAL_URL = computed(() => `${siteUrl.value}/tags`);
+const PAGE_RSS_URL = "/tags/rss.xml";
+
+// Page-Specific Meta & Social Sharing Overrides
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-
-  // Open Graph / Facebook
-  ogType: "website",
-  ogTitle: () => PAGE_TITLE.value,
+  ogTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   ogDescription: () => PAGE_DESCRIPTION.value,
-  ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImageAlt: () => `${config.siteName || "Nodewave"} Tags Directory`,
-  ogSiteName: () => config.siteName || "Nodewave",
-
-  // Twitter
-  twitterCard: "summary_large_image",
-  twitterTitle: () => PAGE_TITLE.value,
+  ogImageAlt: () => `${siteName.value} Tags Directory`,
+  twitterTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   twitterDescription: () => PAGE_DESCRIPTION.value,
 });
 
 useHead({
   link: [
     {
-      rel: "canonical",
-      href: () => PAGE_CANONICAL_URL.value,
-    },
-    {
       rel: "alternate",
       type: "application/rss+xml",
-      title: "Tags RSS Feed",
+      title: () => `${siteName.value} — Tags RSS Feed`,
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
     },
   ],
 });
@@ -106,13 +93,16 @@ const ogColorMode = computed<"light" | "dark">(() =>
 );
 
 defineOgImage("NuxtSeo.takumi", {
+  colorMode: ogColorMode.value,
+  brand: siteName.value,
+  tagline: "Engineering & Insights",
+  badge: "All Tags",
+  siteUrl: siteUrl.value,
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
-  badge: "All Tags",
-  colorMode: ogColorMode.value,
 });
 
-// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+// Connected Schema.org Structured Data (CollectionPage + ItemList + Breadcrumbs)
 useSchemaOrg([
   defineBreadcrumb({
     itemListElement: [
@@ -127,6 +117,23 @@ useSchemaOrg([
     "url": PAGE_CANONICAL_URL.value,
     "name": PAGE_TITLE.value,
     "description": PAGE_DESCRIPTION.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
+    "about": { "@id": `${siteUrl.value}/#organization` },
+    "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#tags-list` },
+    "inLanguage": "en-US",
+  },
+
+  {
+    "@type": "ItemList",
+    "@id": `${PAGE_CANONICAL_URL.value}/#tags-list`,
+    "name": "NodeWave Article Tags",
+    "numberOfItems": enrichedTags.value.length,
+    "itemListElement": enrichedTags.value.map((tag, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": `${siteUrl.value}/tags/${tag.slug}`,
+      "name": tag.name,
+    })),
   },
 ]);
 </script>

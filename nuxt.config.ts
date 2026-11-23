@@ -1,6 +1,9 @@
 /* eslint-disable node/no-process-env */
 import { siteConfig } from "./app/app.meta";
 
+const SITE_URL = (process.env.NUXT_PUBLIC_SITE_URL || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
+const SITE_NAME = process.env.NUXT_PUBLIC_SITE_NAME || siteConfig.name || "NodeWave";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -20,7 +23,6 @@ export default defineNuxtConfig({
     "@nuxtjs/device",
     "nuxt-ai-ready",
     "nuxt-studio",
-    "@nuxtjs/robots",
   ],
 
   devtools: {
@@ -34,8 +36,6 @@ export default defineNuxtConfig({
   app: {
     buildAssetsDir: "/_nuxt/",
     head: {
-      htmlAttrs: { lang: "en" },
-      titleTemplate: "%s | NodeWave Blog",
       meta: [
         { name: "color-scheme", content: "light dark" },
         { name: "theme-color", media: "(prefers-color-scheme: light)", content: "#14b8a6" },
@@ -44,9 +44,8 @@ export default defineNuxtConfig({
         { name: "msapplication-TileColor", content: "#14b8a6" },
         { name: "msapplication-TileImage", content: "/icons/web-app-manifest-192x192.png" },
         { name: "msapplication-config", content: "/icons/browserconfig.xml" },
-        { name: "publisher", content: "NodeWave" },
-        { name: "creator", content: "NodeWave" },
-        { "http-equiv": "X-UA-Compatible", "content": "IE=edge" },
+        { name: "publisher", content: SITE_NAME },
+        { name: "creator", content: SITE_NAME },
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
         { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -62,12 +61,6 @@ export default defineNuxtConfig({
         },
       ],
       link: [
-        {
-          rel: "alternate",
-          type: "application/rss+xml",
-          title: "RSS Feed for NodeWave Blog",
-          href: "/rss.xml",
-        },
         {
           rel: "icon",
           type: "image/x-icon",
@@ -117,9 +110,10 @@ export default defineNuxtConfig({
   },
 
   site: {
-    name: siteConfig.name,
-    url: process.env.NUXT_PUBLIC_SITE_URL,
-    defaultLocale: "en",
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: siteConfig.description,
+    defaultLocale: "en-US",
     trailingSlash: false,
   },
 
@@ -152,7 +146,7 @@ export default defineNuxtConfig({
         remarkPlugins: {
           "remark-reading-time": {},
           "remark-math": {},
-          "remark-gfm": {}, // Enables Tables, Tasklists, and Strikethroughs
+          "remark-gfm": {},
           "@akebifiky/remark-simple-plantuml": { baseUrl: "https://plantuml.com" },
         },
         rehypePlugins: {
@@ -168,10 +162,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
-      siteName: siteConfig.name,
+      siteUrl: SITE_URL,
+      siteName: SITE_NAME,
       siteDescription: siteConfig.description,
-      siteLogo: `${process.env.NUXT_PUBLIC_SITE_URL}/logo.png`,
+      siteLogo: `${SITE_URL}/logo.png`,
       logLevel: process.env.NUXT_PUBLIC_LOG_LEVEL || "log",
     },
   },
@@ -181,7 +175,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // Static Content Prerendering
+    // Static Content Prerender Rules
     "/": { prerender: true },
     "/blogs": { prerender: true },
     "/blogs/**": { prerender: true },
@@ -200,7 +194,10 @@ export default defineNuxtConfig({
     "/tags/rss.xml": { prerender: true },
 
     // Interactive / Private Routes (Client-side rendering & excluded from SEO indexing)
-    "/search": { ssr: false, robots: false },
+    "/search": {
+      ssr: false,
+      robots: "noindex, follow",
+    },
     "/editor": { ssr: false, robots: false },
     "/editor/**": { ssr: false, robots: false },
     "/__nuxt_studio/**": { ssr: true },
@@ -233,7 +230,12 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: true,
-      ignore: ["/__nuxt_studio", "/_vercel"],
+      ignore: [
+        "/__nuxt_studio",
+        "/_vercel",
+        "/search",
+        "/editor",
+      ],
     },
     experimental: {
       wasm: true,
@@ -274,7 +276,7 @@ export default defineNuxtConfig({
   },
 
   aiReady: {
-    autoI18n: true,
+    autoI18n: false,
     cron: true,
     runtimeSync: {
       ttl: 3600,
@@ -422,7 +424,6 @@ export default defineNuxtConfig({
 
   ogImage: {
     enabled: true,
-    componentDirs: ["components/OgImage"],
     defaults: {
       width: 1200,
       height: 630,
@@ -436,6 +437,9 @@ export default defineNuxtConfig({
 
   robots: {
     enabled: true,
+    debug: process.env.NODE_ENV === "development" && process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    disallow: ["/search", "/editor", "/api/"],
+    sitemap: ["/sitemap.xml"],
     groups: [
       {
         userAgent: "*",
@@ -455,11 +459,31 @@ export default defineNuxtConfig({
     ],
   },
 
+  schemaOrg: {
+    identity: {
+      type: "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.png`,
+    },
+  },
+
+  seo: {
+    debug: process.env.NODE_ENV === "development" && process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    fallbackTitle: false,
+    redirectToCanonicalSiteUrl: process.env.NODE_ENV === "production",
+  },
+
   sitemap: {
-    autoI18n: true,
+    zeroRuntime: true,
+    autoI18n: false,
     discoverImages: true,
     exclude: [
-      "/app/**",
+      "/search",
+      "/search/**",
+      "/editor",
+      "/editor/**",
+      "/_og/**",
       "/api/**",
       "/_nuxt/**",
       "/__nuxt_content/**",

@@ -3,23 +3,37 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import { siteConfig } from "~/app.meta";
 import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 
 const route = useRoute();
-const categorySlug = computed(() => route.params.slug as string);
+const categorySlug = computed(() => String(route.params.slug || ""));
 
 const { getCategoryBySlug, getCategoryBlogs } = useContent();
 
 const itemsPerPage = 12;
 const displayLimit = ref(itemsPerPage);
 
-const { data: category, pending: categoryPending, error: categoryError } = await getCategoryBySlug(categorySlug);
-const { data: rawBlogs, pending: blogsPending } = await getCategoryBlogs(categorySlug, displayLimit);
+const [
+  { data: category, pending: categoryPending, error: categoryError },
+  { data: rawBlogs, pending: blogsPending },
+] = await Promise.all([
+  getCategoryBySlug(categorySlug),
+  getCategoryBlogs(categorySlug, displayLimit),
+]);
 
-const blogs = computed(() => {
-  return rawBlogs.value || [];
-});
+// Prevent soft-404 indexing when a category slug does not exist
+if (!category.value && !categoryError.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Category not found",
+    message: `The category with slug "${categorySlug.value}" could not be found.`,
+    fatal: true,
+  });
+}
+
+const blogs = computed(() => rawBlogs.value || []);
 
 const hasMoreContent = computed(() => {
   if (!rawBlogs.value || rawBlogs.value.length === 0)
@@ -43,54 +57,42 @@ useInfiniteScroll(
 );
 
 const config = useRuntimeConfig().public;
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
+);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
+
+const resolvedSlug = computed(() => category.value?.slug || categorySlug.value);
 const PAGE_TITLE = computed(() => `Browse ${category.value?.name || "Category"} Articles`);
 const PAGE_DESCRIPTION = computed(
   () => category.value?.description || category.value?.meta?.description || `Explore articles and tutorials classified under the ${category.value?.name || "category"} topic.`,
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/categories/${category.value?.slug || categorySlug.value}`);
-const CATEGORY_RSS_URL = computed(() => `/categories/${category.value?.slug || categorySlug.value}/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${siteUrl.value}/categories/${resolvedSlug.value}`);
+const CATEGORY_RSS_URL = computed(() => `/categories/${resolvedSlug.value}/rss.xml`);
 
-// Meta & Social Sharing Tags
+// Page-Specific Meta & Social Sharing Overrides
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  robots: "index, follow, max-image-preview:large",
-
-  // Open Graph / Facebook
-  ogType: "website",
-  ogTitle: () => PAGE_TITLE.value,
+  ogTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   ogDescription: () => PAGE_DESCRIPTION.value,
-  ogUrl: () => PAGE_CANONICAL_URL.value,
   ogImageAlt: () => category.value?.name || "Category Archive",
-  ogSiteName: () => config.siteName || "Nodewave",
-
-  // Twitter
-  twitterCard: "summary_large_image",
-  twitterTitle: () => PAGE_TITLE.value,
+  twitterTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   twitterDescription: () => PAGE_DESCRIPTION.value,
 });
 
 useHead({
   link: [
     {
-      rel: "canonical",
-      href: () => PAGE_CANONICAL_URL.value,
-    },
-    {
       rel: "alternate",
       type: "application/rss+xml",
-      title: () => `NodeWave — ${category.value?.name || "Category"} RSS Feed`,
+      title: () => `${siteName.value} — ${category.value?.name || "Category"} RSS Feed`,
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
     },
   ],
 });
 
-// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+// Connected Schema.org Structured Data (CollectionPage + ItemList + Breadcrumbs)
 useSchemaOrg([
   defineBreadcrumb({
     itemListElement: [
@@ -109,11 +111,27 @@ useSchemaOrg([
     "url": PAGE_CANONICAL_URL.value,
     "name": PAGE_TITLE.value,
     "description": PAGE_DESCRIPTION.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
     "about": {
       "@type": "Thing",
       "name": category.value?.name,
-      "description": category.value?.description,
+      "description": PAGE_DESCRIPTION.value,
     },
+    "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#category-articles` },
+    "inLanguage": "en-US",
+  },
+
+  {
+    "@type": "ItemList",
+    "@id": `${PAGE_CANONICAL_URL.value}/#category-articles`,
+    "name": `Articles in ${category.value?.name || "Category"}`,
+    "numberOfItems": blogs.value.length,
+    "itemListElement": blogs.value.map((blog, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": `${siteUrl.value}${blog.path}`,
+      "name": blog.title,
+    })),
   },
 ]);
 
@@ -124,17 +142,19 @@ const ogColorMode = computed<"light" | "dark">(() =>
     : "dark",
 );
 
-defineOgImage("Taxonomy.takumi", {
-  colorMode: ogColorMode.value,
-  brand: config.siteName || "NodeWave",
-  siteUrl: config.siteUrl,
-  title: PAGE_TITLE.value,
-  description: PAGE_DESCRIPTION.value,
-  type: "Category",
-  slug: category.value?.slug || categorySlug.value,
-  accentColor: category.value?.color || "",
-  articleCount: blogs.value.length,
-});
+if (category.value) {
+  defineOgImage("Taxonomy.takumi", {
+    colorMode: ogColorMode.value,
+    brand: siteName.value,
+    siteUrl: siteUrl.value,
+    title: category.value.name || PAGE_TITLE.value,
+    description: PAGE_DESCRIPTION.value,
+    type: "Category",
+    slug: resolvedSlug.value,
+    accentColor: category.value.color || "",
+    articleCount: blogs.value.length,
+  });
+}
 </script>
 
 <template>

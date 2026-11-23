@@ -3,6 +3,7 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import { siteConfig } from "~/app.meta";
 import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
@@ -12,15 +13,30 @@ definePageMeta({
 });
 
 const route = useRoute();
-const authorSlug = computed(() => route.params.slug as string);
+const authorSlug = computed(() => String(route.params.slug || ""));
 
 const { getAuthorBySlug, getAuthorBlogs } = useContent();
 
 const itemsPerPage = 12;
 const displayLimit = ref(itemsPerPage);
 
-const { data: author, pending: authorPending, error: authorError } = await getAuthorBySlug(authorSlug);
-const { data: rawBlogs, pending: blogsPending } = await getAuthorBlogs(authorSlug, displayLimit);
+const [
+  { data: author, pending: authorPending, error: authorError },
+  { data: rawBlogs, pending: blogsPending },
+] = await Promise.all([
+  getAuthorBySlug(authorSlug),
+  getAuthorBlogs(authorSlug, displayLimit),
+]);
+
+// Prevent soft-404 indexing when an author slug does not exist
+if (!author.value && !authorError.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Author not found",
+    message: `The author with slug "${authorSlug.value}" could not be found.`,
+    fatal: true,
+  });
+}
 
 const blogs = computed(() => rawBlogs.value || []);
 
@@ -83,21 +99,26 @@ function getSocialPlatformMeta(platform: string) {
 }
 
 const config = useRuntimeConfig().public;
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
+);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
 
+const resolvedSlug = computed(() => author.value?.slug || authorSlug.value);
 const PAGE_TITLE = computed(() => `${author.value?.name || "Author"} Profile`);
 const PAGE_DESCRIPTION = computed(
-  () => author.value?.description || `Explore the profile of ${author.value?.name || "this author"} and discover their contributions to our platform.`,
+  () => author.value?.description || `Explore the profile of ${author.value?.name || "this author"} and discover their contributions on ${siteName.value}.`,
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/authors/${author.value?.slug || authorSlug.value}`);
-const AUTHOR_RSS_URL = computed(() => `/authors/${author.value?.slug || authorSlug.value}/rss.xml`);
+const PAGE_CANONICAL_URL = computed(() => `${siteUrl.value}/authors/${resolvedSlug.value}`);
+const AUTHOR_RSS_URL = computed(() => `/authors/${resolvedSlug.value}/rss.xml`);
 
 const authorAvatarUrl = computed(() => {
   const src = author.value?.avatar?.src;
   if (!src)
-    return `${config.siteUrl}/avatar.png`;
+    return `${siteUrl.value}/avatar.png`;
   return src.startsWith("http")
     ? src
-    : `${config.siteUrl}${src}`;
+    : `${siteUrl.value}${src}`;
 });
 
 const socialUrls = computed(() => {
@@ -112,51 +133,52 @@ const socialUrls = computed(() => {
         urls.push(link.url);
     });
   }
-  return urls;
+  return Array.from(new Set(urls));
 });
 
-// Meta & Social Sharing Tags
+const twitterCreatorHandle = computed(() => {
+  const twitterLink = author.value?.socialLinks?.find(
+    l => l.platform.toLowerCase() === "twitter" || l.platform.toLowerCase() === "x",
+  )?.url;
+  if (!twitterLink)
+    return undefined;
+  const match = twitterLink.match(/(?:twitter\.com|x\.com)\/(@?\w+)/i);
+  if (!match?.[1])
+    return undefined;
+  return match[1].startsWith("@")
+    ? match[1]
+    : `@${match[1]}`;
+});
+
+// Page-Specific Meta & Social Sharing Overrides
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  robots: "index, follow, max-image-preview:large",
+  author: () => author.value?.name || "",
 
+  // Open Graph Profile Overrides
   ogType: "profile",
-  ogTitle: () => PAGE_TITLE.value,
+  ogTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   ogDescription: () => PAGE_DESCRIPTION.value,
-  ogUrl: () => PAGE_CANONICAL_URL.value,
   ogImageAlt: () => author.value?.name || "Author Avatar",
-  ogSiteName: () => config.siteName || "Nodewave",
 
   profileFirstName: () => author.value?.name?.split(" ")[0] || "",
   profileLastName: () => author.value?.name?.split(" ").slice(1).join(" ") || "",
-  profileUsername: () => author.value?.slug || authorSlug.value,
+  profileUsername: () => resolvedSlug.value,
 
-  twitterCard: "summary_large_image",
-  twitterTitle: () => PAGE_TITLE.value,
+  // Twitter Overrides
+  twitterTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   twitterDescription: () => PAGE_DESCRIPTION.value,
-  twitterSite: () => author.value?.socialLinks?.find(l => l.platform.toLowerCase() === "twitter" || l.platform.toLowerCase() === "x")?.url || "",
-  twitterCreator: () => author.value?.socialLinks?.find(l => l.platform.toLowerCase() === "twitter" || l.platform.toLowerCase() === "x")?.url || "",
-
-  author: () => author.value?.name || "",
+  twitterCreator: () => twitterCreatorHandle.value,
 });
 
 useHead({
   link: [
     {
-      rel: "canonical",
-      href: () => PAGE_CANONICAL_URL.value,
-    },
-    {
       rel: "alternate",
       type: "application/rss+xml",
-      title: () => `NodeWave — ${author.value?.name || "Author"} RSS Feed`,
+      title: () => `${siteName.value} — ${author.value?.name || "Author"} RSS Feed`,
       href: () => `${PAGE_CANONICAL_URL.value}/rss.xml`,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
     },
   ],
 });
@@ -179,7 +201,10 @@ useSchemaOrg([
     "url": PAGE_CANONICAL_URL.value,
     "name": PAGE_TITLE.value,
     "description": PAGE_DESCRIPTION.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
     "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#author` },
+    "hasPart": { "@id": `${PAGE_CANONICAL_URL.value}/#author-articles` },
+    "inLanguage": "en-US",
   },
 
   definePerson({
@@ -198,6 +223,19 @@ useSchemaOrg([
         }
       : undefined,
   }),
+
+  {
+    "@type": "ItemList",
+    "@id": `${PAGE_CANONICAL_URL.value}/#author-articles`,
+    "name": `Articles by ${author.value?.name || "Author"}`,
+    "numberOfItems": blogs.value.length,
+    "itemListElement": blogs.value.map((blog, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "url": `${siteUrl.value}${blog.path}`,
+      "name": blog.title,
+    })),
+  },
 ]);
 
 const colorMode = useColorMode();
@@ -207,19 +245,21 @@ const ogColorMode = computed<"light" | "dark">(() =>
     : "dark",
 );
 
-defineOgImage("Author.takumi", {
-  colorMode: ogColorMode.value,
-  brand: config.siteName || "NodeWave",
-  siteUrl: config.siteUrl,
-  name: author.value?.name,
-  role: author.value?.title,
-  companyName: author.value?.company?.name,
-  companyRole: author.value?.company?.role,
-  bio: author.value?.description,
-  slug: author.value?.slug || authorSlug.value,
-  avatar: author.value?.avatar?.src,
-  articleCount: blogs.value.length,
-});
+if (author.value) {
+  defineOgImage("Author.takumi", {
+    colorMode: ogColorMode.value,
+    brand: siteName.value,
+    siteUrl: siteUrl.value,
+    name: author.value.name,
+    role: author.value.title,
+    companyName: author.value.company?.name,
+    companyRole: author.value.company?.role,
+    bio: author.value.description,
+    slug: resolvedSlug.value,
+    avatar: author.value.avatar?.src,
+    articleCount: blogs.value.length,
+  });
+}
 </script>
 
 <template>

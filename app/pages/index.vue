@@ -53,51 +53,26 @@ onMounted(() => {
   startDecryption("Curated Posts & Insights", "home-badge");
 });
 
-const PAGE_TITLE = computed(() => `Nodewave Curated Posts & Insights`);
-const PAGE_DESCRIPTION = computed(
-  () => "Explore the latest curated posts, technical articles, and engineering insights from nodewave. Stay ahead in web development, software architecture, and modern technology.",
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}`);
-const PAGE_RSS_URL = computed(() => `/rss.xml`);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
 
-// Meta & Social Sharing Tags
+const PAGE_TITLE = computed(() => `${siteName.value} — Curated Posts & Engineering Insights`);
+const PAGE_DESCRIPTION = computed(
+  () => "Explore the latest curated posts, technical articles, and engineering insights from NodeWave. Stay ahead in web development, IoT systems, software architecture, and modern technology.",
+);
+const PAGE_RSS_URL = "/rss.xml";
+
+// Page-Specific Meta & Social Sharing Overrides (site-wide defaults handled by SiteOpenGraph.vue)
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-
-  // Open Graph / Facebook
-  ogType: "website",
   ogTitle: () => PAGE_TITLE.value,
   ogDescription: () => PAGE_DESCRIPTION.value,
-  ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImageAlt: () => `${config.siteName || "Nodewave Blogs"} Homepage`,
-  ogSiteName: () => config.siteName || "Nodewave",
-
-  // Twitter
-  twitterCard: "summary_large_image",
+  ogImageAlt: () => `${siteName.value} — Curated Posts & Engineering Insights`,
   twitterTitle: () => PAGE_TITLE.value,
   twitterDescription: () => PAGE_DESCRIPTION.value,
-});
-
-useHead({
-  link: [
-    {
-      rel: "canonical",
-      href: () => PAGE_CANONICAL_URL.value,
-    },
-    {
-      rel: "alternate",
-      type: "application/rss+xml",
-      title: () => `${config.siteName} RSS Feed`,
-      href: () => PAGE_RSS_URL.value,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
-    },
-  ],
 });
 
 const colorMode = useColorMode();
@@ -108,47 +83,38 @@ const ogColorMode = computed<"light" | "dark">(() =>
 );
 
 defineOgImage("NuxtSeo.takumi", {
+  colorMode: ogColorMode.value,
+  brand: siteName.value,
+  tagline: "Smart IoT Solutions",
+  badge: "Curated Posts & Insights",
+  siteUrl: siteUrl.value,
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
-  badge: "All Categories",
-  colorMode: ogColorMode.value,
 });
 
-// Nuxt Schema.org Structured Data
+// Connected Schema.org Structured Data (Linked to global #website and #organization)
 useSchemaOrg([
-  // WebSite Schema with Site Search Integration
-  defineWebSite({
-    name: config.siteName || "Nodewave",
-    url: () => config.siteUrl,
-    description: () => PAGE_DESCRIPTION.value,
-    potentialAction: [
-      {
-        "@type": "SearchAction",
-        "target": `${config.siteUrl}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string",
-      },
-    ],
-  }),
-
-  // WebPage Document Entity
   defineWebPage({
-    "@id": `${config.siteUrl}/#webpage`,
+    "@id": `${siteUrl.value}/#webpage`,
+    "url": `${siteUrl.value}/`,
     "name": () => PAGE_TITLE.value,
     "description": () => PAGE_DESCRIPTION.value,
-    "url": () => PAGE_CANONICAL_URL.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
+    "about": { "@id": `${siteUrl.value}/#organization` },
+    "mainEntity": { "@id": `${siteUrl.value}/#featured-posts` },
+    "inLanguage": "en-US",
   }),
 
-  // Featured Posts ItemList Schema
   computed(() => ({
-    "@type": "ItemList",
-    "@id": `${config.siteUrl}/#featured-posts`,
+    "@type": "ItemList" as const,
+    "@id": `${siteUrl.value}/#featured-posts`,
     "name": "Featured Insights & Articles",
-    "description": "Curated technical articles and featured publications on Nodewave",
+    "description": "Curated technical articles and featured publications on NodeWave",
     "numberOfItems": featuredBlogs.value.length,
     "itemListElement": featuredBlogs.value.map((blog, index) => ({
-      "@type": "ListItem",
+      "@type": "ListItem" as const,
       "position": index + 1,
-      "url": `${config.siteUrl}${blog.path}`,
+      "url": `${siteUrl.value}${blog.path}`,
       "name": blog.title,
     })),
   })),

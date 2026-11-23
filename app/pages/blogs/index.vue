@@ -2,6 +2,7 @@
 import { useInfiniteScroll } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
+import { siteConfig } from "~/app.meta";
 import RssSubscribeButton from "~/components/ui/rss-subscribe-button.vue";
 import { useContent } from "~/composables/content";
 import { useMatrixDecrypt } from "~/composables/use-matrix-decrypt";
@@ -17,9 +18,7 @@ const displayLimit = ref(itemsPerPage);
 
 const { data: rawBlogs, pending: blogsPending } = await getAllBlogs(displayLimit);
 
-const blogs = computed(() => {
-  return rawBlogs.value || [];
-});
+const blogs = computed(() => rawBlogs.value || []);
 
 const hasMoreContent = computed(() => {
   if (!rawBlogs.value)
@@ -52,52 +51,27 @@ onMounted(() => {
 });
 
 const config = useRuntimeConfig().public;
-
-const PAGE_TITLE = computed(() => `Browse All Blogs`);
-const PAGE_DESCRIPTION = computed(
-  () => "Browse the complete blogs archive of technical articles, software architecture notes, and guides published on Nodewave.",
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
 );
-const PAGE_CANONICAL_URL = computed(() => `${config.siteUrl}/blogs`);
-const PAGE_RSS_URL = computed(() => `/rss.xml`);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
 
-// Meta & Social Sharing Tags
+const PAGE_TITLE = computed(() => "Browse All Blogs");
+const PAGE_DESCRIPTION = computed(
+  () => "Browse the complete blogs archive of technical articles, software architecture notes, and guides published on NodeWave.",
+);
+const PAGE_CANONICAL_URL = computed(() => `${siteUrl.value}/blogs`);
+const PAGE_RSS_URL = "/rss.xml";
+
+// Page-Specific Meta & Social Sharing Overrides
 useSeoMeta({
   title: () => PAGE_TITLE.value,
   description: () => PAGE_DESCRIPTION.value,
-  robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
-
-  // Open Graph / Facebook
-  ogType: "website",
-  ogTitle: () => PAGE_TITLE.value,
+  ogTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   ogDescription: () => PAGE_DESCRIPTION.value,
-  ogUrl: () => PAGE_CANONICAL_URL.value,
-  ogImageAlt: () => `${config.siteName || "Nodewave"} Blog Archive`,
-  ogSiteName: () => config.siteName || "Nodewave",
-
-  // Twitter
-  twitterCard: "summary_large_image",
-  twitterTitle: () => PAGE_TITLE.value,
+  ogImageAlt: () => `${siteName.value} Blog Archive`,
+  twitterTitle: () => `${PAGE_TITLE.value} · ${siteName.value}`,
   twitterDescription: () => PAGE_DESCRIPTION.value,
-});
-
-useHead({
-  link: [
-    {
-      rel: "canonical",
-      href: () => PAGE_CANONICAL_URL.value,
-    },
-    {
-      rel: "alternate",
-      type: "application/rss+xml",
-      title: "Blogs RSS Feed",
-      href: () => PAGE_RSS_URL.value,
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      href: "/icons/favicon.png",
-    },
-  ],
 });
 
 const colorMode = useColorMode();
@@ -108,15 +82,17 @@ const ogColorMode = computed<"light" | "dark">(() =>
 );
 
 defineOgImage("NuxtSeo.takumi", {
+  colorMode: ogColorMode.value,
+  brand: siteName.value,
+  tagline: "Engineering & Insights",
+  badge: "Complete Archive",
+  siteUrl: siteUrl.value,
   title: PAGE_TITLE.value,
   description: PAGE_DESCRIPTION.value,
-  badge: "All Blogs",
-  colorMode: ogColorMode.value,
 });
 
-// Nuxt Schema.org Structured Data (Google CollectionPage & Breadcrumbs)
+// Connected Schema.org Structured Data (CollectionPage + ItemList + Breadcrumbs)
 useSchemaOrg([
-  // Google Search Breadcrumb
   defineBreadcrumb({
     itemListElement: [
       { name: "Home", item: "/" },
@@ -124,14 +100,30 @@ useSchemaOrg([
     ],
   }),
 
-  // CollectionPage Schema for Complete Blog Archive
   {
-    "@type": "CollectionPage",
+    "@type": "CollectionPage" as const,
     "@id": `${PAGE_CANONICAL_URL.value}/#collectionpage`,
     "url": PAGE_CANONICAL_URL.value,
-    "name": PAGE_TITLE.value,
-    "description": PAGE_DESCRIPTION.value,
+    "name": () => PAGE_TITLE.value,
+    "description": () => PAGE_DESCRIPTION.value,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
+    "about": { "@id": `${siteUrl.value}/#organization` },
+    "mainEntity": { "@id": `${PAGE_CANONICAL_URL.value}/#blog-list` },
+    "inLanguage": "en-US",
   },
+
+  computed(() => ({
+    "@type": "ItemList" as const,
+    "@id": `${PAGE_CANONICAL_URL.value}/#blog-list`,
+    "name": "All Published Articles",
+    "numberOfItems": blogs.value.length,
+    "itemListElement": blogs.value.map((blog, index) => ({
+      "@type": "ListItem" as const,
+      "position": index + 1,
+      "url": `${siteUrl.value}${blog.path}`,
+      "name": blog.title,
+    })),
+  })),
 ]);
 </script>
 

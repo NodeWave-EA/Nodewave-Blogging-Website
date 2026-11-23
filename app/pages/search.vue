@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, h, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
+import { siteConfig } from "~/app.meta";
 import { useContent } from "~/composables/content";
 
 import type { BlogAuthor, BlogCategory, BlogTag } from "~/types";
@@ -13,8 +14,12 @@ type SearchTabSlot = "all" | "blogs" | "authors" | "categories" | "tags";
 
 const route = useRoute();
 const router = useRouter();
-const config = useRuntimeConfig();
-const siteUrl = (config.public.siteUrl || "").replace(/\/$/, "");
+const config = useRuntimeConfig().public;
+
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
+);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
 
 const { searchMetadataCollections } = useContent();
 
@@ -64,42 +69,64 @@ function setTabRef(el: unknown, index: number) {
 const searchPageTitle = computed(() => {
   const query = searchQuery.value.trim();
   return query
-    ? `Search results for "${query}" | NodeWave`
-    : "Search Articles, Authors & Topics | NodeWave";
+    ? `Search results for "${query}"`
+    : "Search Articles, Authors & Topics";
 });
 
 const searchPageDescription = computed(() => {
   const query = searchQuery.value.trim();
   return query
-    ? `Explore technical documentation, posts, authors, and tags matching "${query}" on NodeWave.`
-    : "Search across all engineering logs, articles, author rosters, categories, and technical topics on NodeWave.";
+    ? `Explore technical documentation, posts, authors, and tags matching "${query}" on ${siteName.value}.`
+    : `Search across all engineering logs, articles, author rosters, categories, and technical topics on ${siteName.value}.`;
 });
 
+// Page-Specific Meta & Social Sharing Overrides (noindex enforced globally & locally)
 useSeoMeta({
-  title: searchPageTitle,
-  ogTitle: searchPageTitle,
-  twitterTitle: searchPageTitle,
-  description: searchPageDescription,
-  ogDescription: searchPageDescription,
-  twitterDescription: searchPageDescription,
+  title: () => searchPageTitle.value,
+  description: () => searchPageDescription.value,
+  ogTitle: () => `${searchPageTitle.value} · ${siteName.value}`,
+  ogDescription: () => searchPageDescription.value,
+  ogImageAlt: () => `${siteName.value} Knowledge Index Search`,
+  twitterTitle: () => `${searchPageTitle.value} · ${siteName.value}`,
+  twitterDescription: () => searchPageDescription.value,
   robots: "noindex, follow",
 });
 
-useHead({
-  link: [
-    {
-      rel: "canonical",
-      href: `${siteUrl}/search`,
-    },
-  ],
+const colorMode = useColorMode();
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
+defineOgImage("NuxtSeo.takumi", {
+  colorMode: ogColorMode.value,
+  brand: siteName.value,
+  tagline: "Engineering & Insights",
+  badge: "Knowledge Index",
+  siteUrl: siteUrl.value,
+  title: "Search Articles, Authors & Topics",
+  description: `Query technical documentation, engineering logs, author profiles, categories, and tags across ${siteName.value}.`,
 });
 
+// Connected Schema.org Structured Data (SearchResultsPage + Breadcrumbs)
 useSchemaOrg([
+  defineBreadcrumb({
+    itemListElement: [
+      { name: "Home", item: "/" },
+      { name: "Search", item: `${siteUrl.value}/search` },
+    ],
+  }),
+
   defineWebPage({
     "@type": "SearchResultsPage",
+    "@id": `${siteUrl.value}/search/#webpage`,
     "name": () => searchPageTitle.value,
     "description": () => searchPageDescription.value,
-    "url": `${siteUrl}/search`,
+    "url": `${siteUrl.value}/search`,
+    "isPartOf": { "@id": `${siteUrl.value}/#website` },
+    "about": { "@id": `${siteUrl.value}/#organization` },
+    "inLanguage": "en-US",
   }),
 ]);
 

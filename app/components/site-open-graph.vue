@@ -1,179 +1,185 @@
 <script setup lang="ts">
-import { defineOrganization, defineSearchAction, defineWebSite, useSchemaOrg } from "#imports";
+import {
+  defineLocalBusiness,
+  defineOrganization,
+  defineWebSite,
+  useRobotsRule,
+  useSchemaOrg,
+} from "#imports";
+import { computed } from "vue";
 
 import { siteConfig } from "~/app.meta";
 
-const config = useRuntimeConfig();
-const siteUrl = config.public.siteUrl;
-const siteName = config.public.siteName;
-const siteLogo = config.public.siteLogo;
+const route = useRoute();
+const config = useRuntimeConfig().public;
+const colorMode = useColorMode();
 
-const ROOT_URL = siteUrl;
-const ORG_ID = `${ROOT_URL}/#organization`;
-const WEBSITE_ID = `${ROOT_URL}/#website`;
-const LOCAL_BIZ_ID = `${ROOT_URL}/#local-business`;
+const siteUrl = computed(() =>
+  (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, ""),
+);
+const siteName = computed(() => config.siteName || siteConfig.name || "NodeWave");
+const siteDescription = computed(
+  () =>
+    siteConfig.description
+    || "Explore curated technical posts, IoT architecture guides, and software engineering insights from NodeWave.",
+);
+
+const siteLogo = computed(() => {
+  const logo = config.siteLogo || "/logo.png";
+  if (logo.startsWith("http"))
+    return logo;
+  const cleanPath = logo.startsWith("/")
+    ? logo
+    : `/${logo}`;
+  return `${siteUrl.value}${cleanPath}`;
+});
+
+// Strip query strings & trailing slashes (except root "/") for clean canonical URLs
+const canonicalUrl = computed(() => {
+  const cleanPath = route.path === "/"
+    ? "/"
+    : route.path.replace(/\/$/, "");
+  return `${siteUrl.value}${cleanPath}`;
+});
+
+const isSearchRoute = computed(() => route.path.startsWith("/search"));
+
+const socialProfiles = computed(() =>
+  [
+    siteConfig.social?.github,
+    siteConfig.social?.tiktok,
+    ...(siteConfig.socialLinks?.map(link => link.url) || []),
+  ].filter((url, idx, arr): url is string => Boolean(url) && arr.indexOf(url) === idx),
+);
+
+const ogColorMode = computed<"light" | "dark">(() =>
+  colorMode.value === "light"
+    ? "light"
+    : "dark",
+);
+
+// Global <head> Attributes, Title Template, Canonical & Primary RSS Feed
+useHead({
+  htmlAttrs: {
+    lang: "en-US",
+  },
+  titleTemplate: (titleChunk?: string) => {
+    if (!titleChunk)
+      return `${siteName.value} — Smart IoT Solutions & Engineering Insights`;
+    return titleChunk.toLowerCase().includes(siteName.value.toLowerCase())
+      ? titleChunk
+      : `${titleChunk} · ${siteName.value}`;
+  },
+  link: [
+    {
+      rel: "canonical",
+      href: () => canonicalUrl.value,
+    },
+    {
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: () => `${siteName.value} RSS Feed`,
+      href: () => `${siteUrl.value}/rss.xml`,
+    },
+  ],
+});
+
+// Site-Wide Open Graph, Twitter & Robots Defaults (overridden per page by useSeoMeta)
+useSeoMeta({
+  ogSiteName: () => siteName.value,
+  ogLocale: "en_US",
+  ogType: "website",
+  ogUrl: () => canonicalUrl.value,
+  twitterCard: "summary_large_image",
+  robots: () =>
+    isSearchRoute.value
+      ? "noindex, follow"
+      : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+});
+
+const robotsRule = computed<boolean | string>(() =>
+  isSearchRoute.value ? "noindex, follow" : true,
+);
+
+// Keep X-Robots-Tag HTTP header aligned with <meta name="robots">
+useRobotsRule(robotsRule);
+
+// Site-Wide Fallback OG Image (overridden whenever a page calls defineOgImage)
+defineOgImage("NuxtSeo.takumi", {
+  colorMode: ogColorMode.value,
+  brand: siteName.value,
+  tagline: "Smart IoT Solutions",
+  badge: "Engineering & Insights",
+  siteUrl: siteUrl.value,
+  title: `${siteName.value} - Curated Posts & Engineering Insights`,
+  description: siteDescription.value,
+});
+
+// Connected Knowledge Graph Entities (WebSite -> Organization -> LocalBusiness)
+const ORG_ID = `${siteUrl.value}/#organization`;
+const WEBSITE_ID = `${siteUrl.value}/#website`;
+const LOCAL_BIZ_ID = `${siteUrl.value}/#local-business`;
+
+const sharedAddress = {
+  "@type": "PostalAddress" as const,
+  "streetAddress": siteConfig.postAddress?.streetAddress || "Nairobi",
+  "addressLocality": siteConfig.postAddress?.locality || "Nairobi",
+  "addressRegion": siteConfig.postAddress?.addressRegion || "Nairobi County",
+  "postalCode": siteConfig.postAddress?.postalCode || "00100",
+  "addressCountry": siteConfig.postAddress?.addressCountry || "KE",
+};
 
 useSchemaOrg([
   defineWebSite({
     "@id": WEBSITE_ID,
-    "url": ROOT_URL,
-    "name": siteName,
-    "description": siteConfig.description,
+    "url": siteUrl.value,
+    "name": siteName.value,
+    "description": siteDescription.value,
     "publisher": { "@id": ORG_ID },
     "inLanguage": "en-US",
-    // Configures Google Sitelinks Search Box
-    "potentialAction": [
-      defineSearchAction({
-        target: `${ROOT_URL}/search?q={search_term_string}`,
-      }),
-    ],
   }),
 
   defineOrganization({
     "@id": ORG_ID,
-    "url": ROOT_URL,
-    "name": siteName,
-    "legalName": siteName,
-    "description": siteConfig.description,
-    "logo": siteLogo,
-    "image": siteLogo,
+    "url": siteUrl.value,
+    "name": siteName.value,
+    "legalName": siteName.value,
+    "description": siteDescription.value,
+    "logo": siteLogo.value,
+    "image": siteLogo.value,
     "foundingDate": "2024",
-    "email": siteConfig.contact.email,
-    "telephone": siteConfig.contact.phone,
+    "email": siteConfig.contact?.email,
+    "telephone": siteConfig.contact?.phone,
     "areaServed": ["KE", "EA"],
-    "sameAs": [
-      siteConfig.social?.github,
-      siteConfig.social?.tiktok,
-    ].filter(Boolean),
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": siteConfig.postAddress?.streetAddress || "",
-      "addressLocality": siteConfig.postAddress?.locality || "",
-      "addressRegion": siteConfig.postAddress?.addressRegion || "",
-      "postalCode": siteConfig.postAddress?.postalCode || "",
-      "addressCountry": siteConfig.postAddress?.addressCountry || "KE",
-    },
+    "sameAs": socialProfiles.value,
+    "address": sharedAddress,
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "Customer Support",
-      "email": siteConfig.contact.email,
-      "telephone": siteConfig.contact.phone,
+      "email": siteConfig.contact?.email,
+      "telephone": siteConfig.contact?.phone,
       "areaServed": "EA",
       "availableLanguage": ["English"],
     },
-    "numberOfEmployees": {
-      "@type": "QuantitativeValue",
-      "minValue": 10,
-      "maxValue": 50,
-      "unitText": "employees",
-    },
   }),
 
-  {
-    "@type": "LocalBusiness",
+  defineLocalBusiness({
     "@id": LOCAL_BIZ_ID,
-    "name": siteName,
-    "image": siteLogo,
-    "url": ROOT_URL,
-    "department": "Technology",
-    "description": siteConfig.description,
-    "telephone": siteConfig.contact.phone,
-    "email": siteConfig.contact.email,
+    "name": siteName.value,
+    "image": siteLogo.value,
+    "url": siteUrl.value,
+    "description": siteDescription.value,
+    "telephone": siteConfig.contact?.phone,
+    "email": siteConfig.contact?.email,
     "priceRange": "$$$",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": siteConfig.postAddress?.streetAddress || "",
-      "addressLocality": siteConfig.postAddress?.locality || "",
-      "addressRegion": siteConfig.postAddress?.addressRegion || "",
-      "postalCode": siteConfig.postAddress?.postalCode || "",
-      "addressCountry": siteConfig.postAddress?.addressCountry || "KE",
-    },
+    "parentOrganization": { "@id": ORG_ID },
+    "areaServed": ["KE", "EA"],
+    "address": sharedAddress,
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": "-1.2832",
-      "longitude": "36.8172",
+      "latitude": -1.2832,
+      "longitude": 36.8172,
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "itemReviewed": {
-        "@id": LOCAL_BIZ_ID,
-      },
-      "bestRating": "5",
-      "worstRating": "3",
-      "ratingCount": "24",
-      "ratingValue": "4.8",
-      "reviewCount": "24",
-    },
-    "review": [
-      {
-        "@type": "Review",
-        "author": {
-          "@type": "Person",
-          "name": "Michael Kamau",
-          "url": "https://www.linkedin.com/in/michael-ngugi-50ba66177",
-          "image":
-            "https://media.licdn.com/dms/image/v2/D4D03AQE7HKkXViVqLA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1702225972216?e=1780531200&v=beta&t=rwvArvKV2zjktqYkvouDvjTpwIUo0ruLht4hLeVSls0",
-          "sameAs": ["https://www.linkedin.com/in/michael-ngugi-50ba66177"],
-          "jobTitle": "Operations Manager",
-          "worksFor": "Solareon Energy",
-        },
-        "datePublished": "2026-03-10",
-        "reviewBody":
-          "Excellent enterprise IoT telemetry integration systems and custom analytical dashboard solutions setup.",
-        "itemReviewed": {
-          "@id": LOCAL_BIZ_ID,
-        },
-        "reviewRating": {
-          "@type": "Rating",
-          "bestRating": "5",
-          "ratingValue": "5",
-          "worstRating": "1",
-        },
-      },
-      {
-        "@type": "Review",
-        "author": {
-          "@type": "Organization",
-          "name": "Solareon Energy",
-          "logo": "https://solareonenergy.com/logo.png",
-          "image": "https://solareonenergy.com/logo.png",
-          "url": "https://solareonenergy.com",
-          "email": "info@solareonenergy.com",
-          "telephone": "+254 722873777",
-          "sameAs": ["https://solareonenergy.com/#"],
-          "description":
-            "Leading provider of solar energy solutions in East Africa, specializing in residential and commercial solar panel installations.",
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "contactType": "Customer Support",
-            "email": "info@solareonenergy.com",
-            "telephone": "+254 722873777",
-            "areaServed": "EA",
-            "availableLanguage": ["English"],
-          },
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Nairobi",
-            "addressLocality": "Nairobi",
-            "addressRegion": "Nairobi County",
-            "postalCode": "00100",
-            "addressCountry": "KE",
-          },
-        },
-        "datePublished": "2026-02-15",
-        "reviewBody":
-          "Professional and efficient service with great attention to detail in IoT solutions deployment.",
-        "itemReviewed": {
-          "@id": LOCAL_BIZ_ID,
-        },
-        "reviewRating": {
-          "@type": "Rating",
-          "bestRating": "5",
-          "ratingValue": "4",
-          "worstRating": "1",
-        },
-      },
-    ],
     "openingHoursSpecification": [
       {
         "@type": "OpeningHoursSpecification",
@@ -188,7 +194,7 @@ useSchemaOrg([
         "closes": "16:00",
       },
     ],
-  },
+  }),
 ]);
 </script>
 
