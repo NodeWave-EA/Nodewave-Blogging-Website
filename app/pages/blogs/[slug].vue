@@ -359,25 +359,25 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
       v-else-if="currentBlog"
       class="py-4 sm:py-6"
       :ui="{
-        root: 'flex flex-col lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-10',
+        root: 'flex flex-col lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-10 min-w-0',
         center: hasToc ? 'lg:col-span-8 xl:col-span-9 min-w-0' : 'lg:col-span-12 min-w-0',
-        right: 'lg:col-span-4 xl:col-span-3',
+        right: 'lg:col-span-4 xl:col-span-3 min-w-0',
       }"
     >
       <!-- Editorial Hero Header -->
       <UPageHeader
         :title="currentBlog.title"
         :description="currentBlog.description"
-        class="mb-6 lg:mb-8 border-b border-(--app-border) pb-6 bg-transparent"
+        class="mb-6 lg:mb-8 border-b border-(--app-border) pb-6 bg-transparent min-w-0"
         :ui="{
-          title: 'text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-extrabold tracking-tight text-neutral-900 dark:text-white leading-[1.15] text-balance',
+          title: 'text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] font-extrabold tracking-tight text-neutral-900 dark:text-white leading-[1.15] text-balance break-words',
           description: 'text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-300 max-w-3xl leading-relaxed font-normal mt-3 text-pretty',
         }"
       >
         <template #headline>
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 min-w-0">
             <!-- Semantic Breadcrumb Navigation -->
-            <nav aria-label="Breadcrumb" class="flex items-center flex-wrap gap-1.5 text-xs font-mono">
+            <nav aria-label="Breadcrumb" class="flex items-center flex-wrap gap-1.5 text-xs font-mono min-w-0">
               <NuxtLink
                 to="/blogs"
                 class="inline-flex items-center gap-1.5 font-semibold text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors group rounded-xs py-0.5"
@@ -421,14 +421,14 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
         </template>
 
         <!-- Article Metadata & Action Strip -->
-        <div class="flex flex-wrap items-center justify-between gap-y-3 gap-x-6 text-xs font-mono text-neutral-600 dark:text-neutral-400 pt-5 mt-5 border-t border-(--app-border)">
-          <div class="flex flex-wrap items-center gap-y-2.5 gap-x-4">
+        <div class="flex flex-wrap items-center justify-between gap-y-3 gap-x-6 text-xs font-mono text-neutral-600 dark:text-neutral-400 pt-5 mt-5 border-t border-(--app-border) min-w-0">
+          <div class="flex flex-wrap items-center gap-y-2.5 gap-x-4 min-w-0">
             <!-- Author Pill -->
             <NuxtLink
               v-if="blogAuthor"
               :to="`/${blogAuthor.stem}`"
               :aria-label="`View profile of author ${blogAuthor.name}`"
-              class="group inline-flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xs bg-(--app-surface-subtle) border border-(--app-border) hover:border-primary-500/50 hover:bg-(--app-surface-hover) transition-colors"
+              class="group inline-flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xs bg-(--app-surface-subtle) border border-(--app-border) hover:border-primary-500/50 hover:bg-(--app-surface-hover) transition-colors max-w-full"
             >
               <UAvatar
                 :src="blogAuthor.avatar?.src"
@@ -436,7 +436,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
                 size="2xs"
                 class="ring-1 ring-(--app-border) shrink-0"
               />
-              <span class="font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+              <span class="font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                 {{ blogAuthor.name }}
               </span>
             </NuxtLink>
@@ -486,7 +486,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
           </div>
 
           <!-- Share Controls -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
             <BlogPostShare :title="currentBlog.title" />
           </div>
         </div>
@@ -507,7 +507,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
       </template>
 
       <!-- Main Article Column -->
-      <UPageBody class="mt-0 space-y-9">
+      <UPageBody class="mt-0 space-y-9 min-w-0 w-full">
         <figure
           v-if="currentBlog.coverImage?.src"
           class="overflow-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle) shadow-2xs"
@@ -538,7 +538,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
 
         <article
           :aria-label="currentBlog.title"
-          class="prose dark:prose-invert max-w-none markdown-body selection:bg-primary-500/15"
+          class="prose dark:prose-invert max-w-none w-full min-w-0 markdown-body selection:bg-primary-500/15"
         >
           <ContentRenderer :value="currentBlog" />
         </article>
@@ -547,7 +547,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
         <section
           v-if="currentBlog.gallery?.length"
           aria-labelledby="article-gallery-heading"
-          class="pt-8 border-t border-(--app-border)"
+          class="pt-8 border-t border-(--app-border) min-w-0"
         >
           <div class="flex items-center justify-between gap-2 mb-4 select-none">
             <div class="flex items-center gap-2 text-xs font-mono text-neutral-600 dark:text-neutral-400 uppercase tracking-widest font-bold">
@@ -575,8 +575,11 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
               dots
               loop
               :ui="{
+                root: 'relative overflow-hidden',
                 item: 'basis-full md:basis-1/2 transition-opacity duration-300 [&:not(.is-snapped)]:opacity-40',
                 container: 'rounded-xs',
+                prev: 'start-2 sm:start-3',
+                next: 'end-2 sm:end-3',
               }"
               @select="onSelect"
             >
@@ -637,10 +640,10 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
         <!-- Category, Tags & External Reference Anchors -->
         <section
           aria-label="Article taxonomy and references"
-          class="p-4 sm:p-5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/40 flex flex-col sm:flex-row flex-wrap gap-6 sm:gap-12 justify-between"
+          class="p-4 sm:p-5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/40 flex flex-col sm:flex-row flex-wrap gap-6 sm:gap-12 justify-between min-w-0"
         >
           <!-- Category -->
-          <div class="flex flex-col gap-2 min-w-36">
+          <div class="flex flex-col gap-2 min-w-0">
             <div class="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 select-none">
               <UIcon
                 name="i-lucide-folder"
@@ -665,7 +668,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
           </div>
 
           <!-- Tags -->
-          <div v-if="blogTags.length > 0" class="flex flex-col gap-2 flex-1 min-w-48">
+          <div v-if="blogTags.length > 0" class="flex flex-col gap-2 flex-1 min-w-0">
             <div class="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 select-none">
               <UIcon
                 name="i-lucide-tags"
@@ -706,10 +709,10 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
         <aside
           v-if="blogAuthor"
           aria-labelledby="article-author-heading"
-          class="p-5 sm:p-6 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/50 space-y-4"
+          class="p-5 sm:p-6 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/50 space-y-4 min-w-0"
         >
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-(--app-border)">
-            <div class="flex items-center gap-3.5">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-(--app-border) min-w-0">
+            <div class="flex items-center gap-3.5 min-w-0">
               <NuxtLink
                 :to="`/${blogAuthor.stem}`"
                 :aria-label="`Visit ${blogAuthor.name}'s author page`"
@@ -723,7 +726,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
                 />
               </NuxtLink>
 
-              <div>
+              <div class="min-w-0">
                 <span
                   id="article-author-heading"
                   class="text-[10px] font-mono uppercase tracking-widest text-primary-600 dark:text-primary-400 font-bold block"
@@ -736,7 +739,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
                 >
                   {{ blogAuthor.name }}
                 </NuxtLink>
-                <p v-if="blogAuthor.title" class="text-xs font-mono text-neutral-600 dark:text-neutral-400 mt-0.5">
+                <p v-if="blogAuthor.title" class="text-xs font-mono text-neutral-600 dark:text-neutral-400 mt-0.5 break-words">
                   {{ blogAuthor.title }}
                   <template v-if="blogAuthor.company?.name">
                     <span class="text-neutral-400 dark:text-neutral-600"> · </span>
@@ -754,7 +757,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
             </div>
 
             <!-- Author Social & Web Links -->
-            <div class="flex flex-wrap items-center gap-1.5">
+            <div class="flex flex-wrap items-center gap-1.5 shrink-0">
               <UTooltip
                 v-if="blogAuthor.company"
                 :text="`${blogAuthor.company.role} at ${blogAuthor.company.name}`"
@@ -829,7 +832,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
             {{ blogAuthor.description }}
           </p>
 
-          <div class="pt-1 flex items-center justify-between gap-4">
+          <div class="pt-1 flex flex-wrap items-center justify-between gap-4">
             <NuxtLink
               to="/blogs"
               class="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium text-neutral-500 dark:text-neutral-400 hover:text-primary-500 transition-colors"
@@ -857,7 +860,11 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
         </aside>
 
         <!-- Previous / Next Article Surround Navigation -->
-        <nav v-if="surroundingBlog.length > 0" aria-label="Adjacent articles">
+        <nav
+          v-if="surroundingBlog.length > 0"
+          aria-label="Adjacent articles"
+          class="min-w-0"
+        >
           <UContentSurround :surround="surroundingBlog" />
         </nav>
       </UPageBody>
@@ -869,7 +876,7 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
 @reference '~/assets/css/main.css';
 
 :deep(.markdown-body) {
-  @apply text-neutral-700 dark:text-neutral-300 leading-[1.8] text-base sm:text-[1.0625rem];
+  @apply text-neutral-700 dark:text-neutral-300 leading-[1.8] text-base sm:text-[1.0625rem] min-w-0 max-w-full break-words;
 }
 
 :deep(.markdown-body p) {
@@ -889,19 +896,25 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
 }
 
 :deep(.markdown-body a) {
-  @apply text-primary-600 dark:text-primary-400 underline decoration-primary-500/40 underline-offset-4 hover:decoration-primary-500 transition-colors;
+  @apply text-primary-600 dark:text-primary-400 underline decoration-primary-500/40 underline-offset-4 hover:decoration-primary-500 transition-colors [overflow-wrap:anywhere];
 }
 
 :deep(.markdown-body blockquote) {
-  @apply my-6 pl-4 py-2 pr-3 border-l-2 border-primary-500 bg-(--app-surface-subtle)/60 rounded-r-xs italic text-neutral-700 dark:text-neutral-300;
+  @apply my-6 pl-4 py-2 pr-3 border-l-2 border-primary-500 bg-(--app-surface-subtle)/60 rounded-r-xs italic text-neutral-700 dark:text-neutral-300 overflow-x-auto;
 }
 
 :deep(.markdown-body :not(pre) > code) {
-  @apply px-1.5 py-0.5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle) font-mono text-[0.85em] text-neutral-900 dark:text-neutral-100;
+  @apply px-1.5 py-0.5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle) font-mono text-[0.85em] text-neutral-900 dark:text-neutral-100 [overflow-wrap:anywhere];
 }
 
 :deep(.markdown-body pre) {
-  @apply my-6 rounded-xs border border-(--app-border);
+  @apply my-6 max-w-full overflow-x-auto rounded-xs border border-(--app-border);
+}
+
+:deep(.markdown-body img),
+:deep(.markdown-body video),
+:deep(.markdown-body iframe) {
+  @apply max-w-full h-auto rounded-xs;
 }
 
 :deep(.markdown-body ul),
@@ -918,11 +931,11 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
 }
 
 :deep(.markdown-body table) {
-  @apply my-6 w-full border-collapse border border-(--app-border) text-sm;
+  @apply my-6 block w-full max-w-full overflow-x-auto border-collapse text-sm;
 }
 
 :deep(.markdown-body th) {
-  @apply border border-(--app-border) bg-(--app-surface-subtle) px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100;
+  @apply border border-(--app-border) bg-(--app-surface-subtle) px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100 whitespace-nowrap;
 }
 
 :deep(.markdown-body td) {

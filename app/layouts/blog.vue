@@ -1,8 +1,8 @@
 <template>
-  <div class="blog-layout-wrapper">
+  <div class="blog-layout-wrapper min-w-0 overflow-x-clip">
     <UiAppHeader />
 
-    <UMain>
+    <UMain class="min-w-0">
       <SiteOpenGraph>
         <slot />
       </SiteOpenGraph>

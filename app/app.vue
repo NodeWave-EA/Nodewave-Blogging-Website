@@ -33,7 +33,7 @@ watch(
 </script>
 
 <template>
-  <div class="app-root-container">
+  <div class="app-root-container min-w-0 overflow-x-clip">
     <UApp>
       <NuxtLayout>
         <!-- Hidden target container for Google Translate widget -->
