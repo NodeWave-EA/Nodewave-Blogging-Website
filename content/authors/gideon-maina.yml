@@ -1,0 +1,28 @@
+slug: gideon-maina
+name: Gideon Maina
+title: Senior Electrical Engineer & IoT developer
+company:
+  name: Nodewave
+  website: https://nodewave.net
+  icon: https://nodewave.net/favicon.png
+  role: Founder & CTO
+color: "#facc15"
+description: Gideon Maina is a Senior Electrical Engineer and the Founder & CTO of Nodewave. With a passion for technology and innovation, he has been instrumental in driving the company's vision forward. Gideon is known for his expertise in electrical engineering, software development, and his commitment to fostering a collaborative and inclusive work environment.
+avatar:
+  src: /blogs/authors/gideon-maina/avatar.png
+  alt: Gideon Maina's profile picture
+email: info@nodewave.net
+website: https://gideonmaina.me
+socialLinks:
+  - platform: GitHub
+    url: https://github.com/gideonmaina
+    icon: i-line-md-github-loop
+    color: "#14b8a6"
+  - platform: Twitter
+    url: https://x.com/gmaina_
+    icon: i-line-md-twitter-x
+    color: "#1DA1F2"
+  - platform: LinkedIn
+    url: https://linkedin.com/in/gideonmaina
+    icon: i-line-md-linkedin
+    color: "#0077B5"
