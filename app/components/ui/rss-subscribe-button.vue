@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onUnmounted, ref } from "vue";
+
+defineOptions({
+  name: "RssSubscribeButton",
+});
 
 const props = defineProps<{
   /** Label name for the feed (e.g. Author Name, Category Name) */
@@ -10,53 +14,74 @@ const props = defineProps<{
 
 const config = useRuntimeConfig().public;
 const copied = ref(false);
+let copyTimer: ReturnType<typeof setTimeout> | null = null;
+
+const normalizedFeedPath = computed(() =>
+  props.feedPath.startsWith("/")
+    ? props.feedPath
+    : `/${props.feedPath}`,
+);
 
 const fullFeedUrl = computed(() => {
   const site = (config.siteUrl || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
-  return `${site}${props.feedPath}`;
+  return `${site}${normalizedFeedPath.value}`;
 });
 
-const tooltipText = computed(() => {
-  return copied.value
-    ? "Feed URL Copied!"
-    : `Subscribe to ${props.title} RSS Feed`;
-});
+const tooltipText = computed(() =>
+  copied.value
+    ? "RSS feed URL copied to clipboard"
+    : `Subscribe to ${props.title} RSS feed`,
+);
 
 async function handleSubscribe() {
-  // Open styled feed in new tab with security attributes
-  window.open(props.feedPath, "_blank", "noopener,noreferrer");
+  if (!import.meta.client)
+    return;
 
-  // Copy full RSS URL to clipboard for easy feed reader paste
+  window.open(normalizedFeedPath.value, "_blank", "noopener,noreferrer");
+
   try {
     await navigator.clipboard.writeText(fullFeedUrl.value);
     copied.value = true;
-    setTimeout(() => {
+
+    if (copyTimer !== null)
+      clearTimeout(copyTimer);
+
+    copyTimer = setTimeout(() => {
       copied.value = false;
+      copyTimer = null;
     }, 2500);
   }
   catch (err) {
     console.error("Failed to copy feed URL to clipboard:", err);
   }
 }
+
+onUnmounted(() => {
+  if (copyTimer !== null) {
+    clearTimeout(copyTimer);
+    copyTimer = null;
+  }
+});
 </script>
 
 <template>
-  <UTooltip :text="tooltipText">
+  <UTooltip
+    :text="tooltipText"
+    :content="{ side: 'top', sideOffset: 6 }"
+  >
     <button
       type="button"
-      :aria-label="`Subscribe to ${props.title} RSS Feed`"
-      class="group relative inline-flex items-center justify-center p-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-neutral-100/60 dark:bg-neutral-900/60 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/80 hover:border-teal-500/50 transition-all duration-300 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+      :aria-label="tooltipText"
+      class="group relative inline-flex items-center justify-center size-8 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/85 dark:bg-(--app-surface-subtle)/90 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)] hover:bg-(--app-surface-hover)/95 hover:border-primary-500/40 transition-all duration-200 ease-out cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+      :class="{ 'border-primary-500/50 bg-(--app-surface-hover)': copied }"
       @click="handleSubscribe"
     >
       <UIcon
         :name="copied ? 'i-lucide-check' : 'i-lucide-rss'"
-        class="w-4 h-4 transition-transform group-hover:scale-110"
-        :class="copied ? 'text-teal-500' : 'text-amber-500 dark:text-amber-400'"
+        class="size-3.5 transition-transform duration-200 group-hover:scale-105"
+        :class="copied ? 'text-primary-600 dark:text-primary-400' : 'text-amber-500 dark:text-amber-400'"
+        aria-hidden="true"
       />
     </button>
   </UTooltip>
 </template>
-
-<style scoped>
-/* Prevents Tailwind v4 Vite plugin HMR issue */
-</style>

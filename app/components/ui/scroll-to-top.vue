@@ -1,115 +1,114 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
 
+defineOptions({
+  name: "AppScrollToTop",
+});
+
+const { isMotionReduced } = useReduceMotion();
+
 const isVisible = ref(false);
-const dashOffset = ref(0);
+const scrollProgress = ref(0);
+let rafId: number | null = null;
 
-// Circle dimensions for SVG progress calculation
-const radius = 20;
-const circumference = 2 * Math.PI * radius; // ~125.66
-
-function updateScrollProgress() {
-  const scrollTop = window.scrollY;
+function computeScrollMetrics() {
+  rafId = null;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
   const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 
-  // Toggle button visibility
-  isVisible.value = scrollTop > 300;
+  isVisible.value = scrollTop > 280;
 
-  // Calculate dynamic circular stroke progress offset
   if (docHeight > 0) {
-    const progress = Math.min(Math.max(scrollTop / docHeight, 0), 1);
-    dashOffset.value = circumference - progress * circumference;
+    const ratio = Math.min(Math.max(scrollTop / docHeight, 0), 1);
+    scrollProgress.value = Math.round(ratio * 1000) / 10;
   }
+  else {
+    scrollProgress.value = 0;
+  }
+}
+
+function scheduleScrollUpdate() {
+  if (rafId !== null)
+    return;
+  rafId = window.requestAnimationFrame(computeScrollMetrics);
 }
 
 function scrollToTopNode() {
   window.scrollTo({
     top: 0,
-    behavior: "smooth",
+    behavior: isMotionReduced.value ? "auto" : "smooth",
   });
 }
 
 onMounted(() => {
-  window.addEventListener("scroll", updateScrollProgress, { passive: true });
-  updateScrollProgress();
+  window.addEventListener("scroll", scheduleScrollUpdate, { passive: true });
+  window.addEventListener("resize", scheduleScrollUpdate, { passive: true });
+  computeScrollMetrics();
 });
 
 onUnmounted(() => {
-  window.removeEventListener("scroll", updateScrollProgress);
+  window.removeEventListener("scroll", scheduleScrollUpdate);
+  window.removeEventListener("resize", scheduleScrollUpdate);
+  if (rafId !== null) {
+    window.cancelAnimationFrame(rafId);
+    rafId = null;
+  }
 });
 </script>
 
 <template>
   <Transition
-    enter-active-class="transition duration-300 ease-out"
-    enter-from-class="transform translate-y-8 opacity-0 scale-95"
-    enter-to-class="transform translate-y-0 opacity-100 scale-100"
-    leave-active-class="transition duration-200 ease-in"
-    leave-from-class="transform translate-y-0 opacity-100 scale-100"
-    leave-to-class="transform translate-y-8 opacity-0 scale-95"
+    enter-active-class="transition-all duration-300 ease-out"
+    enter-from-class="opacity-0 translate-y-2"
+    enter-to-class="opacity-100 translate-y-0"
+    leave-active-class="transition-all duration-200 ease-in"
+    leave-from-class="opacity-100 translate-y-0"
+    leave-to-class="opacity-0 translate-y-2"
   >
     <div
       v-if="isVisible"
-      class="fixed bottom-6 right-6 z-50 flex items-center justify-center group"
+      class="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 z-50 flex items-center justify-center"
     >
-      <!-- CIRCULAR PROGRESS RING SVG WITH GRADIENT -->
-      <svg
-        class="w-13 h-13 -rotate-90 pointer-events-none drop-shadow-md"
-        viewBox="0 0 48 48"
+      <UTooltip
+        text="Back to top"
+        :content="{ side: 'left', sideOffset: 8 }"
       >
-        <defs>
-          <linearGradient
-            id="scroll-progress-gradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="100%"
+        <button
+          type="button"
+          aria-label="Scroll back to top"
+          class="group relative inline-flex items-center justify-center size-9 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/85 dark:bg-(--app-surface-subtle)/90 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)] text-neutral-700 dark:text-neutral-200 hover:bg-(--app-surface-hover)/95 hover:border-primary-500/40 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-200 ease-out cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          @click="scrollToTopNode"
+        >
+          <!-- Perimeter Reading / Scroll Progress Indicator -->
+          <svg
+            class="absolute inset-0 size-full pointer-events-none"
+            viewBox="0 0 36 36"
+            fill="none"
+            aria-hidden="true"
           >
-            <!-- Brand Teal to Sky/Blue Gradient Stops -->
-            <stop offset="0%" stop-color="#14b8a6" />
-            <stop offset="100%" stop-color="#0284c7" />
-          </linearGradient>
-        </defs>
+            <rect
+              x="1"
+              y="1"
+              width="34"
+              height="34"
+              rx="2"
+              pathLength="100"
+              stroke="var(--ui-primary)"
+              stroke-width="1.75"
+              stroke-linecap="square"
+              stroke-dasharray="100"
+              :stroke-dashoffset="100 - scrollProgress"
+              class="transition-[stroke-dashoffset] duration-100 ease-out"
+            />
+          </svg>
 
-        <!-- Background Track Ring -->
-        <circle
-          cx="24"
-          cy="24"
-          :r="radius"
-          class="stroke-gray-300/40 dark:stroke-gray-700/50"
-          stroke-width="3"
-          fill="none"
-        />
-
-        <!-- Active Progress Ring -->
-        <circle
-          cx="24"
-          cy="24"
-          :r="radius"
-          stroke="url(#scroll-progress-gradient)"
-          stroke-width="3.5"
-          stroke-linecap="round"
-          fill="none"
-          :stroke-dasharray="circumference"
-          :stroke-dashoffset="dashOffset"
-          class="transition-[stroke-dashoffset] duration-150 ease-out"
-        />
-      </svg>
-
-      <!-- SCROLL TO TOP ACTION BUTTON -->
-      <UButton
-        icon="i-lucide-arrow-up"
-        color="neutral"
-        variant="ghost"
-        size="md"
-        class="absolute rounded-full p-2.5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg border border-gray-200/50 dark:border-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:scale-110 active:scale-95 transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-teal-600 dark:hover:text-teal-400"
-        aria-label="Scroll to top of log stream"
-        @click="scrollToTopNode"
-      />
+          <UIcon
+            name="i-lucide-arrow-up"
+            class="size-4 transition-transform duration-200 group-hover:-translate-y-0.5"
+            aria-hidden="true"
+          />
+        </button>
+      </UTooltip>
     </div>
   </Transition>
 </template>
-
-<style scoped>
-/* Prevents Tailwind v4 Vite plugin HMR issues */
-</style>

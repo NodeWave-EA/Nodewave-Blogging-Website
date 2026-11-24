@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { useTranslation } from "~/composables/use-translation";
 
 import type { LanguageOption } from "~/composables/use-translation";
 
+defineOptions({
+  name: "AppLangSwitcher",
+});
+
 const { currentLang, supportedLanguages, status, setLanguage, syncActiveLanguage } = useTranslation();
 
-// State to track full page load
 const isReady = ref(false);
+let readyTimer: ReturnType<typeof setTimeout> | null = null;
+
+function markReady() {
+  isReady.value = true;
+  syncActiveLanguage();
+}
 
 onMounted(() => {
   syncActiveLanguage();
@@ -17,16 +26,16 @@ onMounted(() => {
     isReady.value = true;
   }
   else {
-    window.addEventListener("load", () => {
-      isReady.value = true;
-      syncActiveLanguage();
-    }, { once: true });
+    window.addEventListener("load", markReady, { once: true });
+    readyTimer = setTimeout(markReady, 600);
+  }
+});
 
-    // Fallback safeguard
-    setTimeout(() => {
-      isReady.value = true;
-      syncActiveLanguage();
-    }, 600);
+onUnmounted(() => {
+  window.removeEventListener("load", markReady);
+  if (readyTimer !== null) {
+    clearTimeout(readyTimer);
+    readyTimer = null;
   }
 });
 
@@ -34,7 +43,7 @@ const selectedLanguage = computed<LanguageOption>({
   get: () =>
     supportedLanguages.value.find(l => l.code === currentLang.value)
     ?? supportedLanguages.value[0]
-    ?? { code: "en", label: "English", icon: "i-heroicons-language" },
+    ?? { code: "en", label: "English", icon: "i-lucide-globe" },
   set: (val: LanguageOption) => {
     if (val && val.code !== currentLang.value) {
       setLanguage(val.code);
@@ -44,93 +53,149 @@ const selectedLanguage = computed<LanguageOption>({
 
 const isLoading = computed(() => status.value !== "awaitingLoad" && status.value !== "loaded");
 
+const shortCode = computed(() => (selectedLanguage.value.code || "en").toUpperCase());
+
 const tooltipText = computed(
-  () => `${selectedLanguage.value.label} • Click to select preferred language`,
+  () => `${selectedLanguage.value.label} (${shortCode.value}) · Select preferred language`,
 );
 </script>
 
 <template>
   <Transition
-    enter-active-class="transition-all duration-500 ease-out"
-    enter-from-class="opacity-0 -translate-x-4"
-    enter-to-class="opacity-100 translate-x-0"
-    leave-active-class="transition-all duration-300 ease-in"
-    leave-from-class="opacity-100 translate-x-0"
-    leave-to-class="opacity-0 -translate-x-4"
+    enter-active-class="transition-all duration-300 ease-out"
+    enter-from-class="opacity-0 translate-y-2"
+    enter-to-class="opacity-100 translate-y-0"
+    leave-active-class="transition-all duration-200 ease-in"
+    leave-from-class="opacity-100 translate-y-0"
+    leave-to-class="opacity-0 translate-y-2"
   >
     <div
       v-if="isReady"
-      class="fixed bottom-0 left-0 z-50 flex items-center notranslate"
+      class="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 z-50 flex items-center notranslate"
       translate="no"
     >
       <USelectMenu
         v-model="selectedLanguage"
         :items="supportedLanguages"
-        :searchable="true"
-        :search-input="{ placeholder: 'Search language...', icon: 'i-heroicons-magnifying-glass-20-solid' }"
-        searchable-placeholder="Search language..."
+        :search-input="{
+          placeholder: 'Filter languages...',
+          icon: 'i-lucide-search',
+        }"
         by="code"
-        option-attribute="label"
+        label-key="label"
         :disabled="isLoading"
         trailing-icon=""
         aria-label="Select preferred language"
-        :popper="{ placement: 'top-start', offsetDistance: 12 }"
+        :content="{
+          align: 'start',
+          side: 'top',
+          sideOffset: 8,
+        }"
         :ui="{
           base: 'bg-transparent shadow-none ring-0 border-0 !w-auto p-0',
-          content: 'overflow-x-hidden ring-1 ring-gray-200 dark:ring-gray-800 shadow-2xl rounded-2xl bg-white dark:bg-gray-900 !w-80 sm:!w-96',
-          viewport: 'max-h-[85vh] overflow-x-hidden overflow-y-auto p-1 space-y-0.5',
+          content: 'overflow-x-hidden rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/95 dark:bg-(--app-surface-subtle)/95 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_10px_28px_-4px_rgba(0,0,0,0.14),0_18px_40px_-8px_rgba(0,0,0,0.1)] dark:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] !w-72 sm:!w-80',
+          viewport: 'max-h-[65vh] overflow-x-hidden overflow-y-auto p-1 space-y-0.5',
+          item: 'rounded-xs font-mono text-xs transition-colors data-highlighted:bg-(--app-surface-hover)',
         }"
         class="w-auto"
       >
         <template #default="{ open }">
           <UTooltip
             :text="tooltipText"
-            :popper="{ placement: 'right' }"
+            :content="{ side: 'right', sideOffset: 8 }"
           >
-            <UButton
+            <button
               type="button"
+              :disabled="isLoading"
               :aria-expanded="open"
-              aria-label="Select language menu"
-              class="group flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-l-none rounded-r-full bg-primary hover:bg-primary-600 text-white dark:text-gray-950 shadow-lg hover:shadow-primary/25 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer border-0 ring-0"
+              :aria-busy="isLoading"
+              aria-label="Select preferred language"
+              class="group inline-flex items-center gap-2 h-9 px-2.5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/85 dark:bg-(--app-surface-subtle)/90 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)] text-neutral-800 dark:text-neutral-200 hover:bg-(--app-surface-hover)/95 hover:border-primary-500/40 transition-all duration-200 ease-out cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-60 disabled:cursor-wait"
+              :class="{ 'border-primary-500/50 bg-(--app-surface-hover)': open }"
             >
-              <UIcon
-                name="i-heroicons-language"
-                class="w-5 h-5 text-white dark:text-gray-950 shrink-0 transition-transform duration-300 group-hover:scale-110"
-              />
+              <span
+                class="inline-flex items-center justify-center size-5 rounded-xs bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 shrink-0"
+              >
+                <UIcon
+                  v-if="isLoading"
+                  name="i-lucide-loader"
+                  class="size-3.5 animate-spin"
+                  aria-hidden="true"
+                />
+                <UIcon
+                  v-else
+                  name="i-lucide-languages"
+                  class="size-3.5 transition-transform duration-200 group-hover:scale-105"
+                  aria-hidden="true"
+                />
+              </span>
 
-              <div
-                class="overflow-hidden transition-all duration-300 ease-in-out flex items-center gap-1.5"
+              <span
+                class="font-mono text-[11px] font-bold uppercase tracking-wider text-neutral-900 dark:text-neutral-100"
+              >
+                {{ shortCode }}
+              </span>
+
+              <span
+                class="overflow-hidden transition-all duration-250 ease-out flex items-center gap-1.5"
                 :class="
                   open
-                    ? 'max-w-35 opacity-100 ml-1'
-                    : 'max-w-0 opacity-0 group-hover:max-w-35 group-hover:opacity-100 group-hover:ml-1'
+                    ? 'max-w-36 opacity-100'
+                    : 'max-w-0 opacity-0 group-hover:max-w-36 group-hover:opacity-100 group-focus-visible:max-w-36 group-focus-visible:opacity-100'
                 "
               >
-                <span class="text-xs font-bold whitespace-nowrap text-white dark:text-gray-950">
+                <span class="text-neutral-300 dark:text-neutral-700 select-none" aria-hidden="true">·</span>
+                <span
+                  class="font-mono text-[11px] font-medium whitespace-nowrap text-neutral-600 dark:text-neutral-300"
+                >
                   {{ selectedLanguage.label }}
                 </span>
-                <UIcon
-                  name="i-heroicons-chevron-up-20-solid"
-                  class="w-3.5 h-3.5 text-white/80 dark:text-gray-950/80 shrink-0 transition-transform duration-200"
-                  :class="{ 'rotate-180': open }"
-                />
-              </div>
-            </UButton>
+              </span>
+
+              <UIcon
+                name="i-lucide-chevron-up"
+                class="size-3.5 text-neutral-500 dark:text-neutral-400 shrink-0 transition-transform duration-200"
+                :class="{ 'rotate-180 text-primary-500': open }"
+                aria-hidden="true"
+              />
+            </button>
           </UTooltip>
         </template>
 
         <template #item="{ item }">
-          <div class="flex items-center gap-2.5 p-1 text-xs w-full text-left">
-            <UIcon
-              :name="item.code === selectedLanguage.code ? 'i-heroicons-check-20-solid' : item.icon"
-              class="w-4 h-4 shrink-0 transition-colors"
-              :class="item.code === selectedLanguage.code ? 'text-primary font-bold' : 'text-gray-400 dark:text-gray-500'"
-            />
+          <div class="flex items-center justify-between gap-2.5 py-1 px-1.5 w-full text-left font-mono text-xs">
+            <div class="flex items-center gap-2 min-w-0">
+              <UIcon
+                :name="item.code === selectedLanguage.code ? 'i-lucide-check' : (item.icon || 'i-lucide-globe')"
+                class="size-3.5 shrink-0 transition-colors"
+                :class="
+                  item.code === selectedLanguage.code
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-neutral-400 dark:text-neutral-500'
+                "
+                aria-hidden="true"
+              />
+              <span
+                class="truncate transition-colors"
+                :class="
+                  item.code === selectedLanguage.code
+                    ? 'font-bold text-primary-600 dark:text-primary-400'
+                    : 'font-medium text-neutral-800 dark:text-neutral-200'
+                "
+              >
+                {{ item.label }}
+              </span>
+            </div>
+
             <span
-              class="whitespace-nowrap text-left flex-1 p-0 transition-colors"
-              :class="item.code === selectedLanguage.code ? 'font-bold text-primary dark:text-primary-400' : 'font-medium text-gray-800 dark:text-gray-200'"
+              class="px-1.5 py-0.5 rounded-xs text-[9px] font-bold uppercase tracking-wider border shrink-0"
+              :class="
+                item.code === selectedLanguage.code
+                  ? 'bg-primary-500/10 border-primary-500/25 text-primary-600 dark:text-primary-400'
+                  : 'bg-(--app-bg) border-(--app-border) text-neutral-500 dark:text-neutral-400'
+              "
             >
-              {{ item.label }}
+              {{ item.code }}
             </span>
           </div>
         </template>
