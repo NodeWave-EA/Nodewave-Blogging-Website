@@ -55,6 +55,7 @@
     "nuxt": "^4.6.4",
     "nuxt-ai-ready": "3.5.1",
     "nuxt-aos": "1.2.6",
+    "nuxt-security": "2.7.0",
     "nuxt-studio": "1.8.2",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-external-links": "^3.0.0",

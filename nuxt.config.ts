@@ -23,6 +23,7 @@ export default defineNuxtConfig({
     "@nuxtjs/device",
     "nuxt-ai-ready",
     "nuxt-studio",
+    "nuxt-security",
   ],
 
   devtools: {
@@ -465,6 +466,43 @@ export default defineNuxtConfig({
       name: SITE_NAME,
       url: SITE_URL,
       logo: `${SITE_URL}/logo.png`,
+    },
+  },
+
+  security: {
+    headers: {
+      // HSTS
+      strictTransportSecurity: {
+        maxAge: 63072000, // 2 years
+        includeSubdomains: true,
+        preload: true,
+      },
+      // X-Content-Type-Options
+      xContentTypeOptions: "nosniff",
+      // CSP (auto-injects nonces for Nuxt hydration scripts)
+      contentSecurityPolicy: {
+        "default-src": ["'self'"],
+        "base-uri": ["'self'"],
+        "font-src": ["'self'", "https:", "data:"],
+        "form-action": ["'self'"],
+        "frame-ancestors": ["'none'"], // Replaces X-Frame-Options in modern browsers
+        "img-src": ["'self'", "data:", "https:"],
+        "object-src": ["'none'"],
+        "script-src-attr": ["'none'"],
+        "style-src": ["'self'", "https:", "'unsafe-inline'"],
+        "script-src": [
+          "'self'",
+          "https:",
+          "'unsafe-inline'",
+          "'strict-dynamic'",
+          "'nonce-{{nonce}}'",
+        ],
+        "upgrade-insecure-requests": true,
+      },
+      // Referrer-Policy
+      referrerPolicy: "strict-origin-when-cross-origin",
+      // X-Frame-Options
+      xFrameOptions: "DENY",
     },
   },
 
