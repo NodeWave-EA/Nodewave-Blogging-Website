@@ -273,22 +273,24 @@ onUnmounted(() => {
         :text="social.label"
         :content="{ side: 'left', sideOffset: 8 }"
       >
-        <NuxtLink
-          :href="social.href"
+        <UButton
+          :to="social.href"
+          external
           target="_blank"
           rel="noopener noreferrer"
+          variant="ghost"
+          color="neutral"
+          size="xs"
+          :icon="social.icon"
           :aria-label="social.label"
-          class="inline-flex items-center justify-center size-7 sm:size-8 rounded-xs text-neutral-600 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-        >
-          <UIcon
-            :name="social.icon"
-            class="size-3.5"
-            aria-hidden="true"
-          />
-        </NuxtLink>
+          class="inline-flex items-center justify-center size-7 sm:size-8 p-0 rounded-xs text-neutral-600 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150"
+          :ui="{
+            leadingIcon: 'size-3.5 shrink-0',
+          }"
+        />
       </UTooltip>
 
-      <div class="w-4 h-px bg-(--app-border) my-0.5" aria-hidden="true" />
+      <USeparator class="w-4 my-0.5 border-(--app-border)" />
 
       <!-- Overflow Menu (All Other Platforms + Copy Link) -->
       <UPopover
@@ -305,23 +307,26 @@ onUnmounted(() => {
         >
           <UButton
             type="button"
+            variant="ghost"
+            color="neutral"
+            size="xs"
+            :icon="isCopied ? 'i-lucide-check' : 'i-lucide-ellipsis'"
             aria-label="More share options and copy link"
             :aria-expanded="isMenuOpen"
-            class="inline-flex items-center justify-center size-7 sm:size-8 rounded-xs text-neutral-600 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-            :class="{ 'bg-(--app-surface-hover) text-primary-600 dark:text-primary-400': isMenuOpen }"
-          >
-            <UIcon
-              :name="isCopied ? 'i-lucide-check' : 'i-lucide-ellipsis'"
-              class="size-3.5"
-              :class="{ 'text-primary-600 dark:text-primary-400': isCopied }"
-              aria-hidden="true"
-            />
-          </UButton>
+            class="inline-flex items-center justify-center size-7 sm:size-8 p-0 rounded-xs text-neutral-600 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 cursor-pointer"
+            :class="{
+              'bg-(--app-surface-hover) text-primary-600 dark:text-primary-400': isMenuOpen,
+              'bg-primary-500/10 text-primary-600 dark:text-primary-400': !isMenuOpen && isCopied,
+            }"
+            :ui="{
+              leadingIcon: 'size-3.5 shrink-0',
+            }"
+          />
         </UTooltip>
 
         <template #content>
           <div class="p-1.5 flex flex-col gap-0.5 select-none">
-            <div class="px-2 pt-1 pb-1.5 mb-0.5 border-b border-(--app-border) flex items-center justify-between">
+            <div class="px-2 pt-1 pb-1.5 mb-0.5 border-b border-(--app-border) flex items-center justify-between gap-2">
               <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
                 Share Page
               </span>
@@ -333,24 +338,28 @@ onUnmounted(() => {
             <!-- Copy Link Action -->
             <UButton
               type="button"
-              class="group w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-xs font-mono text-xs text-left transition-colors cursor-pointer hover:bg-(--app-surface-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              variant="ghost"
+              :color="isCopied ? 'primary' : 'neutral'"
+              size="xs"
+              :icon="isCopied ? 'i-lucide-check' : 'i-lucide-link'"
+              class="group w-full justify-start px-2 py-1.5 rounded-xs font-mono text-xs transition-colors cursor-pointer hover:bg-(--app-surface-hover)"
               :class="
                 isCopied
-                  ? 'text-primary-600 dark:text-primary-400 font-bold bg-primary-500/10'
-                  : 'text-neutral-800 dark:text-neutral-200 font-medium'
+                  ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400 font-bold'
+                  : 'text-neutral-700 dark:text-neutral-200 font-medium hover:text-primary-600 dark:hover:text-primary-400'
               "
+              :ui="{
+                leadingIcon: [
+                  'size-3.5 shrink-0 transition-colors',
+                  isCopied
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500',
+                ],
+              }"
               @click="copyCurrentUrl"
             >
-              <span class="inline-flex items-center gap-2">
-                <UIcon
-                  :name="isCopied ? 'i-lucide-check' : 'i-lucide-link'"
-                  class="size-3.5 shrink-0"
-                  :class="isCopied ? 'text-primary-600 dark:text-primary-400' : 'text-primary-500'"
-                  aria-hidden="true"
-                />
-                <span>{{ isCopied ? "Link Copied" : "Copy Link" }}</span>
-              </span>
-              <span class="text-[9px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <span>{{ isCopied ? "Link Copied" : "Copy Link" }}</span>
+              <span class="ms-auto text-[9px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 transition-colors">
                 URL
               </span>
             </UButton>
@@ -359,46 +368,53 @@ onUnmounted(() => {
             <UButton
               v-if="canNativeShare"
               type="button"
-              class="w-full flex items-center gap-2 px-2 py-1.5 rounded-xs font-mono text-xs font-medium text-neutral-800 dark:text-neutral-200 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              variant="ghost"
+              color="neutral"
+              size="xs"
+              icon="i-lucide-share"
+              class="group w-full justify-start px-2 py-1.5 rounded-xs font-mono text-xs font-medium text-neutral-700 dark:text-neutral-200 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-pointer"
+              :ui="{
+                leadingIcon: 'size-3.5 shrink-0 text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 transition-colors',
+              }"
               @click="triggerNativeShare"
             >
-              <UIcon
-                name="i-lucide-share"
-                class="size-3.5 text-neutral-500 dark:text-neutral-400 shrink-0"
-                aria-hidden="true"
-              />
               <span>System Share...</span>
+              <span class="ms-auto text-[9px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 transition-colors">
+                OS
+              </span>
             </UButton>
 
-            <div class="h-px bg-(--app-border) my-1" aria-hidden="true" />
+            <USeparator class="my-1 border-(--app-border)" />
 
             <!-- Remaining Social Platforms -->
-            <NuxtLink
+            <UButton
               v-for="social in secondarySocials"
               :key="social.id"
-              :href="social.href"
+              :to="social.href"
+              external
               target="_blank"
               rel="noopener noreferrer"
-              class="group w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-xs font-mono text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              variant="ghost"
+              color="neutral"
+              size="xs"
+              :icon="social.icon"
+              trailing-icon="i-lucide-arrow-up-right"
+              class="group w-full justify-start px-2 py-1.5 rounded-xs font-mono text-xs font-medium text-neutral-700 dark:text-neutral-200 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              :ui="{
+                leadingIcon: 'size-3.5 shrink-0 text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 transition-colors',
+                trailingIcon: 'ms-auto size-3 shrink-0 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 transition-colors',
+              }"
               @click="isMenuOpen = false"
             >
-              <span class="inline-flex items-center gap-2">
-                <UIcon
-                  :name="social.icon"
-                  class="size-3.5 text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 shrink-0 transition-colors"
-                  aria-hidden="true"
-                />
-                <span>{{ social.label }}</span>
-              </span>
-              <UIcon
-                name="i-lucide-arrow-up-right"
-                class="size-3 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 shrink-0 transition-colors"
-                aria-hidden="true"
-              />
-            </NuxtLink>
+              {{ social.label }}
+            </UButton>
           </div>
         </template>
       </UPopover>
     </div>
   </aside>
 </template>
+
+<style scoped>
+/* Prevents Tailwind v4 Vite plugin HMR issue */
+</style>
