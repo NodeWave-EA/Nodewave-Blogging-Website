@@ -609,11 +609,6 @@ logger.debug("Loaded blog detail page", { slug: slug.value, tagsCount: blogTags.
               </span>
             </div>
           </div>
-
-          <!-- Share Controls -->
-          <div class="flex items-center gap-2 shrink-0">
-            <BlogPostShare :title="currentBlog.title" />
-          </div>
         </div>
       </UPageHeader>
 

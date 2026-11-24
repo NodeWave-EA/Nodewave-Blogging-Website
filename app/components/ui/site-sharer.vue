@@ -1,0 +1,314 @@
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from "vue";
+
+defineOptions({
+  name: "AppSiteSharer",
+});
+
+type ShareTarget = {
+  id: string;
+  label: string;
+  href: string;
+  icon: string;
+};
+
+const route = useRoute();
+const runtimeConfig = useRuntimeConfig().public;
+
+const isMenuOpen = ref(false);
+const isCopied = ref(false);
+const isScrolling = ref(false);
+const canNativeShare = ref(false);
+
+let copyTimer: ReturnType<typeof setTimeout> | null = null;
+let scrollIdleTimer: ReturnType<typeof setTimeout> | null = null;
+
+const currentUrl = computed(() => {
+  const configuredSiteUrl = (runtimeConfig.siteUrl || "").replace(/\/$/, "");
+  const origin = configuredSiteUrl
+    || (import.meta.client
+      ? window.location.origin
+      : "https://nodewaveblog.vercel.app");
+
+  const normalizedPath = route.path === "/"
+    ? "/"
+    : route.path.replace(/\/$/, "");
+
+  return `${origin}${normalizedPath}`;
+});
+
+const encodedUrl = computed(() => encodeURIComponent(currentUrl.value));
+
+// Top 3 primary socials rendered directly on the floating strip (URL-only so OG tags drive previews)
+const primarySocials = computed<ShareTarget[]>(() => [
+  {
+    id: "x",
+    label: "Share on X",
+    href: `https://x.com/intent/tweet?url=${encodedUrl.value}`,
+    icon: "i-simple-icons-x",
+  },
+  {
+    id: "linkedin",
+    label: "Share on LinkedIn",
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl.value}`,
+    icon: "i-simple-icons-linkedin",
+  },
+  {
+    id: "whatsapp",
+    label: "Share on WhatsApp",
+    href: `https://api.whatsapp.com/send?text=${encodedUrl.value}`,
+    icon: "i-simple-icons-whatsapp",
+  },
+]);
+
+// Secondary channels inside the three-dots overflow menu
+const secondarySocials = computed<ShareTarget[]>(() => [
+  {
+    id: "facebook",
+    label: "Facebook",
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl.value}`,
+    icon: "i-simple-icons-facebook",
+  },
+  {
+    id: "telegram",
+    label: "Telegram",
+    href: `https://t.me/share/url?url=${encodedUrl.value}`,
+    icon: "i-simple-icons-telegram",
+  },
+  {
+    id: "reddit",
+    label: "Reddit",
+    href: `https://www.reddit.com/submit?url=${encodedUrl.value}`,
+    icon: "i-simple-icons-reddit",
+  },
+  {
+    id: "bluesky",
+    label: "BlueSky",
+    href: `https://bsky.app/intent/compose?text=${encodedUrl.value}`,
+    icon: "i-simple-icons-bluesky",
+  },
+  {
+    id: "email",
+    label: "Email",
+    href: `mailto:?body=${encodedUrl.value}`,
+    icon: "i-lucide-mail",
+  },
+]);
+
+async function copyCurrentUrl() {
+  if (!import.meta.client)
+    return;
+
+  try {
+    await navigator.clipboard.writeText(currentUrl.value);
+    isCopied.value = true;
+
+    if (copyTimer !== null)
+      clearTimeout(copyTimer);
+
+    copyTimer = setTimeout(() => {
+      isCopied.value = false;
+      copyTimer = null;
+    }, 2200);
+  }
+  catch (err) {
+    console.error("Failed to copy page URL:", err);
+  }
+}
+
+async function triggerNativeShare() {
+  if (!import.meta.client || !navigator.share)
+    return;
+
+  isMenuOpen.value = false;
+  try {
+    await navigator.share({ url: currentUrl.value });
+  }
+  catch {
+    // Ignore user-cancelled share sheets
+  }
+}
+
+function handleScrollActivity() {
+  if (isMenuOpen.value)
+    return;
+
+  isScrolling.value = true;
+  if (scrollIdleTimer !== null)
+    clearTimeout(scrollIdleTimer);
+
+  scrollIdleTimer = setTimeout(() => {
+    isScrolling.value = false;
+    scrollIdleTimer = null;
+  }, 220);
+}
+
+onMounted(() => {
+  canNativeShare.value = typeof navigator !== "undefined" && typeof navigator.share === "function";
+  window.addEventListener("scroll", handleScrollActivity, { passive: true });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScrollActivity);
+  if (copyTimer !== null) {
+    clearTimeout(copyTimer);
+    copyTimer = null;
+  }
+  if (scrollIdleTimer !== null) {
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = null;
+  }
+});
+</script>
+
+<template>
+  <aside
+    aria-label="Share current page"
+    class="fixed right-2 sm:right-3 top-1/2 -translate-y-1/2 z-40 transition-opacity duration-300 ease-out"
+    :class="[
+      isMenuOpen
+        ? 'opacity-100'
+        : isScrolling
+          ? 'opacity-30 hover:opacity-100 focus-within:opacity-100'
+          : 'opacity-70 hover:opacity-100 focus-within:opacity-100',
+    ]"
+  >
+    <div
+      class="flex flex-col items-center gap-0.5 p-1 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/85 dark:bg-(--app-surface-subtle)/90 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)]"
+    >
+      <!-- Top 3 Social Channels -->
+      <UTooltip
+        v-for="social in primarySocials"
+        :key="social.id"
+        :text="social.label"
+        :content="{ side: 'left', sideOffset: 8 }"
+      >
+        <a
+          :href="social.href"
+          target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="social.label"
+          class="inline-flex items-center justify-center size-7 sm:size-8 rounded-xs text-neutral-600 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        >
+          <UIcon
+            :name="social.icon"
+            class="size-3.5"
+            aria-hidden="true"
+          />
+        </a>
+      </UTooltip>
+
+      <div class="w-4 h-px bg-(--app-border) my-0.5" aria-hidden="true" />
+
+      <!-- Overflow Menu (All Other Platforms + Copy Link) -->
+      <UPopover
+        v-model:open="isMenuOpen"
+        :modal="false"
+        :content="{ side: 'left', align: 'center', sideOffset: 10 }"
+        :ui="{
+          content: 'w-52 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/95 dark:bg-(--app-surface-subtle)/95 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_10px_28px_-4px_rgba(0,0,0,0.14),0_18px_40px_-8px_rgba(0,0,0,0.1)] dark:shadow-[0_14px_32px_-4px_rgba(0,0,0,0.65),0_22px_44px_-8px_rgba(0,0,0,0.5)] overflow-hidden',
+        }"
+      >
+        <UTooltip
+          text="More share options & copy link"
+          :content="{ side: 'left', sideOffset: 8 }"
+        >
+          <button
+            type="button"
+            aria-label="More share options and copy link"
+            :aria-expanded="isMenuOpen"
+            class="inline-flex items-center justify-center size-7 sm:size-8 rounded-xs text-neutral-600 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            :class="{ 'bg-(--app-surface-hover) text-primary-600 dark:text-primary-400': isMenuOpen }"
+          >
+            <UIcon
+              :name="isCopied ? 'i-lucide-check' : 'i-lucide-ellipsis'"
+              class="size-3.5"
+              :class="{ 'text-primary-600 dark:text-primary-400': isCopied }"
+              aria-hidden="true"
+            />
+          </button>
+        </UTooltip>
+
+        <template #content>
+          <div class="p-1.5 flex flex-col gap-0.5 select-none">
+            <div class="px-2 pt-1 pb-1.5 mb-0.5 border-b border-(--app-border) flex items-center justify-between">
+              <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                Share Page
+              </span>
+              <span class="font-mono text-[9px] text-neutral-400 dark:text-neutral-500 truncate max-w-24">
+                {{ route.path }}
+              </span>
+            </div>
+
+            <!-- Copy Link Action -->
+            <button
+              type="button"
+              class="group w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-xs font-mono text-xs text-left transition-colors cursor-pointer hover:bg-(--app-surface-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              :class="
+                isCopied
+                  ? 'text-primary-600 dark:text-primary-400 font-bold bg-primary-500/10'
+                  : 'text-neutral-800 dark:text-neutral-200 font-medium'
+              "
+              @click="copyCurrentUrl"
+            >
+              <span class="inline-flex items-center gap-2">
+                <UIcon
+                  :name="isCopied ? 'i-lucide-check' : 'i-lucide-link'"
+                  class="size-3.5 shrink-0"
+                  :class="isCopied ? 'text-primary-600 dark:text-primary-400' : 'text-primary-500'"
+                  aria-hidden="true"
+                />
+                <span>{{ isCopied ? "Link Copied" : "Copy Link" }}</span>
+              </span>
+              <span class="text-[9px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                URL
+              </span>
+            </button>
+
+            <!-- Native OS Share Sheet (when supported) -->
+            <button
+              v-if="canNativeShare"
+              type="button"
+              class="w-full flex items-center gap-2 px-2 py-1.5 rounded-xs font-mono text-xs font-medium text-neutral-800 dark:text-neutral-200 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              @click="triggerNativeShare"
+            >
+              <UIcon
+                name="i-lucide-share"
+                class="size-3.5 text-neutral-500 dark:text-neutral-400 shrink-0"
+                aria-hidden="true"
+              />
+              <span>System Share...</span>
+            </button>
+
+            <div class="h-px bg-(--app-border) my-1" aria-hidden="true" />
+
+            <!-- Remaining Social Platforms -->
+            <a
+              v-for="social in secondarySocials"
+              :key="social.id"
+              :href="social.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-xs font-mono text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+              @click="isMenuOpen = false"
+            >
+              <span class="inline-flex items-center gap-2">
+                <UIcon
+                  :name="social.icon"
+                  class="size-3.5 text-neutral-500 dark:text-neutral-400 group-hover:text-primary-500 shrink-0 transition-colors"
+                  aria-hidden="true"
+                />
+                <span>{{ social.label }}</span>
+              </span>
+              <UIcon
+                name="i-lucide-arrow-up-right"
+                class="size-3 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 shrink-0 transition-colors"
+                aria-hidden="true"
+              />
+            </a>
+          </div>
+        </template>
+      </UPopover>
+    </div>
+  </aside>
+</template>

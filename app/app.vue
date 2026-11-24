@@ -10,6 +10,7 @@
         />
         <UiAppLoadingScreen />
         <UiLangSwitcher />
+        <UiSiteSharer />
         <UiAppSiteBackground
           :grain-opacity="1.0"
           warmth-profile="sepia"
