@@ -112,3 +112,7 @@ onUnmounted(() => {
     </div>
   </Transition>
 </template>
+
+<style scoped>
+/* Prevents Tailwind v4 Vite plugin HMR issue */
+</style>

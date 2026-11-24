@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 defineOptions({
   name: "AppSiteSharer",
@@ -12,16 +12,41 @@ type ShareTarget = {
   icon: string;
 };
 
+const SCROLL_IDLE_DELAY_MS = 1400;
+const COMPACT_VIEWPORT_QUERY = "(max-width: 767px)";
+
 const route = useRoute();
 const runtimeConfig = useRuntimeConfig().public;
+const { isMotionReduced } = useReduceMotion();
 
 const isMenuOpen = ref(false);
 const isCopied = ref(false);
 const isScrolling = ref(false);
+const isInteracting = ref(false);
+const isCompactViewport = ref(false);
 const canNativeShare = ref(false);
 
 let copyTimer: ReturnType<typeof setTimeout> | null = null;
 let scrollIdleTimer: ReturnType<typeof setTimeout> | null = null;
+let viewportMediaQuery: MediaQueryList | null = null;
+
+const isBlogDetailPage = computed(() => {
+  if (route.name === "blogs-slug")
+    return true;
+  const cleanPath = route.path.replace(/\/$/, "");
+  return cleanPath.startsWith("/blogs/") && cleanPath !== "/blogs";
+});
+
+// Auto-hide while idle only on mobile / small screens when reading a blog post
+const shouldAutoHideOnIdle = computed(() =>
+  isCompactViewport.value && isBlogDetailPage.value,
+);
+
+const isSharerVisible = computed(() => {
+  if (!shouldAutoHideOnIdle.value)
+    return true;
+  return isScrolling.value || isMenuOpen.value || isInteracting.value;
+});
 
 const currentUrl = computed(() => {
   const configuredSiteUrl = (runtimeConfig.siteUrl || "").replace(/\/$/, "");
@@ -95,6 +120,72 @@ const secondarySocials = computed<ShareTarget[]>(() => [
   },
 ]);
 
+function syncViewportState() {
+  if (!viewportMediaQuery)
+    return;
+  isCompactViewport.value = viewportMediaQuery.matches;
+  if (!isCompactViewport.value) {
+    isScrolling.value = false;
+    if (scrollIdleTimer !== null) {
+      clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = null;
+    }
+  }
+}
+
+function scheduleAutoHide() {
+  if (scrollIdleTimer !== null)
+    clearTimeout(scrollIdleTimer);
+
+  scrollIdleTimer = setTimeout(() => {
+    if (!isMenuOpen.value && !isInteracting.value) {
+      isScrolling.value = false;
+    }
+    scrollIdleTimer = null;
+  }, SCROLL_IDLE_DELAY_MS);
+}
+
+function handleScrollActivity() {
+  if (!shouldAutoHideOnIdle.value)
+    return;
+  isScrolling.value = true;
+  scheduleAutoHide();
+}
+
+function handleInteractionStart() {
+  isInteracting.value = true;
+  if (scrollIdleTimer !== null) {
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = null;
+  }
+}
+
+function handleInteractionEnd() {
+  isInteracting.value = false;
+  if (shouldAutoHideOnIdle.value && !isMenuOpen.value) {
+    scheduleAutoHide();
+  }
+}
+
+watch(isMenuOpen, (open) => {
+  if (!open && shouldAutoHideOnIdle.value) {
+    scheduleAutoHide();
+  }
+});
+
+watch(
+  () => route.fullPath,
+  () => {
+    isMenuOpen.value = false;
+    isInteracting.value = false;
+    isScrolling.value = false;
+    if (scrollIdleTimer !== null) {
+      clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = null;
+    }
+  },
+);
+
 async function copyCurrentUrl() {
   if (!import.meta.client)
     return;
@@ -129,27 +220,20 @@ async function triggerNativeShare() {
   }
 }
 
-function handleScrollActivity() {
-  if (isMenuOpen.value)
-    return;
-
-  isScrolling.value = true;
-  if (scrollIdleTimer !== null)
-    clearTimeout(scrollIdleTimer);
-
-  scrollIdleTimer = setTimeout(() => {
-    isScrolling.value = false;
-    scrollIdleTimer = null;
-  }, 220);
-}
-
 onMounted(() => {
   canNativeShare.value = typeof navigator !== "undefined" && typeof navigator.share === "function";
+
+  viewportMediaQuery = window.matchMedia(COMPACT_VIEWPORT_QUERY);
+  syncViewportState();
+  viewportMediaQuery.addEventListener("change", syncViewportState);
+
   window.addEventListener("scroll", handleScrollActivity, { passive: true });
 });
 
 onUnmounted(() => {
+  viewportMediaQuery?.removeEventListener("change", syncViewportState);
   window.removeEventListener("scroll", handleScrollActivity);
+
   if (copyTimer !== null) {
     clearTimeout(copyTimer);
     copyTimer = null;
@@ -164,14 +248,20 @@ onUnmounted(() => {
 <template>
   <aside
     aria-label="Share current page"
-    class="fixed right-2 sm:right-3 top-1/2 -translate-y-1/2 z-40 transition-opacity duration-300 ease-out"
+    :aria-hidden="!isSharerVisible"
+    :inert="!isSharerVisible"
+    class="fixed right-2 sm:right-3 top-1/2 -translate-y-1/2 z-40 ease-out md:translate-x-0 md:opacity-90 md:hover:opacity-100 md:focus-within:opacity-100 md:pointer-events-auto"
     :class="[
-      isMenuOpen
-        ? 'opacity-100'
-        : isScrolling
-          ? 'opacity-30 hover:opacity-100 focus-within:opacity-100'
-          : 'opacity-70 hover:opacity-100 focus-within:opacity-100',
+      isMotionReduced ? 'transition-none' : 'transition-all duration-300',
+      isSharerVisible
+        ? 'translate-x-0 opacity-90 hover:opacity-100 focus-within:opacity-100 pointer-events-auto'
+        : 'translate-x-[calc(100%+1rem)] opacity-0 pointer-events-none',
     ]"
+    @pointerenter="handleInteractionStart"
+    @pointerleave="handleInteractionEnd"
+    @touchstart.passive="handleInteractionStart"
+    @focusin="handleInteractionStart"
+    @focusout="handleInteractionEnd"
   >
     <div
       class="flex flex-col items-center gap-0.5 p-1 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/85 dark:bg-(--app-surface-subtle)/90 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)]"
@@ -183,7 +273,7 @@ onUnmounted(() => {
         :text="social.label"
         :content="{ side: 'left', sideOffset: 8 }"
       >
-        <a
+        <NuxtLink
           :href="social.href"
           target="_blank"
           rel="noopener noreferrer"
@@ -195,7 +285,7 @@ onUnmounted(() => {
             class="size-3.5"
             aria-hidden="true"
           />
-        </a>
+        </NuxtLink>
       </UTooltip>
 
       <div class="w-4 h-px bg-(--app-border) my-0.5" aria-hidden="true" />
@@ -213,7 +303,7 @@ onUnmounted(() => {
           text="More share options & copy link"
           :content="{ side: 'left', sideOffset: 8 }"
         >
-          <button
+          <UButton
             type="button"
             aria-label="More share options and copy link"
             :aria-expanded="isMenuOpen"
@@ -226,7 +316,7 @@ onUnmounted(() => {
               :class="{ 'text-primary-600 dark:text-primary-400': isCopied }"
               aria-hidden="true"
             />
-          </button>
+          </UButton>
         </UTooltip>
 
         <template #content>
@@ -241,7 +331,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Copy Link Action -->
-            <button
+            <UButton
               type="button"
               class="group w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-xs font-mono text-xs text-left transition-colors cursor-pointer hover:bg-(--app-surface-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               :class="
@@ -263,10 +353,10 @@ onUnmounted(() => {
               <span class="text-[9px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
                 URL
               </span>
-            </button>
+            </UButton>
 
             <!-- Native OS Share Sheet (when supported) -->
-            <button
+            <UButton
               v-if="canNativeShare"
               type="button"
               class="w-full flex items-center gap-2 px-2 py-1.5 rounded-xs font-mono text-xs font-medium text-neutral-800 dark:text-neutral-200 hover:bg-(--app-surface-hover) hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
@@ -278,12 +368,12 @@ onUnmounted(() => {
                 aria-hidden="true"
               />
               <span>System Share...</span>
-            </button>
+            </UButton>
 
             <div class="h-px bg-(--app-border) my-1" aria-hidden="true" />
 
             <!-- Remaining Social Platforms -->
-            <a
+            <NuxtLink
               v-for="social in secondarySocials"
               :key="social.id"
               :href="social.href"
@@ -305,7 +395,7 @@ onUnmounted(() => {
                 class="size-3 text-neutral-400 dark:text-neutral-500 group-hover:text-primary-500 shrink-0 transition-colors"
                 aria-hidden="true"
               />
-            </a>
+            </NuxtLink>
           </div>
         </template>
       </UPopover>
