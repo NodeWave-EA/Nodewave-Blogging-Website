@@ -3,6 +3,13 @@ import { siteConfig } from "./app/app.meta";
 
 const SITE_URL = (process.env.NUXT_PUBLIC_SITE_URL || "https://nodewaveblog.vercel.app").replace(/\/$/, "");
 const SITE_NAME = process.env.NUXT_PUBLIC_SITE_NAME || siteConfig.name || "NodeWave";
+const IS_DEV = process.env.NODE_ENV === "development";
+const IS_PROD = process.env.NODE_ENV === "production";
+const IS_DEBUG = process.env.NUXT_PUBLIC_LOG_LEVEL === "debug";
+
+const HTML_REVALIDATE_HEADERS = {
+  "Cache-Control": "public, max-age=0, must-revalidate",
+};
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -18,19 +25,19 @@ export default defineNuxtConfig({
     "nuxt-aos",
     "@nuxt/icon",
     "@nuxt/fonts",
-    "@nuxt/hints",
-    "@nuxt/a11y",
     "@nuxtjs/device",
     "nuxt-ai-ready",
     "nuxt-studio",
     "nuxt-security",
+    ...(IS_DEV
+      ? ["@nuxt/hints", "@nuxt/a11y"]
+      : []),
   ],
 
   devtools: {
-    enabled: true,
-
+    enabled: IS_DEV,
     timeline: {
-      enabled: true,
+      enabled: IS_DEV,
     },
   },
 
@@ -176,25 +183,25 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // Static Content Prerender Rules
-    "/": { prerender: true },
-    "/blogs": { prerender: true },
-    "/blogs/**": { prerender: true },
-    "/authors": { prerender: true },
-    "/authors/**": { prerender: true },
-    "/tags": { prerender: true },
-    "/tags/**": { prerender: true },
-    "/categories": { prerender: true },
-    "/categories/**": { prerender: true },
+    // Prerendered HTML pages (always revalidate HTML)
+    "/": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/blogs": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/blogs/**": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/authors": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/authors/**": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/tags": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/tags/**": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/categories": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
+    "/categories/**": { prerender: true, headers: HTML_REVALIDATE_HEADERS },
 
-    // RSS Feed Prerender Rules
+    // Prerendered RSS Feeds
     "/rss.xml": { prerender: true },
     "/blogs/rss.xml": { prerender: true },
     "/authors/rss.xml": { prerender: true },
     "/categories/rss.xml": { prerender: true },
     "/tags/rss.xml": { prerender: true },
 
-    // Interactive / Private Routes (Client-side rendering & excluded from SEO indexing)
+    // Interactive / Private Routes (Client-side rendered & excluded from SEO indexing)
     "/search": {
       ssr: false,
       robots: "noindex, follow",
@@ -212,20 +219,33 @@ export default defineNuxtConfig({
       },
     },
 
-    // Static Assets Caching
+    // Immutable Content-Hashed Assets
     "/_nuxt/**": {
       headers: { "Cache-Control": "public, max-age=31536000, immutable" },
+    },
+
+    // Dynamic OG Images
+    "/_og/**": {
+      ssr: true,
+      cache: false,
+      headers: {
+        "Cache-Control": "no-store",
+        "x-forwarded-host": "true",
+      },
     },
   },
 
   experimental: {
     emitRouteChunkError: "automatic-immediate",
     appManifest: true,
+    payloadExtraction: true,
+    sharedPrerenderData: true,
   },
 
   compatibilityDate: "2025-01-15",
 
   nitro: {
+    compressPublicAssets: true,
     future: {
       nativeSWR: true,
     },
@@ -241,19 +261,6 @@ export default defineNuxtConfig({
     experimental: {
       wasm: true,
     },
-    routeRules: {
-      "/_nuxt/**": {
-        cache: { maxAge: 31536000 },
-      },
-      "/_og/**": {
-        ssr: true,
-        cache: false,
-        headers: {
-          "cache-control": "no-store",
-          "x-forwarded-host": "true",
-        },
-      },
-    },
     vercel: {
       config: {
         images: {
@@ -264,14 +271,19 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    build: {
+      cssCodeSplit: true,
+      target: "es2022",
+    },
     optimizeDeps: {
       include: [
         "unist-util-is",
         "@unhead/schema-org/vue",
-        "@vue/devtools-core",
-        "@vue/devtools-kit",
         "unist-util-visit",
         "@comark/vue",
+        ...(IS_DEV
+          ? ["@vue/devtools-core", "@vue/devtools-kit"]
+          : []),
       ],
     },
   },
@@ -299,7 +311,7 @@ export default defineNuxtConfig({
     delay: 0,
     duration: 450,
     easing: "ease-out-cubic",
-    once: false,
+    once: true,
     mirror: false,
     anchorPlacement: "top-bottom",
   },
@@ -322,9 +334,26 @@ export default defineNuxtConfig({
       weights: [400, 500, 600, 700],
       styles: ["normal", "italic"],
       subsets: ["latin"],
+      fallbacks: {
+        "sans-serif": [
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        "serif": ["Georgia", "Times New Roman", "serif"],
+        "monospace": [
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
+        ],
+      },
     },
 
     families: [
+      // Primary Fonts (loaded globally)
       {
         name: "Plus Jakarta Sans",
         weights: [400, 500, 600, 700],
@@ -342,29 +371,26 @@ export default defineNuxtConfig({
         global: true,
       },
       {
-        name: "Playfair Display",
-        weights: [400, 700],
-        global: true,
-      },
-      {
-        name: "Lora",
-        weights: [400, 500, 600],
-        global: true,
-      },
-      {
-        name: "EB Garamond",
-        weights: [400, 500, 700],
-        global: true,
-      },
-      {
         name: "JetBrains Mono",
         weights: [400, 500, 700],
         global: true,
       },
+      // Secondary Fonts (loaded on-demand when referenced in CSS)
+      {
+        name: "Playfair Display",
+        weights: [400, 700],
+      },
+      {
+        name: "Lora",
+        weights: [400, 500, 600],
+      },
+      {
+        name: "EB Garamond",
+        weights: [400, 500, 700],
+      },
       {
         name: "IBM Plex Mono",
         weights: [400, 500],
-        global: true,
       },
       {
         name: "Poppins",
@@ -373,12 +399,10 @@ export default defineNuxtConfig({
       {
         name: "Roboto",
         weights: [300, 400, 500, 700, 900],
-        global: true,
       },
       {
         name: "Special Elite",
         weights: [400],
-        global: true,
       },
     ],
 
@@ -411,10 +435,10 @@ export default defineNuxtConfig({
   linkChecker: {
     enabled: true,
     failOnError: false,
-    fetchRemoteUrls: process.env.NODE_ENV === "production",
+    fetchRemoteUrls: IS_PROD,
     strictNuxtContentPaths: true,
-    showLiveInspections: true,
-    debug: process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    showLiveInspections: IS_DEV,
+    debug: IS_DEBUG,
     runOnBuild: true,
     fetchTimeout: 10000,
     report: {
@@ -433,12 +457,12 @@ export default defineNuxtConfig({
     security: {
       strict: true,
     },
-    debug: process.env.NODE_ENV === "development" && process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    debug: IS_DEV && IS_DEBUG,
   },
 
   robots: {
     enabled: true,
-    debug: process.env.NODE_ENV === "development" && process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    debug: IS_DEV && IS_DEBUG,
     disallow: ["/search", "/editor", "/api/"],
     sitemap: ["/sitemap.xml"],
     groups: [
@@ -470,6 +494,7 @@ export default defineNuxtConfig({
   },
 
   security: {
+    sri: false,
     headers: {
       strictTransportSecurity: {
         maxAge: 63072000, // 2 years
@@ -486,7 +511,12 @@ export default defineNuxtConfig({
         "img-src": ["'self'", "data:", "https:"],
         "object-src": ["'none'"],
         "script-src-attr": ["'unsafe-inline'"],
-        "style-src": ["'self'", "https:", "'unsafe-inline'"],
+        "style-src": [
+          "'self'",
+          "https:",
+          "'unsafe-inline'",
+          "https://www.gstatic.com",
+        ],
         "script-src": [
           "'self'",
           "https:",
@@ -498,13 +528,14 @@ export default defineNuxtConfig({
         "connect-src": [
           "'self'",
           "https://translate.googleapis.com",
+          "https://translate-pa.googleapis.com",
         ],
-        "upgrade-insecure-requests": true,
         "frame-src": [
           "'self'",
           "https://translate.google.com",
           "https://translate.googleapis.com",
         ],
+        "upgrade-insecure-requests": true,
       },
       referrerPolicy: "strict-origin-when-cross-origin",
       xFrameOptions: "DENY",
@@ -512,9 +543,9 @@ export default defineNuxtConfig({
   },
 
   seo: {
-    debug: process.env.NODE_ENV === "development" && process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    debug: IS_DEV && IS_DEBUG,
     fallbackTitle: false,
-    redirectToCanonicalSiteUrl: process.env.NODE_ENV === "production",
+    redirectToCanonicalSiteUrl: IS_PROD,
   },
 
   sitemap: {
@@ -531,7 +562,7 @@ export default defineNuxtConfig({
       "/_nuxt/**",
       "/__nuxt_content/**",
     ],
-    debug: process.env.NUXT_PUBLIC_LOG_LEVEL === "debug",
+    debug: IS_DEBUG,
   },
 
   studio: {
