@@ -246,6 +246,9 @@ export default defineNuxtConfig({
 
   nitro: {
     compressPublicAssets: true,
+    externals: {
+      inline: ["unhead"],
+    },
     future: {
       nativeSWR: true,
     },
