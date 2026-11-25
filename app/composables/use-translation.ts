@@ -119,25 +119,34 @@ export const DEFAULT_LANGUAGES: LanguageOption[] = [
   { code: "zu", label: "isiZulu", icon: "i-heroicons-globe-alt" },
 ];
 
-const supportedLanguages = ref<LanguageOption[]>(DEFAULT_LANGUAGES);
-const activeLang = ref<string>("en");
-
 export function useTranslation() {
+  const supportedLanguages = useState<LanguageOption[]>(
+    "translation-supported-languages",
+    () => [...DEFAULT_LANGUAGES],
+  );
+  const activeLang = useState<string>("translation-active-lang", () => "en");
+  const shouldLoadTranslate = useState<boolean>("translation-should-load", () => false);
+  const pendingLang = useState<string | null>("translation-pending-lang", () => null);
+
   const userLang = useCookie<string>("user-locale", {
     default: () => "en",
     maxAge: 60 * 60 * 24 * 365,
-  });
-
-  const googTransCookie = useCookie<string>("googtrans", {
     path: "/",
   });
 
+  const googTransCookie = useCookie<string | null>("googtrans", {
+    path: "/",
+    default: () => null,
+  });
+
   const parseGoogTransCookie = (): string | undefined => {
-    if (!import.meta.client)
+    if (!import.meta.client) {
       return undefined;
+    }
     const match = document.cookie.match(/(?:^|; )googtrans=([^;]+)/);
-    if (!match || !match[1])
+    if (!match?.[1]) {
       return undefined;
+    }
     const parts = decodeURIComponent(match[1]).split("/").filter(Boolean);
     return parts.length > 0
       ? parts[parts.length - 1]
@@ -145,8 +154,18 @@ export function useTranslation() {
   };
 
   const updateGoogTransCookie = (lang: string) => {
-    if (!import.meta.client)
+    if (!import.meta.client) {
       return;
+    }
+    if (lang === "en") {
+      googTransCookie.value = null;
+      document.cookie = "googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+      if (window.location.hostname !== "localhost") {
+        document.cookie = `googtrans=; path=/; domain=.${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+      }
+      return;
+    }
+
     const cookieVal = `/en/${lang}`;
     googTransCookie.value = cookieVal;
 
@@ -156,9 +175,14 @@ export function useTranslation() {
     }
   };
 
+  let boundSelectEl: HTMLSelectElement | null = null;
+  let domObserver: MutationObserver | null = null;
+  let idleHandle: number | ReturnType<typeof setTimeout> | null = null;
+
   const syncActiveLanguage = () => {
-    if (!import.meta.client)
+    if (!import.meta.client) {
       return;
+    }
 
     // Check Google Translate select dropdown element
     const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
@@ -178,12 +202,25 @@ export function useTranslation() {
     }
   };
 
+  const applyLanguageToCombo = (selectEl: HTMLSelectElement, lang: string) => {
+    selectEl.value = lang;
+    selectEl.dispatchEvent(new Event("change"));
+  };
+
   const syncWithGoogleDOM = () => {
-    if (!import.meta.client)
-      return;
+    if (!import.meta.client) {
+      return false;
+    }
     const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
-    if (!selectEl || !selectEl.options || selectEl.options.length <= 1)
-      return;
+    if (!selectEl || !selectEl.options || selectEl.options.length <= 1) {
+      return false;
+    }
+
+    if (boundSelectEl !== selectEl) {
+      boundSelectEl?.removeEventListener("change", syncActiveLanguage);
+      boundSelectEl = selectEl;
+      boundSelectEl.addEventListener("change", syncActiveLanguage);
+    }
 
     const parsedLangs: LanguageOption[] = [];
     for (let i = 0; i < selectEl.options.length; i++) {
@@ -204,11 +241,117 @@ export function useTranslation() {
       supportedLanguages.value = parsedLangs;
     }
 
+    if (pendingLang.value) {
+      const target = pendingLang.value;
+      pendingLang.value = null;
+      applyLanguageToCombo(selectEl, target);
+    }
+
     syncActiveLanguage();
+    return true;
   };
 
-  if (import.meta.client) {
-    // Initial sync from cookie
+  const initGoogleTranslate = () => {
+    if (!import.meta.client) {
+      return;
+    }
+    const container = document.getElementById("google_translate_element");
+    if (!window.google?.translate?.TranslateElement || !container) {
+      return;
+    }
+
+    if (container.childElementCount === 0) {
+      // eslint-disable-next-line no-new
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: "en",
+          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
+        },
+        "google_translate_element",
+      );
+    }
+
+    if (!syncWithGoogleDOM() && !domObserver) {
+      domObserver = new MutationObserver(() => {
+        if (syncWithGoogleDOM()) {
+          domObserver?.disconnect();
+          domObserver = null;
+        }
+      });
+      domObserver.observe(container, { childList: true, subtree: true });
+    }
+  };
+
+  // Loads ONLY when `shouldLoadTranslate` becomes true (never on initial English page load)
+  const { status, load, onLoaded } = useScript(
+    {
+      key: "google-translate",
+      src: "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit",
+      crossorigin: false,
+      referrerpolicy: false,
+    },
+    {
+      trigger: shouldLoadTranslate,
+      bundle: false,
+      use() {
+        return {
+          init: initGoogleTranslate,
+        };
+      },
+    },
+  );
+
+  onLoaded(() => {
+    initGoogleTranslate();
+  });
+
+  const scheduleWhenIdle = (fn: () => void) => {
+    if (typeof window.requestIdleCallback === "function") {
+      idleHandle = window.requestIdleCallback(fn, { timeout: 2500 });
+    }
+    else {
+      idleHandle = setTimeout(fn, 200);
+    }
+  };
+
+  const triggerAfterFullLoad = () => {
+    const start = () => {
+      scheduleWhenIdle(() => {
+        shouldLoadTranslate.value = true;
+      });
+    };
+
+    if (document.readyState === "complete") {
+      start();
+    }
+    else {
+      window.addEventListener("load", start, { once: true });
+    }
+  };
+
+  /**
+   * Call on hover/focus of the language switcher so the script is ready
+   * before the user picks a language—without impacting initial page load.
+   */
+  const preloadTranslate = () => {
+    if (!import.meta.client || shouldLoadTranslate.value) {
+      return;
+    }
+    if (document.readyState === "complete") {
+      shouldLoadTranslate.value = true;
+    }
+  };
+
+  onMounted(() => {
+    if (!import.meta.client) {
+      return;
+    }
+
+    window.googleTranslateElementInit = () => {
+      initGoogleTranslate();
+    };
+
     const cookieLang = parseGoogTransCookie();
     if (cookieLang) {
       activeLang.value = cookieLang;
@@ -221,85 +364,74 @@ export function useTranslation() {
       }
     }
 
-    window.googleTranslateElementInit = () => {
-      if (window.google?.translate && document.getElementById("google_translate_element")) {
-        // eslint-disable-next-line no-new
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: "en",
-            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false,
-          },
-          "google_translate_element",
-        );
-
-        setTimeout(syncWithGoogleDOM, 500);
-        setTimeout(syncWithGoogleDOM, 1500);
-        setTimeout(syncWithGoogleDOM, 3000);
-      }
-    };
-  }
-
-  const { status } = useScript(
-    {
-      key: "google-translate",
-      src: "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit",
-      crossorigin: false,
-      referrerpolicy: false,
-    },
-    {
-      trigger: "client",
-      bundle: false,
-    },
-  );
-
-  let intervalId: any = null;
-
-  onMounted(() => {
-    if (!import.meta.client)
-      return;
-
-    syncActiveLanguage();
-
-    const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
-    if (selectEl) {
-      selectEl.addEventListener("change", syncActiveLanguage);
+    // Only load Google Translate automatically if the user already has a non-English preference,
+    // and only AFTER window.load + browser idle so LCP/hydration are completely untouched.
+    if (activeLang.value !== "en") {
+      triggerAfterFullLoad();
     }
-
-    // Interval watcher to guarantee alignment with external Google Translate state
-    intervalId = setInterval(() => {
-      syncActiveLanguage();
-    }, 1000);
   });
 
   onUnmounted(() => {
-    if (intervalId)
-      clearInterval(intervalId);
+    domObserver?.disconnect();
+    domObserver = null;
+    if (boundSelectEl) {
+      boundSelectEl.removeEventListener("change", syncActiveLanguage);
+      boundSelectEl = null;
+    }
+    if (idleHandle !== null) {
+      if (typeof window.cancelIdleCallback === "function" && typeof idleHandle === "number") {
+        window.cancelIdleCallback(idleHandle);
+      }
+      else {
+        clearTimeout(idleHandle);
+      }
+    }
   });
 
   const setLanguage = (lang: string) => {
     userLang.value = lang;
     activeLang.value = lang;
 
-    if (import.meta.client) {
-      updateGoogTransCookie(lang);
+    if (!import.meta.client) {
+      return;
+    }
 
+    updateGoogTransCookie(lang);
+
+    if (lang === "en") {
       const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
       if (selectEl) {
-        selectEl.value = lang;
-        selectEl.dispatchEvent(new Event("change"));
+        applyLanguageToCombo(selectEl, "en");
       }
       else {
         window.location.reload();
       }
+      return;
     }
+
+    const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
+    if (selectEl) {
+      applyLanguageToCombo(selectEl, lang);
+      return;
+    }
+
+    // First-time non-English selection: queue target language and load Google Translate now
+    pendingLang.value = lang;
+    shouldLoadTranslate.value = true;
+    void load().then(() => {
+      initGoogleTranslate();
+    });
   };
+
+  const isTranslated = ref(false);
 
   return {
     currentLang: activeLang,
+    isTranslated,
     supportedLanguages,
     status,
     setLanguage,
+    preloadTranslate,
     syncActiveLanguage,
   };
 }

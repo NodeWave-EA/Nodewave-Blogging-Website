@@ -9,7 +9,7 @@
           aria-hidden="true"
         />
         <UiAppLoadingScreen />
-        <UiLangSwitcher />
+        <LazyUiLangSwitcher hydrate-on-idle />
         <UiSiteSharer />
         <UiAppSiteBackground
           :grain-opacity="1.0"

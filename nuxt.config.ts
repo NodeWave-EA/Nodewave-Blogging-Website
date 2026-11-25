@@ -471,37 +471,42 @@ export default defineNuxtConfig({
 
   security: {
     headers: {
-      // HSTS
       strictTransportSecurity: {
         maxAge: 63072000, // 2 years
         includeSubdomains: true,
         preload: true,
       },
-      // X-Content-Type-Options
       xContentTypeOptions: "nosniff",
-      // CSP (auto-injects nonces for Nuxt hydration scripts)
       contentSecurityPolicy: {
         "default-src": ["'self'"],
         "base-uri": ["'self'"],
         "font-src": ["'self'", "https:", "data:"],
         "form-action": ["'self'"],
-        "frame-ancestors": ["'none'"], // Replaces X-Frame-Options in modern browsers
+        "frame-ancestors": ["'none'"],
         "img-src": ["'self'", "data:", "https:"],
         "object-src": ["'none'"],
-        "script-src-attr": ["'none'"],
+        "script-src-attr": ["'unsafe-inline'"],
         "style-src": ["'self'", "https:", "'unsafe-inline'"],
         "script-src": [
           "'self'",
           "https:",
           "'unsafe-inline'",
-          "'strict-dynamic'",
-          "'nonce-{{nonce}}'",
+          "https://translate.google.com",
+          "https://translate.googleapis.com",
+          "https://www.gstatic.com",
+        ],
+        "connect-src": [
+          "'self'",
+          "https://translate.googleapis.com",
         ],
         "upgrade-insecure-requests": true,
+        "frame-src": [
+          "'self'",
+          "https://translate.google.com",
+          "https://translate.googleapis.com",
+        ],
       },
-      // Referrer-Policy
       referrerPolicy: "strict-origin-when-cross-origin",
-      // X-Frame-Options
       xFrameOptions: "DENY",
     },
   },

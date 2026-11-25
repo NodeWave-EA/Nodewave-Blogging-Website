@@ -9,33 +9,56 @@ defineOptions({
   name: "AppLangSwitcher",
 });
 
-const { currentLang, supportedLanguages, status, setLanguage, syncActiveLanguage } = useTranslation();
+const {
+  currentLang,
+  supportedLanguages,
+  status,
+  setLanguage,
+  preloadTranslate,
+  syncActiveLanguage,
+} = useTranslation();
 
 const isReady = ref(false);
-let readyTimer: ReturnType<typeof setTimeout> | null = null;
+let idleHandle: number | ReturnType<typeof setTimeout> | null = null;
 
-function markReady() {
-  isReady.value = true;
-  syncActiveLanguage();
+function revealSwitcher() {
+  if (isReady.value) {
+    return;
+  }
+  const show = () => {
+    isReady.value = true;
+    syncActiveLanguage();
+  };
+
+  if (typeof window.requestIdleCallback === "function") {
+    idleHandle = window.requestIdleCallback(show, { timeout: 1500 });
+  }
+  else {
+    idleHandle = setTimeout(show, 150);
+  }
 }
 
 onMounted(() => {
   syncActiveLanguage();
 
   if (document.readyState === "complete") {
-    isReady.value = true;
+    revealSwitcher();
   }
   else {
-    window.addEventListener("load", markReady, { once: true });
-    readyTimer = setTimeout(markReady, 600);
+    window.addEventListener("load", revealSwitcher, { once: true });
   }
 });
 
 onUnmounted(() => {
-  window.removeEventListener("load", markReady);
-  if (readyTimer !== null) {
-    clearTimeout(readyTimer);
-    readyTimer = null;
+  window.removeEventListener("load", revealSwitcher);
+  if (idleHandle !== null) {
+    if (typeof window.cancelIdleCallback === "function" && typeof idleHandle === "number") {
+      window.cancelIdleCallback(idleHandle);
+    }
+    else {
+      clearTimeout(idleHandle);
+    }
+    idleHandle = null;
   }
 });
 
@@ -51,7 +74,7 @@ const selectedLanguage = computed<LanguageOption>({
   },
 });
 
-const isLoading = computed(() => status.value !== "awaitingLoad" && status.value !== "loaded");
+const isLoading = computed(() => status.value === "loading");
 
 const shortCode = computed(() => (selectedLanguage.value.code || "en").toUpperCase());
 
@@ -73,6 +96,7 @@ const tooltipText = computed(
       v-if="isReady"
       class="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 z-50 flex items-center notranslate"
       translate="no"
+      @pointerenter="preloadTranslate"
     >
       <USelectMenu
         v-model="selectedLanguage"
@@ -112,6 +136,7 @@ const tooltipText = computed(
               aria-label="Select preferred language"
               class="group inline-flex items-center gap-2 h-9 px-2.5 rounded-xs border border-(--app-border) bg-(--app-surface-subtle)/85 dark:bg-(--app-surface-subtle)/90 backdrop-blur-md ring-1 ring-inset ring-white/45 dark:ring-white/6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.06),0_6px_16px_-4px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.45),0_8px_20px_-4px_rgba(0,0,0,0.35)] text-neutral-800 dark:text-neutral-200 hover:bg-(--app-surface-hover)/95 hover:border-primary-500/40 transition-all duration-200 ease-out cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-60 disabled:cursor-wait"
               :class="{ 'border-primary-500/50 bg-(--app-surface-hover)': open }"
+              @focus="preloadTranslate"
             >
               <span
                 class="inline-flex items-center justify-center size-5 rounded-xs bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 shrink-0"
