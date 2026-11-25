@@ -246,14 +246,6 @@ export default defineNuxtConfig({
 
   nitro: {
     compressPublicAssets: true,
-    externals: {
-      inline: [
-        "unhead",
-        "@unhead/vue",
-        "@unhead/schema-org",
-        "@unhead/addons",
-      ],
-    },
     future: {
       nativeSWR: true,
     },
