@@ -120,7 +120,7 @@ const archivePath = computed(() => {
       padding: '44px 56px 38px 56px',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: '\'Plus Jakarta Sans\', system-ui, sans-serif',
+      fontFamily: 'Plus Jakarta Sans',
       boxSizing: 'border-box',
     }"
   >
@@ -307,7 +307,7 @@ const archivePath = computed(() => {
           backgroundColor: palette.primarySoft,
           border: `1px solid ${palette.primaryBorder}`,
           color: palette.primary,
-          fontFamily: '\'JetBrains Mono\', monospace',
+          fontFamily: 'JetBrains Mono',
           fontSize: '12px',
           fontWeight: 700,
           letterSpacing: '0.16em',
@@ -376,7 +376,7 @@ const archivePath = computed(() => {
         <span
           v-if="isTag"
           :style="{
-            fontFamily: '\'JetBrains Mono\', monospace',
+            fontFamily: 'JetBrains Mono',
             fontSize: titleFontSize,
             fontWeight: 800,
             lineHeight: 1.1,
@@ -386,7 +386,7 @@ const archivePath = computed(() => {
 
         <h1
           :style="{
-            fontFamily: '\'Playfair Display\', Georgia, serif',
+            fontFamily: 'Playfair Display',
             fontSize: titleFontSize,
             fontWeight: 700,
             lineHeight: 1.12,
@@ -424,7 +424,7 @@ const archivePath = computed(() => {
         borderTop: `1px solid ${palette.border}`,
         position: 'relative',
         zIndex: 10,
-        fontFamily: '\'JetBrains Mono\', monospace',
+        fontFamily: 'JetBrains Mono',
         fontSize: '13px',
       }"
     >

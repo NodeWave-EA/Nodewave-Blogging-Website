@@ -147,7 +147,7 @@ const authorInitial = computed(() =>
       padding: '40px 56px 36px 56px',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: '\'Plus Jakarta Sans\', system-ui, sans-serif',
+      fontFamily: 'Plus Jakarta Sans',
       boxSizing: 'border-box',
     }"
   >
@@ -372,7 +372,7 @@ const authorInitial = computed(() =>
             backgroundColor: palette.amberSoft,
             border: `1px solid ${palette.amberBorder}`,
             color: palette.amber,
-            fontFamily: '\'JetBrains Mono\', monospace',
+            fontFamily: 'JetBrains Mono',
             fontSize: '12px',
             fontWeight: 700,
             letterSpacing: '0.14em',
@@ -407,7 +407,7 @@ const authorInitial = computed(() =>
             backgroundColor: palette.primarySoft,
             border: `1px solid ${palette.primaryBorder}`,
             color: palette.primary,
-            fontFamily: '\'JetBrains Mono\', monospace',
+            fontFamily: 'JetBrains Mono',
             fontSize: '13px',
             fontWeight: 700,
             letterSpacing: '0.14em',
@@ -448,7 +448,7 @@ const authorInitial = computed(() =>
     >
       <h1
         :style="{
-          fontFamily: '\'Playfair Display\', Georgia, serif',
+          fontFamily: 'Playfair Display',
           fontSize: titleFontSize,
           fontWeight: 700,
           lineHeight: 1.14,
@@ -496,7 +496,7 @@ const authorInitial = computed(() =>
             borderRadius: '4px',
             backgroundColor: palette.surfaceElevated,
             border: `1px solid ${palette.border}`,
-            fontFamily: '\'JetBrains Mono\', monospace',
+            fontFamily: 'JetBrains Mono',
             fontSize: '13px',
             fontWeight: 600,
             color: palette.muted,
@@ -515,7 +515,7 @@ const authorInitial = computed(() =>
             borderRadius: '4px',
             backgroundColor: palette.surfaceElevated,
             border: `1px solid ${palette.border}`,
-            fontFamily: '\'JetBrains Mono\', monospace',
+            fontFamily: 'JetBrains Mono',
             fontSize: '12px',
             fontWeight: 600,
             color: palette.subtle,
@@ -622,7 +622,7 @@ const authorInitial = computed(() =>
             <span
               v-if="authorTitle"
               :style="{
-                fontFamily: '\'JetBrains Mono\', monospace',
+                fontFamily: 'JetBrains Mono',
                 fontSize: '13px',
                 fontWeight: 500,
                 color: palette.subtle,
@@ -638,7 +638,7 @@ const authorInitial = computed(() =>
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              fontFamily: '\'JetBrains Mono\', monospace',
+              fontFamily: 'JetBrains Mono',
               fontSize: '14px',
               fontWeight: 500,
               color: palette.muted,
@@ -743,7 +743,7 @@ const authorInitial = computed(() =>
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          fontFamily: '\'JetBrains Mono\', monospace',
+          fontFamily: 'JetBrains Mono',
           fontSize: '13px',
           fontWeight: 600,
           color: palette.text,

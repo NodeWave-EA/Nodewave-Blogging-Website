@@ -128,7 +128,7 @@ const authorInitial = computed(() =>
       padding: '42px 56px 36px 56px',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: '\'Plus Jakarta Sans\', system-ui, sans-serif',
+      fontFamily: 'Plus Jakarta Sans',
       boxSizing: 'border-box',
     }"
   >
@@ -315,7 +315,7 @@ const authorInitial = computed(() =>
           backgroundColor: palette.primarySoft,
           border: `1px solid ${palette.primaryBorder}`,
           color: palette.primary,
-          fontFamily: '\'JetBrains Mono\', monospace',
+          fontFamily: 'JetBrains Mono',
           fontSize: '12px',
           fontWeight: 700,
           letterSpacing: '0.16em',
@@ -401,7 +401,7 @@ const authorInitial = computed(() =>
             borderRadius: '9999px',
             backgroundColor: palette.bg,
             color: palette.primary,
-            fontFamily: '\'JetBrains Mono\', monospace',
+            fontFamily: 'JetBrains Mono',
             fontSize: '64px',
             fontWeight: 800,
             display: 'flex',
@@ -425,7 +425,7 @@ const authorInitial = computed(() =>
       >
         <h1
           :style="{
-            fontFamily: '\'Playfair Display\', Georgia, serif',
+            fontFamily: 'Playfair Display',
             fontSize: nameFontSize,
             fontWeight: 700,
             lineHeight: 1.12,
@@ -444,7 +444,7 @@ const authorInitial = computed(() =>
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '12px',
-            fontFamily: '\'JetBrains Mono\', monospace',
+            fontFamily: 'JetBrains Mono',
             fontSize: '18px',
             fontWeight: 600,
           }"
@@ -528,7 +528,7 @@ const authorInitial = computed(() =>
         borderTop: `1px solid ${palette.border}`,
         position: 'relative',
         zIndex: 10,
-        fontFamily: '\'JetBrains Mono\', monospace',
+        fontFamily: 'JetBrains Mono',
         fontSize: '13px',
       }"
     >

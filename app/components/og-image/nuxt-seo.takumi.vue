@@ -97,7 +97,7 @@ const year = new Date().getFullYear();
       padding: '48px 56px 40px 56px',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: '\'Plus Jakarta Sans\', system-ui, sans-serif',
+      fontFamily: 'Plus Jakarta Sans',
       boxSizing: 'border-box',
     }"
   >
@@ -312,7 +312,7 @@ const year = new Date().getFullYear();
           <span
             v-if="tagline"
             :style="{
-              fontFamily: '\'JetBrains Mono\', monospace',
+              fontFamily: 'JetBrains Mono',
               fontSize: '12px',
               fontWeight: 600,
               letterSpacing: '0.1em',
@@ -336,7 +336,7 @@ const year = new Date().getFullYear();
           backgroundColor: palette.primarySoft,
           border: `1px solid ${palette.primaryBorder}`,
           color: palette.primary,
-          fontFamily: '\'JetBrains Mono\', monospace',
+          fontFamily: 'JetBrains Mono',
           fontSize: '12px',
           fontWeight: 700,
           letterSpacing: '0.18em',
@@ -377,7 +377,7 @@ const year = new Date().getFullYear();
     >
       <h1
         :style="{
-          fontFamily: '\'Playfair Display\', Georgia, serif',
+          fontFamily: 'Playfair Display',
           fontSize: titleFontSize,
           fontWeight: 700,
           lineHeight: 1.14,
@@ -414,7 +414,7 @@ const year = new Date().getFullYear();
         borderTop: `1px solid ${palette.border}`,
         position: 'relative',
         zIndex: 10,
-        fontFamily: '\'JetBrains Mono\', monospace',
+        fontFamily: 'JetBrains Mono',
         fontSize: '13px',
       }"
     >
