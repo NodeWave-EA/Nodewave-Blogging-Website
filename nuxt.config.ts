@@ -380,11 +380,6 @@ export default defineNuxtConfig({
         weights: [400],
         global: true,
       },
-      { name: "Segoe UI", global: true },
-      { name: "Helvetica Neue", global: true },
-      { name: "Arial", global: true },
-      { name: "Noto Sans CJK KR", global: true },
-      { name: "Malgun Gothic", global: true },
     ],
 
     processCSSVariables: true,
